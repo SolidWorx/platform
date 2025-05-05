@@ -1,0 +1,31 @@
+name: Static Analysis
+
+on: [ pull_request ]
+
+jobs:
+  phpstan:
+    name: PHPStan
+
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4.1.7
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          coverage: "none"
+          php-version-file: ".php-version"
+          extensions: intl, ctype, iconv
+
+      - name: "Set up problem matchers for PHP"
+        run: "echo \"::add-matcher::${{ runner.tool_cache }}/php.json\""
+
+      - uses: "ramsey/composer-install@v3"
+
+      - name: Run PHPStan
+        run: vendor/bin/phpstan

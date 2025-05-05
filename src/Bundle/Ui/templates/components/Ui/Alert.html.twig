@@ -1,0 +1,54 @@
+{% props
+    type = 'info',
+    dismissible = false,
+    important = false,
+    title = '',
+    icon = '' %}
+
+{% set alert = cva({
+    base: 'alert ',
+    variants: {
+        type: {
+            success: 'alert-success',
+            info: 'alert-info',
+            warning: 'alert-warning',
+            danger: 'alert-danger',
+        },
+        dismissible: {
+            true: 'alert-dismissible',
+        },
+        important: {
+            true: 'alert-important',
+        }
+    },
+    defaultVariants: {
+        type: 'info',
+    }
+}) %}
+
+{{ dump(alert) }}
+
+<div class="{{ alert.apply({type, dismissible, important}, attributes.render('class')) }}" role="alert">
+    <div class="d-flex">
+        {% if icon is not empty %}
+            <div class="alert-icon">
+                {{ ux_icon('tabler:' ~ icon) }}
+            </div>
+        {% endif %}
+        <div>
+            {% if title is not empty %}
+                <h4 class="alert-title">{{ title }}</h4>
+            {% endif %}
+
+            <div {{ html_classes({
+                'text-body-secondary': not important,
+            }) }}>
+                {{ block('content') }}
+            </div>
+
+            {% if dismissible %}
+                <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+            {% endif %}
+        </div>
+    </div>
+</div>

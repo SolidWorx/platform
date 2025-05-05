@@ -1,0 +1,55 @@
+<?php
+
+declare(strict_types=1);
+
+/*
+ * This file is part of SolidWorx Platform project.
+ *
+ * (c) Pierre du Plessis <open-source@solidworx.co>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
+namespace SolidWorx\Platform\Bundle\Platform\Console;
+
+use LogicException;
+use Symfony\Component\Console\Command\Command as SymfonyCommand;
+use Symfony\Component\Console\Exception\ExceptionInterface;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\StyleInterface;
+
+abstract class Command extends SymfonyCommand
+{
+    protected StyleInterface $io;
+
+    public function setIo(StyleInterface $io): void
+    {
+        $this->io = $io;
+    }
+
+    /**
+     * Set the run method to final to ensure the function is not overridden
+     * @throws LogicException|ExceptionInterface
+     */
+    final public function run(InputInterface $input, OutputInterface $output): int
+    {
+        if (! isset($this->io)) {
+            throw new LogicException('The IO object has not been set on the command');
+        }
+
+        return parent::run($input, $output);
+    }
+
+    /**
+     * Set the execute method to final to ensure the function is not overridden.
+     * All command functionality should be implemented in the handle method.
+     */
+    final protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        return $this->handle();
+    }
+
+    abstract protected function handle(): int;
+}

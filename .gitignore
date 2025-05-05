@@ -1,0 +1,9 @@
+/phpunit.xml
+/.phpunit.result.cache
+/phpstan.neon
+/node_modules/
+/build/
+/npm-debug.log
+/yarn-error.log
+/composer.lock
+/vendor/

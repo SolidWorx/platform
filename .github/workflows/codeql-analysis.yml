@@ -1,0 +1,48 @@
+name: "CodeQL"
+
+on:
+  pull_request:
+  schedule:
+    - cron: '26 23 * * 2'
+
+permissions:  # added using https://github.com/step-security/secure-workflows
+  contents: read
+
+jobs:
+  analyze:
+    permissions:
+      actions: read  # for github/codeql-action/init to get workflow details
+      contents: read  # for actions/checkout to fetch code
+      security-events: write  # for github/codeql-action/autobuild to send a status report
+    name: Analyze
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript' ]
+
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@0d381219ddf674d61a7572ddd19d7941e271515c
+      with:
+        disable-sudo: true
+        egress-policy: block
+        allowed-endpoints: >
+          api.github.com:443
+          github.com:443
+          54.185.253.63:443
+
+    - name: Checkout repository
+      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@afb54ba388a7dca6ecae48f608c4ff05ff4cc77a
+      with:
+        languages: ${{ matrix.language }}
+
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@afb54ba388a7dca6ecae48f608c4ff05ff4cc77a
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@afb54ba388a7dca6ecae48f608c4ff05ff4cc77a

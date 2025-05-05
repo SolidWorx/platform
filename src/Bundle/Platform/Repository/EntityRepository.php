@@ -1,0 +1,37 @@
+<?php
+
+declare(strict_types=1);
+
+/*
+ * This file is part of SolidWorx Platform project.
+ *
+ * (c) Pierre du Plessis <open-source@solidworx.co>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
+namespace SolidWorx\Platform\Bundle\Platform\Repository;
+
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use SolidWorx\Platform\Bundle\Platform\Exception\InvalidEntityException;
+
+/**
+ * @template T of object
+ * @template-extends ServiceEntityRepository<T>
+ */
+abstract class EntityRepository extends ServiceEntityRepository
+{
+    public function save(object $entity, bool $flush = true): void
+    {
+        if (! is_a($entity, $expected = $this->getEntityName())) {
+            throw new InvalidEntityException($expected, $entity::class);
+        }
+
+        $em = $this->getEntityManager();
+        $em->persist($entity);
+        if ($flush) {
+            $em->flush();
+        }
+    }
+}
