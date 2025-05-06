@@ -13,12 +13,15 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\UiBundle;
 
+use Override;
+use Symfony\Component\AssetMapper\AssetMapper;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 final class UiBundle extends AbstractBundle
 {
+    #[Override]
     public function prependExtension(ContainerConfigurator $container, ContainerBuilder $builder): void
     {
         if ($builder->hasExtension('twig_component')) {
@@ -32,7 +35,8 @@ final class UiBundle extends AbstractBundle
             ]);
         }
 
-        if ($builder->hasExtension('framework')) {
+        // Check if AssetMapper is installed
+        if ($builder->hasExtension('framework') && class_exists(AssetMapper::class)) {
             $builder->prependExtensionConfig('framework', [
                 'asset_mapper' => [
                     'paths' => [

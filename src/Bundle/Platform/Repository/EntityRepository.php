@@ -11,10 +11,10 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace SolidWorx\Platform\Bundle\Platform\Repository;
+namespace SolidWorx\Platform\PlatformBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use SolidWorx\Platform\Bundle\Platform\Exception\InvalidEntityException;
+use SolidWorx\Platform\PlatformBundle\Exception\InvalidEntityException;
 
 /**
  * @template T of object
@@ -22,6 +22,9 @@ use SolidWorx\Platform\Bundle\Platform\Exception\InvalidEntityException;
  */
 abstract class EntityRepository extends ServiceEntityRepository
 {
+    /**
+     * @param T $entity
+     */
     public function save(object $entity, bool $flush = true): void
     {
         if (! is_a($entity, $expected = $this->getEntityName())) {

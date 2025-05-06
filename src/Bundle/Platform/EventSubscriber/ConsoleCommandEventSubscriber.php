@@ -11,15 +11,17 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace SolidWorx\Platform\Bundle\Platform\EventSubscriber;
+namespace SolidWorx\Platform\PlatformBundle\EventSubscriber;
 
-use SolidWorx\Platform\Bundle\Platform\Console\Command;
+use Override;
+use SolidWorx\Platform\PlatformBundle\Console\Command;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 final class ConsoleCommandEventSubscriber implements EventSubscriberInterface
 {
+    #[Override]
     public static function getSubscribedEvents(): array
     {
         return [

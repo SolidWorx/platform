@@ -95,6 +95,7 @@ return ECSConfig::configure()
             LineLengthFixer::class,
             MethodChainingIndentationFixer::class => [
                 __DIR__ . '/src/Bundle/Ui/DependencyInjection/Configuration.php',
+                __DIR__ . '/src/Bundle/Saas/DependencyInjection/Configuration.php',
             ],
         ]
     )

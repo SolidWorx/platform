@@ -11,11 +11,14 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace SolidWorx\Platform\Bundle\Platform\Exception;
+namespace SolidWorx\Platform\PlatformBundle\Exception;
 
-final class InvalidEntityException extends \InvalidArgumentException
+use InvalidArgumentException;
+use Throwable;
+
+final class InvalidEntityException extends InvalidArgumentException
 {
-    public function __construct(string $expected, string $actual, int $code = 0, \Throwable $previous = null)
+    public function __construct(string $expected, string $actual, int $code = 0, Throwable $previous = null)
     {
         parent::__construct(sprintf('Entity must be an instance of "%s", "%s" given', $expected, $actual), $code, $previous);
     }
