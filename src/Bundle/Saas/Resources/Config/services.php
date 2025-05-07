@@ -11,8 +11,6 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-use Doctrine\ORM\Events;
-use SolidWorx\Platform\SaasBundle\Doctrine\EventSubscriber\MetadataSubscriber;
 use SolidWorx\Platform\SaasBundle\SaasBundle;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 

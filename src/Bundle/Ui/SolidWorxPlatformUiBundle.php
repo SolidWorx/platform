@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
-final class UiBundle extends AbstractBundle
+final class SolidWorxPlatformUiBundle extends AbstractBundle
 {
     #[Override]
     public function prependExtension(ContainerConfigurator $container, ContainerBuilder $builder): void
@@ -49,9 +49,14 @@ final class UiBundle extends AbstractBundle
         if ($builder->hasExtension('twig')) {
             $builder->prependExtensionConfig('twig', [
                 'paths' => [
-                    __DIR__ . '/templates/' => null,
+                    __DIR__ . '/templates/' => '@Ui',
                 ],
             ]);
         }
+    }
+
+    public function getPath(): string
+    {
+        return __DIR__;
     }
 }
