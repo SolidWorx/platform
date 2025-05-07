@@ -11,7 +11,7 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-use SolidWorx\Platform\SaasBundle\SaasBundle;
+use SolidWorx\Platform\SaasBundle\SolidWorxPlatformSaasBundle;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
 return static function (ContainerConfigurator $containerConfigurator): void {
@@ -25,6 +25,6 @@ return static function (ContainerConfigurator $containerConfigurator): void {
     ;
 
     $services
-        ->load(SaasBundle::NAMESPACE . '\\', dirname(__DIR__, 2))
+        ->load(SolidWorxPlatformSaasBundle::NAMESPACE . '\\', dirname(__DIR__, 2))
         ->exclude(dirname(__DIR__, 2) . '/{DependencyInjection,Entity,Resources,Tests}');
 };

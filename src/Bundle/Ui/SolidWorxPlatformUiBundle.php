@@ -55,6 +55,7 @@ final class SolidWorxPlatformUiBundle extends AbstractBundle
         }
     }
 
+    #[Override]
     public function getPath(): string
     {
         return __DIR__;

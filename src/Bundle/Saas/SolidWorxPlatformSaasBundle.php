@@ -13,14 +13,25 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle;
 
+use Override;
+use SolidWorx\Platform\SaasBundle\DependencyInjection\CompilerPass\ResolveTargetEntityPass;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 final class SolidWorxPlatformSaasBundle extends Bundle
 {
     public const string NAMESPACE = __NAMESPACE__;
 
+    #[Override]
     public function getPath(): string
     {
         return __DIR__;
+    }
+
+    #[Override]
+    public function build(ContainerBuilder $container): void
+    {
+        parent::build($container);
+        $container->addCompilerPass(new ResolveTargetEntityPass());
     }
 }

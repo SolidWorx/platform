@@ -23,7 +23,7 @@ final readonly class MetadataSubscriber
      * @param array<class-string, string> $dbNames
      */
     public function __construct(
-        #[Autowire(param: 'saas.doctrine.db_schema.table_names')]
+        #[Autowire(param: 'solidworx_platform.saas.doctrine.db_schema.table_names')]
         private array $dbNames
     ) {
     }
