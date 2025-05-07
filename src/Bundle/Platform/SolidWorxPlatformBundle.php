@@ -11,11 +11,16 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace SolidWorx\Platform\SaasBundle;
+namespace SolidWorx\Platform\PlatformBundle;
 
-use Symfony\Component\HttpKernel\Bundle\Bundle;
+use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
-final class SaasBundle extends Bundle
+final class SolidWorxPlatformBundle extends AbstractBundle
 {
     public const string NAMESPACE = __NAMESPACE__;
+
+    public function getPath(): string
+    {
+        return __DIR__;
+    }
 }

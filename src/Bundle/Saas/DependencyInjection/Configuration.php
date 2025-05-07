@@ -39,7 +39,7 @@ final class Configuration implements ConfigurationInterface
                                                 ->defaultValue('saas_plan')
                                                 ->info('The table name for the Plan entity')
                                                 ->validate()
-                                                    ->ifTrue(fn ($value) => !preg_match('/^(?!\d)[A-Za-z_][A-Za-z0-9_$#]{0,64}$/u', $value))
+                                                    ->ifTrue(fn ($value) => ! preg_match('/^(?!\d)[A-Za-z_][A-Za-z0-9_$#]{0,64}$/u', $value))
                                                         ->thenInvalid('The table name is not valid')
                                                     ->end()
                                                 ->end()
