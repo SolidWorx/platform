@@ -35,7 +35,7 @@
         }
     },
     "require-dev": {
-        "ergebnis/composer-normalize": "^2.43",
+        "ergebnis/composer-normalize": "^2.47",
         "ergebnis/phpunit-slow-test-detector": "^2.19",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^1.11",
