@@ -1,0 +1,11 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Parameter \\#1 \\$config \\(array\\{doctrine\\: array\\{types\\: array\\{enable_utc_date\\: bool\\}\\}\\}\\) of method SolidWorx\\\\Platform\\\\PlatformBundle\\\\SolidWorxPlatformBundle\\:\\:loadExtension\\(\\) should be contravariant with parameter \\$config \\(array\\) of method Symfony\\\\Component\\\\DependencyInjection\\\\Extension\\\\ConfigurableExtensionInterface\\:\\:loadExtension\\(\\)$#"
+			count: 1
+			path: src/Bundle/Platform/SolidWorxPlatformBundle.php
+
+		-
+			message: "#^Parameter \\#1 \\$config \\(array\\{doctrine\\: array\\{types\\: array\\{enable_utc_date\\: bool\\}\\}\\}\\) of method SolidWorx\\\\Platform\\\\PlatformBundle\\\\SolidWorxPlatformBundle\\:\\:loadExtension\\(\\) should be contravariant with parameter \\$config \\(array\\) of method Symfony\\\\Component\\\\HttpKernel\\\\Bundle\\\\AbstractBundle\\:\\:loadExtension\\(\\)$#"
+			count: 1
+			path: src/Bundle/Platform/SolidWorxPlatformBundle.php

@@ -22,9 +22,11 @@ use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\Uid\Ulid;
 
 #[ORM\Entity(repositoryClass: PlanRepository::class)]
-#[ORM\Table(name: 'saas_plan')]
+#[ORM\Table(name: Plan::TABLE_NAME)]
 class Plan
 {
+    final public const string TABLE_NAME = 'saas_plan';
+
     #[ORM\Id]
     #[ORM\Column(type: UlidType::NAME)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
@@ -55,7 +57,7 @@ class Plan
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function setName(string $name): static
     {
         $this->name = $name;
         return $this;
@@ -66,7 +68,7 @@ class Plan
         return $this->description;
     }
 
-    public function setDescription(string $description): self
+    public function setDescription(string $description): static
     {
         $this->description = $description;
         return $this;
@@ -77,7 +79,7 @@ class Plan
         return $this->price;
     }
 
-    public function setPrice(int $price): self
+    public function setPrice(int $price): static
     {
         $this->price = $price;
         return $this;

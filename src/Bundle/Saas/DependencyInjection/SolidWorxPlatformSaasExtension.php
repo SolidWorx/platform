@@ -15,14 +15,15 @@ namespace SolidWorx\Platform\SaasBundle\DependencyInjection;
 
 use Override;
 use SolidWorx\Platform\SaasBundle\Exception\ExtensionRequiredException;
-use SolidWorx\Platform\SaasBundle\SaasBundle;
+use SolidWorx\Platform\SaasBundle\SolidWorxPlatformSaasBundle;
+use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 
-final class SaasExtension extends Extension implements PrependExtensionInterface
+final class SolidWorxPlatformSaasExtension extends Extension implements PrependExtensionInterface
 {
     #[Override]
     public function load(array $configs, ContainerBuilder $container): void
@@ -36,7 +37,11 @@ final class SaasExtension extends Extension implements PrependExtensionInterface
         if (isset($config['doctrine']['db_schema']['table_names'])) {
             $loader->import('doctrine.php');
 
-            $container->setParameter('saas.doctrine.db_schema.table_names', $config['doctrine']['db_schema']['table_names']);
+            $container->setParameter('solidworx_platform.saas.doctrine.db_schema.table_names', $config['doctrine']['db_schema']['table_names']);
+        }
+
+        if (isset($config['doctrine']['subscriptions']['entity'])) {
+            $container->setParameter('solidworx_platform.saas.doctrine.subscribable_class', $config['doctrine']['subscriptions']['entity']);
         }
     }
 
@@ -56,9 +61,12 @@ final class SaasExtension extends Extension implements PrependExtensionInterface
                             'is_bundle' => false,
                             'type' => 'attribute',
                             'dir' => __DIR__ . '/../Entity',
-                            'prefix' => SaasBundle::NAMESPACE . '\Entity',
+                            'prefix' => SolidWorxPlatformSaasBundle::NAMESPACE . '\Entity',
                             'alias' => 'Saas',
                         ],
+                    ],
+                    'resolve_target_entities' => [
+                        SubscribableInterface::class => SubscribableInterface::class,
                     ],
                 ],
             ],
