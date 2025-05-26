@@ -78,8 +78,8 @@ final class LemonSqueezyRequestParser extends AbstractRequestParser
 
         try {
             return $this->converter->convert($payload);
-        } catch (ParseException $e) {
-            throw new RejectWebhookException(406, $e->getMessage(), $e);
+        } catch (ParseException $parseException) {
+            throw new RejectWebhookException(406, $parseException->getMessage(), $parseException);
         }
     }
 }

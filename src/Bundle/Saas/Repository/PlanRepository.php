@@ -33,7 +33,7 @@ final class PlanRepository extends EntityRepository
      * @param string|Plan|Ulid $id
      */
     #[Override]
-    public function find($id, $lockMode = null, $lockVersion = null): ?Plan
+    public function find(mixed $id, \Doctrine\DBAL\LockMode|int|null $lockMode = null, int|null $lockVersion = null): ?Plan
     {
         return match (get_debug_type($id)) {
             Plan::class => $id,

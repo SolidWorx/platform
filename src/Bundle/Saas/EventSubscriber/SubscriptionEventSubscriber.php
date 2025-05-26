@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\EventSubscriber;
 
+use Override;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Enum\LemonSqueezy\SubscriptionStatus;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionCreatedEvent;
@@ -30,6 +31,7 @@ readonly class SubscriptionEventSubscriber implements EventSubscriberInterface
     ) {
     }
 
+    #[Override]
     public static function getSubscribedEvents(): array
     {
         return [
@@ -90,8 +92,6 @@ readonly class SubscriptionEventSubscriber implements EventSubscriberInterface
                 $this->subscriptionManager->pauseSubscription($subscription);
                 break;
             case SubscriptionStatus::UNPAID:
-                // Handle unpaid status if necessary, e.g., log or notify
-                break;
             case SubscriptionStatus::PAST_DUE:
                 // Handle past due status if necessary, e.g., log or notify
                 break;

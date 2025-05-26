@@ -10,5 +10,5 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4.2.2
+      - uses: "ramsey/composer-install@v3"
       - uses: symfonycorp/security-checker-action@v5
-

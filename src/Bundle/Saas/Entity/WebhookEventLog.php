@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\Entity;
 
+use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use SolidWorx\Platform\SaasBundle\Repository\WebhookEventLogRepository;
@@ -37,7 +38,7 @@ class WebhookEventLog
     private string $event;
 
     #[ORM\Column(type: 'datetime_immutable')]
-    private \DateTimeImmutable $receivedAt;
+    private DateTimeImmutable $receivedAt;
 
     public function __construct()
     {

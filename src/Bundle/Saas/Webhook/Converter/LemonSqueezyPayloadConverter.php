@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\Webhook\Converter;
 
+use Override;
 use SolidWorx\Platform\SaasBundle\Dto\LemonSqueezy\Subscription;
 use SolidWorx\Platform\SaasBundle\Dto\LemonSqueezy\SubscriptionInvoice;
 use SolidWorx\Platform\SaasBundle\Enum\LemonSqueezy\Event;
@@ -55,6 +56,7 @@ final readonly class LemonSqueezyPayloadConverter implements PayloadConverterInt
      *
      * @throws ExceptionInterface
      */
+    #[Override]
     public function convert(array $payload): RemoteEvent
     {
         $type = $this->getMappingClass($payload['data']['type']);

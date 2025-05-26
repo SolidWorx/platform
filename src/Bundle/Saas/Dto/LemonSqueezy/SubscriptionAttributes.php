@@ -47,7 +47,7 @@ class SubscriptionAttributes
 
     public string $cardLastFour;
 
-    public ?string $pause;
+    public ?string $pause = null;
 
     public bool $cancelled;
 
@@ -61,7 +61,7 @@ class SubscriptionAttributes
     public DateTimeInterface $renewsAt;
 
     #[SerializedName('ends_at')]
-    public ?DateTimeInterface $endsAt;
+    public ?DateTimeInterface $endsAt = null;
 
     #[SerializedName('created_at')]
     public DateTimeInterface $createdAt;
