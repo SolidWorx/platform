@@ -169,6 +169,7 @@ class LemonSqueezy implements PaymentIntegrationInterface
         return $data['data']['attributes']['url'];
     }
 
+    #[Override]
     public function getCustomerPortalUrl(Subscription $subscription): string
     {
         $subscriptionId = $subscription->getSubscriptionId();

@@ -39,10 +39,10 @@ class SubscriptionInvoiceAttributes
     public SubscriptionInvoiceBillingReason $billingReason;
 
     #[SerializedName('card_brand')]
-    public ?string $cardBrand;
+    public ?string $cardBrand = null;
 
     #[SerializedName('card_last_four')]
-    public ?string $cardLastFour;
+    public ?string $cardLastFour = null;
 
     public string $currency;
 
@@ -57,7 +57,7 @@ class SubscriptionInvoiceAttributes
     public bool $refunded;
 
     #[SerializedName('refunded_at')]
-    public ?DateTimeInterface $refundedAt;
+    public ?DateTimeInterface $refundedAt = null;
 
     public float $subtotal;
 

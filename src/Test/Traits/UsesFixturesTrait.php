@@ -17,6 +17,8 @@ use const DIRECTORY_SEPARATOR;
 use JsonException;
 use PHPUnit\Framework\Attributes\AfterClass;
 use PHPUnit\Framework\Attributes\BeforeClass;
+use ReflectionClass;
+use RuntimeException;
 use function array_slice;
 use function dirname;
 use function implode;
@@ -44,11 +46,11 @@ trait UsesFixturesTrait
             return static::$fixturesPath . ($path !== '' ? '/' . $path : '');
         }
 
-        $ref = new \ReflectionClass(static::class);
+        $ref = new ReflectionClass(static::class);
 
         $fileName = $ref->getFileName();
         if ($fileName === false) {
-            throw new \RuntimeException('Could not determine the file name of the test class.');
+            throw new RuntimeException('Could not determine the file name of the test class.');
         }
 
         $topLevelDir = dirname($fileName);
@@ -62,6 +64,7 @@ trait UsesFixturesTrait
             if ($lastPart === 'tests') {
                 break;
             }
+
             $topLevelDir = dirname($topLevelDir);
             $counter--;
         } while ($counter > 0);
@@ -83,12 +86,12 @@ trait UsesFixturesTrait
         $fixturePath = static::getFixturesPath($path);
 
         if (! file_exists($fixturePath)) {
-            throw new \RuntimeException(sprintf('Fixture file "%s" does not exist.', $fixturePath));
+            throw new RuntimeException(sprintf('Fixture file "%s" does not exist.', $fixturePath));
         }
 
         $content = file_get_contents($fixturePath);
         if ($content === false) {
-            throw new \RuntimeException(sprintf('Could not read fixture file "%s".', $fixturePath));
+            throw new RuntimeException(sprintf('Could not read fixture file "%s".', $fixturePath));
         }
 
         return (array) json_decode($content, true, flags: JSON_THROW_ON_ERROR);
