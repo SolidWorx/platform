@@ -1,12 +1,9 @@
-
-
 parameters:
     level: max
+    treatPhpDocTypesAsCertain: false
     paths:
         - src/
         - tests/
-
-    treatPhpDocTypesAsCertain: false
 
 includes:
     - phar://phpstan.phar/conf/bleedingEdge.neon

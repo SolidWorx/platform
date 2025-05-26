@@ -19,18 +19,19 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use SolidWorx\Platform\Component\Uid\EmptyUlid;
-use SolidWorx\Platform\SaasBundle\Enum\SubscriptionInterval;
 use SolidWorx\Platform\SaasBundle\Enum\SubscriptionStatus;
 use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepository;
 use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
 use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
 use Symfony\Bridge\Doctrine\Types\UlidType;
+use Symfony\Component\Uid\NilUlid;
 use Symfony\Component\Uid\Ulid;
 
 #[ORM\Entity(repositoryClass: SubscriptionRepository::class)]
+#[ORM\UniqueConstraint(fields: ['subscriber'])]
 #[ORM\Table(name: Subscription::TABLE_NAME)]
-#[ORM\Index(columns: ['status'])]
+#[ORM\Index(fields: ['status'])]
+#[ORM\Index(fields: ['subscriptionId'])]
 class Subscription
 {
     public const string TABLE_NAME = 'saas_subscription';
@@ -47,8 +48,8 @@ class Subscription
     #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE, precision: 3)]
     private DateTimeImmutable $endDate;
 
-    #[ORM\ManyToOne(targetEntity: SubscribableInterface::class, inversedBy: 'subscriptions')]
-    #[ORM\JoinColumn(name: 'subscriber_id', referencedColumnName: 'id', nullable: false)]
+    #[ORM\OneToOne(targetEntity: SubscribableInterface::class)]
+    #[ORM\JoinColumn(name: 'subscriber_id', referencedColumnName: 'id', unique: true, nullable: true)]
     private SubscribableInterface $subscriber;
 
     #[ORM\ManyToOne(targetEntity: Plan::class, inversedBy: 'subscriptions')]
@@ -58,13 +59,16 @@ class Subscription
     #[ORM\Column(type: Types::STRING, length: 45, enumType: SubscriptionStatus::class)]
     private SubscriptionStatus $status = SubscriptionStatus::PENDING;
 
-    #[ORM\Column(type: Types::STRING, length: 45, enumType: SubscriptionInterval::class)]
-    private SubscriptionInterval $interval = SubscriptionInterval::MONTHLY;
+    /**
+     * Unique subscription id. Can either be set manually or set from an external system
+     */
+    #[ORM\Column(type: Types::STRING, length: 255, unique: true, nullable: true)]
+    private string $subscriptionId;
 
     /**
      * @var Collection<int, SubscriptionLog>
      */
-    #[ORM\OneToMany(targetEntity: SubscriptionLog::class, mappedBy: 'subscription')]
+    #[ORM\OneToMany(targetEntity: SubscriptionLog::class, mappedBy: 'subscription', fetch: 'EXTRA_LAZY')]
     #[ORM\OrderBy([
         'createdAt' => 'DESC',
     ])]
@@ -83,7 +87,7 @@ class Subscription
 
     public function __construct()
     {
-        $this->id = EmptyUlid::create();
+        $this->id = new NilUlid();
         $this->logs = new ArrayCollection();
     }
 
@@ -152,18 +156,6 @@ class Subscription
         return $this;
     }
 
-    public function getInterval(): SubscriptionInterval
-    {
-        return $this->interval;
-    }
-
-    public function setInterval(SubscriptionInterval $interval): static
-    {
-        $this->interval = $interval;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, SubscriptionLog>
      */
@@ -178,6 +170,18 @@ class Subscription
             $this->logs->add($log);
             $log->setSubscription($this);
         }
+
+        return $this;
+    }
+
+    public function getSubscriptionId(): string
+    {
+        return $this->subscriptionId;
+    }
+
+    public function setSubscriptionId(string $subscriptionId): static
+    {
+        $this->subscriptionId = $subscriptionId;
 
         return $this;
     }

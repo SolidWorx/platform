@@ -14,8 +14,10 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\SaasBundle\Repository;
 
 use Doctrine\Persistence\ManagerRegistry;
+use Override;
 use SolidWorx\Platform\PlatformBundle\Repository\EntityRepository;
 use SolidWorx\Platform\SaasBundle\Entity\Plan;
+use Symfony\Component\Uid\Ulid;
 
 /**
  * @template-extends EntityRepository<Plan>
@@ -25,5 +27,20 @@ final class PlanRepository extends EntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Plan::class);
+    }
+
+    /**
+     * @param string|Plan|Ulid $id
+     */
+    #[Override]
+    public function find($id, $lockMode = null, $lockVersion = null): ?Plan
+    {
+        return match (get_debug_type($id)) {
+            Plan::class => $id,
+            'string' => $this->findOneBy([
+                'planId' => $id,
+            ]),
+            default => parent::find($id, $lockMode, $lockVersion),
+        };
     }
 }

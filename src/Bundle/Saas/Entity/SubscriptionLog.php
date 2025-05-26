@@ -16,11 +16,11 @@ namespace SolidWorx\Platform\SaasBundle\Entity;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use SolidWorx\Platform\Component\Uid\EmptyUlid;
 use SolidWorx\Platform\SaasBundle\Enum\SubscriptionLogType;
 use SolidWorx\Platform\SaasBundle\Repository\SubscriptionLogRepository;
 use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
 use Symfony\Bridge\Doctrine\Types\UlidType;
+use Symfony\Component\Uid\NilUlid;
 use Symfony\Component\Uid\Ulid;
 
 #[ORM\Entity(repositoryClass: SubscriptionLogRepository::class)]
@@ -51,7 +51,7 @@ class SubscriptionLog
 
     public function __construct()
     {
-        $this->id = EmptyUlid::create();
+        $this->id = new NilUlid();
         $this->createdAt = new DateTimeImmutable();
     }
 

@@ -11,10 +11,8 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace SolidWorx\Platform\SaasBundle\Enum;
+namespace SolidWorx\Platform\SaasBundle\Event;
 
-enum SubscriptionInterval: string
+final class SubscriptionResumedEvent extends SubscriptionEvent
 {
-    case MONTHLY = 'monthly';
-    case YEARLY = 'yearly';
 }
