@@ -24,8 +24,8 @@ use SolidWorx\Platform\SaasBundle\Dto\LemonSqueezy\SubscriptionInvoice;
 use SolidWorx\Platform\SaasBundle\Enum\LemonSqueezy\Event;
 use SolidWorx\Platform\SaasBundle\Enum\LemonSqueezy\SubscriptionStatus;
 use SolidWorx\Platform\SaasBundle\Event\PaymentEvent;
-use SolidWorx\Platform\SaasBundle\Event\SubscriptionActivatedEvent;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionCancelledEvent;
+use SolidWorx\Platform\SaasBundle\Event\SubscriptionCreatedEvent;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionEvent;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionExpiredEvent;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionPausedEvent;
@@ -36,7 +36,6 @@ use SolidWorx\Platform\SaasBundle\Event\SubscriptionPaymentRefundedEvent;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionResumedEvent;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionUnpausedEvent;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionUpdatedEvent;
-use SolidWorx\Platform\SaasBundle\Event\TrialStartedEvent;
 use SolidWorx\Platform\SaasBundle\RemoteEvent\LemonSqueezyWebhookConsumer;
 use SolidWorx\Platform\SaasBundle\RemoteEvent\SubscriptionPaymentRemoteEvent;
 use SolidWorx\Platform\SaasBundle\RemoteEvent\SubscriptionRemoteEvent;
@@ -135,13 +134,13 @@ final class LemonSqueezyWebhookConsumerTest extends TestCase
         // Test case 1: Subscription created (active)
         yield 'subscription created (active)' => [
             new SubscriptionRemoteEvent($subscriptionId, $activeSubscription, Event::SUBSCRIPTION_CREATED, []),
-            SubscriptionActivatedEvent::class,
+            SubscriptionCreatedEvent::class,
         ];
 
         // Test case 2: Subscription created (trial)
         yield 'subscription created (trial)' => [
             new SubscriptionRemoteEvent($subscriptionId, $trialSubscription, Event::SUBSCRIPTION_CREATED, []),
-            TrialStartedEvent::class,
+            SubscriptionCreatedEvent::class,
         ];
 
         // Test case 3: Subscription updated
