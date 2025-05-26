@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\Entity;
 
-use DateInterval;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -57,15 +56,11 @@ class Plan implements Stringable
     #[ORM\Column(type: Types::INTEGER)]
     private int $price;
 
-    #[ORM\Column(type: Types::DATEINTERVAL)]
-    private DateInterval $interval;
-
     #[ORM\OneToMany(targetEntity: Subscription::class, mappedBy: 'plan', orphanRemoval: true)]
     private Collection $subscriptions;
 
-    public function __construct(
-
-    ) {
+    public function __construct()
+    {
         $this->id = new NilUlid();
         $this->subscriptions = new ArrayCollection();
     }
@@ -132,17 +127,5 @@ class Plan implements Stringable
     public function getSubscriptions(): Collection
     {
         return $this->subscriptions;
-    }
-
-    public function getInterval(): DateInterval
-    {
-        return $this->interval;
-    }
-
-    public function setInterval(DateInterval $interval): static
-    {
-        $this->interval = $interval;
-
-        return $this;
     }
 }

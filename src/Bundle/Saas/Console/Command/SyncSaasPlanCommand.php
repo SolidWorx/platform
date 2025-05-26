@@ -42,7 +42,6 @@ final class SyncSaasPlanCommand extends Command
             $plan->setDescription($planInfo->description);
             $plan->setPrice($planInfo->price);
             $plan->setPlanId($planInfo->id);
-            $plan->setInterval($planInfo->interval);
 
             $this->planRepository->save($plan);
         }
