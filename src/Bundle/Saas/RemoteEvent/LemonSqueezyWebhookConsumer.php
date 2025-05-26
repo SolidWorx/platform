@@ -16,9 +16,7 @@ namespace SolidWorx\Platform\SaasBundle\RemoteEvent;
 use Override;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use SolidWorx\Platform\SaasBundle\Enum\LemonSqueezy\Event;
-use SolidWorx\Platform\SaasBundle\Enum\LemonSqueezy\SubscriptionStatus;
 use SolidWorx\Platform\SaasBundle\Event\PaymentEvent;
-use SolidWorx\Platform\SaasBundle\Event\SubscriptionActivatedEvent;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionCancelledEvent;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionCreatedEvent;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionEvent;
@@ -31,7 +29,6 @@ use SolidWorx\Platform\SaasBundle\Event\SubscriptionPaymentRefundedEvent;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionResumedEvent;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionUnpausedEvent;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionUpdatedEvent;
-use SolidWorx\Platform\SaasBundle\Event\TrialStartedEvent;
 use Symfony\Component\RemoteEvent\Attribute\AsRemoteEventConsumer;
 use Symfony\Component\RemoteEvent\Consumer\ConsumerInterface;
 use Symfony\Component\RemoteEvent\RemoteEvent;
@@ -53,7 +50,6 @@ final readonly class LemonSqueezyWebhookConsumer implements ConsumerInterface
         }
 
         [$eventClass, $object] = match ($event->event) {
-            //Event::SUBSCRIPTION_CREATED => [$this->subscriptionCreated($event), $event->subscription],
             Event::SUBSCRIPTION_CREATED => [SubscriptionCreatedEvent::class, $event->subscription],
             Event::SUBSCRIPTION_UPDATED => [SubscriptionUpdatedEvent::class, $event->subscription],
             Event::SUBSCRIPTION_CANCELLED => [SubscriptionCancelledEvent::class, $event->subscription],
@@ -78,8 +74,4 @@ final readonly class LemonSqueezyWebhookConsumer implements ConsumerInterface
             }
         ));
     }
-
-    /*private function subscriptionCreated(SubscriptionRemoteEvent $event): string
-        return SubscriptionActivatedEvent::class;
-    }*/
 }

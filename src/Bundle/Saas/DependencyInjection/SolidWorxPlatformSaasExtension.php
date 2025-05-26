@@ -18,7 +18,6 @@ use SolidWorx\Platform\SaasBundle\Exception\ExtensionRequiredException;
 use SolidWorx\Platform\SaasBundle\Integration\LemonSqueezy;
 use SolidWorx\Platform\SaasBundle\SolidWorxPlatformSaasBundle;
 use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
-use SolidWorx\Platform\SaasBundle\Webhook\LemonSqueezyRequestParser;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -99,19 +98,5 @@ final class SolidWorxPlatformSaasExtension extends Extension implements PrependE
                 ],
             ],
         );
-
-        /*$container->prependExtensionConfig(
-            'framework',
-            [
-                'webhook' => [
-                    'routing' => [
-                        'lemonsqueezy' => [
-                            'service' =>  LemonsqueezyRequestParser::class,
-                            'secret' =>  '%env(LEMONSQUEEZY_WEBHOOK_SECRET)%',
-                        ]
-                    ],
-                ],
-            ]
-        );*/
     }
 }
