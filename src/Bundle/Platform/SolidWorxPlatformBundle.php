@@ -20,9 +20,11 @@ use Override;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Type\UTCDateTimeType;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
+use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 final class SolidWorxPlatformBundle extends AbstractBundle
@@ -62,6 +64,9 @@ final class SolidWorxPlatformBundle extends AbstractBundle
     #[Override]
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
+        $loader = new PhpFileLoader($builder, new FileLocator(__DIR__ . '/Resources/config'));
+        $loader->import('services.php');
+
         $builder->setParameter('solidworx_platform.doctrine.types.enable_utc_date', $config['doctrine']['types']['enable_utc_date']);
     }
 

@@ -20,6 +20,6 @@ enum SubscriptionStatus: string
     case PENDING = 'pending';
     case CANCELLED = 'cancelled';
     case EXPIRED = 'expired';
-
     case TRIAL = 'trial';
+    case PAUSED = 'paused';
 }

@@ -15,8 +15,10 @@ namespace SolidWorx\Platform\SaasBundle\DependencyInjection;
 
 use Override;
 use SolidWorx\Platform\SaasBundle\Exception\ExtensionRequiredException;
+use SolidWorx\Platform\SaasBundle\Integration\LemonSqueezy;
 use SolidWorx\Platform\SaasBundle\SolidWorxPlatformSaasBundle;
 use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
+use SolidWorx\Platform\SaasBundle\Webhook\LemonSqueezyRequestParser;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -43,12 +45,38 @@ final class SolidWorxPlatformSaasExtension extends Extension implements PrependE
         if (isset($config['doctrine']['subscriptions']['entity'])) {
             $container->setParameter('solidworx_platform.saas.doctrine.subscribable_class', $config['doctrine']['subscriptions']['entity']);
         }
+
+        if (isset($config['payment']['return_route'])) {
+            $container->setParameter('solidworx_platform.saas.payment.return_route', $config['payment']['return_route']);
+        }
+
+        foreach ($config['integration']['payment'] ?? [] as $key => $value) {
+            if ($value['enabled'] === false) {
+                continue;
+            }
+
+            if ($key === 'lemon_squeezy') {
+                $def = $container->getDefinition(LemonSqueezy::class);
+                $def->setBindings([
+                    '$apiKey' => $value['api_key'],
+                    '$storeId' => $value['store_id'],
+                ]);
+                $container->setParameter('solidworx_platform.saas.integration.payment.lemon_squeezy.api_key', $value['api_key']);
+                $container->setParameter('solidworx_platform.saas.integration.payment.lemon_squeezy.store_id', $value['store_id']);
+                $container->setParameter('solidworx_platform.saas.integration.payment.lemon_squeezy.webhook_secret', $value['webhook_secret']);
+                $container->setParameter('solidworx_platform.saas.integration.payment.lemon_squeezy.enabled', true);
+            }
+        }
     }
 
     #[Override]
     public function prepend(ContainerBuilder $container): void
     {
         if (! $container->hasExtension('doctrine')) {
+            throw new ExtensionRequiredException('doctrine');
+        }
+
+        if (! $container->hasExtension('framework')) {
             throw new ExtensionRequiredException('doctrine');
         }
 
@@ -71,5 +99,19 @@ final class SolidWorxPlatformSaasExtension extends Extension implements PrependE
                 ],
             ],
         );
+
+        /*$container->prependExtensionConfig(
+            'framework',
+            [
+                'webhook' => [
+                    'routing' => [
+                        'lemonsqueezy' => [
+                            'service' =>  LemonsqueezyRequestParser::class,
+                            'secret' =>  '%env(LEMONSQUEEZY_WEBHOOK_SECRET)%',
+                        ]
+                    ],
+                ],
+            ]
+        );*/
     }
 }

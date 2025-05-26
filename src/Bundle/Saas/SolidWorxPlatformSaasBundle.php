@@ -15,6 +15,7 @@ namespace SolidWorx\Platform\SaasBundle;
 
 use Override;
 use SolidWorx\Platform\SaasBundle\DependencyInjection\CompilerPass\ResolveTargetEntityPass;
+use SolidWorx\Platform\SaasBundle\DependencyInjection\CompilerPass\WebhookCompilerPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
@@ -33,5 +34,6 @@ final class SolidWorxPlatformSaasBundle extends Bundle
     {
         parent::build($container);
         $container->addCompilerPass(new ResolveTargetEntityPass());
+        $container->addCompilerPass(new WebhookCompilerPass());
     }
 }

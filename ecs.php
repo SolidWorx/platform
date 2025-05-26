@@ -29,6 +29,7 @@ use PhpCsFixer\Fixer\StringNotation\ExplicitStringVariableFixer;
 use PhpCsFixer\Fixer\StringNotation\SingleQuoteFixer;
 use PhpCsFixer\Fixer\Whitespace\MethodChainingIndentationFixer;
 use Symplify\CodingStandard\Fixer\LineLength\LineLengthFixer;
+use Symplify\CodingStandard\Fixer\Spacing\MethodChainingNewlineFixer;
 use Symplify\EasyCodingStandard\Config\ECSConfig;
 
 $header = <<<'EOF'
@@ -92,6 +93,7 @@ return ECSConfig::configure()
     ])
     ->withSkip(
         [
+            MethodChainingNewlineFixer::class,
             LineLengthFixer::class,
             MethodChainingIndentationFixer::class => [
                 __DIR__ . '/src/Bundle/Platform/SolidWorxPlatformBundle.php',

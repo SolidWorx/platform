@@ -13,17 +13,25 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\Entity;
 
+use DateInterval;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use SolidWorx\Platform\Component\Uid\EmptyUlid;
+use Override;
 use SolidWorx\Platform\SaasBundle\Repository\PlanRepository;
+use Stringable;
 use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
 use Symfony\Bridge\Doctrine\Types\UlidType;
+use Symfony\Component\Uid\NilUlid;
 use Symfony\Component\Uid\Ulid;
 
 #[ORM\Entity(repositoryClass: PlanRepository::class)]
 #[ORM\Table(name: Plan::TABLE_NAME)]
-class Plan
+#[ORM\HasLifecycleCallbacks]
+#[ORM\UniqueConstraint(fields: ['planId'])]
+#[ORM\Index(fields: ['planId'])]
+class Plan implements Stringable
 {
     final public const string TABLE_NAME = 'saas_plan';
 
@@ -36,15 +44,36 @@ class Plan
     #[ORM\Column(type: Types::STRING, length: 255)]
     private string $name;
 
+    /**
+     * Unique value representing the plan id. This can be a unique value set by the user,
+     * or an external value (E.G variantId from LemonSqueezy)
+     */
+    #[ORM\Column(type: Types::STRING, length: 255, unique: true, nullable: false)]
+    private string $planId;
+
     #[ORM\Column(type: Types::TEXT)]
     private string $description = '';
 
     #[ORM\Column(type: Types::INTEGER)]
     private int $price;
 
-    public function __construct()
+    #[ORM\Column(type: Types::DATEINTERVAL)]
+    private DateInterval $interval;
+
+    #[ORM\OneToMany(targetEntity: Subscription::class, mappedBy: 'plan', orphanRemoval: true)]
+    private Collection $subscriptions;
+
+    public function __construct(
+
+    ) {
+        $this->id = new NilUlid();
+        $this->subscriptions = new ArrayCollection();
+    }
+
+    #[Override]
+    public function __toString(): string
     {
-        $this->id = EmptyUlid::create();
+        return $this->name ?? '';
     }
 
     public function getId(): Ulid
@@ -82,6 +111,38 @@ class Plan
     public function setPrice(int $price): static
     {
         $this->price = $price;
+        return $this;
+    }
+
+    public function getPlanId(): string
+    {
+        return $this->planId;
+    }
+
+    public function setPlanId(string $planId): static
+    {
+        $this->planId = $planId;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Subscription>
+     */
+    public function getSubscriptions(): Collection
+    {
+        return $this->subscriptions;
+    }
+
+    public function getInterval(): DateInterval
+    {
+        return $this->interval;
+    }
+
+    public function setInterval(DateInterval $interval): static
+    {
+        $this->interval = $interval;
+
         return $this;
     }
 }
