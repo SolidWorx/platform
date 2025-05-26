@@ -76,7 +76,7 @@ final class SolidWorxPlatformSaasExtension extends Extension implements PrependE
         }
 
         if (! $container->hasExtension('framework')) {
-            throw new ExtensionRequiredException('doctrine');
+            throw new ExtensionRequiredException('framework');
         }
 
         $container->prependExtensionConfig(
