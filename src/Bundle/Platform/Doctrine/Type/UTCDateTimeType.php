@@ -63,7 +63,7 @@ final class UTCDateTimeType extends DateTimeTzImmutableType
         }
 
         $converted = DateTimeImmutable::createFromFormat(
-            $platform->getDateTimeFormatString(),
+            $platform->getDateTimeTzFormatString(),
             $value,
             $this->getUtc()
         );
