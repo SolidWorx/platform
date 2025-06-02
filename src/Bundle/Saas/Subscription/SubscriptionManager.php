@@ -20,6 +20,7 @@ use SolidWorx\Platform\SaasBundle\Entity\Plan;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Enum\SubscriptionStatus;
 use SolidWorx\Platform\SaasBundle\Exception\InvalidPlanException;
+use SolidWorx\Platform\SaasBundle\Integration\Options;
 use SolidWorx\Platform\SaasBundle\Integration\PaymentIntegrationInterface;
 use SolidWorx\Platform\SaasBundle\Repository\PlanRepository;
 use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepository;
@@ -71,9 +72,9 @@ final readonly class SubscriptionManager
         return $subscription;
     }
 
-    public function getCheckoutUrl(Subscription $subscription, array $additionalData = []): string
+    public function getCheckoutUrl(Subscription $subscription, ?Options $options = null): string
     {
-        return $this->paymentIntegration->checkout($subscription, $additionalData);
+        return $this->paymentIntegration->checkout($subscription, $options);
     }
 
     public function getCustomerPortalUrl(Subscription $subscription): string

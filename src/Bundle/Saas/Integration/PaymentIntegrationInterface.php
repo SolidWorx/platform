@@ -21,7 +21,7 @@ interface PaymentIntegrationInterface
     /**
      * @return string The URL to redirect the user to for checkout
      */
-    public function checkout(Subscription $subscription, array $additionalInfo = []): string;
+    public function checkout(Subscription $subscription, ?Options $options = null): string;
 
     /**
      * @return iterable<IntegrationProduct>

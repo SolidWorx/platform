@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\SaasBundle\Integration;
 
 use Carbon\CarbonInterval;
+use InvalidArgumentException;
 use Override;
 use SolidWorx\Platform\SaasBundle\Dto\IntegrationProduct;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
@@ -125,7 +126,7 @@ class LemonSqueezy implements PaymentIntegrationInterface
      * @throws ServerExceptionInterface
      */
     #[Override]
-    public function checkout(Subscription $subscription, array $additionalInfo = []): string
+    public function checkout(Subscription $subscription, ?Options $options = null): string
     {
         $response = $this->httpClient->request(
             Request::METHOD_POST,
@@ -139,13 +140,13 @@ class LemonSqueezy implements PaymentIntegrationInterface
                                 'redirect_url' => $this->router->generate($this->returnRoute, referenceType: UrlGeneratorInterface::ABSOLUTE_URL),
                             ],
                             'checkout_data' => [
-                                'email' => $additionalInfo['email'] ?? null,
+                                'email' => $options?->getValue(Options::EMAIL),
                                 'custom' => [
                                     'subscription_id' => $subscription->getId()->toBase58(),
                                 ],
                             ],
                             'checkout_options' => [
-                                'skip_trial' => true,
+                                'skip_trial' => $options?->getValue(Options::SKIP_TRIAL) ?? false,
                             ],
                         ],
                         'relationships' => [
@@ -178,7 +179,7 @@ class LemonSqueezy implements PaymentIntegrationInterface
         $subscriptionId = $subscription->getSubscriptionId();
 
         if ($subscriptionId === null) {
-            throw new \InvalidArgumentException('Subscription ID is not set.');
+            throw new InvalidArgumentException('Subscription ID is not set.');
         }
 
         $response = $this->httpClient->request(
