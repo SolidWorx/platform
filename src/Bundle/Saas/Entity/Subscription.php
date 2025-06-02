@@ -63,7 +63,7 @@ class Subscription
      * Unique subscription id. Can either be set manually or set from an external system
      */
     #[ORM\Column(type: Types::STRING, length: 255, unique: true, nullable: true)]
-    private string $subscriptionId;
+    private ?string $subscriptionId = null;
 
     /**
      * @var Collection<int, SubscriptionLog>
@@ -174,7 +174,7 @@ class Subscription
         return $this;
     }
 
-    public function getSubscriptionId(): string
+    public function getSubscriptionId(): ?string
     {
         return $this->subscriptionId;
     }
