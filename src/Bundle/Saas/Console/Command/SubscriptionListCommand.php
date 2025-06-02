@@ -18,7 +18,6 @@ use Override;
 use SolidWorx\Platform\PlatformBundle\Console\Command;
 use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepository;
 use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
-use Stringable;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Uid\Ulid;
 use function array_map;
@@ -37,7 +36,7 @@ final class SubscriptionListCommand extends Command
     {
         $subscriptions = $this->subscriptionRepository->findAll();
 
-        if ($subscriptions === []) {
+        if (empty($subscriptions)) {
             $this->io->caution('No subscriptions found.');
             return self::SUCCESS;
         }
@@ -46,7 +45,7 @@ final class SubscriptionListCommand extends Command
         $this->io->table(
             ['Subscription ID', 'Subscriber', 'Plan', 'Status', 'Start Date', 'End Date'],
             array_map(
-                fn ($subscription): array => [
+                fn ($subscription) => [
                     $subscription->getSubscriptionId() ?? 'N/A',
                     $this->getSubscriberString($subscription->getSubscriber()),
                     $subscription->getPlan()->getName(),
@@ -63,7 +62,7 @@ final class SubscriptionListCommand extends Command
 
     private function getSubscriberString(SubscribableInterface $subscriber): string|int|Ulid
     {
-        if (method_exists($subscriber, '__toString') || $subscriber instanceof Stringable) {
+        if (method_exists($subscriber, '__toString') || $subscriber instanceof \Stringable) {
             return (string) $subscriber;
         }
 

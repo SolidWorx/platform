@@ -144,6 +144,9 @@ class LemonSqueezy implements PaymentIntegrationInterface
                                     'subscription_id' => $subscription->getId()->toBase58(),
                                 ],
                             ],
+                            'checkout_options' => [
+                                'skip_trial' => true,
+                            ],
                         ],
                         'relationships' => [
                             'store' => [
@@ -173,6 +176,10 @@ class LemonSqueezy implements PaymentIntegrationInterface
     public function getCustomerPortalUrl(Subscription $subscription): string
     {
         $subscriptionId = $subscription->getSubscriptionId();
+
+        if ($subscriptionId === null) {
+            throw new \InvalidArgumentException('Subscription ID is not set.');
+        }
 
         $response = $this->httpClient->request(
             Request::METHOD_GET,
