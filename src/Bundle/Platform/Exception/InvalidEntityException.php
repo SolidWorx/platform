@@ -18,7 +18,7 @@ use Throwable;
 
 final class InvalidEntityException extends InvalidArgumentException
 {
-    public function __construct(string $expected, string $actual, int $code = 0, Throwable $previous = null)
+    public function __construct(string $expected, string $actual, int $code = 0, ?Throwable $previous = null)
     {
         parent::__construct(sprintf('Entity must be an instance of "%s", "%s" given', $expected, $actual), $code, $previous);
     }

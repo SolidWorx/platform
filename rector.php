@@ -22,7 +22,7 @@ return static function (RectorConfig $rectorConfig): void {
 
     $rectorConfig->importNames();
     $rectorConfig->importShortClasses();
-    $rectorConfig->phpVersion(PhpVersion::PHP_83);
+    $rectorConfig->phpVersion(PhpVersion::PHP_84);
 
     $rectorConfig->sets([
         // General
@@ -31,13 +31,13 @@ return static function (RectorConfig $rectorConfig): void {
         SetList::DEAD_CODE,
         SetList::EARLY_RETURN,
         SetList::INSTANCEOF,
-        SetList::PHP_82,
+        SetList::PHP_84,
         SetList::STRICT_BOOLEANS,
         SetList::TYPE_DECLARATION,
         SetList::PRIVATIZATION,
 
         // PHP
-        LevelSetList::UP_TO_PHP_83,
+        LevelSetList::UP_TO_PHP_84,
 
         // PHPUnit
         PHPUnitSetList::PHPUNIT_90,
