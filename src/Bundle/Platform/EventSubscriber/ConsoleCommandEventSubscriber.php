@@ -15,8 +15,8 @@ namespace SolidWorx\Platform\PlatformBundle\EventSubscriber;
 
 use Override;
 use SolidWorx\Platform\PlatformBundle\Console\Command;
+use SolidWorx\Platform\PlatformBundle\Console\IO;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 final class ConsoleCommandEventSubscriber implements EventSubscriberInterface
@@ -40,6 +40,6 @@ final class ConsoleCommandEventSubscriber implements EventSubscriberInterface
         $input = $event->getInput();
         $output = $event->getOutput();
 
-        $command->setIo(new SymfonyStyle($input, $output));
+        $command->setIo(new IO($input, $output));
     }
 }

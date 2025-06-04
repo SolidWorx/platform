@@ -28,7 +28,6 @@ use Symfony\Component\Uid\NilUlid;
 use Symfony\Component\Uid\Ulid;
 
 #[ORM\Entity(repositoryClass: SubscriptionRepository::class)]
-#[ORM\UniqueConstraint(fields: ['subscriber'])]
 #[ORM\Table(name: Subscription::TABLE_NAME)]
 #[ORM\Index(fields: ['status'])]
 #[ORM\Index(fields: ['subscriptionId'])]
@@ -48,8 +47,8 @@ class Subscription
     #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE, precision: 3)]
     private DateTimeImmutable $endDate;
 
-    #[ORM\OneToOne(targetEntity: SubscribableInterface::class)]
-    #[ORM\JoinColumn(name: 'subscriber_id', referencedColumnName: 'id', unique: true, nullable: true)]
+    #[ORM\ManyToOne(targetEntity: SubscribableInterface::class)]
+    #[ORM\JoinColumn(name: 'subscriber_id', referencedColumnName: 'id', nullable: false)]
     private SubscribableInterface $subscriber;
 
     #[ORM\ManyToOne(targetEntity: Plan::class, inversedBy: 'subscriptions')]

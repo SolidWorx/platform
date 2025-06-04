@@ -19,13 +19,12 @@ use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Exception\ExceptionInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\StyleInterface;
 
 abstract class Command extends SymfonyCommand
 {
-    protected StyleInterface $io;
+    protected IO $io;
 
-    public function setIo(StyleInterface $io): void
+    public function setIo(IO $io): void
     {
         $this->io = $io;
     }
