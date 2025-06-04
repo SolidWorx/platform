@@ -52,13 +52,13 @@ class SubscriptionAttributes
     public bool $cancelled;
 
     #[SerializedName('trial_ends_at')]
-    public DateTimeInterface $trialEndsAt;
+    public ?DateTimeInterface $trialEndsAt;
 
     #[SerializedName('billing_anchor')]
     public int $billingAnchor;
 
     #[SerializedName('renews_at')]
-    public DateTimeInterface $renewsAt;
+    public ?DateTimeInterface $renewsAt;
 
     #[SerializedName('ends_at')]
     public ?DateTimeInterface $endsAt = null;
