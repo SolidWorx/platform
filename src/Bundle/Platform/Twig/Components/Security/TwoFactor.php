@@ -39,8 +39,6 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Symfony\UX\TwigComponent\Attribute\ExposeInTemplate;
 use Symfony\UX\TwigComponent\Attribute\PreMount;
 use function assert;
-use function bin2hex;
-use function random_bytes;
 
 #[AsLiveComponent(name: 'Platform:Security:TwoFactor', template: '@SolidWorxPlatform/Components/Security/two_factor.html.twig')]
 final class TwoFactor extends AbstractController
