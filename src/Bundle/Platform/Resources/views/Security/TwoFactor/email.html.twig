@@ -1,0 +1,77 @@
+{% extends base_template %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-lg-5 text-center">
+            <div class="card mt-5">
+                <div class="card-body py-5 px-lg-5">
+                    {% if authenticationError %}
+                        <div class="alert alert-danger">{{ authenticationError|trans(authenticationErrorData, 'SchebTwoFactorBundle') }}</div>
+                    {% endif %}
+
+                    <form class="form" action="{{ checkPathUrl ? checkPathUrl: path(checkPathRoute) }}" method="post">
+                        <div class="svg-icon svg-icon-xl text-red">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-lock">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6z" />
+                                <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" />
+                                <path d="M8 11v-4a4 4 0 1 1 8 0v4" />
+                            </svg>
+                        </div>
+                        <h3 class="fw-normal text-dark mt-4">
+                            {{ '2-step verification'|trans }}
+                        </h3>
+                        <p class="mt-4 mb-1">
+                            {{ 'We sent a verification code to your email.'|trans }}
+                        </p>
+                        <p>
+                            {{ 'Please enter the code in the field below.'|trans }}
+                        </p>
+
+                        <div class="row mt-4 pt-2">
+                            <div class="col">
+                                <input name="{{ authCodeParameterName }}" type="text" class="form-control form-control-lg text-center py-4" maxlength="13" autofocus autocomplete="one-time-code" inputmode="numeric">
+                            </div>
+                        </div>
+
+                        {% if isCsrfProtectionEnabled %}
+                            <input type="hidden" name="{{ csrfParameterName }}" value="{{ csrf_token(csrfTokenId) }}">
+                        {% endif %}
+
+                        {% if displayTrustedOption %}
+                            <div class="mt-4">
+                                <label for="_trusted">
+                                    <input id="_trusted" type="checkbox" name="{{ trustedParameterName }}" /> {{ "Trust this device"|trans }}
+                                </label>
+                            </div>
+                        {% endif %}
+
+                        <button class="btn btn-outline-info btn-lg w-100 hover-lift-light mt-4" type="submit">
+                            {{ "login"|trans({}, 'SchebTwoFactorBundle') }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <p class="text-center text-muted mt-4">
+                {{ "Didn't receive it?"|trans }}
+                <a href="{{ path('_solidworx_platform_security_two_factor_resend') }}" class="text-decoration-none ms-2">
+                    {{ "Resend code"|trans }}
+                </a>
+            </p>
+
+            {% if availableTwoFactorProviders|length > 1 %}
+                <div class="mt-4">
+                    <p>{{ 'Or use another method:'|trans }}</p>
+                    <div class="text-center">
+                        {% for provider in availableTwoFactorProviders|filter(v => v != twoFactorProvider) %}
+                            <a href="{{ path("2fa_login", {"preferProvider": provider}) }}" class="btn btn-outline-secondary hover-lift-light mt-2">
+                                {{ provider|title|trans() }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock content %}

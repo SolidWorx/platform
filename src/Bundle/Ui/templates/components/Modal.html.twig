@@ -1,0 +1,58 @@
+{% props
+    show = false,
+    title = '',
+    id = random()
+%}
+
+{% set modal = html_cva(
+    base: 'modal in',
+    variants: {
+        show: {
+            true: 'show',
+            false: 'fade',
+        }
+    },
+) %}
+
+{% set headerBlock = '' %}
+{% if title is not empty %}
+    {% set headerBlock %}
+        <h5>{{ title|trans }}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    {% endset %}
+{% endif %}
+
+<div
+    {{ attributes }}
+    class="{{ modal.apply({show}, attributes.render('class')) }}"
+    tabindex="-1"
+    aria-hidden="true"
+    id="{{ id }}"
+    {{ stimulus_controller('@solidworx/platform/modal') }}
+>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            {% block full_content %}
+                {% if headerBlock is not empty or block('header') is not empty %}
+                    <div class="modal-header">
+                        {% block header %}
+                            {{ headerBlock }}
+                        {% endblock header %}
+                    </div>
+                {% endif %}
+
+                <div class="modal-body">
+                    {% block body %}{% endblock %}
+                </div>
+
+                {% if block('footer') %}
+                    <div class="modal-footer justify-content-between">
+                        {% block footer %}{% endblock %}
+                    </div>
+                {% endif %}
+            {% endblock %}
+        </div>
+    </div>
+</div>

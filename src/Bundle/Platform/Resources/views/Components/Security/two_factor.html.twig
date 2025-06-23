@@ -1,0 +1,149 @@
+<div {{ attributes }}>
+    <div class="card card-outline card-primary">
+        <div class="card-header with-border">
+            <h3 class="card-title">
+                {{ "Two-factor Authentication"|trans }}
+            </h3>
+        </div>
+        <div class="card-body p-0 border-0">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col-4">
+                            {{ 'Email'|trans }}
+                        </div>
+                        {% if app.user.isEmailAuthEnabled %}
+                            <div class="col-4 text-center">
+                                <span class="badge badge-success">{{ 'Enabled'|trans }}</span>
+                            </div>
+                            <div class="col-4 text-right text-end">
+                                <a href="#" class="btn btn-sm btn-danger" {{ live_action('disableEmailAuth:prevent') }}>{{ 'Disable'|trans }}</a>
+                            </div>
+                        {% else %}
+                            <div class="col-4 text-center">
+                                <span class="badge badge-secondary">{{ 'Disabled'|trans }}</span>
+                            </div>
+                            <div class="col-4 text-right text-end">
+                                <a href="#" class="btn btn-sm btn-success" {{ live_action('enableEmailAuth:prevent') }}>{{ 'Enable'|trans }}</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col-4">
+                            {{ 'Authenticator app'|trans }}
+                        </div>
+
+                        {% if app.user.isTotpAuthenticationEnabled %}
+                            <div class="col-4 text-center">
+                                <span class="badge badge-success">{{ 'Enabled'|trans }}</span>
+                            </div>
+                            <div class="col-4 text-right text-end">
+                                <a href="#" class="btn btn-sm btn-danger" {{ live_action('disableTOTPAuth:prevent') }}>{{ 'Disable'|trans }}</a>
+                            </div>
+                        {% else %}
+                            <div class="col-4 text-center">
+                                <span class="badge badge-secondary">{{ 'Disabled'|trans }}</span>
+                            </div>
+                            <div class="col-4 text-right text-end">
+                                <a href="#" class="btn btn-sm btn-success" data-toggle="modal" data-target="#enable-totp-modal">{{ 'Enable'|trans }}</a>
+                            </div>
+
+                            {% set qrImage = this.qrContent %}
+
+                            {{ form_start(form) }}
+                            <twig:Ui:Modal id="enable-totp-modal" title="TOTP">
+                                <twig:block name="body">
+                                    <div class="text-center">
+                                        <img src="{{ qrImage }}" />
+                                        {{ form_row(form) }}
+                                    </div>
+                                </twig:block>
+                                <twig:block name="footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">{{ 'Close'|trans }}</button>
+                                    <button type="button" class="btn btn-primary" {{ live_action('enableTOTPAuth:prevent') }}>{{ 'Save'|trans }}</button>
+                                </twig:block>
+                            </twig:Ui:Modal>
+                            {{ form_end(form) }}
+                        {% endif %}
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    {% if app.user.is2FaEnabled and app.user.backupCodes is not empty %}
+        <div class="card card-outline card-info">
+            <div class="card-header with-border">
+                <h3 class="card-title">
+                    {{ "Recovery Options"|trans }}
+                </h3>
+            </div>
+            <div class="card-body p-0 border-0">
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ 'Backup Codes'|trans }}
+
+                        <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#view-backup-codes-modal">
+                            {{ 'View'|trans }}
+                        </a>
+                    </li>
+                </ul>
+
+                <twig:Ui:Modal id="view-backup-codes-modal" title="Backup Codes" :show="showBackupCodes">
+                    <twig:block name="body">
+                        <div class="text-center">
+                            <twig:Ui:Alert type="info">
+                                Use these backup codes when you have lost access to your authentication device.
+                            </twig:Ui:Alert>
+                            <twig:Ui:Alert type="warning">
+                                Store these backup codes in a safe place where it can be accessed when needed.
+                            </twig:Ui:Alert>
+                        </div>
+                        <div class="row m-4">
+                            {% for chunk in app.user.backupCodes|batch(app.user.backupCodes|length / 2) %}
+                                <div class="col-6 col-md-3 offset-md-2">
+                                    {% for code in chunk %}
+                                        <code>{{ code }}</code><br />
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </twig:block>
+                    <twig:block name="footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">{{ 'Close'|trans }}</button>
+                        <button type="button" class="btn btn-primary" {{ live_action('regenerateBackupCodes:prevent') }}>{{ 'Regenerate'|trans }}</button>
+                    </twig:block>
+                </twig:Ui:Modal>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if isDeviceTrusted %}
+        <div class="card card-outline card-success">
+            <div class="card-header with-border">
+                <h3 class="card-title">
+                    {{ "Trusted Device"|trans }}
+                </h3>
+            </div>
+            <div class="card-body p-0 border-0">
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <p class="">
+                            {{ 'Browser Trusted'|trans }}<br />
+                            <small>
+                                {{ 'This device is trusted and won\'t require a 2FA code.'|trans }}'
+                            </small>
+                        </p>
+
+                        <span class="badge badge-success">{{ 'Enabled'|trans }}</span>
+
+                        <a href="#" class="btn btn-sm btn-danger" {{ live_action('clearTrustedDevice:prevent') }}>
+                            {{ 'Disable'|trans }}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+</div>
