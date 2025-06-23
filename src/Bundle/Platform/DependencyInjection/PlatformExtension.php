@@ -59,7 +59,7 @@ final class PlatformExtension extends Extension implements PrependExtensionInter
             );
         }
 
-        if ($this->platformConfig->get('security.2fa.enabled')) {
+        if ($this->platformConfig->get('security.2fa.enabled') === true) {
             TwoFactorExtension::enable(
                 $container,
                 [

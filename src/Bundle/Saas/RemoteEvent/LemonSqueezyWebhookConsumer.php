@@ -49,6 +49,8 @@ final readonly class LemonSqueezyWebhookConsumer implements ConsumerInterface
             return;
         }
 
+        /** @var SubscriptionRemoteEvent&SubscriptionPaymentPaidEvent $event */
+
         [$eventClass, $object] = match ($event->event) {
             Event::SUBSCRIPTION_CREATED => [SubscriptionCreatedEvent::class, $event->subscription],
             Event::SUBSCRIPTION_UPDATED => [SubscriptionUpdatedEvent::class, $event->subscription],

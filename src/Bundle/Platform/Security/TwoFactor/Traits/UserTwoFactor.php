@@ -27,7 +27,7 @@ trait UserTwoFactor
     private ?string $totpSecret = null;
 
     #[ORM\Column(name: 'auth_code', type: Types::STRING, length: 45, nullable: true)]
-    private ?string $authCode;
+    private ?string $authCode = null;
 
     #[ORM\Column(name: 'email_auth_enabled', type: Types::BOOLEAN, nullable: true)]
     private ?bool $emailAuthEnabled = false;
