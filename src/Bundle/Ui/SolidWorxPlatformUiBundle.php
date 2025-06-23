@@ -28,7 +28,7 @@ final class SolidWorxPlatformUiBundle extends AbstractBundle
             $builder->prependExtensionConfig('twig_component', [
                 'defaults' => [
                     'UiBundle\Twig\Component\\' => [
-                        'template_directory' => '@Ui/components/',
+                        'template_directory' => '@Ui/components/Ui/',
                         'name_prefix' => 'Ui',
                     ],
                 ],
@@ -49,7 +49,7 @@ final class SolidWorxPlatformUiBundle extends AbstractBundle
         if ($builder->hasExtension('twig')) {
             $builder->prependExtensionConfig('twig', [
                 'paths' => [
-                    __DIR__ . '/templates/' => '@Ui',
+                    __DIR__ . '/templates/' => 'Ui',
                 ],
             ]);
         }

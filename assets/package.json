@@ -14,7 +14,7 @@
         "main": "controllers/modal.js",
         "webpackMode": "lazy",
         "fetch": "lazy",
-        "enabled": true,
+        "enabled": true
       }
     },
     "importmap": {
@@ -24,7 +24,8 @@
   },
   "peerDependencies": {
     "@hotwired/stimulus": "^3.0.0",
-    "bootstrap": "^4.6.2"
+    "bootstrap": "^4.6.2",
+    "jquery": "^3.7.1"
   },
   "devDependencies": {
     "@hotwired/stimulus": "^3.0.0",

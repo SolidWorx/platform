@@ -3,7 +3,8 @@
     dismissible = false,
     important = false,
     title = '',
-    icon = '' %}
+    icon = ''
+%}
 
 {% set alert = cva({
     base: 'alert ',
@@ -26,13 +27,11 @@
     }
 }) %}
 
-{{ dump(alert) }}
-
-<div class="{{ alert.apply({type, dismissible, important}, attributes.render('class')) }}" role="alert">
+<div {{ attributes }} class="{{ alert.apply({type, dismissible, important}, attributes.render('class')) }}" role="alert">
     <div class="d-flex">
         {% if icon is not empty %}
             <div class="alert-icon">
-                {{ ux_icon('tabler:' ~ icon) }}
+                {#{{ ux_icon('tabler:' ~ icon) }}#}
             </div>
         {% endif %}
         <div>
