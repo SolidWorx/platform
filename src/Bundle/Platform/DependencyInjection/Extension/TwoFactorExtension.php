@@ -21,6 +21,8 @@ use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken;
+use Symfony\Config\Security\AccessControlConfig;
+use Symfony\Config\Security\FirewallConfig;
 
 final class TwoFactorExtension
 {
@@ -42,40 +44,6 @@ final class TwoFactorExtension
                     ->addArgument(new Parameter('scheb_two_factor.totp.template'))
                     ->addArgument($config),
             );
-
-        $ext = $container->getExtensionConfig('security');
-
-        $ext[0]['firewalls']['main']['two_factor'] = [
-            'auth_form_path' => '2fa_login',
-            'check_path' => '2fa_login_check',
-            //'default_target_path' => '/dashboard',
-            'enable_csrf' => true,
-        ];
-
-        // $container->prependExtensionConfig('security', $ext[0]);
-
-        /*$container->prependExtensionConfig('security', [
-            'firewalls' => [
-                'main' => [
-                    'two_factor' => [
-                        'auth_form_path' => '2fa_login',
-                        'check_path' => '2fa_login_check',
-                        //'default_target_path' => '/dashboard',
-                        'enable_csrf' => true,
-                    ],
-                ],
-            ],
-            'access_control' => [
-                [
-                    'path' => '^/2fa/resend-email',
-                    'roles' => ['IS_AUTHENTICATED_2FA_IN_PROGRESS'],
-                ],
-                [
-                    'path' => '^/2fa',
-                    'roles' => ['IS_AUTHENTICATED_2FA_IN_PROGRESS'],
-                ],
-            ],
-        ]);*/
 
         $container->prependExtensionConfig('scheb_two_factor', [
             'security_tokens' => [
@@ -109,8 +77,8 @@ final class TwoFactorExtension
     }
 
     public static function configureSecurity(
-        \Symfony\Config\Security\FirewallConfig $config,
-        \Symfony\Config\Security\AccessControlConfig $accessControlConfig,
+        FirewallConfig $config,
+        AccessControlConfig $accessControlConfig,
     ): void {
         $config
             ->twoFactor()

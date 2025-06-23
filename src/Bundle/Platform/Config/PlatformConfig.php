@@ -16,8 +16,11 @@ namespace SolidWorx\Platform\PlatformBundle\Config;
 use function array_key_exists;
 use function explode;
 
-final class PlatformConfig
+final readonly class PlatformConfig
 {
+    /**
+     * @param array<string, mixed> $config
+     */
     public function __construct(
         private array $config
     ) {

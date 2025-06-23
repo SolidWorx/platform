@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Form\Type\Security;
 
+use Override;
 use SolidWorx\Platform\PlatformBundle\Validator\Constraint\TwoFactorCode;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -23,6 +24,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 
 final class TwoFactorVerifyType extends AbstractType
 {
+    #[Override]
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -47,6 +49,7 @@ final class TwoFactorVerifyType extends AbstractType
             ]);
     }
 
+    #[Override]
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setRequired('secret');

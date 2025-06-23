@@ -13,11 +13,13 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Config;
 
+use Override;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
+    #[Override]
     public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('solidworx_platform');
