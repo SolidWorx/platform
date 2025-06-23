@@ -15,6 +15,7 @@ namespace SolidWorx\Platform\PlatformBundle\Security\TwoFactor\Traits;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use LogicException;
 use Scheb\TwoFactorBundle\Model\Totp\TotpConfiguration;
 use Scheb\TwoFactorBundle\Model\Totp\TotpConfigurationInterface;
 use function array_search;
@@ -79,7 +80,7 @@ trait UserTwoFactor
     public function getEmailAuthCode(): string | null
     {
         if ($this->authCode === null) {
-            throw new \LogicException('The email authentication code was not set');
+            throw new LogicException('The email authentication code was not set');
         }
 
         return $this->authCode;
@@ -92,7 +93,10 @@ trait UserTwoFactor
 
     public function is2FaEnabled(): bool
     {
-        return $this->isTotpAuthenticationEnabled() || $this->isEmailAuthEnabled();
+        if ($this->isTotpAuthenticationEnabled()) {
+            return true;
+        }
+        return (bool) $this->isEmailAuthEnabled();
     }
 
     public function getTrustedTokenVersion(): int

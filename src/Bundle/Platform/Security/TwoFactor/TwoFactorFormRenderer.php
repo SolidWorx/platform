@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Security\TwoFactor;
 
+use Override;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\TwoFactorFormRendererInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -39,6 +40,7 @@ final readonly class TwoFactorFormRenderer implements TwoFactorFormRendererInter
      *
      * @throws LoaderError|RuntimeError|SyntaxError
      */
+    #[Override]
     public function renderForm(Request $request, array $templateVars): Response
     {
         $content = $this->twigEnvironment->render($this->template, array_merge($this->templateVars, $templateVars));

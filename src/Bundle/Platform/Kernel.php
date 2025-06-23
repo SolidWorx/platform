@@ -15,6 +15,8 @@ namespace SolidWorx\Platform\PlatformBundle;
 
 use const GLOB_BRACE;
 use const PATHINFO_EXTENSION;
+use Override;
+use RuntimeException;
 use Scheb\TwoFactorBundle\SchebTwoFactorBundle;
 use SolidWorx\Platform\PlatformBundle\Config\Configuration;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfig;
@@ -54,9 +56,10 @@ abstract class Kernel extends BaseKernel
      */
     private PlatformConfig $platformConfig;
 
+    #[Override]
     public function boot(): void
     {
-        if ($this->booted === true) {
+        if ($this->booted) {
             parent::boot();
             return;
         }
@@ -66,6 +69,7 @@ abstract class Kernel extends BaseKernel
         parent::boot();
     }
 
+    #[Override]
     public function handle(Request $request, int $type = HttpKernelInterface::MAIN_REQUEST, bool $catch = true): Response
     {
         $this->processPlatformConfig();
@@ -73,6 +77,7 @@ abstract class Kernel extends BaseKernel
         return parent::handle($request, $type, $catch);
     }
 
+    #[Override]
     public function registerBundles(): iterable
     {
         $bundles = yield from $this->registerBundlesTrait();
@@ -86,6 +91,7 @@ abstract class Kernel extends BaseKernel
         return $bundles;
     }
 
+    #[Override]
     protected function initializeBundles(): void
     {
         // init bundles
@@ -96,6 +102,7 @@ abstract class Kernel extends BaseKernel
                 // Bundle is already registered, let's skip it
                 continue;
             }
+
             $this->bundles[$name] = $bundle;
         }
     }
@@ -138,7 +145,7 @@ abstract class Kernel extends BaseKernel
         }
 
         if (count($configFiles) > 1) {
-            throw new \RuntimeException(sprintf(
+            throw new RuntimeException(sprintf(
                 'Multiple platform configuration files found: %s. Please ensure there is only one configuration file.',
                 implode(', ', $configFiles)
             ));
@@ -149,7 +156,7 @@ abstract class Kernel extends BaseKernel
         $parsedConfig = match ($ext) {
             'xml' => XmlUtils::loadFile($configFiles[0]),
             'yaml', 'yml' => Yaml::parseFile($configFiles[0]),
-            default => throw new \RuntimeException(sprintf('Unsupported configuration file format: %s', $ext)),
+            default => throw new RuntimeException(sprintf('Unsupported configuration file format: %s', $ext)),
         };
 
         $processor = new Processor();

@@ -13,10 +13,11 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Validator\Constraint;
 
+use Attribute;
 use Symfony\Component\Validator\Attribute\HasNamedArguments;
 use Symfony\Component\Validator\Constraint;
 
-#[\Attribute(\Attribute::TARGET_PROPERTY | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
+#[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 final class TwoFactorCode extends Constraint
 {
     public const string INVALID_CODE_ERROR = '01978d55-112b-72ae-a336-9e1bc05d0f1c';

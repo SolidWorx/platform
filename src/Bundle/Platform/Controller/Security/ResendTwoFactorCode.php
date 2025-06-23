@@ -16,6 +16,7 @@ namespace SolidWorx\Platform\PlatformBundle\Controller\Security;
 use Scheb\TwoFactorBundle\Model\Email\TwoFactorInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Email\Generator\CodeGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -27,7 +28,7 @@ class ResendTwoFactorCode extends AbstractController
     ) {
     }
 
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): RedirectResponse
     {
         $user = $this->getUser();
         assert($user instanceof TwoFactorInterface);

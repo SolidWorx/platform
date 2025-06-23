@@ -18,6 +18,7 @@ use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
+use Override;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticatorInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Trusted\TrustedDeviceManagerInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Trusted\TrustedDeviceTokenStorage;
@@ -197,6 +198,7 @@ final class TwoFactor extends AbstractController
         $this->trustedDeviceTokenStorage->clearTrustedToken($user->getUserIdentifier(), 'main');
     }
 
+    #[Override]
     protected function instantiateForm(): FormInterface
     {
         return $this->createForm(TwoFactorVerifyType::class, [

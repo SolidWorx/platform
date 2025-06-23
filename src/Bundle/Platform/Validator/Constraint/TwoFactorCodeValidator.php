@@ -13,9 +13,11 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Validator\Constraint;
 
+use Override;
 use RuntimeException;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticatorInterface;
 use SolidWorx\Platform\PlatformBundle\Contracts\Security\TwoFactor\UserTwoFactorInterface;
+use Stringable;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -30,6 +32,7 @@ final class TwoFactorCodeValidator extends ConstraintValidator
     ) {
     }
 
+    #[Override]
     public function validate(mixed $value, Constraint $constraint): void
     {
         if (! $constraint instanceof TwoFactorCode) {
@@ -40,7 +43,7 @@ final class TwoFactorCodeValidator extends ConstraintValidator
             return;
         }
 
-        if (! \is_scalar($value) && ! $value instanceof \Stringable) {
+        if (! \is_scalar($value) && ! $value instanceof Stringable) {
             throw new UnexpectedValueException($value, 'string');
         }
 
