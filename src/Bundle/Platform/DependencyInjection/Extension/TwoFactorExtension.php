@@ -26,6 +26,9 @@ use Symfony\Config\Security\FirewallConfig;
 
 final class TwoFactorExtension
 {
+    /**
+     * @param array{name: string, base_template: string} $config
+     */
     public static function enable(ContainerBuilder $container, array $config = []): void
     {
         $container
@@ -56,8 +59,8 @@ final class TwoFactorExtension
             ],
             'totp' => [
                 'enabled' => true,
-                'server_name' => $config['name'] ?? '',
-                'issuer' => $config['name'] ?? '',
+                'server_name' => $config['name'],
+                'issuer' => $config['name'],
                 'leeway' => 10,
                 'template' => '@SolidWorxPlatform/Security/TwoFactor/totp.html.twig',
                 'form_renderer' => 'solidworx_platform.security.two_factor.form_renderer.totp',
@@ -65,7 +68,7 @@ final class TwoFactorExtension
             'email' => [
                 'enabled' => true,
                 // 'sender_email' => 'no-reply@solidworx.co',
-                'sender_name' => $config['name'] ?? '',
+                'sender_name' => $config['name'],
                 'digits' => 6,
                 'template' => '@SolidWorxPlatform/Security/TwoFactor/email.html.twig',
                 'form_renderer' => 'solidworx_platform.security.two_factor.form_renderer.email',

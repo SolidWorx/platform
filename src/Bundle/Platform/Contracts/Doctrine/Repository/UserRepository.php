@@ -22,5 +22,5 @@ use SolidWorx\Platform\PlatformBundle\Contracts\Security\TwoFactor\UserTwoFactor
  */
 interface UserRepository
 {
-    public function save(UserTwoFactorInterface $user);
+    public function save(UserTwoFactorInterface $user): void;
 }

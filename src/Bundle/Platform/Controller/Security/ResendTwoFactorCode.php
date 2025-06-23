@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle\Controller\Security;
 
 use Scheb\TwoFactorBundle\Model\Email\TwoFactorInterface;
+use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Email\Generator\CodeGenerator;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Email\Generator\CodeGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -32,6 +33,7 @@ class ResendTwoFactorCode extends AbstractController
     {
         $user = $this->getUser();
         assert($user instanceof TwoFactorInterface);
+        assert($this->codeGenerator instanceof CodeGenerator);
         $this->codeGenerator->reSend($user);
 
         $this->addFlash('success', 'Two-factor authentication code has been re-sent.');

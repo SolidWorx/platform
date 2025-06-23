@@ -22,6 +22,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
+/**
+ * @extends AbstractType<array{code: string|null}>
+ */
 final class TwoFactorVerifyType extends AbstractType
 {
     #[Override]
@@ -41,7 +44,7 @@ final class TwoFactorVerifyType extends AbstractType
                 ],
                 'constraints' => [
                     new NotBlank(),
-                    new TwoFactorCode(secret: $options['secret']),
+                    new TwoFactorCode(secret: (string) $options['secret']),
                 ],
             ])
             ->add('secret', HiddenType::class, [

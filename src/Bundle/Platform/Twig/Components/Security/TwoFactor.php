@@ -25,6 +25,7 @@ use Scheb\TwoFactorBundle\Security\TwoFactor\Trusted\TrustedDeviceTokenStorage;
 use SolidWorx\Platform\PlatformBundle\Contracts\Doctrine\Repository\UserRepository;
 use SolidWorx\Platform\PlatformBundle\Contracts\Security\TwoFactor\UserTwoFactorInterface;
 use SolidWorx\Platform\PlatformBundle\Form\Type\Security\TwoFactorVerifyType;
+use SolidWorx\Platform\PlatformBundle\Security\TwoFactor\BackupCodeGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\FormInterface;
@@ -60,6 +61,7 @@ final class TwoFactor extends AbstractController
         private readonly TrustedDeviceTokenStorage $trustedDeviceTokenStorage,
         #[Autowire(service: 'scheb_two_factor.default_trusted_device_manager')]
         private readonly TrustedDeviceManagerInterface $trustedDeviceManager,
+        private readonly BackupCodeGeneratorInterface $backupCodeGenerator,
     ) {
     }
 
@@ -208,14 +210,11 @@ final class TwoFactor extends AbstractController
         ]);
     }
 
-    private function generateBackupCodes(int $number = 8): array
+    /**
+     * @return list<string>
+     */
+    private function generateBackupCodes(int $number = BackupCodeGeneratorInterface::LIMIT): array
     {
-        $codes = [];
-
-        for ($i = 0; $i < $number; $i++) {
-            $codes[] = strtoupper(bin2hex(random_bytes(3)) . '-' . bin2hex(random_bytes(3)));
-        }
-
-        return $codes;
+        return $this->backupCodeGenerator->generateBackupCodes($number);
     }
 }
