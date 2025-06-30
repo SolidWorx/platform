@@ -40,4 +40,12 @@ final readonly class PlatformConfig
 
         return $config;
     }
+
+    /**
+     * @return array<string, scalar>
+     */
+    public function toArray(): array
+    {
+        return $this->config;
+    }
 }

@@ -163,7 +163,7 @@ abstract class Kernel extends BaseKernel
         $this->platformConfig = new PlatformConfig($processor->processConfiguration(new Configuration(), $parsedConfig));
 
         $configCache->write(
-            '<?php return ' . var_export($this->platformConfig, true) . ';',
+            '<?php return ' . var_export($this->platformConfig->toArray(), true) . ';',
         );
     }
 }
