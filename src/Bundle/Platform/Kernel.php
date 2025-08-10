@@ -36,6 +36,7 @@ use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Yaml\Yaml;
 use Twig\Extra\TwigExtraBundle\TwigExtraBundle;
 use function defined;
+use function file_exists;
 use function glob;
 use function implode;
 use function pathinfo;
@@ -52,10 +53,7 @@ abstract class Kernel extends BaseKernel
 
     private const string PLATFORM_CONFIG_FILE = 'platform.{xml,yml,yaml}';
 
-    /**
-     * @var array|mixed
-     */
-    private PlatformConfig $platformConfig;
+    private ?PlatformConfig $platformConfig = null;
 
     #[Override]
     public function boot(): void
@@ -83,7 +81,7 @@ abstract class Kernel extends BaseKernel
     {
         $bundles = yield from $this->registerBundlesTrait();
 
-        if ($this->platformConfig->get('security.2fa.enabled') === true) {
+        if ($this->platformConfig?->get('security.2fa.enabled') === true) {
             yield new SchebTwoFactorBundle();
         }
 
@@ -115,7 +113,10 @@ abstract class Kernel extends BaseKernel
 
     protected function configureContainer(ContainerConfigurator $container, LoaderInterface $loader, ContainerBuilder $builder): void
     {
-        $builder->registerExtension(new PlatformExtension($this->platformConfig));
+        if ($this->platformConfig instanceof PlatformConfig) {
+            $builder->registerExtension(new PlatformExtension($this->platformConfig));
+        }
+
         $this->configureContainerTrait($container, $loader, $builder);
     }
 
@@ -139,7 +140,13 @@ abstract class Kernel extends BaseKernel
             return;
         }
 
-        $configFiles = glob($platformConfigFile, defined('GLOB_BRACE') ? GLOB_BRACE : 0);
+        $configFiles = [];
+
+        if (defined('GLOB_BRACE')) {
+            $configFiles = glob($platformConfigFile, defined('GLOB_BRACE') ? GLOB_BRACE : 0);
+        } elseif (file_exists($this->getProjectDir() . '/platform.yaml')) {
+            $configFiles = [$this->getProjectDir() . '/platform.yaml'];
+        }
 
         if ($configFiles === []) {
             return;
