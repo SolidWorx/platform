@@ -51,13 +51,14 @@ final readonly class SubscriptionManager
         $plan = $this->planRepository->find($planId);
 
         if (! $plan instanceof Plan) {
-            throw new InvalidPlanException(
-                match (get_debug_type($planId)) {
-                    'string' => $planId,
-                    Ulid::class => $planId->toBase58(),
-                    Plan::class => $planId->getPlanId(),
-                },
-            );
+            $planIdString = match (get_debug_type($planId)) {
+                'string' => $planId,
+                Ulid::class => $planId->toBase58(),
+                Plan::class => $planId->getPlanId(),
+                default => (string) $planId,
+            };
+
+            throw new InvalidPlanException($planIdString);
         }
 
         $subscription = new Subscription();

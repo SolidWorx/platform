@@ -96,6 +96,7 @@ trait UserTwoFactor
         if ($this->isTotpAuthenticationEnabled()) {
             return true;
         }
+
         return (bool) $this->isEmailAuthEnabled();
     }
 

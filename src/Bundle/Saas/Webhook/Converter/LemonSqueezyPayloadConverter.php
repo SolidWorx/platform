@@ -45,21 +45,12 @@ final readonly class LemonSqueezyPayloadConverter implements PayloadConverterInt
     }
 
     /**
-     * @param array{
-     *     data: array<string, mixed>,
-     *     meta: array{
-     *         event_name: string,
-     *         id: string,
-     *         custom_data?: array{subscription_id: string},
-     *     }
-     * } $payload
-     *
      * @throws ExceptionInterface
      */
     #[Override]
     public function convert(array $payload): RemoteEvent
     {
-        $type = $this->getMappingClass($payload['data']['type']);
+        $type = $this->getMappingClass((string) ($payload['data']['type'] ?? ''));
 
         if ($type === null) {
             return new RemoteEvent(
@@ -88,6 +79,7 @@ final readonly class LemonSqueezyPayloadConverter implements PayloadConverterInt
                 Event::from($payload['meta']['event_name']),
                 $payload,
             ),
+            default => throw new ParseException(sprintf('Unsupported type: %s', $type)),
         };
     }
 

@@ -1,0 +1,74 @@
+{% block date_widget %}
+    {% if widget == 'single_text' %}
+        <div class="input-group">
+            <div class="input-group-text">
+                {{ ux_icon('tabler:calendar') }}
+            </div>
+            {{- parent() -}}
+        </div>
+    {% else %}
+        {{- parent() -}}
+    {% endif %}
+{% endblock %}
+
+{% block time_widget %}
+    {% if widget == 'single_text' %}
+        <div class="input-group">
+            <div class="input-group-text">
+                {{ ux_icon('tabler:clock') }}
+            </div>
+            {{- parent() -}}
+        </div>
+    {% else %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}
+
+{% block datetime_widget -%}
+    {%- if widget == 'single_text' -%}
+        <div class="input-group">
+            <div class="input-group-text">
+                {{ ux_icon('tabler:calendar') }}
+            </div>
+            {{- parent() -}}
+        </div>
+    {%- else -%}
+        {{- parent() -}}
+    {%- endif -%}
+{%- endblock datetime_widget %}
+
+{% block tel_widget -%}
+    <div class="input-group">
+        <div class="input-group-text">
+            {{ ux_icon('tabler:phone') }}
+        </div>
+        {{- parent() -}}
+    </div>
+{%- endblock tel_widget %}
+
+{% block url_widget -%}
+    <div class="input-group">
+        <div class="input-group-text">
+            {{ ux_icon('tabler:home') }}
+        </div>
+        {{- parent() -}}
+    </div>
+{%- endblock url_widget %}
+
+{% block email_widget -%}
+    <div class="input-group">
+        <div class="input-group-text">
+            {{ ux_icon('tabler:email') }}
+        </div>
+        {{- parent() -}}
+    </div>
+{%- endblock email_widget %}
+
+{% block password_widget -%}
+    <div class="input-group">
+        <div class="input-group-text">
+            {{ ux_icon('tabler:password') }}
+        </div>
+        {{- parent() -}}
+    </div>
+{%- endblock password_widget %}

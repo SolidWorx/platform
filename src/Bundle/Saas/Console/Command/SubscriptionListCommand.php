@@ -60,7 +60,8 @@ final class SubscriptionListCommand extends Command
             $criteria->andWhere($expr->eq('status', SubscriptionStatus::from($status)));
         }
 
-        $limit = (int) $this->io->getOption('limit');
+        $limitOption = $this->io->getOption('limit');
+        $limit = is_numeric($limitOption) ? (int) $limitOption : 25;
         if ($limit <= 0) {
             $this->io->error('Limit must be a positive integer.');
             return self::FAILURE;

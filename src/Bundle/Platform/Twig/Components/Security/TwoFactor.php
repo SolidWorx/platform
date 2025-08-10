@@ -199,6 +199,9 @@ final class TwoFactor extends AbstractController
     }
 
     #[Override]
+    /**
+     * @return \Symfony\Component\Form\FormInterface<array{code: string|null, secret: string|null}>
+     */
     protected function instantiateForm(): FormInterface
     {
         return $this->createForm(TwoFactorVerifyType::class, [
