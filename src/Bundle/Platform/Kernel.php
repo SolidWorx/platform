@@ -35,9 +35,9 @@ use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Yaml\Yaml;
 use Twig\Extra\TwigExtraBundle\TwigExtraBundle;
+use function defined;
 use function glob;
 use function implode;
-use function is_defined;
 use function pathinfo;
 use function sprintf;
 use function var_export;
@@ -139,7 +139,7 @@ abstract class Kernel extends BaseKernel
             return;
         }
 
-        $configFiles = glob($platformConfigFile, is_defined('GLOB_BRACE') ? GLOB_BRACE : 0);
+        $configFiles = glob($platformConfigFile, defined('GLOB_BRACE') ? GLOB_BRACE : 0);
 
         if ($configFiles === []) {
             return;
