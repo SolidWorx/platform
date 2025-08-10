@@ -138,7 +138,7 @@ abstract class Kernel extends BaseKernel
             return;
         }
 
-        $configFiles = glob($platformConfigFile, GLOB_BRACE);
+        $configFiles = glob($platformConfigFile, is_define('GLOB_BRACE') ? GLOB_BRACE : 0);
 
         if ($configFiles === []) {
             return;
