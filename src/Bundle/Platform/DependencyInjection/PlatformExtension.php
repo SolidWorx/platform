@@ -13,10 +13,14 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\DependencyInjection;
 
+use Knp\Menu\Provider\MenuProviderInterface;
 use Override;
+use SolidWorx\Platform\PlatformBundle\Attributes\Menu\MenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfig;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendTwoFactorCode;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\Extension\TwoFactorExtension;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
@@ -25,9 +29,8 @@ use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 final class PlatformExtension extends Extension implements PrependExtensionInterface
 {
     public function __construct(
-        private readonly PlatformConfig $platformConfig
-    ) {
-    }
+        private readonly ?PlatformConfig $platformConfig
+    ) {}
 
     #[Override]
     public function load(array $configs, ContainerBuilder $container): void
@@ -39,6 +42,25 @@ final class PlatformExtension extends Extension implements PrependExtensionInter
         $loader->import('services.php');
 
         $container->setParameter('solidworx_platform.doctrine.types.enable_utc_date', $config['doctrine']['types']['enable_utc_date']);
+
+        $container->registerForAutoconfiguration(MenuProviderInterface::class)
+            ->addTag('knp_menu.provider');
+
+        $container->registerAttributeForAutoconfiguration(MenuBuilder::class, static function (ChildDefinition $definition, MenuBuilder $attribute, \ReflectionMethod $reflectionMethod): void {
+            $definition->addTag(Util::tag('menu.builder'), [
+                'alias' => $attribute->name,
+                'method' => $reflectionMethod->getName(),
+                'priority' => $attribute->priority,
+                'role' => $attribute->role,
+            ]);
+        });
+
+        if (! $this->platformConfig?->get('security.2fa.enabled')) {
+            // @TODO: Need to remove the 2FA routes as well if 2fa is not configured
+            $container->removeDefinition(ResendTwoFactorCode::class);
+            $container->removeDefinition(\SolidWorx\Platform\PlatformBundle\Validator\Constraint\TwoFactorCodeValidator::class);
+            $container->removeDefinition(\SolidWorx\Platform\PlatformBundle\Twig\Components\Security\TwoFactor::class);
+        }
     }
 
     #[Override]
@@ -59,12 +81,27 @@ final class PlatformExtension extends Extension implements PrependExtensionInter
             );
         }
 
-        if ($this->platformConfig->get('security.2fa.enabled') === true) {
+        if ($this->platformConfig?->get('security.2fa.enabled') === true) {
             TwoFactorExtension::enable(
                 $container,
                 [
-                    'name' => $this->platformConfig->get('name'),
-                    'base_template' => $this->platformConfig->get('security.2fa.base_template'),
+                    'name' => $this->platformConfig?->get('name'),
+                    'base_template' => $this->platformConfig?->get('security.2fa.base_template'),
+                ]
+            );
+        }
+
+        if ($container->hasExtension('knp_menu')) {
+            $container->prependExtensionConfig(
+                'knp_menu',
+                [
+                    'twig' => [
+                        'template' => '@SolidWorxPlatform/Menu/menu.html.twig',
+                    ],
+                    'default_renderer' => 'twig',
+                    'providers' => [
+                        'builder_alias' => false,
+                    ],
                 ]
             );
         }

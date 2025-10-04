@@ -17,13 +17,23 @@ use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
 use Override;
+use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\MenuCompilerPass;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Type\UTCDateTimeType;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 final class SolidWorxPlatformBundle extends Bundle
 {
     public const string NAMESPACE = __NAMESPACE__;
+
+    public function build(ContainerBuilder $container)
+    {
+        parent::build($container);
+
+        $container->addCompilerPass(new MenuCompilerPass());
+    }
+
 
     /**
      * @throws Exception
@@ -41,8 +51,8 @@ final class SolidWorxPlatformBundle extends Bundle
 
         $parameter = $this->container->getParameter('solidworx_platform.doctrine.types.enable_utc_date');
         if ($parameter === true) {
-            Type::overrideType(Types::DATETIMETZ_IMMUTABLE, UTCDateTimeType::class);
-            Type::overrideType(Types::DATETIME_IMMUTABLE, UTCDateTimeType::class);
+            /*Type::overrideType(Types::DATETIMETZ_IMMUTABLE, UTCDateTimeType::class);
+            Type::overrideType(Types::DATETIME_IMMUTABLE, UTCDateTimeType::class);*/
         }
     }
 

@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle;
 
+use Knp\Bundle\MenuBundle\KnpMenuBundle;
+use Symfony\UX\Icons\UXIconsBundle;
 use const GLOB_BRACE;
 use const PATHINFO_EXTENSION;
 use Override;
@@ -79,15 +81,15 @@ abstract class Kernel extends BaseKernel
     #[Override]
     public function registerBundles(): iterable
     {
-        $bundles = yield from $this->registerBundlesTrait();
+        yield from $this->registerBundlesTrait();
 
         if ($this->platformConfig?->get('security.2fa.enabled') === true) {
             yield new SchebTwoFactorBundle();
         }
 
         yield new TwigExtraBundle();
-
-        return $bundles;
+        yield new KnpMenuBundle();
+        yield new UXIconsBundle();
     }
 
     #[Override]
@@ -113,9 +115,7 @@ abstract class Kernel extends BaseKernel
 
     protected function configureContainer(ContainerConfigurator $container, LoaderInterface $loader, ContainerBuilder $builder): void
     {
-        if ($this->platformConfig instanceof PlatformConfig) {
-            $builder->registerExtension(new PlatformExtension($this->platformConfig));
-        }
+        $builder->registerExtension(new PlatformExtension($this->platformConfig));
 
         $this->configureContainerTrait($container, $loader, $builder);
     }

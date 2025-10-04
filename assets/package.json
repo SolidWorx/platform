@@ -18,17 +18,36 @@
       }
     },
     "importmap": {
-      "@hotwired/stimulus": "^3.0.0",
-      "bootstrap": "^4.6.2"
+      "@hotwired/stimulus": "^3.2.2",
+      "@symfony/stimulus-bridge": "^4.0.1",
+      "@tabler/core": "^1.4.0",
+      "bootstrap": "^5.3.8"
     }
   },
   "peerDependencies": {
-    "@hotwired/stimulus": "^3.0.0",
-    "bootstrap": "^4.6.2",
-    "jquery": "^3.7.1"
+    "@hotwired/stimulus": "^3.2.2",
+    "@symfony/stimulus-bridge": "^4.0.1",
+    "@tabler/core": "^1.4.0",
+    "bootstrap": "^5.3.8"
   },
-  "devDependencies": {
-    "@hotwired/stimulus": "^3.0.0",
-    "bootstrap": "^4.6.2"
+  "dependencies": {
+    "@hotwired/stimulus": "^3.2.2",
+    "@symfony/stimulus-bridge": "^4.0.1",
+    "@tabler/core": "^1.4.0",
+    "bootstrap": "^5.3.8"
+  },
+  "peerDependenciesMeta": {
+    "@tabler/core": {
+      "optional": false
+    },
+    "bootstrap": {
+      "optional": false
+    },
+    "@hotwired/stimulus": {
+      "optional": false
+    },
+    "@symfony/stimulus-bridge": {
+        "optional": false
+    }
   }
 }

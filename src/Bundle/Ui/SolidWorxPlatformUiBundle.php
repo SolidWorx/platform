@@ -36,7 +36,7 @@ final class SolidWorxPlatformUiBundle extends AbstractBundle
         }
 
         // Check if AssetMapper is installed
-        if ($builder->hasExtension('framework') && class_exists(AssetMapper::class)) {
+        /*if ($builder->hasExtension('framework') && class_exists(AssetMapper::class)) {
             $builder->prependExtensionConfig('framework', [
                 'asset_mapper' => [
                     'paths' => [
@@ -44,7 +44,7 @@ final class SolidWorxPlatformUiBundle extends AbstractBundle
                     ],
                 ],
             ]);
-        }
+        }*/
 
         if ($builder->hasExtension('twig')) {
             $builder->prependExtensionConfig('twig', [
