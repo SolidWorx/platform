@@ -40,7 +40,7 @@ final class MenuCompilerPass implements CompilerPassInterface
 
                 $wrapperDefinition = (new Definition(Closure::class))
                     ->addArgument([new Reference($id), $attributes['method']])
-                    ->setFactory(Closure::fromCallable(...));
+                    ->setFactory([Closure::class, 'fromCallable']);
 
                 $definition->addMethodCall(
                     'addBuilder',
