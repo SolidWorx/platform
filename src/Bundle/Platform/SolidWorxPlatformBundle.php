@@ -17,6 +17,7 @@ use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
 use Override;
+use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\AuthenticationCompilerPass;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\MenuCompilerPass;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Type\UTCDateTimeType;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -27,13 +28,14 @@ final class SolidWorxPlatformBundle extends Bundle
 {
     public const string NAMESPACE = __NAMESPACE__;
 
-    public function build(ContainerBuilder $container)
+    #[Override]
+    public function build(ContainerBuilder $container): void
     {
         parent::build($container);
 
         $container->addCompilerPass(new MenuCompilerPass());
+        $container->addCompilerPass(new AuthenticationCompilerPass());
     }
-
 
     /**
      * @throws Exception

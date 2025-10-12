@@ -1,10 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of SolidWorx Platform project.
+ *
+ * (c) Pierre du Plessis <open-source@solidworx.co>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace SolidWorx\Platform\PlatformBundle\Menu;
 
 use Knp\Menu\FactoryInterface;
 use Knp\Menu\ItemInterface;
 use Knp\Menu\Provider\MenuProviderInterface;
+use Override;
 use SplPriorityQueue;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
@@ -20,8 +32,10 @@ final class Provider implements MenuProviderInterface
     public function __construct(
         private readonly FactoryInterface $factory,
         private readonly AuthorizationCheckerInterface $authorizationChecker,
-    ) {}
+    ) {
+    }
 
+    #[Override]
     public function get(string $name, array $options = []): ItemInterface
     {
         $root = $this->factory->createItem('root', $options);
@@ -50,18 +64,7 @@ final class Provider implements MenuProviderInterface
         return $root;
     }
 
-    private function removeItems(ItemInterface $item): void
-    {
-        foreach ($item->getChildren() as $child) {
-            $role = $child->getExtra('role');
-            if ($role && !$this->authorizationChecker->isGranted($role)) {
-                $item->removeChild($child);
-            } else {
-                $this->removeItems($child);
-            }
-        }
-    }
-
+    #[Override]
     public function has(string $name, array $options = []): bool
     {
         return isset($this->list[$name]);
@@ -72,11 +75,11 @@ final class Provider implements MenuProviderInterface
         // Ensure the menu name is still defined
         // to prevent errors when trying to render a menu
         // that has no authorized items.
-        if (!$this->has($name)) {
+        if (! $this->has($name)) {
             $this->list[$name] = new SplPriorityQueue();
         }
 
-        if ($role !== '' && !$this->authorizationChecker->isGranted($role)) {
+        if ($role !== '' && ! $this->authorizationChecker->isGranted($role)) {
             return; // Skip adding the builder if the role is not granted
         }
 
@@ -87,5 +90,17 @@ final class Provider implements MenuProviderInterface
          * This ensures that builders with the same priority are executed in the order they were added.
          */
         $this->list[$name]->insert($builder, [$priority, -$this->seq++]);
+    }
+
+    private function removeItems(ItemInterface $item): void
+    {
+        foreach ($item->getChildren() as $child) {
+            $role = $child->getExtra('role');
+            if ($role && ! $this->authorizationChecker->isGranted($role)) {
+                $item->removeChild($child);
+            } else {
+                $this->removeItems($child);
+            }
+        }
     }
 }

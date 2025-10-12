@@ -7,14 +7,16 @@
   "files": [
     "controllers"
   ],
-  "keywords": ["symfony-ux"],
+  "keywords": [
+    "symfony-ux"
+  ],
   "symfony": {
     "controllers": {
       "modal": {
         "main": "controllers/modal.js",
         "webpackMode": "lazy",
         "fetch": "lazy",
-        "enabled": true,
+        "enabled": true
       }
     },
     "importmap": {
@@ -26,6 +28,18 @@
     "@hotwired/stimulus": "^3.2.2",
     "@symfony/stimulus-bridge": "^4.0.1",
     "@tabler/core": "^1.4.0",
+    "bootstrap": "^5.3.8"
+  },
+  "devDependencies": {
+    "@symfony/webpack-encore": "^5.2.0",
+    "@types/bootstrap": "^5.2.10",
+    "eslint-webpack-plugin": "^5.0.2"
+  },
+  "dependencies": {
+    "@stimulus-components/checkbox-select-all": "^6.1.0",
+    "@stimulus-components/clipboard": "^5.0.0",
+    "@stimulus-components/password-visibility": "^3.0.0",
+    "jquery": "^3.7.1",
     "bootstrap": "^5.3.8"
   }
 }

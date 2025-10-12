@@ -13,23 +13,21 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Twig\Extension;
 
-use Knp\Menu\Twig\MenuRuntimeExtension;
 use Override;
+use SolidWorx\Platform\PlatformBundle\Twig\Runtime\UrlRuntime;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
-final class MenuExtension extends AbstractExtension
+final class UrlExtension extends AbstractExtension
 {
     /**
-     * @return TwigFunction[]
+     * @return list<TwigFunction>
      */
     #[Override]
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('render_menu', [MenuRuntimeExtension::class, 'render'], [
-                'is_safe' => ['html'],
-            ]),
+            new TwigFunction('logout_link', [UrlRuntime::class, 'logoutLink']),
         ];
     }
 }

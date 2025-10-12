@@ -22,17 +22,29 @@ final class Configuration implements ConfigurationInterface
     #[Override]
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder('solidworx_platform_ui');
+        $treeBuilder = new TreeBuilder('solid_worx_platform_ui');
 
         //@formatter:off
         $treeBuilder
             ->getRootNode()
+                ->addDefaultsIfNotSet()
                 ->children()
                     ->scalarNode('icon_pack')
                         ->info('The icon pack to use')
-                        ->isRequired()
                         ->defaultValue('tabler')
                     ->end()
+                    ->arrayNode('templates')
+                        ->addDefaultsIfNotSet()
+                        ->children()
+                            ->scalarNode('base')
+                                ->info('The base template')
+                                ->defaultValue('@Ui/Layout/base.html.twig')
+                            ->end()
+                            ->scalarNode('login')
+                                ->info('The standard login template')
+                                ->defaultValue('@Ui/Security/login.html.twig')
+                            ->end()
+                        ->end()
                 ->end();
         //@formatter:on
 

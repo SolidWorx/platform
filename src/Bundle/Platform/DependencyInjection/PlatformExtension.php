@@ -15,22 +15,27 @@ namespace SolidWorx\Platform\PlatformBundle\DependencyInjection;
 
 use Knp\Menu\Provider\MenuProviderInterface;
 use Override;
+use ReflectionMethod;
 use SolidWorx\Platform\PlatformBundle\Attributes\Menu\MenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfig;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendTwoFactorCode;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\Extension\TwoFactorExtension;
+use SolidWorx\Platform\PlatformBundle\Twig\Components\Security\TwoFactor;
+use SolidWorx\Platform\PlatformBundle\Validator\Constraint\TwoFactorCodeValidator;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+use function dirname;
 
 final class PlatformExtension extends Extension implements PrependExtensionInterface
 {
     public function __construct(
         private readonly ?PlatformConfig $platformConfig
-    ) {}
+    ) {
+    }
 
     #[Override]
     public function load(array $configs, ContainerBuilder $container): void
@@ -41,12 +46,14 @@ final class PlatformExtension extends Extension implements PrependExtensionInter
         $loader = new PhpFileLoader($container, new FileLocator(dirname(__DIR__) . '/Resources/config'));
         $loader->import('services.php');
 
+        $container->setParameter('solidworx_platform.app.name', $this->platformConfig?->get('name'));
+
         $container->setParameter('solidworx_platform.doctrine.types.enable_utc_date', $config['doctrine']['types']['enable_utc_date']);
 
         $container->registerForAutoconfiguration(MenuProviderInterface::class)
             ->addTag('knp_menu.provider');
 
-        $container->registerAttributeForAutoconfiguration(MenuBuilder::class, static function (ChildDefinition $definition, MenuBuilder $attribute, \ReflectionMethod $reflectionMethod): void {
+        $container->registerAttributeForAutoconfiguration(MenuBuilder::class, static function (ChildDefinition $definition, MenuBuilder $attribute, ReflectionMethod $reflectionMethod): void {
             $definition->addTag(Util::tag('menu.builder'), [
                 'alias' => $attribute->name,
                 'method' => $reflectionMethod->getName(),
@@ -58,8 +65,8 @@ final class PlatformExtension extends Extension implements PrependExtensionInter
         if (! $this->platformConfig?->get('security.2fa.enabled')) {
             // @TODO: Need to remove the 2FA routes as well if 2fa is not configured
             $container->removeDefinition(ResendTwoFactorCode::class);
-            $container->removeDefinition(\SolidWorx\Platform\PlatformBundle\Validator\Constraint\TwoFactorCodeValidator::class);
-            $container->removeDefinition(\SolidWorx\Platform\PlatformBundle\Twig\Components\Security\TwoFactor::class);
+            $container->removeDefinition(TwoFactorCodeValidator::class);
+            $container->removeDefinition(TwoFactor::class);
         }
     }
 
@@ -69,7 +76,7 @@ final class PlatformExtension extends Extension implements PrependExtensionInter
         $container->prependExtensionConfig('platform', []);
 
         if ($container->hasExtension('twig')) {
-            $path = \dirname(__DIR__) . '/Resources/views';
+            $path = dirname(__DIR__) . '/Resources/views';
 
             $container->prependExtensionConfig(
                 'twig',
@@ -105,5 +112,15 @@ final class PlatformExtension extends Extension implements PrependExtensionInter
                 ]
             );
         }
+
+        $container->prependExtensionConfig(
+            'framework',
+            [
+                'csrf_protection' => [
+                    'enabled' => true,
+                    'stateless_token_ids' => ['submit', 'authenticate', 'logout'],
+                ],
+            ],
+        );
     }
 }

@@ -11,8 +11,7 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-use SolidWorx\Platform\PlatformBundle\Controller\Security\Login;
-use SolidWorx\Platform\PlatformBundle\SolidWorxPlatformBundle;
+use SolidWorx\Platform\UiBundle\SolidWorxPlatformUiBundle;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
 return static function (ContainerConfigurator $containerConfigurator): void {
@@ -26,9 +25,6 @@ return static function (ContainerConfigurator $containerConfigurator): void {
     ;
 
     $services
-        ->load(SolidWorxPlatformBundle::NAMESPACE . '\\', dirname(__DIR__, 2))
+        ->load(SolidWorxPlatformUiBundle::NAMESPACE . '\\', dirname(__DIR__, 2))
         ->exclude(dirname(__DIR__, 2) . '/{DependencyInjection,Entity,Resources,Tests}');
-
-    $services->set(Login::class)
-        ->tag('controller.service_arguments');
 };

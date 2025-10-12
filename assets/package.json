@@ -15,6 +15,18 @@
         "webpackMode": "lazy",
         "fetch": "lazy",
         "enabled": true
+      },
+      "csrf-protection": {
+        "main": "controllers/csrf_protection.js",
+        "webpackMode": "lazy",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "loading": {
+        "main": "controllers/loading.js",
+        "webpackMode": "lazy",
+        "fetch": "lazy",
+        "enabled": true
       }
     },
     "importmap": {

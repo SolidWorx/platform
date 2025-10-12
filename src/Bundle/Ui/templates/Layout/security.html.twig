@@ -1,0 +1,26 @@
+{#
+    This template serves as a base layout for security-related pages.
+    It does not contain header or footer sections, focusing solely on the body content.
+#}
+{% extends ui_base_template %}
+
+{% block body %}
+    <div class="page page-center">
+        <div class="container container-tight py-4">
+            {% for type, flashMessage in app.session.flashbag.all() %}
+                {% if type == 'error' %}
+                    {% set type = 'danger' %}
+                {% endif %}
+
+                {% for message in flashMessage %}
+                    <div class="alert alert-{{ type }} no-print">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        {{ message|trans }} <br />
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            {{ block('content') }}
+        </div>
+    </div>
+{% endblock body %}

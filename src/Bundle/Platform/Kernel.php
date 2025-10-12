@@ -13,10 +13,9 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle;
 
-use Knp\Bundle\MenuBundle\KnpMenuBundle;
-use Symfony\UX\Icons\UXIconsBundle;
 use const GLOB_BRACE;
 use const PATHINFO_EXTENSION;
+use Knp\Bundle\MenuBundle\KnpMenuBundle;
 use Override;
 use RuntimeException;
 use Scheb\TwoFactorBundle\SchebTwoFactorBundle;
@@ -36,6 +35,7 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\UX\Icons\UXIconsBundle;
 use Twig\Extra\TwigExtraBundle\TwigExtraBundle;
 use function defined;
 use function file_exists;
@@ -123,11 +123,13 @@ abstract class Kernel extends BaseKernel
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
         $this->configureRoutesTrait($routes);
+
+        $routes->import('.', '_solidworx_platform_auth_routes');
     }
 
     private function processPlatformConfig(): void
     {
-        if (isset($this->platformConfig)) {
+        if ($this->platformConfig instanceof PlatformConfig) {
             return;
         }
 

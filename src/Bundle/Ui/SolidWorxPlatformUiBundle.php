@@ -14,46 +14,11 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\UiBundle;
 
 use Override;
-use Symfony\Component\AssetMapper\AssetMapper;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
+use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-final class SolidWorxPlatformUiBundle extends AbstractBundle
+final class SolidWorxPlatformUiBundle extends Bundle
 {
-    #[Override]
-    public function prependExtension(ContainerConfigurator $container, ContainerBuilder $builder): void
-    {
-        if ($builder->hasExtension('twig_component')) {
-            $builder->prependExtensionConfig('twig_component', [
-                'defaults' => [
-                    'UiBundle\Twig\Component\\' => [
-                        'template_directory' => '@Ui/components/Ui/',
-                        'name_prefix' => 'Ui',
-                    ],
-                ],
-            ]);
-        }
-
-        // Check if AssetMapper is installed
-        /*if ($builder->hasExtension('framework') && class_exists(AssetMapper::class)) {
-            $builder->prependExtensionConfig('framework', [
-                'asset_mapper' => [
-                    'paths' => [
-                        __DIR__ . '/../../../assets/ui/dist' => '@solidworx/ui-component',
-                    ],
-                ],
-            ]);
-        }*/
-
-        if ($builder->hasExtension('twig')) {
-            $builder->prependExtensionConfig('twig', [
-                'paths' => [
-                    __DIR__ . '/templates/' => 'Ui',
-                ],
-            ]);
-        }
-    }
+    public const string  NAMESPACE = __NAMESPACE__;
 
     #[Override]
     public function getPath(): string

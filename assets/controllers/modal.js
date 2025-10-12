@@ -1,20 +1,17 @@
 import { Controller } from '@hotwired/stimulus';
-import $, {jQuery} from 'jquery';
+import { Modal } from 'bootstrap';
 
 /* stimulusFetch: 'lazy' */
 export default class extends Controller {
-    /**
-     * @type {jQuery}
-     */
     modal = null;
 
     connect() {
-        this.modal = $(this.element);
+        this.modal = new Modal(this.element);
 
-        if (this.modal.hasClass('show')) {
-            this.modal.modal('show');
+        if (this.element.classList.contains('show')) {
+            this.modal.show();
         }
 
-        document.addEventListener('modal:close', () => this.modal?.modal('hide'));
+        document.addEventListener('modal:close', () => this.modal?.hide());
     }
 }
