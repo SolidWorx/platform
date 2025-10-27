@@ -9,7 +9,7 @@
     ],
     "require": {
         "php": ">=8.3",
-        "doctrine/doctrine-bundle": "^2.13",
+        "doctrine/doctrine-bundle": "^2.13 || ^3.0",
         "doctrine/orm": "^2.15 || ^3.3",
         "endroid/qr-code": "^6.0",
         "knplabs/knp-menu-bundle": "^3.6",
