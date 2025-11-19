@@ -113,7 +113,7 @@ final class PlatformExtension extends Extension implements PrependExtensionInter
             );
         }
 
-        $container->prependExtensionConfig(
+        /*$container->prependExtensionConfig(
             'framework',
             [
                 'csrf_protection' => [
@@ -121,6 +121,6 @@ final class PlatformExtension extends Extension implements PrependExtensionInter
                     'stateless_token_ids' => ['submit', 'authenticate', 'logout'],
                 ],
             ],
-        );
+        );*/
     }
 }
