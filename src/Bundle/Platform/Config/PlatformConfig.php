@@ -18,6 +18,59 @@ use function explode;
 
 final readonly class PlatformConfig
 {
+
+    private string $name;
+    private string $version;
+    private array $models;
+    private array $templates;
+
+    public static function create(): self
+    {
+        return new self([]);
+    }
+
+    public function withName(string $name): self
+    {
+        $config = $this->config;
+        $config['name'] = $name;
+
+        return new self($config);
+    }
+
+    public function withVersion(string $version): self
+    {
+        $config = $this->config;
+        $config['version'] = $version;
+
+        return new self($config);
+    }
+
+    public function withModel(string $name, string $value): self
+    {
+        $config = $this->config;
+        $config['models'][$name] = $value;
+
+        return new self($config);
+    }
+
+    public function withTemplate(string $name, string $value): self
+    {
+        $config = $this->config;
+        $config['templates'][$name] = $value;
+
+        return new self($config);
+    }
+
+    public function registerBundle(string $bundleClass, callable $bundleConfig = null): self
+    {
+        $config = $this->config;
+        $bundles = $config['bundles'] ?? [];
+        $bundles[$bundleClass] = $bundleConfig;
+        $config['bundles'] = $bundles;
+
+        return new self($config);
+    }
+
     /**
      * @param array<string, mixed> $config
      */

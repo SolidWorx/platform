@@ -17,16 +17,24 @@ use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
 use Override;
+use SolidWorx\Platform\PlatformBundle\Config\PlatformConfig;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\AuthenticationCompilerPass;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\MenuCompilerPass;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Type\UTCDateTimeType;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
+use function class_exists;
 
 final class SolidWorxPlatformBundle extends Bundle
 {
     public const string NAMESPACE = __NAMESPACE__;
+
+    public function __construct(
+        private readonly PlatformConfig $platformConfig
+    ) {
+    }
 
     #[Override]
     public function build(ContainerBuilder $container): void
@@ -62,5 +70,10 @@ final class SolidWorxPlatformBundle extends Bundle
     public function getPath(): string
     {
         return __DIR__;
+    }
+
+    protected function createContainerExtension(): ?ExtensionInterface
+    {
+        return new ($this->getContainerExtensionClass())($this->platformConfig);
     }
 }

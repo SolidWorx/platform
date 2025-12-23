@@ -24,25 +24,33 @@ final class AuthenticationCompilerPass implements CompilerPassInterface
     #[Override]
     public function process(ContainerBuilder $container): void
     {
-        if (! $container->hasDefinition(LoginPageRouteLoader::class)) {
-            return;
+        if ($container->hasDefinition(LoginPageRouteLoader::class)) {
+            $this->registerLoginRouteLoader($container);
         }
 
+        if ($container->hasDefinition('security.user.provider.concrete.platform_user')) {
+            $definition = $container->getDefinition('security.user.provider.concrete.platform_user');
+            $definition->setArgument(0, $container->getParameter('solidworx_platform.models.user'));
+        }
+    }
+
+    private function registerLoginRouteLoader(ContainerBuilder $container): void
+    {
         $routeLoader = $container->getDefinition(LoginPageRouteLoader::class);
         $firewalls = $container->getParameter('security.firewalls');
 
         $authenticators = [];
 
         foreach ($firewalls as $firewall) {
-            if (! $container->hasDefinition('security.authenticator.form_login.' . $firewall)) {
+            if (!$container->hasDefinition('security.authenticator.form_login.' . $firewall)) {
                 continue;
             }
 
             $authenticator = $container->getDefinition('security.authenticator.form_login.' . $firewall);
             $authenticators[$firewall] = $authenticator->getArgument(4) + [
-                'remember_me_parameter' => null,
-                'always_remember_me' => false,
-            ];
+                    'remember_me_parameter' => null,
+                    'always_remember_me' => false,
+                ];
 
             if ($container->hasDefinition('security.authenticator.remember_me_handler.' . $firewall)) {
                 $rememberMeArguments = $container->getDefinition('security.authenticator.remember_me_handler.' . $firewall)->getArgument(3);

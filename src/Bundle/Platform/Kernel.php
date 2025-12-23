@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle;
 
+use SymfonyCasts\Bundle\ResetPassword\SymfonyCastsResetPasswordBundle;
 use const GLOB_BRACE;
 use const PATHINFO_EXTENSION;
 use Knp\Bundle\MenuBundle\KnpMenuBundle;
@@ -21,7 +22,7 @@ use RuntimeException;
 use Scheb\TwoFactorBundle\SchebTwoFactorBundle;
 use SolidWorx\Platform\PlatformBundle\Config\Configuration;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfig;
-use SolidWorx\Platform\PlatformBundle\DependencyInjection\PlatformExtension;
+use SolidWorx\Platform\PlatformBundle\DependencyInjection\SolidWorxPlatformExtension;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\Config\Definition\Processor;
@@ -87,9 +88,13 @@ abstract class Kernel extends BaseKernel
             yield new SchebTwoFactorBundle();
         }
 
+        //yield new $builder->registerExtension(new SolidWorxPlatformExtension($this->platformConfig));
+        yield new SolidWorxPlatformBundle($this->platformConfig);
+
         yield new TwigExtraBundle();
         yield new KnpMenuBundle();
         yield new UXIconsBundle();
+        // yield new SymfonyCastsResetPasswordBundle();
     }
 
     #[Override]
@@ -115,7 +120,7 @@ abstract class Kernel extends BaseKernel
 
     protected function configureContainer(ContainerConfigurator $container, LoaderInterface $loader, ContainerBuilder $builder): void
     {
-        $builder->registerExtension(new PlatformExtension($this->platformConfig));
+        // $builder->registerExtension(new SolidWorxPlatformExtension($this->platformConfig));
 
         $this->configureContainerTrait($container, $loader, $builder);
     }

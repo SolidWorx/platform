@@ -1,0 +1,47 @@
+{% props
+    title = 'Logout'|trans,
+    icon = 'logout',
+    firewall = null,
+    csrf_token_id = 'logout',
+    color = 'link',
+    size = null,
+    outline = false,
+    class = '',
+%}
+
+{% set button = cva({
+    base: 'btn',
+    variants: {
+        color: {
+            primary: 'btn-primary',
+            secondary: 'btn-secondary',
+            success: 'btn-success',
+            danger: 'btn-danger',
+            warning: 'btn-warning',
+            info: 'btn-info',
+            light: 'btn-light',
+            dark: 'btn-dark',
+            link: 'btn-link',
+        },
+        size: {
+            sm: 'btn-sm',
+            lg: 'btn-lg',
+        },
+        outline: {
+            true: 'btn-outline',
+        },
+    },
+    defaultVariants: {
+        color: 'link',
+    }
+}) %}
+
+<form method="post" action="{{ logout_path(firewall) }}">
+    <input type="hidden" {{ stimulus_controller('@solidworx/platform/csrf-protection') }} name="_csrf_token" value="{{ csrf_token(csrf_token_id) }}"/>
+    <button type="submit" class="{{ button.apply({color, size, outline}, class) }}">
+        {% if icon is not empty -%}
+            {{ ux_icon('tabler:' ~ icon, {width: 16, height: 16}) }}&nbsp;
+        {%- endif -%}
+        {{ title }}
+    </button>
+</form>

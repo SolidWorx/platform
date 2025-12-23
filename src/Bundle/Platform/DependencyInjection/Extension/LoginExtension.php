@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\DependencyInjection\Extension;
 
+use SolidWorx\Platform\PlatformBundle\Model\User;
 use Symfony\Config\Security\FirewallConfig;
 use Symfony\Config\SecurityConfig;
 
@@ -22,10 +23,15 @@ final class LoginExtension
         SecurityConfig $config,
         bool $enableTwoFactor = false,
     ): FirewallConfig {
+        $config
+            ->passwordHasher(User::class)
+            ->algorithm('auto');
+
         $mainFirewallConfig = $config
             ->firewall('main')
             ->pattern('^/')
             ->entryPoint('form_login')
+            ->provider('platform_user')
             ->lazy(true);
 
         $mainFirewallConfig
@@ -39,6 +45,7 @@ final class LoginExtension
             ->enableCsrf(true)
             ->loginPath('/login')
             ->checkPath('_login_check')
+            ->provider('platform_user')
             ->alwaysUseDefaultTargetPath(true);
 
         $mainFirewallConfig

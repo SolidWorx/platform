@@ -34,7 +34,7 @@ Encore
     .enableSassLoader()
     .autoProvidejQuery()
 
-    .enableStimulusBridge('./assets/controllers.json')
+    //.enableStimulusBridge(process.cwd() + '/assets/controllers.json')
     .enableTypeScriptLoader()
 
     .addPlugin(new ESLintPlugin())

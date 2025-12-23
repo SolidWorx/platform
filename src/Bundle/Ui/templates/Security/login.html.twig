@@ -1,9 +1,6 @@
 {% extends '@Ui/Layout/security.html.twig' %}
 
 {% block content %}
-    {% block app_logo %}
-    {% endblock app_logo %}
-
     {% if error %}
         <div class="alert alert-danger alert-dismissible" role="alert">
             <div class="alert-icon">
@@ -22,17 +19,23 @@
 
             <form action="{{ options.check_path starts with '/' ? options.check_path : url(options.check_path) }}" method="post" {{ stimulus_action('@solidworx/platform/loading', 'onSubmit', 'submit') }} role="form">
                 <div class="mb-3">
+
                     <label class="form-label">{{ 'Email address'|trans }}</label>
-                    <input
-                            type="email"
-                            class="form-control"
-                            placeholder="your@email.com"
-                            autocomplete="username"
-                            required
-                            autofocus
-                            value="{{ last_username }}"
-                            name="{{ options.username_parameter }}"
-                    />
+                    <div class="input-group input-group-flat">
+                        <div class="input-group-text">
+                            {{ ux_icon('tabler:mail', {width: 24, height: 24}) }}
+                        </div>
+                        <input
+                                type="email"
+                                class="form-control"
+                                placeholder="your@email.com"
+                                autocomplete="username"
+                                required
+                                autofocus
+                                value="{{ last_username }}"
+                                name="{{ options.username_parameter }}"
+                        />
+                    </div>
                 </div>
                 <div class="mb-2">
                     <label class="form-label">
@@ -42,6 +45,11 @@
                         </span>#}
                     </label>
                     <div class="input-group input-group-flat" {{ stimulus_controller('password-visibility', controllerClasses = { 'hidden': 'd-none' }) }}>
+
+                        <div class="input-group-text">
+                            {{ ux_icon('tabler:password', {width: 24, height: 24}) }}
+                        </div>
+
                         <input
                                 type="password"
                                 class="form-control"
@@ -52,15 +60,16 @@
                                 {{ stimulus_target('password-visibility', 'input') }}
                         />
                         <span class="input-group-text">
-                            <a href="#" class="link-secondary" data-bs-toggle="tooltip" aria-label="Show password" data-bs-original-title="Show password" {{ stimulus_action('password-visibility', 'toggle') }}>
-                                <span {{ stimulus_target('password-visibility', 'icon') }}>
-                                    {{ ux_icon('tabler:eye', {width: 24, height: 24}) }}
-                                </span>
-                                <span {{ stimulus_target('password-visibility', 'icon') }} class="d-none">
-                                    {{ ux_icon('tabler:eye-closed', {width: 24, height: 24}) }}
-                                </span>
-                            </a>
-                        </span>
+                                <a href="#" class="link-secondary" data-bs-toggle="tooltip" aria-label="Show password" data-bs-original-title="Show password" {{ stimulus_action('password-visibility', 'toggle') }}>
+                                    <span {{ stimulus_target('password-visibility', 'icon') }}>
+                                        {{ ux_icon('tabler:eye', {width: 24, height: 24}) }}
+                                    </span>
+                                    <span {{ stimulus_target('password-visibility', 'icon') }} class="d-none">
+                                        {{ ux_icon('tabler:eye-closed', {width: 24, height: 24}) }}
+                                    </span>
+                                </a>
+                            </span>
+
                     </div>
                 </div>
                 {% if options.always_remember_me is same as(false) and options.remember_me_parameter is not empty %}
@@ -88,6 +97,5 @@
             {# TODO: Add Social Auth Integration #}
         {% endblock social_login %}
     </div>
-    <div class="text-center text-secondary mt-3">Don't have account yet? <a href="./sign-up.html" tabindex="-1">Sign up</a></div>
 {% endblock content %}
 

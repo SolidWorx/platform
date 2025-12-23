@@ -22,7 +22,7 @@ class Configuration implements ConfigurationInterface
     #[Override]
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder('solidworx_platform');
+        $treeBuilder = new TreeBuilder('solid_worx_platform');
 
         $rootNode = $treeBuilder->getRootNode();
 
