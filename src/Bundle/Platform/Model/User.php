@@ -75,6 +75,9 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'roles', type: 'array')]
     protected array $roles = [];
 
+    #[ORM\Column(name: 'google_id', type: Types::STRING, length: 45, nullable: true)]
+    private ?string $googleId = null;
+
     public function __construct()
     {
         $this->id = new NilUlid();
