@@ -1,0 +1,80 @@
+{% props
+    title = '',
+    subtitle = '',
+    status = '',
+    statusPosition = 'top',
+    stacked = false,
+    borderless = false,
+    size = '',
+    hover = false,
+    inactive = false,
+    rotate = ''
+%}
+
+{% set card = cva({
+    base: 'card',
+    variants: {
+        stacked: {
+            true: 'card-stacked',
+        },
+        borderless: {
+            true: 'card-borderless',
+        },
+        size: {
+            sm: 'card-sm',
+            md: 'card-md',
+            lg: 'card-lg',
+        },
+        hover: {
+            true: 'card-link',
+        },
+        inactive: {
+            true: 'card-inactive',
+        },
+        rotate: {
+            left: 'card-rotate-left',
+            right: 'card-rotate-right',
+        }
+    }
+}) %}
+
+{% set statusClass = '' %}
+{% if status is not empty %}
+    {% set statusPositionSuffix = statusPosition == 'start' ? '-start' : (statusPosition == 'bottom' ? '-bottom' : '-top') %}
+    {% set statusClass = 'card-status' ~ statusPositionSuffix ~ ' bg-' ~ status %}
+{% endif %}
+
+<div {{ attributes }} class="{{ card.apply({stacked, borderless, size, hover, inactive, rotate}, attributes.render('class')) }}">
+    {% if status is not empty %}
+        <div class="{{ statusClass }}"></div>
+    {% endif %}
+
+    {% block full_content %}
+        {% if block('header') is defined and block('header') is not empty %}
+            <div class="card-header">
+                {% block header %}{% endblock %}
+            </div>
+        {% elseif title is not empty or subtitle is not empty %}
+            <div class="card-header">
+                {% if title is not empty %}
+                    <h3 class="card-title">{{ title }}</h3>
+                {% endif %}
+                {% if subtitle is not empty %}
+                    <p class="card-subtitle">{{ subtitle }}</p>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <div class="card-body">
+            {% block body %}
+                {% block content %}{% endblock %}
+            {% endblock %}
+        </div>
+
+        {% if block('footer') is defined and block('footer') is not empty %}
+            <div class="card-footer">
+                {% block footer %}{% endblock %}
+            </div>
+        {% endif %}
+    {% endblock %}
+</div>
