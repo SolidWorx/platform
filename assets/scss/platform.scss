@@ -1,6 +1,12 @@
-$prefix: 'swp-';
-$nav-link-font-size: 1.2rem;
-$font-sans-serif: 'Inter', sans-serif;
+// Import user custom variables if provided via webpack
+// This is injected by webpack's sass-loader additionalData option
+// Users can override any Bootstrap/Tabler variables before they are defined
+
+// Default platform variables (can be overridden by custom variables)
+$prefix: 'swp-' !default;
+$nav-link-font-size: 1.2rem !default;
+$font-sans-serif: 'Inter', sans-serif !default;
+$enable-deprecation-messages: false !default;
 
 @import '@tabler/core';
 @import '@tabler/core/scss/vendor/tom-select';

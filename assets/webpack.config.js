@@ -9,9 +9,15 @@ if (!Encore.isRuntimeEnvironmentConfigured()) {
 
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 //we need to change up how __dirname is used for ES6 purposes
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Allow users to override CSS variables by providing a custom variables file
+// Set the SOLIDWORX_PLATFORM_CUSTOM_STYLE_VARIABLES environment variable or create a _variables.scss file
+const customVariablesPath = process.env.SOLIDWORX_PLATFORM_CUSTOM_STYLE_VARIABLES || path.join(process.cwd(), 'assets/scss/_variables.scss');
+const hasCustomVariables = fs.existsSync(customVariablesPath);
 
 Encore
     // directory where compiled assets will be stored
@@ -21,17 +27,18 @@ Encore
 
     .addEntry('_platform_ui', __dirname + '/core.ts')
 
-    /*.addStyleEntry('app', './assets/scss/app.scss')
-    .addStyleEntry('email', './assets/scss/email.scss')
-    .addStyleEntry('pdf', './assets/scss/pdf.scss')*/
-
     .enableSingleRuntimeChunk()
     .splitEntryChunks()
     .cleanupOutputBeforeBuild()
     .enableSourceMaps(!Encore.isProduction())
     .enableVersioning(Encore.isProduction())
 
-    .enableSassLoader()
+    .enableSassLoader((options) => {
+        if (hasCustomVariables) {
+            // Inject custom variables before all SCSS imports
+            options.additionalData = `@import "${customVariablesPath}";`;
+        }
+    })
     .autoProvidejQuery()
 
     //.enableStimulusBridge(process.cwd() + '/assets/controllers.json')
