@@ -16,7 +16,7 @@ use function is_subclass_of;
 use function sprintf;
 
 /**
- * @extends EntityRepository<User>
+ * @template-extends EntityRepository
  */
 class UserRepository extends EntityRepository implements UserRepositoryInterface, UserLoaderInterface
 {
