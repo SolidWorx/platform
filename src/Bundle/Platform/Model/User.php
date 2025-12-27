@@ -88,14 +88,14 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->mobile;
     }
 
-    public function setMobile(string $mobile): self
+    public function setMobile(string $mobile): static
     {
         $this->mobile = $mobile;
 
         return $this;
     }
 
-    public function addRole(string $role): self
+    public function addRole(string $role): static
     {
         $role = strtoupper($role);
         if ('ROLE_USER' === $role) {
@@ -161,7 +161,7 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->verified;
     }
 
-    public function removeRole(string $role): self
+    public function removeRole(string $role): static
     {
         if (false !== $key = array_search(strtoupper($role), $this->roles, true)) {
             unset($this->roles[$key]);
@@ -171,35 +171,35 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function setEmail(string $email): self
+    public function setEmail(string $email): static
     {
         $this->email = $email;
 
         return $this;
     }
 
-    public function setEnabled(bool $enabled): self
+    public function setEnabled(bool $enabled): static
     {
         $this->enabled = $enabled;
 
         return $this;
     }
 
-    public function setVerified(bool $verified): self
+    public function setVerified(bool $verified): static
     {
         $this->verified = $verified;
 
         return $this;
     }
 
-    public function setPassword(string $password): self
+    public function setPassword(string $password): static
     {
         $this->password = $password;
 
         return $this;
     }
 
-    public function setLastLogin(?DateTimeInterface $time = null): self
+    public function setLastLogin(?DateTimeInterface $time = null): static
     {
         $this->lastLogin = $time;
 
@@ -209,7 +209,7 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @param string[] $roles
      */
-    public function setRoles(array $roles): self
+    public function setRoles(array $roles): static
     {
         $this->roles = [];
 
@@ -225,7 +225,7 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->googleId;
     }
 
-    public function setGoogleId(?string $googleId): self
+    public function setGoogleId(?string $googleId): static
     {
         $this->googleId = $googleId;
 
