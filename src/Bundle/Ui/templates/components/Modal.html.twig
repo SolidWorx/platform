@@ -1,54 +1,91 @@
 {% props
     show = false,
     title = '',
-    id = random()
+    id = random(),
+    size = '',
+    centered = false,
+    scrollable = false,
+    staticBackdrop = false,
+    closeable = true,
+    status = ''
 %}
 
-{% set modal = html_cva(
-    base: 'modal in',
+{% set modal = cva({
+    base: 'modal',
     variants: {
         show: {
             true: 'show',
             false: 'fade',
         }
-    },
-) %}
+    }
+}) %}
+
+{% set dialog = cva({
+    base: 'modal-dialog',
+    variants: {
+        size: {
+            sm: 'modal-sm',
+            lg: 'modal-lg',
+            xl: 'modal-xl',
+            full: 'modal-fullscreen',
+        },
+        centered: {
+            true: 'modal-dialog-centered',
+        },
+        scrollable: {
+            true: 'modal-dialog-scrollable',
+        }
+    }
+}) %}
 
 {% set headerBlock = '' %}
 {% if title is not empty %}
     {% set headerBlock %}
-        <h5>{{ title|trans }}</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
+        <h5 class="modal-title">{{ title|trans }}</h5>
+        {% if closeable %}
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        {% endif %}
     {% endset %}
+{% endif %}
+
+{% set statusClass = '' %}
+{% if status is not empty %}
+    {% set statusClass = 'modal-status bg-' ~ status %}
 {% endif %}
 
 <div
     {{ attributes }}
     class="{{ modal.apply({show}, attributes.render('class')) }}"
     tabindex="-1"
-    aria-hidden="true"
+    aria-hidden="{{ show ? 'false' : 'true' }}"
+    aria-labelledby="{{ id }}-title"
     id="{{ id }}"
+    {% if staticBackdrop %}data-bs-backdrop="static" data-bs-keyboard="false"{% endif %}
     {{ stimulus_controller('@solidworx/platform/modal') }}
 >
-    <div class="modal-dialog">
+    <div class="{{ dialog.apply({size, centered, scrollable}) }}">
         <div class="modal-content">
+            {% if status is not empty %}
+                <div class="{{ statusClass }}"></div>
+            {% endif %}
+
             {% block full_content %}
                 {% if headerBlock is not empty or block('header') is not empty %}
                     <div class="modal-header">
                         {% block header %}
-                            {{ headerBlock }}
+                            {{ headerBlock|raw }}
                         {% endblock header %}
                     </div>
                 {% endif %}
 
                 <div class="modal-body">
-                    {% block body %}{% endblock %}
+                    {% block body %}
+                        {% block content %}{% endblock %}
+                    {% endblock %}
                 </div>
 
-                {% if block('footer') %}
-                    <div class="modal-footer justify-content-between">
+                {% if block('footer') is defined and block('footer') is not empty %}
+                    <div class="modal-footer">
                         {% block footer %}{% endblock %}
                     </div>
                 {% endif %}

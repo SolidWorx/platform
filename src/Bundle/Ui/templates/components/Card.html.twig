@@ -8,7 +8,17 @@
     size = '',
     hover = false,
     inactive = false,
-    rotate = ''
+    rotate = '',
+    image = '',
+    imagePosition = 'top',
+    imageAlt = '',
+    stamp = '',
+    stampColor = 'secondary',
+    progress = null,
+    progressColor = 'primary',
+    ribbon = '',
+    ribbonColor = 'primary',
+    ribbonPosition = ''
 %}
 
 {% set card = cva({
@@ -44,12 +54,35 @@
     {% set statusClass = 'card-status' ~ statusPositionSuffix ~ ' bg-' ~ status %}
 {% endif %}
 
+{% set ribbonClass = 'ribbon bg-' ~ ribbonColor %}
+{% if ribbonPosition is not empty %}
+    {% set ribbonClass = ribbonClass ~ ' ribbon-' ~ ribbonPosition %}
+{% endif %}
+
 <div {{ attributes }} class="{{ card.apply({stacked, borderless, size, hover, inactive, rotate}, attributes.render('class')) }}">
     {% if status is not empty %}
         <div class="{{ statusClass }}"></div>
     {% endif %}
 
+    {% if ribbon is not empty %}
+        <div class="{{ ribbonClass }}">{{ ribbon }}</div>
+    {% endif %}
+
     {% block full_content %}
+        {# Image at top position #}
+        {% if image is not empty and imagePosition == 'top' %}
+            <img src="{{ image }}" class="card-img-top" alt="{{ imageAlt }}">
+        {% endif %}
+
+        {# Stamp #}
+        {% if stamp is not empty %}
+            <div class="card-stamp">
+                <div class="card-stamp-icon bg-{{ stampColor }}">
+                    {{ ux_icon(stamp, {class: 'icon'}) }}
+                </div>
+            </div>
+        {% endif %}
+
         {% if block('header') is defined and block('header') is not empty %}
             <div class="card-header">
                 {% block header %}{% endblock %}
@@ -65,16 +98,41 @@
             </div>
         {% endif %}
 
-        <div class="card-body">
-            {% block body %}
-                {% block content %}{% endblock %}
-            {% endblock %}
-        </div>
+        {# Image as overlay #}
+        {% if image is not empty and imagePosition == 'overlay' %}
+            <div class="card-img-overlay d-flex align-items-end" style="background-image: url({{ image }})">
+                <div class="card-body">
+                    {% block body %}
+                        {% block content %}{% endblock %}
+                    {% endblock %}
+                </div>
+            </div>
+        {% else %}
+            <div class="card-body">
+                {% block body %}
+                    {% block content %}{% endblock %}
+                {% endblock %}
+            </div>
+        {% endif %}
+
+        {# Progress bar #}
+        {% if progress is not null %}
+            <div class="progress progress-sm card-progress">
+                <div class="progress-bar bg-{{ progressColor }}" style="width: {{ progress }}%" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100">
+                    <span class="visually-hidden">{{ progress }}% Complete</span>
+                </div>
+            </div>
+        {% endif %}
 
         {% if block('footer') is defined and block('footer') is not empty %}
             <div class="card-footer">
                 {% block footer %}{% endblock %}
             </div>
+        {% endif %}
+
+        {# Image at bottom position #}
+        {% if image is not empty and imagePosition == 'bottom' %}
+            <img src="{{ image }}" class="card-img-bottom" alt="{{ imageAlt }}">
         {% endif %}
     {% endblock %}
 </div>

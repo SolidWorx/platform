@@ -3,13 +3,17 @@
     dismissible = false,
     important = false,
     title = '',
-    icon = ''
+    icon = '',
+    avatar = '',
+    link = ''
 %}
 
 {% set alert = cva({
-    base: 'alert ',
+    base: 'alert',
     variants: {
         type: {
+            primary: 'alert-primary',
+            secondary: 'alert-secondary',
             success: 'alert-success',
             info: 'alert-info',
             warning: 'alert-warning',
@@ -20,6 +24,9 @@
         },
         important: {
             true: 'alert-important',
+        },
+        link: {
+            true: 'alert-link',
         }
     },
     defaultVariants: {
@@ -27,14 +34,23 @@
     }
 }) %}
 
-<div {{ attributes }} class="{{ alert.apply({type, dismissible, important}, attributes.render('class')) }}" role="alert">
+{% set isLink = link is not empty %}
+{% set tag = isLink ? 'a' : 'div' %}
+
+<{{ tag }} {{ attributes }}
+    class="{{ alert.apply({type, dismissible, important, link: isLink}, attributes.render('class')) }}"
+    role="alert"
+    {% if isLink %}href="{{ link }}"{% endif %}
+>
     <div class="d-flex">
-        {% if icon is not empty %}
+        {% if avatar is not empty %}
+            <span class="avatar float-start me-3" style="background-image: url({{ avatar }})"></span>
+        {% elseif icon is not empty %}
             <div class="alert-icon">
-                {#{{ ux_icon('tabler:' ~ icon) }}#}
+                {{ ux_icon(icon, {class: 'icon'}) }}
             </div>
         {% endif %}
-        <div>
+        <div class="flex-fill">
             {% if title is not empty %}
                 <h4 class="alert-title">{{ title }}</h4>
             {% endif %}
@@ -42,12 +58,12 @@
             <div {{ html_classes({
                 'text-body-secondary': not important,
             }) }}>
-                {{ block('content') }}
+                {% block content %}{% endblock %}
             </div>
-
-            {% if dismissible %}
-                <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
-            {% endif %}
         </div>
+
+        {% if dismissible %}
+            <a class="btn-close" data-bs-dismiss="alert" aria-label="Close"></a>
+        {% endif %}
     </div>
-</div>
+</{{ tag }}>
