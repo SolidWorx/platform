@@ -98,22 +98,20 @@
             </div>
         {% endif %}
 
-        {# Image as overlay #}
-        {% if image is not empty and imagePosition == 'overlay' %}
-            <div class="card-img-overlay d-flex align-items-end" style="background-image: url({{ image }})">
-                <div class="card-body">
-                    {% block body %}
-                        {% block content %}{% endblock %}
-                    {% endblock %}
+        {# Image as overlay or regular body #}
+        {% block body %}
+            {% if image is not empty and imagePosition == 'overlay' %}
+                <div class="card-img-overlay d-flex align-items-end" style="background-image: url({{ image }})">
+                    <div class="card-body">
+                        {{ block('content') }}
+                    </div>
                 </div>
-            </div>
-        {% else %}
-            <div class="card-body">
-                {% block body %}
-                    {% block content %}{% endblock %}
-                {% endblock %}
-            </div>
-        {% endif %}
+            {% else %}
+                <div class="card-body">
+                    {{ block('content') }}
+                </div>
+            {% endif %}
+        {% endblock %}
 
         {# Progress bar #}
         {% if progress is not null %}

@@ -61,7 +61,7 @@ final readonly class PlatformConfig
         return new self($config);
     }
 
-    public function registerBundle(string $bundleClass, callable $bundleConfig = null): self
+    public function registerBundle(string $bundleClass, ?callable $bundleConfig = null): self
     {
         $config = $this->config;
         $bundles = $config['bundles'] ?? [];
