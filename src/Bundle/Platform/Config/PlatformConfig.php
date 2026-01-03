@@ -18,11 +18,21 @@ use function explode;
 
 final readonly class PlatformConfig
 {
-
     private string $name;
+
     private string $version;
+
     private array $models;
+
     private array $templates;
+
+    /**
+     * @param array<string, mixed> $config
+     */
+    public function __construct(
+        private array $config
+    ) {
+    }
 
     public static function create(): self
     {
@@ -69,14 +79,6 @@ final readonly class PlatformConfig
         $config['bundles'] = $bundles;
 
         return new self($config);
-    }
-
-    /**
-     * @param array<string, mixed> $config
-     */
-    public function __construct(
-        private array $config
-    ) {
     }
 
     public function get(string $key, mixed $default = null): mixed

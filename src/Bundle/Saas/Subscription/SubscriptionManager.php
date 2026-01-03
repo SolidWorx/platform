@@ -16,6 +16,7 @@ namespace SolidWorx\Platform\SaasBundle\Subscription;
 use Carbon\CarbonImmutable;
 use DateTime;
 use DateTimeInterface;
+use Override;
 use SolidWorx\Platform\SaasBundle\Entity\Plan;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Enum\SubscriptionStatus;
@@ -28,7 +29,7 @@ use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
 use Symfony\Component\Uid\Ulid;
 use function get_debug_type;
 
-final readonly class SubscriptionManager
+final readonly class SubscriptionManager implements SubscriptionProviderInterface
 {
     public function __construct(
         private SubscriptionRepository $subscriptionRepository,
@@ -37,6 +38,7 @@ final readonly class SubscriptionManager
     ) {
     }
 
+    #[Override]
     public function getSubscriptionFor(SubscribableInterface $subscriber): ?Subscription
     {
         return $this->subscriptionRepository->findOneBy([

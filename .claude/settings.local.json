@@ -3,7 +3,11 @@
     "allow": [
       "Bash(ls:*)",
       "Bash(xargs:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(cat:*)",
+      "Bash(vendor/bin/ecs:*)",
+      "Bash(vendor/bin/phpstan:*)",
+      "Bash(vendor/bin/phpunit:*)"
     ]
   }
 }

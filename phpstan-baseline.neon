@@ -1,9 +1,114 @@
 parameters:
 	ignoreErrors:
 		-
+			message: "#^Cannot access offset string on mixed\\.$#"
+			count: 3
+			path: src/Bundle/Platform/Config/PlatformConfig.php
+
+		-
+			message: "#^Class SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig has an uninitialized readonly property \\$models\\. Assign it in the constructor\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Config/PlatformConfig.php
+
+		-
+			message: "#^Class SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig has an uninitialized readonly property \\$name\\. Assign it in the constructor\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Config/PlatformConfig.php
+
+		-
+			message: "#^Class SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig has an uninitialized readonly property \\$templates\\. Assign it in the constructor\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Config/PlatformConfig.php
+
+		-
+			message: "#^Class SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig has an uninitialized readonly property \\$version\\. Assign it in the constructor\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Config/PlatformConfig.php
+
+		-
+			message: "#^Method SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\:\\:toArray\\(\\) should return array\\<string, bool\\|float\\|int\\|string\\> but returns array\\<string, mixed\\>\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Config/PlatformConfig.php
+
+		-
 			message: "#^Parameter \\#2 \\$array of function array_key_exists expects array, mixed given\\.$#"
 			count: 1
 			path: src/Bundle/Platform/Config/PlatformConfig.php
+
+		-
+			message: "#^Property SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\:\\:\\$models is unused\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Config/PlatformConfig.php
+
+		-
+			message: "#^Property SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\:\\:\\$models type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Config/PlatformConfig.php
+
+		-
+			message: "#^Property SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\:\\:\\$name is unused\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Config/PlatformConfig.php
+
+		-
+			message: "#^Property SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\:\\:\\$templates is unused\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Config/PlatformConfig.php
+
+		-
+			message: "#^Property SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\:\\:\\$templates type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Config/PlatformConfig.php
+
+		-
+			message: "#^Property SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\:\\:\\$version is unused\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Config/PlatformConfig.php
+
+		-
+			message: "#^Argument of an invalid type array\\|bool\\|float\\|int\\|string\\|null supplied for foreach, only iterables are supported\\.$#"
+			count: 1
+			path: src/Bundle/Platform/DependencyInjection/CompilerPass/AuthenticationCompilerPass.php
+
+		-
+			message: "#^Binary operation \"\\+\" between mixed and array\\{remember_me_parameter\\: null, always_remember_me\\: false\\} results in an error\\.$#"
+			count: 1
+			path: src/Bundle/Platform/DependencyInjection/CompilerPass/AuthenticationCompilerPass.php
+
+		-
+			message: "#^Cannot access offset 'always_remember_me' on mixed\\.$#"
+			count: 1
+			path: src/Bundle/Platform/DependencyInjection/CompilerPass/AuthenticationCompilerPass.php
+
+		-
+			message: "#^Cannot access offset 'remember_me…' on mixed\\.$#"
+			count: 1
+			path: src/Bundle/Platform/DependencyInjection/CompilerPass/AuthenticationCompilerPass.php
+
+		-
+			message: "#^Call to method accessControl\\(\\) on an unknown class Symfony\\\\Config\\\\SecurityConfig\\.$#"
+			count: 1
+			path: src/Bundle/Platform/DependencyInjection/Extension/LoginExtension.php
+
+		-
+			message: "#^Call to method firewall\\(\\) on an unknown class Symfony\\\\Config\\\\SecurityConfig\\.$#"
+			count: 1
+			path: src/Bundle/Platform/DependencyInjection/Extension/LoginExtension.php
+
+		-
+			message: "#^Call to method passwordHasher\\(\\) on an unknown class Symfony\\\\Config\\\\SecurityConfig\\.$#"
+			count: 1
+			path: src/Bundle/Platform/DependencyInjection/Extension/LoginExtension.php
+
+		-
+			message: "#^Method SolidWorx\\\\Platform\\\\PlatformBundle\\\\DependencyInjection\\\\Extension\\\\LoginExtension\\:\\:configureDefaultFormLogin\\(\\) has invalid return type Symfony\\\\Config\\\\Security\\\\FirewallConfig\\.$#"
+			count: 1
+			path: src/Bundle/Platform/DependencyInjection/Extension/LoginExtension.php
+
+		-
+			message: "#^Parameter \\$config of method SolidWorx\\\\Platform\\\\PlatformBundle\\\\DependencyInjection\\\\Extension\\\\LoginExtension\\:\\:configureDefaultFormLogin\\(\\) has invalid type Symfony\\\\Config\\\\SecurityConfig\\.$#"
+			count: 1
+			path: src/Bundle/Platform/DependencyInjection/Extension/LoginExtension.php
 
 		-
 			message: "#^Call to method path\\(\\) on an unknown class Symfony\\\\Config\\\\Security\\\\AccessControlConfig\\.$#"
@@ -31,9 +136,59 @@ parameters:
 			path: src/Bundle/Platform/DependencyInjection/Extension/TwoFactorExtension.php
 
 		-
+			message: "#^Only booleans are allowed in a negated boolean, mixed given\\.$#"
+			count: 1
+			path: src/Bundle/Platform/DependencyInjection/PlatformExtension.php
+
+		-
 			message: "#^Parameter \\#2 \\$config of static method SolidWorx\\\\Platform\\\\PlatformBundle\\\\DependencyInjection\\\\Extension\\\\TwoFactorExtension\\:\\:enable\\(\\) expects array\\{name\\: string, base_template\\: string\\}, array\\{name\\: mixed, base_template\\: mixed\\} given\\.$#"
 			count: 1
 			path: src/Bundle/Platform/DependencyInjection/PlatformExtension.php
+
+		-
+			message: "#^Parameter \\#2 \\$configurator of method Symfony\\\\Component\\\\DependencyInjection\\\\ContainerBuilder\\:\\:registerAttributeForAutoconfiguration\\(\\) expects callable\\(Symfony\\\\Component\\\\DependencyInjection\\\\ChildDefinition, SolidWorx\\\\Platform\\\\PlatformBundle\\\\Attributes\\\\Menu\\\\MenuBuilder, Reflector\\)\\: void, Closure\\(Symfony\\\\Component\\\\DependencyInjection\\\\ChildDefinition, SolidWorx\\\\Platform\\\\PlatformBundle\\\\Attributes\\\\Menu\\\\MenuBuilder, ReflectionMethod\\)\\: void given\\.$#"
+			count: 1
+			path: src/Bundle/Platform/DependencyInjection/PlatformExtension.php
+
+		-
+			message: "#^Parameter \\#2 \\$value of method Symfony\\\\Component\\\\DependencyInjection\\\\Container\\:\\:setParameter\\(\\) expects array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null, mixed given\\.$#"
+			count: 1
+			path: src/Bundle/Platform/DependencyInjection/PlatformExtension.php
+
+		-
+			message: "#^Using nullsafe method call on non\\-nullable type SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\. Use \\-\\> instead\\.$#"
+			count: 2
+			path: src/Bundle/Platform/DependencyInjection/PlatformExtension.php
+
+		-
+			message: "#^Only booleans are allowed in a negated boolean, mixed given\\.$#"
+			count: 1
+			path: src/Bundle/Platform/DependencyInjection/SolidWorxPlatformExtension.php
+
+		-
+			message: "#^Parameter \\#2 \\$config of static method SolidWorx\\\\Platform\\\\PlatformBundle\\\\DependencyInjection\\\\Extension\\\\TwoFactorExtension\\:\\:enable\\(\\) expects array\\{name\\: string, base_template\\: string\\}, array\\{name\\: mixed, base_template\\: mixed\\} given\\.$#"
+			count: 1
+			path: src/Bundle/Platform/DependencyInjection/SolidWorxPlatformExtension.php
+
+		-
+			message: "#^Parameter \\#2 \\$configurator of method Symfony\\\\Component\\\\DependencyInjection\\\\ContainerBuilder\\:\\:registerAttributeForAutoconfiguration\\(\\) expects callable\\(Symfony\\\\Component\\\\DependencyInjection\\\\ChildDefinition, SolidWorx\\\\Platform\\\\PlatformBundle\\\\Attributes\\\\Menu\\\\MenuBuilder, Reflector\\)\\: void, Closure\\(Symfony\\\\Component\\\\DependencyInjection\\\\ChildDefinition, SolidWorx\\\\Platform\\\\PlatformBundle\\\\Attributes\\\\Menu\\\\MenuBuilder, ReflectionMethod\\)\\: void given\\.$#"
+			count: 1
+			path: src/Bundle/Platform/DependencyInjection/SolidWorxPlatformExtension.php
+
+		-
+			message: "#^Parameter \\#2 \\$value of method Symfony\\\\Component\\\\DependencyInjection\\\\Container\\:\\:setParameter\\(\\) expects array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null, mixed given\\.$#"
+			count: 1
+			path: src/Bundle/Platform/DependencyInjection/SolidWorxPlatformExtension.php
+
+		-
+			message: "#^Using nullsafe method call on non\\-nullable type SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\. Use \\-\\> instead\\.$#"
+			count: 5
+			path: src/Bundle/Platform/DependencyInjection/SolidWorxPlatformExtension.php
+
+		-
+			message: "#^Parameter \\#1 \\$child of method Symfony\\\\Component\\\\Form\\\\FormBuilderInterface\\<array\\<string, string\\|null\\>\\|null\\>\\:\\:add\\(\\) expects string\\|Symfony\\\\Component\\\\Form\\\\FormBuilderInterface, mixed given\\.$#"
+			count: 2
+			path: src/Bundle/Platform/Form/Type/Security/LoginType.php
 
 		-
 			message: "#^Cannot cast mixed to string\\.$#"
@@ -46,7 +201,7 @@ parameters:
 			path: src/Bundle/Platform/Kernel.php
 
 		-
-			message: "#^PHPDoc tag @var for property SolidWorx\\\\Platform\\\\PlatformBundle\\\\Kernel\\:\\:\\$platformConfig with type mixed is not subtype of native type SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\.$#"
+			message: "#^Parameter \\#1 \\$platformConfig of class SolidWorx\\\\Platform\\\\PlatformBundle\\\\SolidWorxPlatformBundle constructor expects SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig, SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\|null given\\.$#"
 			count: 1
 			path: src/Bundle/Platform/Kernel.php
 
@@ -61,9 +216,94 @@ parameters:
 			path: src/Bundle/Platform/Kernel.php
 
 		-
-			message: "#^Trait SolidWorx\\\\Platform\\\\PlatformBundle\\\\Security\\\\TwoFactor\\\\Traits\\\\UserTwoFactor is used zero times and is not analysed\\.$#"
+			message: "#^Method SolidWorx\\\\Platform\\\\PlatformBundle\\\\Menu\\\\Options\\:\\:route\\(\\) has parameter \\$parameters with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: src/Bundle/Platform/Security/TwoFactor/Traits/UserTwoFactor.php
+			path: src/Bundle/Platform/Menu/Options.php
+
+		-
+			message: "#^Only booleans are allowed in &&, mixed given on the left side\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Menu/Provider.php
+
+		-
+			message: "#^Parameter \\#2 \\$priority of method SplPriorityQueue\\<int,callable\\>\\:\\:insert\\(\\) expects int, array\\<int, int\\> given\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Menu/Provider.php
+
+		-
+			message: "#^Casting to bool something that's already bool\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Model/User.php
+
+		-
+			message: "#^Method SolidWorx\\\\Platform\\\\PlatformBundle\\\\Model\\\\User\\:\\:__toString\\(\\) should return string but returns string\\|null\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Model/User.php
+
+		-
+			message: "#^Method SolidWorx\\\\Platform\\\\PlatformBundle\\\\Model\\\\User\\:\\:getBackUpCodes\\(\\) does not match interface method name\\: SolidWorx\\\\Platform\\\\PlatformBundle\\\\Contracts\\\\Security\\\\TwoFactor\\\\UserTwoFactorInterface\\:\\:getBackupCodes\\(\\)\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Model/User.php
+
+		-
+			message: "#^Method SolidWorx\\\\Platform\\\\PlatformBundle\\\\Model\\\\User\\:\\:getBackUpCodes\\(\\) should return list\\<string\\> but returns array\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Model/User.php
+
+		-
+			message: "#^Method SolidWorx\\\\Platform\\\\PlatformBundle\\\\Model\\\\User\\:\\:getEmailAuthRecipient\\(\\) should return string but returns string\\|null\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Model/User.php
+
+		-
+			message: "#^Method SolidWorx\\\\Platform\\\\PlatformBundle\\\\Model\\\\User\\:\\:getTotpAuthenticationUsername\\(\\) should return string but returns string\\|null\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Model/User.php
+
+		-
+			message: "#^Method SolidWorx\\\\Platform\\\\PlatformBundle\\\\Model\\\\User\\:\\:getUserIdentifier\\(\\) should return non\\-empty\\-string but returns string\\|null\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Model/User.php
+
+		-
+			message: "#^Property SolidWorx\\\\Platform\\\\PlatformBundle\\\\Model\\\\User\\:\\:\\$backupCodes type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Model/User.php
+
+		-
+			message: "#^Method SolidWorx\\\\Platform\\\\PlatformBundle\\\\Repository\\\\UserRepository\\:\\:loadUserByIdentifier\\(\\) should return Symfony\\\\Component\\\\Security\\\\Core\\\\User\\\\UserInterface but returns mixed\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Repository/UserRepository.php
+
+		-
+			message: "#^Parameter \\#1 \\$identifier of method SolidWorx\\\\Platform\\\\PlatformBundle\\\\Repository\\\\UserRepository\\<T\\>\\:\\:loadUserByIdentifier\\(\\) expects string, string\\|null given\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Repository/UserRepository.php
+
+		-
+			message: "#^Parameter \\#2 \\$entityClass of method Doctrine\\\\Bundle\\\\DoctrineBundle\\\\Repository\\\\LazyServiceEntityRepository\\<T\\>\\:\\:__construct\\(\\) expects class\\-string\\<T of object\\>, string\\|null given\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Repository/UserRepository.php
+
+		-
+			message: "#^Type mixed in generic type SolidWorx\\\\Platform\\\\PlatformBundle\\\\Repository\\\\EntityRepository\\<mixed\\> in PHPDoc tag @extends is not subtype of template type T of object of class SolidWorx\\\\Platform\\\\PlatformBundle\\\\Repository\\\\EntityRepository\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Repository/UserRepository.php
+
+		-
+			message: "#^Method SolidWorx\\\\Platform\\\\PlatformBundle\\\\Routing\\\\LoginPageRouteLoader\\:\\:__construct\\(\\) has parameter \\$authenticators with no value type specified in iterable type iterable\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Routing/LoginPageRouteLoader.php
+
+		-
+			message: "#^Method SolidWorx\\\\Platform\\\\PlatformBundle\\\\SolidWorxPlatformBundle\\:\\:createContainerExtension\\(\\) never returns null so it can be removed from the return type\\.$#"
+			count: 1
+			path: src/Bundle/Platform/SolidWorxPlatformBundle.php
+
+		-
+			message: "#^Method SolidWorx\\\\Platform\\\\PlatformBundle\\\\SolidWorxPlatformBundle\\:\\:createContainerExtension\\(\\) should return Symfony\\\\Component\\\\DependencyInjection\\\\Extension\\\\ExtensionInterface\\|null but returns object\\.$#"
+			count: 1
+			path: src/Bundle/Platform/SolidWorxPlatformBundle.php
 
 		-
 			message: "#^Cannot access offset 'secret' on mixed\\.$#"
@@ -112,11 +352,6 @@ parameters:
 
 		-
 			message: "#^Cannot call method getSubscriptionId\\(\\) on mixed\\.$#"
-			count: 1
-			path: src/Bundle/Saas/Console/Command/SubscriptionListCommand.php
-
-		-
-			message: "#^Cannot cast mixed to int\\.$#"
 			count: 1
 			path: src/Bundle/Saas/Console/Command/SubscriptionListCommand.php
 
@@ -211,6 +446,11 @@ parameters:
 			path: src/Bundle/Saas/EventSubscriber/SubscriptionEventSubscriber.php
 
 		-
+			message: "#^Call to an undefined method Symfony\\\\Contracts\\\\Cache\\\\CacheInterface\\:\\:clear\\(\\)\\.$#"
+			count: 1
+			path: src/Bundle/Saas/Feature/PlanFeatureManager.php
+
+		-
 			message: "#^Method SolidWorx\\\\Platform\\\\SaasBundle\\\\Integration\\\\Options\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: src/Bundle/Saas/Integration/Options.php
@@ -221,7 +461,72 @@ parameters:
 			path: src/Bundle/Saas/Integration/Options.php
 
 		-
-			message: "#^PHPDoc tag @var for variable \\$event contains unresolvable type\\.$#"
+			message: "#^Access to an undefined property SolidWorx\\\\Platform\\\\SaasBundle\\\\RemoteEvent\\\\SubscriptionPaymentRemoteEvent\\|SolidWorx\\\\Platform\\\\SaasBundle\\\\RemoteEvent\\\\SubscriptionRemoteEvent\\:\\:\\$subscription\\.$#"
+			count: 8
+			path: src/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumer.php
+
+		-
+			message: "#^Access to an undefined property SolidWorx\\\\Platform\\\\SaasBundle\\\\RemoteEvent\\\\SubscriptionPaymentRemoteEvent\\|SolidWorx\\\\Platform\\\\SaasBundle\\\\RemoteEvent\\\\SubscriptionRemoteEvent\\:\\:\\$subscriptionInvoice\\.$#"
+			count: 5
+			path: src/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumer.php
+
+		-
+			message: "#^Match arm comparison between SolidWorx\\\\Platform\\\\SaasBundle\\\\Enum\\\\LemonSqueezy\\\\Event\\:\\:SUBSCRIPTION_PAYMENT_REFUNDED and SolidWorx\\\\Platform\\\\SaasBundle\\\\Enum\\\\LemonSqueezy\\\\Event\\:\\:SUBSCRIPTION_PAYMENT_REFUNDED is always true\\.$#"
+			count: 1
+			path: src/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumer.php
+
+		-
+			message: "#^Parameter \\#3 \\$subscription of class SolidWorx\\\\Platform\\\\SaasBundle\\\\Event\\\\SubscriptionCancelledEvent constructor expects SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|null, SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\SubscriptionInvoice\\|null given\\.$#"
+			count: 1
+			path: src/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumer.php
+
+		-
+			message: "#^Parameter \\#3 \\$subscription of class SolidWorx\\\\Platform\\\\SaasBundle\\\\Event\\\\SubscriptionCreatedEvent constructor expects SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|null, SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\SubscriptionInvoice\\|null given\\.$#"
+			count: 1
+			path: src/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumer.php
+
+		-
+			message: "#^Parameter \\#3 \\$subscription of class SolidWorx\\\\Platform\\\\SaasBundle\\\\Event\\\\SubscriptionExpiredEvent constructor expects SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|null, SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\SubscriptionInvoice\\|null given\\.$#"
+			count: 1
+			path: src/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumer.php
+
+		-
+			message: "#^Parameter \\#3 \\$subscription of class SolidWorx\\\\Platform\\\\SaasBundle\\\\Event\\\\SubscriptionPausedEvent constructor expects SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|null, SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\SubscriptionInvoice\\|null given\\.$#"
+			count: 1
+			path: src/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumer.php
+
+		-
+			message: "#^Parameter \\#3 \\$subscription of class SolidWorx\\\\Platform\\\\SaasBundle\\\\Event\\\\SubscriptionResumedEvent constructor expects SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|null, SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\SubscriptionInvoice\\|null given\\.$#"
+			count: 1
+			path: src/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumer.php
+
+		-
+			message: "#^Parameter \\#3 \\$subscription of class SolidWorx\\\\Platform\\\\SaasBundle\\\\Event\\\\SubscriptionUnpausedEvent constructor expects SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|null, SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\SubscriptionInvoice\\|null given\\.$#"
+			count: 1
+			path: src/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumer.php
+
+		-
+			message: "#^Parameter \\#3 \\$subscription of class SolidWorx\\\\Platform\\\\SaasBundle\\\\Event\\\\SubscriptionUpdatedEvent constructor expects SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|null, SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\SubscriptionInvoice\\|null given\\.$#"
+			count: 1
+			path: src/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumer.php
+
+		-
+			message: "#^Parameter \\#3 \\$subscriptionInvoice of class SolidWorx\\\\Platform\\\\SaasBundle\\\\Event\\\\SubscriptionPaymentFailedEvent constructor expects SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\SubscriptionInvoice\\|null, SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\SubscriptionInvoice\\|null given\\.$#"
+			count: 1
+			path: src/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumer.php
+
+		-
+			message: "#^Parameter \\#3 \\$subscriptionInvoice of class SolidWorx\\\\Platform\\\\SaasBundle\\\\Event\\\\SubscriptionPaymentPaidEvent constructor expects SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\SubscriptionInvoice\\|null, SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\SubscriptionInvoice\\|null given\\.$#"
+			count: 1
+			path: src/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumer.php
+
+		-
+			message: "#^Parameter \\#3 \\$subscriptionInvoice of class SolidWorx\\\\Platform\\\\SaasBundle\\\\Event\\\\SubscriptionPaymentRecoveredEvent constructor expects SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\SubscriptionInvoice\\|null, SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\SubscriptionInvoice\\|null given\\.$#"
+			count: 1
+			path: src/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumer.php
+
+		-
+			message: "#^Parameter \\#3 \\$subscriptionInvoice of class SolidWorx\\\\Platform\\\\SaasBundle\\\\Event\\\\SubscriptionPaymentRefundedEvent constructor expects SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\SubscriptionInvoice\\|null, SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\SubscriptionInvoice\\|null given\\.$#"
 			count: 1
 			path: src/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumer.php
 
@@ -251,27 +556,12 @@ parameters:
 			path: src/Bundle/Saas/Repository/PlanRepository.php
 
 		-
-			message: "#^Match expression does not handle remaining value\\: string$#"
-			count: 1
-			path: src/Bundle/Saas/Subscription/SubscriptionManager.php
-
-		-
 			message: "#^Parameter \\#1 \\$plan of class SolidWorx\\\\Platform\\\\SaasBundle\\\\Exception\\\\InvalidPlanException constructor expects string, SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\Plan\\|string\\|Symfony\\\\Component\\\\Uid\\\\Ulid given\\.$#"
 			count: 1
 			path: src/Bundle/Saas/Subscription/SubscriptionManager.php
 
 		-
-			message: "#^Match expression does not handle remaining value\\: class\\-string\\<SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\SubscriptionInvoice\\>$#"
-			count: 1
-			path: src/Bundle/Saas/Webhook/Converter/LemonSqueezyPayloadConverter.php
-
-		-
-			message: "#^Parameter \\#1 \\$eventType of method SolidWorx\\\\Platform\\\\SaasBundle\\\\Webhook\\\\Converter\\\\LemonSqueezyPayloadConverter\\:\\:getMappingClass\\(\\) expects string, mixed given\\.$#"
-			count: 1
-			path: src/Bundle/Saas/Webhook/Converter/LemonSqueezyPayloadConverter.php
-
-		-
-			message: "#^Parameter \\#1 \\$payload \\(array\\{data\\: array\\<string, mixed\\>, meta\\: array\\{event_name\\: string, id\\: string, custom_data\\?\\: array\\{subscription_id\\: string\\}\\}\\}\\) of method SolidWorx\\\\Platform\\\\SaasBundle\\\\Webhook\\\\Converter\\\\LemonSqueezyPayloadConverter\\:\\:convert\\(\\) should be contravariant with parameter \\$payload \\(array\\) of method Symfony\\\\Component\\\\RemoteEvent\\\\PayloadConverterInterface\\:\\:convert\\(\\)$#"
+			message: "#^Method SolidWorx\\\\Platform\\\\SaasBundle\\\\Webhook\\\\Converter\\\\LemonSqueezyPayloadConverter\\:\\:convert\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: src/Bundle/Saas/Webhook/Converter/LemonSqueezyPayloadConverter.php
 
@@ -291,6 +581,16 @@ parameters:
 			path: tests/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumerTest.php
 
 		-
+			message: "#^Dynamic call to static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertInstanceOf\\(\\)\\.$#"
+			count: 1
+			path: tests/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumerTest.php
+
+		-
+			message: "#^Dynamic call to static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertSame\\(\\)\\.$#"
+			count: 6
+			path: tests/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumerTest.php
+
+		-
 			message: "#^Instanceof between \\*NEVER\\* and SolidWorx\\\\Platform\\\\SaasBundle\\\\Event\\\\PaymentEvent will always evaluate to false\\.$#"
 			count: 1
 			path: tests/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumerTest.php
@@ -306,11 +606,31 @@ parameters:
 			path: tests/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumerTest.php
 
 		-
-			message: "#^Method Bundle\\\\Saas\\\\Webhook\\\\Converter\\\\LemonSqueezyPayloadConverterTest\\:\\:loadFixture\\(\\) should return array\\<string, mixed\\> but returns array\\.$#"
+			message: "#^Call to method method\\(\\) on an unknown class PHPUnit\\\\Framework\\\\MockObject\\\\Builder\\\\InvocationMocker\\.$#"
+			count: 6
+			path: tests/Bundle/Saas/Security/Voter/PlanFeatureVoterTest.php
+
+		-
+			message: "#^Dynamic call to static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertNotSame\\(\\)\\.$#"
+			count: 1
+			path: tests/Bundle/Saas/Security/Voter/PlanFeatureVoterTest.php
+
+		-
+			message: "#^Dynamic call to static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertSame\\(\\)\\.$#"
+			count: 6
+			path: tests/Bundle/Saas/Security/Voter/PlanFeatureVoterTest.php
+
+		-
+			message: "#^Call to method method\\(\\) on an unknown class PHPUnit\\\\Framework\\\\MockObject\\\\Builder\\\\InvocationMocker\\.$#"
+			count: 17
+			path: tests/Bundle/Saas/Twig/Runtime/FeatureRuntimeTest.php
+
+		-
+			message: "#^Dynamic call to static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertInstanceOf\\(\\)\\.$#"
 			count: 1
 			path: tests/Bundle/Saas/Webhook/Converter/LemonSqueezyPayloadConverterTest.php
 
 		-
-			message: "#^Parameter \\#1 \\$payload of method SolidWorx\\\\Platform\\\\SaasBundle\\\\Webhook\\\\Converter\\\\LemonSqueezyPayloadConverter\\:\\:convert\\(\\) expects array\\{data\\: array\\<string, mixed\\>, meta\\: array\\{event_name\\: string, id\\: string, custom_data\\?\\: array\\{subscription_id\\: string\\}\\}\\}, array\\<string, mixed\\> given\\.$#"
+			message: "#^Method Bundle\\\\Saas\\\\Webhook\\\\Converter\\\\LemonSqueezyPayloadConverterTest\\:\\:loadFixture\\(\\) should return array\\<string, mixed\\> but returns array\\.$#"
 			count: 1
 			path: tests/Bundle/Saas/Webhook/Converter/LemonSqueezyPayloadConverterTest.php

@@ -8,3 +8,4 @@
 /yarn-error.log
 /composer.lock
 /vendor/
+/.claude/settings.local.json

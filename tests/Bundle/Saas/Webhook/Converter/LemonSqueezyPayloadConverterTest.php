@@ -40,7 +40,7 @@ final class LemonSqueezyPayloadConverterTest extends TestCase
 
         $event = $converter->convert($payload);
 
-        self::assertInstanceOf($expectedClass, $event);
+        $this->assertInstanceOf($expectedClass, $event);
         $this->assertMatchesObjectSnapshot($event);
     }
 

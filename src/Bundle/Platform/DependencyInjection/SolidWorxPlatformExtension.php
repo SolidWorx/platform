@@ -35,7 +35,8 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
 {
     public function __construct(
         private readonly PlatformConfig $platformConfig
-    ) {}
+    ) {
+    }
 
     #[Override]
     public function load(array $configs, ContainerBuilder $container): void
@@ -64,7 +65,7 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
 
         $container->setParameter('solidworx_platform.models.user', $config['models']['user']);
 
-        if (!$this->platformConfig?->get('security.2fa.enabled')) {
+        if (! $this->platformConfig?->get('security.2fa.enabled')) {
             // @TODO: Need to remove the 2FA routes as well if 2fa is not configured
             $container->removeDefinition(ResendTwoFactorCode::class);
             $container->removeDefinition(TwoFactorCodeValidator::class);

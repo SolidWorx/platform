@@ -15,6 +15,7 @@ namespace SolidWorx\Platform\SaasBundle\DependencyInjection;
 
 use Override;
 use SolidWorx\Platform\SaasBundle\Exception\ExtensionRequiredException;
+use SolidWorx\Platform\SaasBundle\Feature\FeatureConfigRegistry;
 use SolidWorx\Platform\SaasBundle\Integration\LemonSqueezy;
 use SolidWorx\Platform\SaasBundle\SolidWorxPlatformSaasBundle;
 use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
@@ -65,6 +66,14 @@ final class SolidWorxPlatformSaasExtension extends Extension implements PrependE
                 $container->setParameter('solidworx_platform.saas.integration.payment.lemon_squeezy.webhook_secret', $value['webhook_secret']);
                 $container->setParameter('solidworx_platform.saas.integration.payment.lemon_squeezy.enabled', true);
             }
+        }
+
+        $features = $config['features'] ?? [];
+        $container->setParameter('solidworx_platform.saas.features', $features);
+
+        if ($container->hasDefinition(FeatureConfigRegistry::class)) {
+            $def = $container->getDefinition(FeatureConfigRegistry::class);
+            $def->setArgument('$featureConfigs', $features);
         }
     }
 

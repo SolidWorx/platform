@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle;
 
-use SymfonyCasts\Bundle\ResetPassword\SymfonyCastsResetPasswordBundle;
 use const GLOB_BRACE;
 use const PATHINFO_EXTENSION;
 use Knp\Bundle\MenuBundle\KnpMenuBundle;
@@ -37,6 +36,7 @@ use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\UX\Icons\UXIconsBundle;
+use SymfonyCasts\Bundle\ResetPassword\SymfonyCastsResetPasswordBundle;
 use Twig\Extra\TwigExtraBundle\TwigExtraBundle;
 use function defined;
 use function file_exists;

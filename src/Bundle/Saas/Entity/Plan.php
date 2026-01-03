@@ -59,10 +59,17 @@ class Plan implements Stringable
     #[ORM\OneToMany(targetEntity: Subscription::class, mappedBy: 'plan', orphanRemoval: true)]
     private Collection $subscriptions;
 
+    /**
+     * @var Collection<int, PlanFeature>
+     */
+    #[ORM\OneToMany(targetEntity: PlanFeature::class, mappedBy: 'plan', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $features;
+
     public function __construct()
     {
         $this->id = new NilUlid();
         $this->subscriptions = new ArrayCollection();
+        $this->features = new ArrayCollection();
     }
 
     #[Override]
@@ -127,5 +134,32 @@ class Plan implements Stringable
     public function getSubscriptions(): Collection
     {
         return $this->subscriptions;
+    }
+
+    /**
+     * @return Collection<int, PlanFeature>
+     */
+    public function getFeatures(): Collection
+    {
+        return $this->features;
+    }
+
+    public function addFeature(PlanFeature $feature): static
+    {
+        if (! $this->features->contains($feature)) {
+            $this->features->add($feature);
+            $feature->setPlan($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFeature(PlanFeature $feature): static
+    {
+        if ($this->features->removeElement($feature) && $feature->getPlan() === $this) {
+            $feature->setPlan($this);
+        }
+
+        return $this;
     }
 }

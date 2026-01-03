@@ -42,15 +42,15 @@ final class AuthenticationCompilerPass implements CompilerPassInterface
         $authenticators = [];
 
         foreach ($firewalls as $firewall) {
-            if (!$container->hasDefinition('security.authenticator.form_login.' . $firewall)) {
+            if (! $container->hasDefinition('security.authenticator.form_login.' . $firewall)) {
                 continue;
             }
 
             $authenticator = $container->getDefinition('security.authenticator.form_login.' . $firewall);
             $authenticators[$firewall] = $authenticator->getArgument(4) + [
-                    'remember_me_parameter' => null,
-                    'always_remember_me' => false,
-                ];
+                'remember_me_parameter' => null,
+                'always_remember_me' => false,
+            ];
 
             if ($container->hasDefinition('security.authenticator.remember_me_handler.' . $firewall)) {
                 $rememberMeArguments = $container->getDefinition('security.authenticator.remember_me_handler.' . $firewall)->getArgument(3);

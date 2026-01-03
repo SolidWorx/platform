@@ -1,5 +1,15 @@
 <?php
+
 declare(strict_types=1);
+
+/*
+ * This file is part of SolidWorx Platform project.
+ *
+ * (c) Pierre du Plessis <open-source@solidworx.co>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
 
 namespace SolidWorx\Platform\PlatformBundle\Model;
 
@@ -7,7 +17,6 @@ use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use SolidWorx\Platform\PlatformBundle\Contracts\Security\TwoFactor\UserTwoFactorInterface;
-use SolidWorx\Platform\PlatformBundle\Repository\UserRepository;
 use SolidWorx\Platform\PlatformBundle\Security\TwoFactor\Traits\UserTwoFactor;
 use Stringable;
 use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
@@ -83,6 +92,11 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->id = new NilUlid();
     }
 
+    public function __toString(): string
+    {
+        return $this->email;
+    }
+
     public function getMobile(): ?string
     {
         return $this->mobile;
@@ -98,18 +112,20 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function addRole(string $role): static
     {
         $role = strtoupper($role);
-        if ('ROLE_USER' === $role) {
+        if ($role === 'ROLE_USER') {
             return $this;
         }
 
-        if (!in_array($role, $this->roles, true)) {
+        if (! in_array($role, $this->roles, true)) {
             $this->roles[] = $role;
         }
 
         return $this;
     }
 
-    public function eraseCredentials(): void {}
+    public function eraseCredentials(): void
+    {
+    }
 
     public function getId(): ?Ulid
     {
@@ -254,10 +270,5 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->lastName = $lastName;
 
         return $this;
-    }
-
-    public function __toString(): string
-    {
-        return $this->email;
     }
 }

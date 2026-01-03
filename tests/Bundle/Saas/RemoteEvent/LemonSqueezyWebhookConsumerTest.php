@@ -63,20 +63,20 @@ final class LemonSqueezyWebhookConsumerTest extends TestCase
             ->with(
                 self::callback(function (SymfonyEvent $event) use ($expectedEventClass, $remoteEvent): bool {
                     // Verify the event is of the expected class
-                    self::assertInstanceOf($expectedEventClass, $event);
+                    $this->assertInstanceOf($expectedEventClass, $event);
 
                     // Verify common properties for subscription events
                     if ($event instanceof SubscriptionEvent && $remoteEvent instanceof SubscriptionRemoteEvent) {
-                        self::assertSame($remoteEvent->subscriptionId, $event->subscriptionId, 'Subscription ID should match');
-                        self::assertSame($remoteEvent->subscription->id, $event->externalId, 'External ID should match');
-                        self::assertSame($remoteEvent->subscription, $event->subscription, 'Subscription object should be passed through');
+                        $this->assertSame($remoteEvent->subscriptionId, $event->subscriptionId, 'Subscription ID should match');
+                        $this->assertSame($remoteEvent->subscription->id, $event->externalId, 'External ID should match');
+                        $this->assertSame($remoteEvent->subscription, $event->subscription, 'Subscription object should be passed through');
                     }
 
                     // Verify common properties for payment events
                     if ($event instanceof PaymentEvent && $remoteEvent instanceof SubscriptionPaymentRemoteEvent) {
-                        self::assertSame($remoteEvent->subscriptionId, $event->subscriptionId, 'Subscription ID should match');
-                        self::assertSame($remoteEvent->subscriptionInvoice->id, $event->externalId, 'External ID should match');
-                        self::assertSame($remoteEvent->subscriptionInvoice, $event->subscriptionInvoice, 'Invoice object should be passed through');
+                        $this->assertSame($remoteEvent->subscriptionId, $event->subscriptionId, 'Subscription ID should match');
+                        $this->assertSame($remoteEvent->subscriptionInvoice->id, $event->externalId, 'External ID should match');
+                        $this->assertSame($remoteEvent->subscriptionInvoice, $event->subscriptionInvoice, 'Invoice object should be passed through');
                     }
 
                     return true;

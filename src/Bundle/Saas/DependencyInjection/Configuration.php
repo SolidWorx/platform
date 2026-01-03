@@ -15,6 +15,7 @@ namespace SolidWorx\Platform\SaasBundle\DependencyInjection;
 
 use Override;
 use SolidWorx\Platform\SaasBundle\Entity\Plan;
+use SolidWorx\Platform\SaasBundle\Entity\PlanFeature;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Entity\SubscriptionLog;
 use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
@@ -22,6 +23,7 @@ use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use function in_array;
 
 /**
  * @phpstan-type ValidateBuilder NodeDefinition|ArrayNodeDefinition
@@ -84,6 +86,14 @@ final class Configuration implements ConfigurationInterface
                                                     ->thenInvalid('The table name is not valid')
                                                 ->end()
                                             ->end()
+                                            ->scalarNode(PlanFeature::class)
+                                                ->defaultValue(PlanFeature::TABLE_NAME)
+                                                ->info('The table name for the Plan Feature entity')
+                                                ->validate()
+                                                    ->ifTrue(fn ($value): bool => in_array(preg_match('/^(?!\d)[A-Za-z_][A-Za-z0-9_$#]{0,64}$/u', (string) $value), [0, false], true))
+                                                    ->thenInvalid('The table name is not valid')
+                                                ->end()
+                                            ->end()
                                         ->end()
                                     ->end()
                                 ->end()
@@ -127,6 +137,27 @@ final class Configuration implements ConfigurationInterface
                                             ->end()
                                         ->end()
                                     ->end()
+                                ->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                    ->arrayNode('features')
+                        ->info('Define available plan features and their defaults')
+                        ->useAttributeAsKey('name')
+                        ->arrayPrototype()
+                            ->children()
+                                ->enumNode('type')
+                                    ->values(['boolean', 'integer', 'string', 'array'])
+                                    ->isRequired()
+                                    ->info('The data type of the feature value')
+                                ->end()
+                                ->variableNode('default')
+                                    ->isRequired()
+                                    ->info('The default value for this feature (used when plan has no override)')
+                                ->end()
+                                ->scalarNode('description')
+                                    ->defaultValue('')
+                                    ->info('A human-readable description of this feature')
                                 ->end()
                             ->end()
                         ->end()
