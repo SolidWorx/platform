@@ -234,14 +234,6 @@ final class PlanFeatureManagerTest extends TestCase
             {
                 return array_filter($this->planFeatures, fn (PlanFeature $f): bool => $f->getFeatureKey() === $featureKey);
             }
-
-            public function save(PlanFeature $planFeature, bool $flush = true): void
-            {
-            }
-
-            public function remove(PlanFeature $planFeature, bool $flush = true): void
-            {
-            }
         };
 
         $subscriptionProvider = new class($subscription) implements SubscriptionProviderInterface {

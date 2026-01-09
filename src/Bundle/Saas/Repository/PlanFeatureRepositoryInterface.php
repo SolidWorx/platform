@@ -38,8 +38,4 @@ interface PlanFeatureRepositoryInterface
      * @return array<PlanFeature>
      */
     public function findByFeatureKey(string $featureKey): array;
-
-    public function save(PlanFeature $planFeature, bool $flush = true): void;
-
-    public function remove(PlanFeature $planFeature, bool $flush = true): void;
 }

@@ -82,24 +82,4 @@ class PlanFeatureRepository extends EntityRepository implements PlanFeatureRepos
             'featureKey' => $featureKey,
         ]);
     }
-
-    #[Override]
-    public function save(PlanFeature $planFeature, bool $flush = true): void
-    {
-        $em = $this->getEntityManager();
-        $em->persist($planFeature);
-        if ($flush) {
-            $em->flush();
-        }
-    }
-
-    #[Override]
-    public function remove(PlanFeature $planFeature, bool $flush = true): void
-    {
-        $em = $this->getEntityManager();
-        $em->remove($planFeature);
-        if ($flush) {
-            $em->flush();
-        }
-    }
 }
