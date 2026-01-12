@@ -6,7 +6,7 @@ export default class extends Controller {
     modal = null;
 
     connect() {
-        this.modal = new Modal(this.element);
+        this.modal = Modal.getOrCreateInstance(this.element);
 
         if (this.element.classList.contains('show')) {
             this.modal.show();
