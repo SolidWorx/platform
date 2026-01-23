@@ -72,7 +72,7 @@
         "phpunit/phpunit": "^12.5",
         "rector/rector": "^1.2",
         "roave/security-advisories": "dev-latest",
-        "spatie/phpunit-snapshot-assertions": "^5.2",
+        "spatie/phpunit-snapshot-assertions": "^5.3",
         "symplify/easy-coding-standard": "^13.0"
     }
 }
