@@ -45,10 +45,10 @@ final class Provider implements MenuProviderInterface
          * so we clone it to keep the original intact. This allows
          * rendering the same menu multiple times
          */
-        $q = clone $this->list[$name];
-        $q->setExtractFlags(SplPriorityQueue::EXTR_DATA);
+        $clone = clone $this->list[$name];
+        $clone->setExtractFlags(SplPriorityQueue::EXTR_DATA);
 
-        foreach ($this->list[$name] as $builder) {
+        foreach ($clone as $builder) {
             $builder($root, $options);
 
             /*
