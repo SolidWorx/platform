@@ -19,7 +19,9 @@
     <meta name="HandheldFriendly" content="True" />
     <meta name="MobileOptimized" content="320" />
 
-    <meta name="canonical" content="{{ url(app.current_route, app.current_route_parameters, false) }}" />
+    {% if app.current_route is not empty -%}
+        <meta name="canonical" content="{{ url(app.current_route, app.current_route_parameters, false) }}" />
+    {%- endif %}
 
     {# TODO: Add description and keywords meta #}
     {# <meta name="description" content=""> #}
