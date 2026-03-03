@@ -37,13 +37,13 @@ abstract class EntityRepository extends ServiceEntityRepository
             $em->flush();
         }
     }
-    
+
     /**
      * @param T $entity
      */
     public function remove(object $entity, bool $flush = true): void
     {
-        if (!is_a($entity, $expected = $this->getEntityName())) {
+        if (! is_a($entity, $expected = $this->getEntityName())) {
             throw new InvalidEntityException($expected, $entity::class);
         }
 
