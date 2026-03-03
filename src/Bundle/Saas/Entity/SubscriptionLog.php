@@ -40,7 +40,7 @@ class SubscriptionLog
     private DateTimeImmutable $createdAt;
 
     #[ORM\ManyToOne(targetEntity: Subscription::class, inversedBy: 'logs')]
-    #[ORM\JoinColumn(name: 'subscription_id', referencedColumnName: 'id', nullable: false)]
+    #[ORM\JoinColumn(name: 'subscription_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private Subscription $subscription;
 
     #[ORM\Column(type: Types::STRING, length: 45, enumType: SubscriptionLogType::class)]

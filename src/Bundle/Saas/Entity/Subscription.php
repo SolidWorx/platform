@@ -48,7 +48,7 @@ class Subscription
     private DateTimeImmutable $endDate;
 
     #[ORM\ManyToOne(targetEntity: SubscribableInterface::class)]
-    #[ORM\JoinColumn(name: 'subscriber_id', referencedColumnName: 'id', nullable: false)]
+    #[ORM\JoinColumn(name: 'subscriber_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private SubscribableInterface $subscriber;
 
     #[ORM\ManyToOne(targetEntity: Plan::class, inversedBy: 'subscriptions')]
