@@ -14,11 +14,12 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\SaasBundle\Exception;
 
 use RuntimeException;
+use Throwable;
 use function sprintf;
 
 final class UndefinedFeatureException extends RuntimeException
 {
-    public function __construct(string $featureKey, int $code = 0, ?\Throwable $previous = null)
+    public function __construct(string $featureKey, int $code = 0, ?Throwable $previous = null)
     {
         parent::__construct(sprintf(
             'Feature "%s" is not defined. Make sure it is configured in solid_worx_platform_saas.features.',

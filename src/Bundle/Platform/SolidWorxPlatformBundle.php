@@ -71,6 +71,7 @@ final class SolidWorxPlatformBundle extends Bundle
         return __DIR__;
     }
 
+    #[Override]
     protected function createContainerExtension(): ?ExtensionInterface
     {
         return new ($this->getContainerExtensionClass())($this->platformConfig);

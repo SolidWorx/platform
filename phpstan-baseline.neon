@@ -6,62 +6,12 @@ parameters:
 			path: src/Bundle/Platform/Config/PlatformConfig.php
 
 		-
-			message: "#^Class SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig has an uninitialized readonly property \\$models\\. Assign it in the constructor\\.$#"
-			count: 1
-			path: src/Bundle/Platform/Config/PlatformConfig.php
-
-		-
-			message: "#^Class SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig has an uninitialized readonly property \\$name\\. Assign it in the constructor\\.$#"
-			count: 1
-			path: src/Bundle/Platform/Config/PlatformConfig.php
-
-		-
-			message: "#^Class SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig has an uninitialized readonly property \\$templates\\. Assign it in the constructor\\.$#"
-			count: 1
-			path: src/Bundle/Platform/Config/PlatformConfig.php
-
-		-
-			message: "#^Class SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig has an uninitialized readonly property \\$version\\. Assign it in the constructor\\.$#"
-			count: 1
-			path: src/Bundle/Platform/Config/PlatformConfig.php
-
-		-
 			message: "#^Method SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\:\\:toArray\\(\\) should return array\\<string, bool\\|float\\|int\\|string\\> but returns array\\<string, mixed\\>\\.$#"
 			count: 1
 			path: src/Bundle/Platform/Config/PlatformConfig.php
 
 		-
 			message: "#^Parameter \\#2 \\$array of function array_key_exists expects array, mixed given\\.$#"
-			count: 1
-			path: src/Bundle/Platform/Config/PlatformConfig.php
-
-		-
-			message: "#^Property SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\:\\:\\$models is unused\\.$#"
-			count: 1
-			path: src/Bundle/Platform/Config/PlatformConfig.php
-
-		-
-			message: "#^Property SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\:\\:\\$models type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Bundle/Platform/Config/PlatformConfig.php
-
-		-
-			message: "#^Property SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\:\\:\\$name is unused\\.$#"
-			count: 1
-			path: src/Bundle/Platform/Config/PlatformConfig.php
-
-		-
-			message: "#^Property SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\:\\:\\$templates is unused\\.$#"
-			count: 1
-			path: src/Bundle/Platform/Config/PlatformConfig.php
-
-		-
-			message: "#^Property SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\:\\:\\$templates type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/Bundle/Platform/Config/PlatformConfig.php
-
-		-
-			message: "#^Property SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\:\\:\\$version is unused\\.$#"
 			count: 1
 			path: src/Bundle/Platform/Config/PlatformConfig.php
 
@@ -84,6 +34,11 @@ parameters:
 			message: "#^Cannot access offset 'remember_me…' on mixed\\.$#"
 			count: 1
 			path: src/Bundle/Platform/DependencyInjection/CompilerPass/AuthenticationCompilerPass.php
+
+		-
+			message: "#^Parameter \\#1 \\$factory of method Symfony\\\\Component\\\\DependencyInjection\\\\Definition\\:\\:setFactory\\(\\) expects array\\|string\\|Symfony\\\\Component\\\\DependencyInjection\\\\Reference\\|null, Closure given\\.$#"
+			count: 1
+			path: src/Bundle/Platform/DependencyInjection/CompilerPass/MenuCompilerPass.php
 
 		-
 			message: "#^Call to method accessControl\\(\\) on an unknown class Symfony\\\\Config\\\\SecurityConfig\\.$#"
@@ -232,11 +187,6 @@ parameters:
 
 		-
 			message: "#^Casting to bool something that's already bool\\.$#"
-			count: 1
-			path: src/Bundle/Platform/Model/User.php
-
-		-
-			message: "#^Method SolidWorx\\\\Platform\\\\PlatformBundle\\\\Model\\\\User\\:\\:__toString\\(\\) should return string but returns string\\|null\\.$#"
 			count: 1
 			path: src/Bundle/Platform/Model/User.php
 
@@ -411,16 +361,6 @@ parameters:
 			path: src/Bundle/Saas/Entity/Plan.php
 
 		-
-			message: "#^Property SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\WebhookEventLog\\:\\:\\$event is never written, only read\\.$#"
-			count: 1
-			path: src/Bundle/Saas/Entity/WebhookEventLog.php
-
-		-
-			message: "#^Property SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\WebhookEventLog\\:\\:\\$receivedAt is never written, only read\\.$#"
-			count: 1
-			path: src/Bundle/Saas/Entity/WebhookEventLog.php
-
-		-
 			message: "#^Cannot access property \\$attributes on SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|null\\.$#"
 			count: 1
 			path: src/Bundle/Saas/Event/TrialStartedEvent.php
@@ -444,6 +384,16 @@ parameters:
 			message: "#^Parameter \\#2 \\$trialEndDate of method SolidWorx\\\\Platform\\\\SaasBundle\\\\Subscription\\\\SubscriptionManager\\:\\:startTrial\\(\\) expects DateTimeInterface, DateTimeInterface\\|null given\\.$#"
 			count: 1
 			path: src/Bundle/Saas/EventSubscriber/SubscriptionEventSubscriber.php
+
+		-
+			message: "#^Call to an undefined method SolidWorx\\\\Platform\\\\SaasBundle\\\\Repository\\\\PlanFeatureRepositoryInterface\\:\\:remove\\(\\)\\.$#"
+			count: 1
+			path: src/Bundle/Saas/Feature/PlanFeatureManager.php
+
+		-
+			message: "#^Call to an undefined method SolidWorx\\\\Platform\\\\SaasBundle\\\\Repository\\\\PlanFeatureRepositoryInterface\\:\\:save\\(\\)\\.$#"
+			count: 1
+			path: src/Bundle/Saas/Feature/PlanFeatureManager.php
 
 		-
 			message: "#^Call to an undefined method Symfony\\\\Contracts\\\\Cache\\\\CacheInterface\\:\\:clear\\(\\)\\.$#"
@@ -547,11 +497,6 @@ parameters:
 
 		-
 			message: "#^Parameter \\#1 \\$id \\(SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\Plan\\|string\\|Symfony\\\\Component\\\\Uid\\\\Ulid\\) of method SolidWorx\\\\Platform\\\\SaasBundle\\\\Repository\\\\PlanRepository\\:\\:find\\(\\) should be contravariant with parameter \\$id \\(mixed\\) of method Doctrine\\\\Persistence\\\\ObjectRepository\\<SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\Plan\\>\\:\\:find\\(\\)$#"
-			count: 1
-			path: src/Bundle/Saas/Repository/PlanRepository.php
-
-		-
-			message: "#^Parameter \\#2 \\$lockMode \\(int\\|null\\) of method SolidWorx\\\\Platform\\\\SaasBundle\\\\Repository\\\\PlanRepository\\:\\:find\\(\\) should be contravariant with parameter \\$lockMode \\(Doctrine\\\\DBAL\\\\LockMode\\|int\\|null\\) of method Doctrine\\\\ORM\\\\EntityRepository\\<SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\Plan\\>\\:\\:find\\(\\)$#"
 			count: 1
 			path: src/Bundle/Saas/Repository/PlanRepository.php
 
