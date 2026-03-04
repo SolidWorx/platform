@@ -19,8 +19,8 @@ use Override;
 use SolidWorx\Platform\PlatformBundle\Enum\WebhookEventStatus;
 use SolidWorx\Platform\PlatformBundle\Model\WebhookEventLog;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Throwable;
@@ -36,13 +36,13 @@ final readonly class WebhookRequestLogSubscriber implements EventSubscriberInter
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::CONTROLLER => ['onKernelController', 0],
+            KernelEvents::REQUEST => ['onKernelRequest', 0],
             KernelEvents::RESPONSE => ['onKernelResponse', -1024],
             KernelEvents::EXCEPTION => ['onKernelException', -1024],
         ];
     }
 
-    public function onKernelController(ControllerEvent $event): void
+    public function onKernelRequest(RequestEvent $event): void
     {
         if (! $event->isMainRequest()) {
             return;
