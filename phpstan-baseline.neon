@@ -501,6 +501,11 @@ parameters:
 			path: src/Bundle/Saas/Repository/PlanRepository.php
 
 		-
+			message: "#^Parameter \\#2 \\$lockMode \\(int\\|null\\) of method SolidWorx\\\\Platform\\\\SaasBundle\\\\Repository\\\\PlanRepository\\:\\:find\\(\\) should be contravariant with parameter \\$lockMode \\(Doctrine\\\\DBAL\\\\LockMode\\|int\\|null\\) of method Doctrine\\\\ORM\\\\EntityRepository\\<SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\Plan\\>\\:\\:find\\(\\)$#"
+			count: 1
+			path: src/Bundle/Saas/Repository/PlanRepository.php
+
+		-
 			message: "#^Parameter \\#1 \\$plan of class SolidWorx\\\\Platform\\\\SaasBundle\\\\Exception\\\\InvalidPlanException constructor expects string, SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\Plan\\|string\\|Symfony\\\\Component\\\\Uid\\\\Ulid given\\.$#"
 			count: 1
 			path: src/Bundle/Saas/Subscription/SubscriptionManager.php
