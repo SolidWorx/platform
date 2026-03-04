@@ -27,6 +27,21 @@ use Throwable;
 
 final readonly class WebhookRequestLogSubscriber implements EventSubscriberInterface
 {
+    private const string REDACTED_VALUE = '[REDACTED]';
+
+    /**
+     * @var list<string>
+     */
+    private const array SENSITIVE_HEADERS = [
+        'authorization',
+        'cookie',
+        'set-cookie',
+        'x-api-key',
+        'x-auth-token',
+        'x-hub-signature',
+        'x-hub-signature-256',
+    ];
+
     public function __construct(
         private EntityManagerInterface $entityManager,
     ) {
@@ -62,7 +77,7 @@ final readonly class WebhookRequestLogSubscriber implements EventSubscriberInter
 
         $headers = [];
         foreach ($request->headers->all() as $name => $values) {
-            $headers[$name] = implode(', ', $values);
+            $headers[$name] = $this->isSensitiveHeader($name) ? self::REDACTED_VALUE : implode(', ', $values);
         }
 
         $log = new WebhookEventLog();
@@ -119,5 +134,10 @@ final readonly class WebhookRequestLogSubscriber implements EventSubscriberInter
     private function extractErrorMessage(Throwable $throwable): string
     {
         return sprintf('[%s] %s', $throwable::class, $throwable->getMessage());
+    }
+
+    private function isSensitiveHeader(string $name): bool
+    {
+        return in_array(strtolower($name), self::SENSITIVE_HEADERS, true);
     }
 }
