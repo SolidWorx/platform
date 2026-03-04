@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\SaasBundle\Feature;
 
 use InvalidArgumentException;
+use Override;
 use SolidWorx\Platform\SaasBundle\Entity\Plan;
 use SolidWorx\Platform\SaasBundle\Entity\PlanFeature;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
@@ -51,7 +52,7 @@ readonly class PlanFeatureManager implements ResetInterface
         $cacheKey = sprintf('feature_%s_%s', $plan->getId()->toBase58(), $featureKey);
 
         try {
-            return $this->cache->get($cacheKey, function () use ($plan, $featureKey) {
+            return $this->cache->get($cacheKey, function () use ($plan, $featureKey): FeatureValue {
                 if (! $this->configRegistry->has($featureKey)) {
                     throw new UndefinedFeatureException($featureKey);
                 }
@@ -59,15 +60,13 @@ readonly class PlanFeatureManager implements ResetInterface
                 $planFeature = $this->planFeatureRepository->findOneByPlanAndKey($plan, $featureKey);
 
                 if ($planFeature instanceof PlanFeature) {
-                    $featureValue = $planFeature->toFeatureValue();
-                } else {
-                    $featureValue = $this->configRegistry->get($featureKey)->toFeatureValue();
+                    return $planFeature->toFeatureValue();
                 }
 
-                return $featureValue;
+                return $this->configRegistry->get($featureKey)->toFeatureValue();
             });
-        } catch (\Psr\Cache\InvalidArgumentException $e) {
-            throw new UndefinedFeatureException($featureKey, previous: $e);
+        } catch (\Psr\Cache\InvalidArgumentException $invalidArgumentException) {
+            throw new UndefinedFeatureException($featureKey, previous: $invalidArgumentException);
         }
     }
 
@@ -255,6 +254,7 @@ readonly class PlanFeatureManager implements ResetInterface
     /**
      * Clear the in-memory cache.
      */
+    #[Override]
     public function reset(): void
     {
         $this->cache->clear();

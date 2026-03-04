@@ -39,6 +39,7 @@ use SolidWorx\Platform\SaasBundle\Event\SubscriptionUpdatedEvent;
 use SolidWorx\Platform\SaasBundle\RemoteEvent\LemonSqueezyWebhookConsumer;
 use SolidWorx\Platform\SaasBundle\RemoteEvent\SubscriptionPaymentRemoteEvent;
 use SolidWorx\Platform\SaasBundle\RemoteEvent\SubscriptionRemoteEvent;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\RemoteEvent\RemoteEvent;
 use Symfony\Component\Uid\Ulid;
 use Symfony\Contracts\EventDispatcher\Event as SymfonyEvent;
@@ -84,7 +85,7 @@ final class LemonSqueezyWebhookConsumerTest extends TestCase
             )
             ->willReturnArgument(0);
 
-        $consumer = new LemonSqueezyWebhookConsumer($dispatcher);
+        $consumer = new LemonSqueezyWebhookConsumer($dispatcher, new RequestStack());
         $consumer->consume($remoteEvent);
     }
 
@@ -96,7 +97,7 @@ final class LemonSqueezyWebhookConsumerTest extends TestCase
         $dispatcher = $this->createMock(EventDispatcherInterface::class);
         $dispatcher->expects($this->never())->method('dispatch');
 
-        $consumer = new LemonSqueezyWebhookConsumer($dispatcher);
+        $consumer = new LemonSqueezyWebhookConsumer($dispatcher, new RequestStack());
 
         $consumer->consume(new RemoteEvent('name', 'text', []));
     }
