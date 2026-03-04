@@ -15,6 +15,7 @@ namespace SolidWorx\Platform\SaasBundle\RemoteEvent;
 
 use Override;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use SolidWorx\Platform\PlatformBundle\Model\WebhookEventLog;
 use SolidWorx\Platform\SaasBundle\Enum\LemonSqueezy\Event;
 use SolidWorx\Platform\SaasBundle\Event\PaymentEvent;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionCancelledEvent;
@@ -29,6 +30,7 @@ use SolidWorx\Platform\SaasBundle\Event\SubscriptionPaymentRefundedEvent;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionResumedEvent;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionUnpausedEvent;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionUpdatedEvent;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\RemoteEvent\Attribute\AsRemoteEventConsumer;
 use Symfony\Component\RemoteEvent\Consumer\ConsumerInterface;
 use Symfony\Component\RemoteEvent\RemoteEvent;
@@ -38,7 +40,8 @@ use Symfony\Component\Webhook\Exception\RejectWebhookException;
 final readonly class LemonSqueezyWebhookConsumer implements ConsumerInterface
 {
     public function __construct(
-        private EventDispatcherInterface $eventDispatcher
+        private EventDispatcherInterface $eventDispatcher,
+        private RequestStack $requestStack,
     ) {
     }
 
@@ -75,5 +78,13 @@ final readonly class LemonSqueezyWebhookConsumer implements ConsumerInterface
                 default => null,
             }
         ));
+
+        $log = $this->requestStack->getCurrentRequest()?->attributes->get('_webhook_event_log');
+
+        if ($log instanceof WebhookEventLog) {
+            $log->setEventType($event->getName());
+            $log->setGatewayEventId($event->getPayload()['meta']['id'] ?? null);
+            $log->setExternalSubscriptionId($event->subscriptionId->toBase58());
+        }
     }
 }

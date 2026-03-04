@@ -16,6 +16,7 @@ namespace SolidWorx\Platform\PlatformBundle\Repository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ManagerRegistry;
+use Override;
 use SolidWorx\Platform\PlatformBundle\Contracts\Doctrine\Repository\UserRepository as UserRepositoryInterface;
 use SolidWorx\Platform\PlatformBundle\Model\User;
 use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
@@ -51,9 +52,14 @@ class UserRepository extends EntityRepository implements UserRepositoryInterface
 
     public function supportsClass(string $class): bool
     {
-        return $this->getEntityName() === $class || is_subclass_of($class, $this->getEntityName());
+        if ($this->getEntityName() === $class) {
+            return true;
+        }
+
+        return is_subclass_of($class, $this->getEntityName());
     }
 
+    #[Override]
     public function loadUserByIdentifier(string $identifier): UserInterface
     {
         $q = $this

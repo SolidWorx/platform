@@ -18,14 +18,6 @@ use function explode;
 
 final readonly class PlatformConfig
 {
-    private string $name;
-
-    private string $version;
-
-    private array $models;
-
-    private array $templates;
-
     /**
      * @param array<string, mixed> $config
      */

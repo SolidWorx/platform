@@ -16,6 +16,7 @@ namespace SolidWorx\Platform\PlatformBundle\Model;
 use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Override;
 use SolidWorx\Platform\PlatformBundle\Contracts\Security\TwoFactor\UserTwoFactorInterface;
 use SolidWorx\Platform\PlatformBundle\Security\TwoFactor\Traits\UserTwoFactor;
 use Stringable;
@@ -92,9 +93,10 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->id = new NilUlid();
     }
 
+    #[Override]
     public function __toString(): string
     {
-        return $this->email;
+        return (string) $this->email;
     }
 
     public function getMobile(): ?string
@@ -123,6 +125,7 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    #[Override]
     public function eraseCredentials(): void
     {
     }
@@ -132,6 +135,7 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->id;
     }
 
+    #[Override]
     public function getUserIdentifier(): string
     {
         return $this->email;
@@ -142,6 +146,7 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->email;
     }
 
+    #[Override]
     public function getPassword(): ?string
     {
         return $this->password;
@@ -152,6 +157,7 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->lastLogin;
     }
 
+    #[Override]
     public function getRoles(): array
     {
         $roles = $this->roles;
