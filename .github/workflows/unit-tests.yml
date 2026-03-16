@@ -32,7 +32,7 @@ jobs:
       - name: "Set up problem matchers for phpunit/phpunit"
         run: "echo \"::add-matcher::${{ runner.tool_cache }}/phpunit.json\""
 
-      - uses: "ramsey/composer-install@v3"
+      - uses: "ramsey/composer-install@v4"
 
       - name: Run test suite
         run: vendor/bin/phpunit
@@ -65,7 +65,7 @@ jobs:
       - name: "Set up problem matchers for phpunit/phpunit"
         run: "echo \"::add-matcher::${{ runner.tool_cache }}/phpunit.json\""
 
-      - uses: "ramsey/composer-install@v3"
+      - uses: "ramsey/composer-install@v4"
 
       - name: Run test suite
         run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
