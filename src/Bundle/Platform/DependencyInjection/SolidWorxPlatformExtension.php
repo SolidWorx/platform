@@ -18,6 +18,7 @@ use Override;
 use ReflectionMethod;
 use SolidWorx\Platform\PlatformBundle\Attributes\Menu\MenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfig;
+use SolidWorx\Platform\PlatformBundle\Doctrine\Type\URLType;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendTwoFactorCode;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\Extension\TwoFactorExtension;
 use SolidWorx\Platform\PlatformBundle\Model\User;
@@ -82,6 +83,11 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
             $container->prependExtensionConfig(
                 'doctrine',
                 [
+                    'dbal' => [
+                        'types' => [
+                            URLType::NAME => URLType::class,
+                        ],
+                    ],
                     'orm' => [
                         'mappings' => [
                             'Platform' => [
