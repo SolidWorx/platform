@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle\Command;
 
 use Override;
-use SolidWorx\Platform\PlatformBundle\Config\SchemaGenerator;
+use SolidWorx\Platform\PlatformBundle\Config\SchemaGeneratorInterface;
 use SolidWorx\Platform\PlatformBundle\Console\Command;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
@@ -31,7 +31,7 @@ final class GenerateSchemaCommand extends Command
     private const string DEFAULT_OUTPUT = 'platform-schema.json';
 
     public function __construct(
-        private readonly SchemaGenerator $schemaGenerator,
+        private readonly SchemaGeneratorInterface $schemaGenerator,
     ) {
         parent::__construct();
     }
