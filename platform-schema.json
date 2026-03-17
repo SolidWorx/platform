@@ -1,0 +1,221 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "SolidWorx Platform Configuration",
+    "description": "Configuration schema for platform.yaml",
+    "type": "object",
+    "properties": {
+        "platform": {
+            "type": "object",
+            "description": "Core platform configuration",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "The name of the platform.",
+                    "default": "SolidWorx Platform"
+                },
+                "version": {
+                    "type": "string",
+                    "description": "The version of the platform.",
+                    "default": "1.0.0"
+                },
+                "security": {
+                    "type": "object",
+                    "properties": {
+                        "two_factor": {
+                            "type": "object",
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean",
+                                    "description": "Enable two-factor authentication.",
+                                    "default": false
+                                },
+                                "base_template": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
+                                    "description": "The base layout template for 2FA pages."
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "doctrine": {
+                    "type": "object",
+                    "properties": {
+                        "types": {
+                            "type": "object",
+                            "properties": {
+                                "enable_utc_date": {
+                                    "type": "boolean",
+                                    "description": "Enable UTC date type.",
+                                    "default": true
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "models": {
+                    "type": "object",
+                    "properties": {
+                        "user": {
+                            "type": "string",
+                            "description": "The User model class.",
+                            "default": "SolidWorx\\Platform\\PlatformBundle\\Model\\User"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "saas": {
+                    "type": "object",
+                    "description": "SaaS / subscription configuration",
+                    "properties": {
+                        "doctrine": {
+                            "type": "object",
+                            "required": [
+                                "subscriptions"
+                            ],
+                            "properties": {
+                                "subscriptions": {
+                                    "type": "object",
+                                    "required": [
+                                        "entity"
+                                    ],
+                                    "properties": {
+                                        "entity": {
+                                            "type": "string",
+                                            "description": "Fully-qualified class name of the subscription entity."
+                                        }
+                                    }
+                                },
+                                "db_schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "table_names": {
+                                            "type": "object",
+                                            "properties": {
+                                                "plan": {
+                                                    "type": "string",
+                                                    "default": "saas_plan"
+                                                },
+                                                "subscription": {
+                                                    "type": "string",
+                                                    "default": "saas_subscription"
+                                                },
+                                                "subscription_log": {
+                                                    "type": "string",
+                                                    "default": "saas_subscription_log"
+                                                },
+                                                "plan_feature": {
+                                                    "type": "string",
+                                                    "default": "saas_plan_feature"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "payment": {
+                            "type": "object",
+                            "required": [
+                                "return_route"
+                            ],
+                            "properties": {
+                                "return_route": {
+                                    "type": "string",
+                                    "description": "Route name to redirect to after payment."
+                                }
+                            }
+                        },
+                        "integration": {
+                            "type": "object",
+                            "properties": {
+                                "lemon_squeezy": {
+                                    "type": "object",
+                                    "properties": {
+                                        "enabled": {
+                                            "type": "boolean",
+                                            "default": false
+                                        },
+                                        "api_key": {
+                                            "type": "string"
+                                        },
+                                        "webhook_secret": {
+                                            "type": "string"
+                                        },
+                                        "store_id": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "features": {
+                            "type": "object",
+                            "description": "Named feature definitions.",
+                            "additionalProperties": {
+                                "type": "object",
+                                "required": [
+                                    "type",
+                                    "default"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "boolean",
+                                            "integer",
+                                            "string",
+                                            "array"
+                                        ]
+                                    },
+                                    "default": {
+                                        "description": "Default value for the feature."
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "ui": {
+                    "type": "object",
+                    "description": "UI / presentation configuration",
+                    "properties": {
+                        "icon_pack": {
+                            "type": "string",
+                            "description": "The icon pack to use.",
+                            "default": "tabler"
+                        },
+                        "templates": {
+                            "type": "object",
+                            "properties": {
+                                "base": {
+                                    "type": "string",
+                                    "description": "The base layout template.",
+                                    "default": "@Ui/Layout/base.html.twig"
+                                },
+                                "login": {
+                                    "type": "string",
+                                    "description": "The login page template.",
+                                    "default": "@Ui/Security/login.html.twig"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": true
+        }
+    },
+    "additionalProperties": true
+}

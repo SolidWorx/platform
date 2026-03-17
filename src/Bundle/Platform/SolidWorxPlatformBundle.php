@@ -14,25 +14,34 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle;
 
 use Doctrine\DBAL\Exception;
-use Doctrine\DBAL\Types\Type;
-use Doctrine\DBAL\Types\Types;
 use Override;
-use SolidWorx\Platform\PlatformBundle\Config\PlatformConfig;
+use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigSectionInterface;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\AuthenticationCompilerPass;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\MenuCompilerPass;
-use SolidWorx\Platform\PlatformBundle\Doctrine\Type\UTCDateTimeType;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-final class SolidWorxPlatformBundle extends Bundle
+final class SolidWorxPlatformBundle extends Bundle implements PlatformConfigSectionInterface
 {
     public const string NAMESPACE = __NAMESPACE__;
 
-    public function __construct(
-        private readonly PlatformConfig $platformConfig
-    ) {
+    /**
+     * @var array<string, mixed>
+     */
+    private array $rawConfig = [];
+
+    #[Override]
+    public function getConfigSectionKey(): string
+    {
+        return '';
+    }
+
+    #[Override]
+    public function setPlatformRawConfig(array $rawConfig): void
+    {
+        $this->rawConfig = $rawConfig;
     }
 
     #[Override]
@@ -74,6 +83,6 @@ final class SolidWorxPlatformBundle extends Bundle
     #[Override]
     protected function createContainerExtension(): ?ExtensionInterface
     {
-        return new ($this->getContainerExtensionClass())($this->platformConfig);
+        return new ($this->getContainerExtensionClass())($this->rawConfig);
     }
 }

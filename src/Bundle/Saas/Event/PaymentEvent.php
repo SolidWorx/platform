@@ -22,7 +22,9 @@ abstract class PaymentEvent extends Event
     public function __construct(
         public readonly Ulid $subscriptionId,
         public readonly string $externalId,
-        /** @TODO: This should be a generic Payment DTO instead of integration-specific */
+        /**
+         * @TODO: This should be a generic Payment DTO instead of integration-specific
+         */
         public readonly ?SubscriptionInvoice $subscriptionInvoice = null,
     ) {
     }

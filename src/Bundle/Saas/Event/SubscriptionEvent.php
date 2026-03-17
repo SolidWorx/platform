@@ -22,7 +22,9 @@ abstract class SubscriptionEvent extends Event
     public function __construct(
         public readonly Ulid $subscriptionId,
         public readonly string $externalId,
-        /** @TODO: This should be a generic subscription DTO instead of integration-specific */
+        /**
+         * @TODO: This should be a generic subscription DTO instead of integration-specific
+         */
         public readonly ?Subscription $subscription = null,
     ) {
     }
