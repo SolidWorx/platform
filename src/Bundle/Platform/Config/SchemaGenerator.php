@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Config;
 
+use Override;
 use Symfony\Component\Config\Definition\ArrayNode;
 use Symfony\Component\Config\Definition\BaseNode;
 use Symfony\Component\Config\Definition\BooleanNode;
@@ -21,7 +22,7 @@ use Symfony\Component\Config\Definition\FloatNode;
 use Symfony\Component\Config\Definition\IntegerNode;
 use Symfony\Component\Config\Definition\NodeInterface;
 use Symfony\Component\Config\Definition\PrototypedArrayNode;
-use Symfony\Component\Config\Definition\VariableNode;
+use Symfony\Component\Config\Definition\ScalarNode;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Throwable;
 
@@ -32,7 +33,7 @@ use Throwable;
  * This generator collects those sections and converts their Symfony Config {@see NodeInterface} trees into a
  * single JSON Schema document suitable for IDE autocompletion of `platform.yaml`.
  */
-final readonly class SchemaGenerator
+final readonly class SchemaGenerator implements SchemaGeneratorInterface
 {
     /**
      * @param iterable<PlatformConfigurationInterface> $configurations
@@ -48,6 +49,7 @@ final readonly class SchemaGenerator
      *
      * @return array<string, mixed>
      */
+    #[Override]
     public function generate(): array
     {
         $platformProperties = [];
@@ -122,8 +124,9 @@ final readonly class SchemaGenerator
             $node instanceof FloatNode => [
                 'type' => 'number',
             ],
-            $node instanceof VariableNode => [], // no type restriction — accepts any value
-            default => $this->scalarNodeToSchema($node),
+            // ScalarNode extends VariableNode — must be checked before VariableNode
+            $node instanceof ScalarNode => $this->scalarNodeToSchema($node),
+            default => [], // VariableNode and any other node — no type constraint
         };
 
         return array_merge($schema, $typeSchema);

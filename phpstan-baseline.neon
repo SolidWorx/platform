@@ -471,11 +471,6 @@ parameters:
 			path: src/Bundle/Saas/Repository/PlanRepository.php
 
 		-
-			message: "#^Parameter \\#2 \\$lockMode \\(int\\|null\\) of method SolidWorx\\\\Platform\\\\SaasBundle\\\\Repository\\\\PlanRepository\\:\\:find\\(\\) should be contravariant with parameter \\$lockMode \\(Doctrine\\\\DBAL\\\\LockMode\\|int\\|null\\) of method Doctrine\\\\ORM\\\\EntityRepository\\<SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\Plan\\>\\:\\:find\\(\\)$#"
-			count: 1
-			path: src/Bundle/Saas/Repository/PlanRepository.php
-
-		-
 			message: "#^Method SolidWorx\\\\Platform\\\\SaasBundle\\\\SolidWorxPlatformSaasBundle\\:\\:createContainerExtension\\(\\) never returns null so it can be removed from the return type\\.$#"
 			count: 1
 			path: src/Bundle/Saas/SolidWorxPlatformSaasBundle.php
@@ -503,12 +498,187 @@ parameters:
 		-
 			message: "#^Call to method method\\(\\) on an unknown class PHPUnit\\\\Framework\\\\MockObject\\\\Builder\\\\InvocationMocker\\.$#"
 			count: 1
+			path: tests/Bundle/PlatformBundle/Command/GenerateSchemaCommandTest.php
+
+		-
+			message: "#^Call to method arrayNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
+			count: 5
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Call to method booleanNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
+			count: 3
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Call to method enumNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Call to method floatNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Call to method integerNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Call to method scalarNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
+			count: 9
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Call to method variableNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'active' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'additionalProperties' on mixed\\.$#"
+			count: 2
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'anything' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'color' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'count' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'db' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'default' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'description' on mixed\\.$#"
+			count: 2
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'driver' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'enabled' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'enum' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'items' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'name' on mixed\\.$#"
+			count: 2
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'nested' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'options' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'platform' on mixed\\.$#"
+			count: 25
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'properties' on mixed\\.$#"
+			count: 25
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'ratio' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'required_field' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'tags' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'template' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'title' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'type' on mixed\\.$#"
+			count: 10
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Cannot access offset 'ui' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Parameter \\#2 \\$array of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertArrayHasKey\\(\\) expects array\\|ArrayAccess\\<\\(int\\|string\\), mixed\\>, mixed given\\.$#"
+			count: 12
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Parameter \\#2 \\$array of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertArrayNotHasKey\\(\\) expects array\\|ArrayAccess\\<\\(int\\|string\\), mixed\\>, mixed given\\.$#"
+			count: 3
+			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
+
+		-
+			message: "#^Call to method method\\(\\) on an unknown class PHPUnit\\\\Framework\\\\MockObject\\\\Builder\\\\InvocationMocker\\.$#"
+			count: 1
 			path: tests/Bundle/PlatformBundle/EventSubscriber/ConsoleCommandEventSubscriberTest.php
 
 		-
 			message: "#^Call to function is_a\\(\\) with arguments 'SolidWorx\\\\\\\\Platform\\\\\\\\PlatformBundle\\\\\\\\Response\\\\\\\\RedirectResponse', 'Symfony\\\\\\\\Component\\\\\\\\HttpFoundation\\\\\\\\RedirectResponse' and true will always evaluate to true\\.$#"
 			count: 1
 			path: tests/Bundle/PlatformBundle/Response/RedirectResponseTest.php
+
+		-
+			message: "#^Cannot access offset 'db_schema' on mixed\\.$#"
+			count: 2
+			path: tests/Bundle/Saas/Config/SaasConfigurationTest.php
 
 		-
 			message: "#^Call to method method\\(\\) on an unknown class PHPUnit\\\\Framework\\\\MockObject\\\\Builder\\\\InvocationMocker\\.$#"
