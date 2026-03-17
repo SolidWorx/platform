@@ -14,8 +14,8 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\UiBundle\DependencyInjection;
 
 use Override;
+use SolidWorx\Platform\UiBundle\Config\UiConfiguration;
 use SolidWorx\Platform\UiBundle\Twig\UiExtension;
-use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -104,32 +104,7 @@ final class SolidWorxPlatformUiExtension extends Extension implements PrependExt
      */
     private function processRawSection(): array
     {
-        $treeBuilder = new TreeBuilder('ui');
-        $root = $treeBuilder->getRootNode();
-
-        //@formatter:off
-        $root
-            ->addDefaultsIfNotSet()
-            ->children()
-                ->scalarNode('icon_pack')
-                    ->info('The icon pack to use')
-                    ->defaultValue('tabler')
-                ->end()
-                ->arrayNode('templates')
-                    ->addDefaultsIfNotSet()
-                    ->children()
-                        ->scalarNode('base')
-                            ->info('The base template')
-                            ->defaultValue('@Ui/Layout/base.html.twig')
-                        ->end()
-                        ->scalarNode('login')
-                            ->info('The standard login template')
-                            ->defaultValue('@Ui/Security/login.html.twig')
-                        ->end()
-                    ->end()
-                ->end()
-            ->end();
-        //@formatter:on
+        $treeBuilder = (new UiConfiguration())->getTreeBuilder();
 
         $processor = new Processor();
 

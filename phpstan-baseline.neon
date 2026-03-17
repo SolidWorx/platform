@@ -1,6 +1,11 @@
 parameters:
 	ignoreErrors:
 		-
+			message: "#^Call to method scalarNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Config/PlatformConfiguration.php
+
+		-
 			message: "#^Argument of an invalid type array\\|bool\\|float\\|int\\|string\\|null supplied for foreach, only iterables are supported\\.$#"
 			count: 1
 			path: src/Bundle/Platform/DependencyInjection/CompilerPass/AuthenticationCompilerPass.php
@@ -74,11 +79,6 @@ parameters:
 			message: "#^Parameter \\$config of method SolidWorx\\\\Platform\\\\PlatformBundle\\\\DependencyInjection\\\\Extension\\\\TwoFactorExtension\\:\\:configureSecurity\\(\\) has invalid type Symfony\\\\Config\\\\Security\\\\FirewallConfig\\.$#"
 			count: 1
 			path: src/Bundle/Platform/DependencyInjection/Extension/TwoFactorExtension.php
-
-		-
-			message: "#^Call to method scalarNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
-			count: 1
-			path: src/Bundle/Platform/DependencyInjection/SolidWorxPlatformExtension.php
 
 		-
 			message: "#^Parameter \\#2 \\$configurator of method Symfony\\\\Component\\\\DependencyInjection\\\\ContainerBuilder\\:\\:registerAttributeForAutoconfiguration\\(\\) expects callable\\(Symfony\\\\Component\\\\DependencyInjection\\\\ChildDefinition, SolidWorx\\\\Platform\\\\PlatformBundle\\\\Attributes\\\\Menu\\\\MenuBuilder, Reflector\\)\\: void, Closure\\(Symfony\\\\Component\\\\DependencyInjection\\\\ChildDefinition, SolidWorx\\\\Platform\\\\PlatformBundle\\\\Attributes\\\\Menu\\\\MenuBuilder, ReflectionMethod\\)\\: void given\\.$#"
@@ -236,6 +236,11 @@ parameters:
 			path: src/Bundle/Platform/Twig/Components/Security/TwoFactor.php
 
 		-
+			message: "#^Call to method arrayNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
+			count: 1
+			path: src/Bundle/Saas/Config/SaasConfiguration.php
+
+		-
 			message: "#^Call to static method getClass\\(\\) on an unknown class Doctrine\\\\Common\\\\Util\\\\ClassUtils\\.$#"
 			count: 2
 			path: src/Bundle/Saas/Console/Command/SubscriptionListCommand.php
@@ -299,11 +304,6 @@ parameters:
 			message: "#^Parameter \\#1 \\$value of static method SolidWorx\\\\Platform\\\\SaasBundle\\\\Enum\\\\SubscriptionStatus\\:\\:from\\(\\) expects int\\|string, mixed given\\.$#"
 			count: 1
 			path: src/Bundle/Saas/Console/Command/SubscriptionListCommand.php
-
-		-
-			message: "#^Call to method arrayNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
-			count: 1
-			path: src/Bundle/Saas/DependencyInjection/SolidWorxPlatformSaasExtension.php
 
 		-
 			message: "#^Parameter \\#1 \\$string of function strtolower expects string, Symfony\\\\Component\\\\String\\\\AbstractUnicodeString given\\.$#"
@@ -471,6 +471,11 @@ parameters:
 			path: src/Bundle/Saas/Repository/PlanRepository.php
 
 		-
+			message: "#^Parameter \\#2 \\$lockMode \\(int\\|null\\) of method SolidWorx\\\\Platform\\\\SaasBundle\\\\Repository\\\\PlanRepository\\:\\:find\\(\\) should be contravariant with parameter \\$lockMode \\(Doctrine\\\\DBAL\\\\LockMode\\|int\\|null\\) of method Doctrine\\\\ORM\\\\EntityRepository\\<SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\Plan\\>\\:\\:find\\(\\)$#"
+			count: 1
+			path: src/Bundle/Saas/Repository/PlanRepository.php
+
+		-
 			message: "#^Method SolidWorx\\\\Platform\\\\SaasBundle\\\\SolidWorxPlatformSaasBundle\\:\\:createContainerExtension\\(\\) never returns null so it can be removed from the return type\\.$#"
 			count: 1
 			path: src/Bundle/Saas/SolidWorxPlatformSaasBundle.php
@@ -488,7 +493,7 @@ parameters:
 		-
 			message: "#^Call to method scalarNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
 			count: 1
-			path: src/Bundle/Ui/DependencyInjection/SolidWorxPlatformUiExtension.php
+			path: src/Bundle/Ui/Config/UiConfiguration.php
 
 		-
 			message: "#^Method SolidWorx\\\\Platform\\\\UiBundle\\\\SolidWorxPlatformUiBundle\\:\\:createContainerExtension\\(\\) never returns null so it can be removed from the return type\\.$#"

@@ -17,13 +17,13 @@ use Knp\Menu\Provider\MenuProviderInterface;
 use Override;
 use ReflectionMethod;
 use SolidWorx\Platform\PlatformBundle\Attributes\Menu\MenuBuilder;
+use SolidWorx\Platform\PlatformBundle\Config\PlatformConfiguration;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendTwoFactorCode;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\Extension\TwoFactorExtension;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Type\URLType;
 use SolidWorx\Platform\PlatformBundle\Model\User;
 use SolidWorx\Platform\PlatformBundle\Twig\Components\Security\TwoFactor;
 use SolidWorx\Platform\PlatformBundle\Validator\Constraint\TwoFactorCodeValidator;
-use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
@@ -204,64 +204,7 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
      */
     private function processRawSection(): array
     {
-        $treeBuilder = new TreeBuilder('platform');
-        $root = $treeBuilder->getRootNode();
-
-        //@formatter:off
-        $root
-            ->addDefaultsIfNotSet()
-            ->children()
-                ->scalarNode('name')
-                    ->defaultValue('SolidWorx Platform')
-                    ->info('The name of the platform.')
-                ->end()
-                ->scalarNode('version')
-                    ->defaultValue('1.0.0')
-                    ->info('The version of the platform.')
-                ->end()
-                ->arrayNode('security')
-                    ->addDefaultsIfNotSet()
-                    ->children()
-                        ->arrayNode('two_factor')
-                            ->addDefaultsIfNotSet()
-                            ->children()
-                                ->booleanNode('enabled')
-                                    ->defaultFalse()
-                                    ->info('Enable two-factor authentication.')
-                                ->end()
-                                ->scalarNode('base_template')
-                                    ->defaultNull()
-                                    ->info('The base layout template for 2FA pages.')
-                                ->end()
-                            ->end()
-                        ->end()
-                    ->end()
-                ->end()
-                ->arrayNode('doctrine')
-                    ->addDefaultsIfNotSet()
-                    ->children()
-                        ->arrayNode('types')
-                            ->addDefaultsIfNotSet()
-                            ->children()
-                                ->booleanNode('enable_utc_date')
-                                    ->defaultTrue()
-                                    ->info('Enable UTC date type.')
-                                ->end()
-                            ->end()
-                        ->end()
-                    ->end()
-                ->end()
-                ->arrayNode('models')
-                    ->addDefaultsIfNotSet()
-                    ->children()
-                        ->scalarNode('user')
-                            ->defaultValue(User::class)
-                            ->info('The User model class.')
-                        ->end()
-                    ->end()
-                ->end()
-            ->end();
-        //@formatter:on
+        $treeBuilder = (new PlatformConfiguration())->getTreeBuilder();
 
         $processor = new Processor();
 
