@@ -1,21 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Cannot access offset string on mixed\\.$#"
-			count: 3
-			path: src/Bundle/Platform/Config/PlatformConfig.php
-
-		-
-			message: "#^Method SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\:\\:toArray\\(\\) should return array\\<string, bool\\|float\\|int\\|string\\> but returns array\\<string, mixed\\>\\.$#"
-			count: 1
-			path: src/Bundle/Platform/Config/PlatformConfig.php
-
-		-
-			message: "#^Parameter \\#2 \\$array of function array_key_exists expects array, mixed given\\.$#"
-			count: 1
-			path: src/Bundle/Platform/Config/PlatformConfig.php
-
-		-
 			message: "#^Argument of an invalid type array\\|bool\\|float\\|int\\|string\\|null supplied for foreach, only iterables are supported\\.$#"
 			count: 1
 			path: src/Bundle/Platform/DependencyInjection/CompilerPass/AuthenticationCompilerPass.php
@@ -91,53 +76,13 @@ parameters:
 			path: src/Bundle/Platform/DependencyInjection/Extension/TwoFactorExtension.php
 
 		-
-			message: "#^Only booleans are allowed in a negated boolean, mixed given\\.$#"
-			count: 1
-			path: src/Bundle/Platform/DependencyInjection/PlatformExtension.php
-
-		-
-			message: "#^Parameter \\#2 \\$config of static method SolidWorx\\\\Platform\\\\PlatformBundle\\\\DependencyInjection\\\\Extension\\\\TwoFactorExtension\\:\\:enable\\(\\) expects array\\{name\\: string, base_template\\: string\\}, array\\{name\\: mixed, base_template\\: mixed\\} given\\.$#"
-			count: 1
-			path: src/Bundle/Platform/DependencyInjection/PlatformExtension.php
-
-		-
-			message: "#^Parameter \\#2 \\$configurator of method Symfony\\\\Component\\\\DependencyInjection\\\\ContainerBuilder\\:\\:registerAttributeForAutoconfiguration\\(\\) expects callable\\(Symfony\\\\Component\\\\DependencyInjection\\\\ChildDefinition, SolidWorx\\\\Platform\\\\PlatformBundle\\\\Attributes\\\\Menu\\\\MenuBuilder, Reflector\\)\\: void, Closure\\(Symfony\\\\Component\\\\DependencyInjection\\\\ChildDefinition, SolidWorx\\\\Platform\\\\PlatformBundle\\\\Attributes\\\\Menu\\\\MenuBuilder, ReflectionMethod\\)\\: void given\\.$#"
-			count: 1
-			path: src/Bundle/Platform/DependencyInjection/PlatformExtension.php
-
-		-
-			message: "#^Parameter \\#2 \\$value of method Symfony\\\\Component\\\\DependencyInjection\\\\Container\\:\\:setParameter\\(\\) expects array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null, mixed given\\.$#"
-			count: 1
-			path: src/Bundle/Platform/DependencyInjection/PlatformExtension.php
-
-		-
-			message: "#^Using nullsafe method call on non\\-nullable type SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\. Use \\-\\> instead\\.$#"
-			count: 2
-			path: src/Bundle/Platform/DependencyInjection/PlatformExtension.php
-
-		-
-			message: "#^Only booleans are allowed in a negated boolean, mixed given\\.$#"
-			count: 1
-			path: src/Bundle/Platform/DependencyInjection/SolidWorxPlatformExtension.php
-
-		-
-			message: "#^Parameter \\#2 \\$config of static method SolidWorx\\\\Platform\\\\PlatformBundle\\\\DependencyInjection\\\\Extension\\\\TwoFactorExtension\\:\\:enable\\(\\) expects array\\{name\\: string, base_template\\: string\\}, array\\{name\\: mixed, base_template\\: mixed\\} given\\.$#"
+			message: "#^Call to method scalarNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
 			count: 1
 			path: src/Bundle/Platform/DependencyInjection/SolidWorxPlatformExtension.php
 
 		-
 			message: "#^Parameter \\#2 \\$configurator of method Symfony\\\\Component\\\\DependencyInjection\\\\ContainerBuilder\\:\\:registerAttributeForAutoconfiguration\\(\\) expects callable\\(Symfony\\\\Component\\\\DependencyInjection\\\\ChildDefinition, SolidWorx\\\\Platform\\\\PlatformBundle\\\\Attributes\\\\Menu\\\\MenuBuilder, Reflector\\)\\: void, Closure\\(Symfony\\\\Component\\\\DependencyInjection\\\\ChildDefinition, SolidWorx\\\\Platform\\\\PlatformBundle\\\\Attributes\\\\Menu\\\\MenuBuilder, ReflectionMethod\\)\\: void given\\.$#"
 			count: 1
-			path: src/Bundle/Platform/DependencyInjection/SolidWorxPlatformExtension.php
-
-		-
-			message: "#^Parameter \\#2 \\$value of method Symfony\\\\Component\\\\DependencyInjection\\\\Container\\:\\:setParameter\\(\\) expects array\\|bool\\|float\\|int\\|string\\|UnitEnum\\|null, mixed given\\.$#"
-			count: 1
-			path: src/Bundle/Platform/DependencyInjection/SolidWorxPlatformExtension.php
-
-		-
-			message: "#^Using nullsafe method call on non\\-nullable type SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\. Use \\-\\> instead\\.$#"
-			count: 5
 			path: src/Bundle/Platform/DependencyInjection/SolidWorxPlatformExtension.php
 
 		-
@@ -151,22 +96,42 @@ parameters:
 			path: src/Bundle/Platform/Form/Type/Security/TwoFactorVerifyType.php
 
 		-
-			message: "#^Cannot access offset 0 on non\\-empty\\-list\\<string\\>\\|false\\.$#"
-			count: 3
-			path: src/Bundle/Platform/Kernel.php
-
-		-
-			message: "#^Parameter \\#1 \\$platformConfig of class SolidWorx\\\\Platform\\\\PlatformBundle\\\\SolidWorxPlatformBundle constructor expects SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig, SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfig\\|null given\\.$#"
+			message: "#^Cannot access offset 'enabled' on mixed\\.$#"
 			count: 1
 			path: src/Bundle/Platform/Kernel.php
 
 		-
-			message: "#^Parameter \\#1 \\$value of function count expects array\\|Countable, array\\<int, string\\>\\|false given\\.$#"
+			message: "#^Cannot access offset 'security' on mixed\\.$#"
 			count: 1
 			path: src/Bundle/Platform/Kernel.php
 
 		-
-			message: "#^Parameter \\#2 \\$configs of method Symfony\\\\Component\\\\Config\\\\Definition\\\\Processor\\:\\:processConfiguration\\(\\) expects array, mixed given\\.$#"
+			message: "#^Cannot access offset 'two_factor' on mixed\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Kernel.php
+
+		-
+			message: "#^Cannot access offset non\\-empty\\-string on mixed\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Kernel.php
+
+		-
+			message: "#^Cannot cast mixed to string\\.$#"
+			count: 2
+			path: src/Bundle/Platform/Kernel.php
+
+		-
+			message: "#^Parameter \\#1 \\$rawConfig of method SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\PlatformConfigSectionInterface\\:\\:setPlatformRawConfig\\(\\) expects array\\<string, mixed\\>, mixed given\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Kernel.php
+
+		-
+			message: "#^Property SolidWorx\\\\Platform\\\\PlatformBundle\\\\Kernel\\:\\:\\$rawConfig \\(array\\<string, mixed\\>\\|null\\) does not accept mixed\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Kernel.php
+
+		-
+			message: "#^Short ternary operator is not allowed\\. Use null coalesce operator if applicable or consider using long ternary\\.$#"
 			count: 1
 			path: src/Bundle/Platform/Kernel.php
 
@@ -336,9 +301,9 @@ parameters:
 			path: src/Bundle/Saas/Console/Command/SubscriptionListCommand.php
 
 		-
-			message: "#^Call to an undefined method Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeParentInterface\\:\\:end\\(\\)\\.$#"
+			message: "#^Call to method arrayNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
 			count: 1
-			path: src/Bundle/Saas/DependencyInjection/Configuration.php
+			path: src/Bundle/Saas/DependencyInjection/SolidWorxPlatformSaasExtension.php
 
 		-
 			message: "#^Parameter \\#1 \\$string of function strtolower expects string, Symfony\\\\Component\\\\String\\\\AbstractUnicodeString given\\.$#"
@@ -418,6 +383,11 @@ parameters:
 		-
 			message: "#^Access to an undefined property SolidWorx\\\\Platform\\\\SaasBundle\\\\RemoteEvent\\\\SubscriptionPaymentRemoteEvent\\|SolidWorx\\\\Platform\\\\SaasBundle\\\\RemoteEvent\\\\SubscriptionRemoteEvent\\:\\:\\$subscriptionInvoice\\.$#"
 			count: 5
+			path: src/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumer.php
+
+		-
+			message: "#^Call to function is_a\\(\\) with arguments 'SolidWorx\\\\\\\\Platform\\\\\\\\SaasBundle\\\\\\\\Event\\\\\\\\SubscriptionPaymentFailedEvent'\\|'SolidWorx\\\\\\\\Platform\\\\\\\\SaasBundle\\\\\\\\Event\\\\\\\\SubscriptionPaymentPaidEvent'\\|'SolidWorx\\\\\\\\Platform\\\\\\\\SaasBundle\\\\\\\\Event\\\\\\\\SubscriptionPaymentRecoveredEvent'\\|'SolidWorx\\\\\\\\Platform\\\\\\\\SaasBundle\\\\\\\\Event\\\\\\\\SubscriptionPaymentRefundedEvent', 'SolidWorx\\\\\\\\Platform\\\\\\\\SaasBundle\\\\\\\\Event\\\\\\\\PaymentEvent' and true will always evaluate to true\\.$#"
+			count: 1
 			path: src/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumer.php
 
 		-
@@ -501,9 +471,9 @@ parameters:
 			path: src/Bundle/Saas/Repository/PlanRepository.php
 
 		-
-			message: "#^Parameter \\#2 \\$lockMode \\(int\\|null\\) of method SolidWorx\\\\Platform\\\\SaasBundle\\\\Repository\\\\PlanRepository\\:\\:find\\(\\) should be contravariant with parameter \\$lockMode \\(Doctrine\\\\DBAL\\\\LockMode\\|int\\|null\\) of method Doctrine\\\\ORM\\\\EntityRepository\\<SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\Plan\\>\\:\\:find\\(\\)$#"
+			message: "#^Method SolidWorx\\\\Platform\\\\SaasBundle\\\\SolidWorxPlatformSaasBundle\\:\\:createContainerExtension\\(\\) never returns null so it can be removed from the return type\\.$#"
 			count: 1
-			path: src/Bundle/Saas/Repository/PlanRepository.php
+			path: src/Bundle/Saas/SolidWorxPlatformSaasBundle.php
 
 		-
 			message: "#^Parameter \\#1 \\$plan of class SolidWorx\\\\Platform\\\\SaasBundle\\\\Exception\\\\InvalidPlanException constructor expects string, SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\Plan\\|string\\|Symfony\\\\Component\\\\Uid\\\\Ulid given\\.$#"
@@ -516,9 +486,24 @@ parameters:
 			path: src/Bundle/Saas/Webhook/Converter/LemonSqueezyPayloadConverter.php
 
 		-
+			message: "#^Call to method scalarNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
+			count: 1
+			path: src/Bundle/Ui/DependencyInjection/SolidWorxPlatformUiExtension.php
+
+		-
+			message: "#^Method SolidWorx\\\\Platform\\\\UiBundle\\\\SolidWorxPlatformUiBundle\\:\\:createContainerExtension\\(\\) never returns null so it can be removed from the return type\\.$#"
+			count: 1
+			path: src/Bundle/Ui/SolidWorxPlatformUiBundle.php
+
+		-
 			message: "#^Call to method method\\(\\) on an unknown class PHPUnit\\\\Framework\\\\MockObject\\\\Builder\\\\InvocationMocker\\.$#"
 			count: 1
 			path: tests/Bundle/PlatformBundle/EventSubscriber/ConsoleCommandEventSubscriberTest.php
+
+		-
+			message: "#^Call to function is_a\\(\\) with arguments 'SolidWorx\\\\\\\\Platform\\\\\\\\PlatformBundle\\\\\\\\Response\\\\\\\\RedirectResponse', 'Symfony\\\\\\\\Component\\\\\\\\HttpFoundation\\\\\\\\RedirectResponse' and true will always evaluate to true\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Response/RedirectResponseTest.php
 
 		-
 			message: "#^Call to method method\\(\\) on an unknown class PHPUnit\\\\Framework\\\\MockObject\\\\Builder\\\\InvocationMocker\\.$#"

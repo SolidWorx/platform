@@ -15,6 +15,8 @@ namespace SolidWorx\Platform\UiBundle\DependencyInjection;
 
 use Override;
 use SolidWorx\Platform\UiBundle\Twig\UiExtension;
+use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -24,14 +26,29 @@ use function dirname;
 
 final class SolidWorxPlatformUiExtension extends Extension implements PrependExtensionInterface
 {
+    /**
+     * @var array{
+     *   icon_pack: string,
+     *   templates: array{base: string, login: string}
+     * }|null
+     */
+    private ?array $config = null;
+
+    /**
+     * @param array<string, mixed> $rawSection The raw (unvalidated) `platform.ui:` config section.
+     */
+    public function __construct(
+        private readonly array $rawSection
+    ) {
+    }
+
     #[Override]
     public function load(array $configs, ContainerBuilder $container): void
     {
         $loader = new PhpFileLoader($container, new FileLocator(dirname(__DIR__) . '/Resources/config'));
         $loader->import('services.php');
 
-        $configuration = new Configuration();
-        $config = $this->processConfiguration($configuration, $configs);
+        $config = $this->getConfig();
 
         $container
             ->getDefinition(UiExtension::class)
@@ -55,17 +72,6 @@ final class SolidWorxPlatformUiExtension extends Extension implements PrependExt
             ]);
         }
 
-        // Check if AssetMapper is installed
-        /*if ($container->hasExtension('framework') && class_exists(AssetMapper::class)) {
-            $container->prependExtensionConfig('framework', [
-                'asset_mapper' => [
-                    'paths' => [
-                        __DIR__ . '/../../../assets/ui/dist' => '@solidworx/ui-component',
-                    ],
-                ],
-            ]);
-        }*/
-
         if ($container->hasExtension('twig')) {
             $container->prependExtensionConfig('twig', [
                 'paths' => [
@@ -73,5 +79,61 @@ final class SolidWorxPlatformUiExtension extends Extension implements PrependExt
                 ],
             ]);
         }
+    }
+
+    /**
+     * @return array{
+     *   icon_pack: string,
+     *   templates: array{base: string, login: string}
+     * }
+     */
+    private function getConfig(): array
+    {
+        if ($this->config === null) {
+            $this->config = $this->processRawSection();
+        }
+
+        return $this->config;
+    }
+
+    /**
+     * @return array{
+     *   icon_pack: string,
+     *   templates: array{base: string, login: string}
+     * }
+     */
+    private function processRawSection(): array
+    {
+        $treeBuilder = new TreeBuilder('ui');
+        $root = $treeBuilder->getRootNode();
+
+        //@formatter:off
+        $root
+            ->addDefaultsIfNotSet()
+            ->children()
+                ->scalarNode('icon_pack')
+                    ->info('The icon pack to use')
+                    ->defaultValue('tabler')
+                ->end()
+                ->arrayNode('templates')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('base')
+                            ->info('The base template')
+                            ->defaultValue('@Ui/Layout/base.html.twig')
+                        ->end()
+                        ->scalarNode('login')
+                            ->info('The standard login template')
+                            ->defaultValue('@Ui/Security/login.html.twig')
+                        ->end()
+                    ->end()
+                ->end()
+            ->end();
+        //@formatter:on
+
+        $processor = new Processor();
+
+        /** @var array{icon_pack: string, templates: array{base: string, login: string}} */
+        return $processor->process($treeBuilder->buildTree(), [$this->rawSection]);
     }
 }
