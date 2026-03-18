@@ -17,6 +17,7 @@ use Override;
 use SolidWorx\Platform\SaasBundle\Feature\PlanFeatureManager;
 use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use function is_array;
 use function str_starts_with;
@@ -60,7 +61,7 @@ final class PlanFeatureVoter extends Voter
     }
 
     #[Override]
-    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
+    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool
     {
         $featureKey = $this->extractFeatureKey($attribute);
 
