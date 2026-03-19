@@ -38,7 +38,7 @@ class SubscriptionLog
     #[ORM\CustomIdGenerator(class: UlidGenerator::class)]
     private Ulid $id;
 
-    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE, precision: 3)]
+    #[ORM\Column(name: 'created_at', type: Types::DATETIMETZ_IMMUTABLE, precision: 3)]
     private DateTimeImmutable $createdAt;
 
     #[ORM\ManyToOne(targetEntity: Subscription::class, inversedBy: 'logs')]
