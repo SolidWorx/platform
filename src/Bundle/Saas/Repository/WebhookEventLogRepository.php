@@ -11,10 +11,11 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace SolidWorx\Platform\PlatformBundle\Repository;
+namespace SolidWorx\Platform\SaasBundle\Repository;
 
 use Doctrine\Persistence\ManagerRegistry;
-use SolidWorx\Platform\PlatformBundle\Model\WebhookEventLog;
+use SolidWorx\Platform\PlatformBundle\Repository\EntityRepository;
+use SolidWorx\Platform\SaasBundle\Entity\WebhookEventLog;
 
 /**
  * @template-extends EntityRepository<WebhookEventLog>

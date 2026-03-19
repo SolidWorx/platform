@@ -11,13 +11,13 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace SolidWorx\Platform\PlatformBundle\EventSubscriber;
+namespace SolidWorx\Platform\SaasBundle\EventSubscriber;
 
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Override;
-use SolidWorx\Platform\PlatformBundle\Enum\WebhookEventStatus;
-use SolidWorx\Platform\PlatformBundle\Model\WebhookEventLog;
+use SolidWorx\Platform\SaasBundle\Entity\WebhookEventLog;
+use SolidWorx\Platform\SaasBundle\Enum\WebhookEventStatus;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Event\RequestEvent;

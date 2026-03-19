@@ -16,7 +16,7 @@ namespace SolidWorx\Platform\SaasBundle\Entity;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use SolidWorx\Platform\PlatformBundle\Model\WebhookEventLog;
+use SolidWorx\Platform\SaasBundle\Entity\WebhookEventLog;
 use SolidWorx\Platform\SaasBundle\Enum\SubscriptionLogType;
 use SolidWorx\Platform\SaasBundle\Repository\SubscriptionLogRepository;
 use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;

@@ -16,7 +16,7 @@ namespace SolidWorx\Platform\SaasBundle\EventSubscriber;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Override;
-use SolidWorx\Platform\PlatformBundle\Model\WebhookEventLog;
+use SolidWorx\Platform\SaasBundle\Entity\WebhookEventLog;
 use SolidWorx\Platform\SaasBundle\Dto\LemonSqueezy\SubscriptionInvoice;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Entity\SubscriptionLog;

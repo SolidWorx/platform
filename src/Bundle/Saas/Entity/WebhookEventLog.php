@@ -11,13 +11,13 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace SolidWorx\Platform\PlatformBundle\Model;
+namespace SolidWorx\Platform\SaasBundle\Entity;
 
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use SolidWorx\Platform\PlatformBundle\Enum\WebhookEventStatus;
-use SolidWorx\Platform\PlatformBundle\Repository\WebhookEventLogRepository;
+use SolidWorx\Platform\SaasBundle\Enum\WebhookEventStatus;
+use SolidWorx\Platform\SaasBundle\Repository\WebhookEventLogRepository;
 use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
 use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\Uid\NilUlid;

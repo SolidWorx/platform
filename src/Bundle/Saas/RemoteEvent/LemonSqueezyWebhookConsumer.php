@@ -15,7 +15,7 @@ namespace SolidWorx\Platform\SaasBundle\RemoteEvent;
 
 use Override;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use SolidWorx\Platform\PlatformBundle\Model\WebhookEventLog;
+use SolidWorx\Platform\SaasBundle\Entity\WebhookEventLog;
 use SolidWorx\Platform\SaasBundle\Enum\LemonSqueezy\Event;
 use SolidWorx\Platform\SaasBundle\Event\PaymentEvent;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionCancelledEvent;
