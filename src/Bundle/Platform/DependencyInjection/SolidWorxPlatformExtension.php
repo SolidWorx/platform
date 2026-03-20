@@ -17,13 +17,14 @@ use Knp\Menu\Provider\MenuProviderInterface;
 use Override;
 use ReflectionMethod;
 use SolidWorx\Platform\PlatformBundle\Attributes\Menu\MenuBuilder;
-use SolidWorx\Platform\PlatformBundle\Config\PlatformConfig;
-use SolidWorx\Platform\PlatformBundle\Doctrine\Type\URLType;
+use SolidWorx\Platform\PlatformBundle\Config\PlatformConfiguration;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendTwoFactorCode;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\Extension\TwoFactorExtension;
+use SolidWorx\Platform\PlatformBundle\Doctrine\Type\URLType;
 use SolidWorx\Platform\PlatformBundle\Model\User;
 use SolidWorx\Platform\PlatformBundle\Twig\Components\Security\TwoFactor;
 use SolidWorx\Platform\PlatformBundle\Validator\Constraint\TwoFactorCodeValidator;
+use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -34,22 +35,34 @@ use function dirname;
 
 final class SolidWorxPlatformExtension extends Extension implements PrependExtensionInterface
 {
+    /**
+     * @var array{
+     *   name: string,
+     *   version: string,
+     *   security: array{two_factor: array{enabled: bool, base_template: string|null}},
+     *   doctrine: array{types: array{enable_utc_date: bool}},
+     *   models: array{user: string}
+     * }|null
+     */
+    private ?array $config = null;
+
+    /**
+     * @param array<string, mixed> $rawSection The raw (unvalidated) `platform:` config section.
+     */
     public function __construct(
-        private readonly PlatformConfig $platformConfig
+        private readonly array $rawSection
     ) {
     }
 
     #[Override]
     public function load(array $configs, ContainerBuilder $container): void
     {
-        $configuration = new Configuration();
-        $config = $this->processConfiguration($configuration, $configs);
+        $config = $this->getConfig();
 
         $loader = new PhpFileLoader($container, new FileLocator(dirname(__DIR__) . '/Resources/config'));
         $loader->import('services.php');
 
-        $container->setParameter('solidworx_platform.app.name', $this->platformConfig?->get('name'));
-
+        $container->setParameter('solidworx_platform.app.name', $config['name']);
         $container->setParameter('solidworx_platform.doctrine.types.enable_utc_date', $config['doctrine']['types']['enable_utc_date']);
 
         $container->registerForAutoconfiguration(MenuProviderInterface::class)
@@ -66,7 +79,7 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
 
         $container->setParameter('solidworx_platform.models.user', $config['models']['user']);
 
-        if (! $this->platformConfig?->get('security.2fa.enabled')) {
+        if (! $config['security']['two_factor']['enabled']) {
             // @TODO: Need to remove the 2FA routes as well if 2fa is not configured
             $container->removeDefinition(ResendTwoFactorCode::class);
             $container->removeDefinition(TwoFactorCodeValidator::class);
@@ -77,8 +90,6 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
     #[Override]
     public function prepend(ContainerBuilder $container): void
     {
-        $container->prependExtensionConfig('platform', []);
-
         if ($container->hasExtension('doctrine')) {
             $container->prependExtensionConfig(
                 'doctrine',
@@ -116,12 +127,14 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
             );
         }
 
-        if ($this->platformConfig?->get('security.2fa.enabled') === true) {
+        $config = $this->getConfig();
+
+        if ($config['security']['two_factor']['enabled']) {
             TwoFactorExtension::enable(
                 $container,
                 [
-                    'name' => $this->platformConfig?->get('name'),
-                    'base_template' => $this->platformConfig?->get('security.2fa.base_template'),
+                    'name' => $config['name'],
+                    'base_template' => $config['security']['two_factor']['base_template'] ?? '',
                 ]
             );
         }
@@ -148,16 +161,6 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
             );
         }
 
-        /*$container->prependExtensionConfig(
-            'framework',
-            [
-                'csrf_protection' => [
-                    'enabled' => true,
-                    'stateless_token_ids' => ['submit', 'authenticate', 'logout'],
-                ],
-            ],
-        );*/
-
         $container->prependExtensionConfig(
             'security',
             [
@@ -170,5 +173,42 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
                 ],
             ],
         );
+    }
+
+    /**
+     * @return array{
+     *   name: string,
+     *   version: string,
+     *   security: array{two_factor: array{enabled: bool, base_template: string|null}},
+     *   doctrine: array{types: array{enable_utc_date: bool}},
+     *   models: array{user: string}
+     * }
+     */
+    private function getConfig(): array
+    {
+        if ($this->config === null) {
+            $this->config = $this->processRawSection();
+        }
+
+        return $this->config;
+    }
+
+    /**
+     * @return array{
+     *   name: string,
+     *   version: string,
+     *   security: array{two_factor: array{enabled: bool, base_template: string|null}},
+     *   doctrine: array{types: array{enable_utc_date: bool}},
+     *   models: array{user: string}
+     * }
+     */
+    private function processRawSection(): array
+    {
+        $treeBuilder = (new PlatformConfiguration())->getTreeBuilder();
+
+        $processor = new Processor();
+
+        /** @var array{name: string, version: string, security: array{two_factor: array{enabled: bool, base_template: string|null}}, doctrine: array{types: array{enable_utc_date: bool}}, models: array{user: string}} */
+        return $processor->process($treeBuilder->buildTree(), [$this->rawSection]);
     }
 }

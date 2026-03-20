@@ -14,14 +14,34 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\SaasBundle;
 
 use Override;
+use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigSectionInterface;
 use SolidWorx\Platform\SaasBundle\DependencyInjection\CompilerPass\ResolveTargetEntityPass;
 use SolidWorx\Platform\SaasBundle\DependencyInjection\CompilerPass\WebhookCompilerPass;
+use SolidWorx\Platform\SaasBundle\DependencyInjection\SolidWorxPlatformSaasExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-final class SolidWorxPlatformSaasBundle extends Bundle
+final class SolidWorxPlatformSaasBundle extends Bundle implements PlatformConfigSectionInterface
 {
     public const string NAMESPACE = __NAMESPACE__;
+
+    /**
+     * @var array<string, mixed>
+     */
+    private array $rawConfig = [];
+
+    #[Override]
+    public function getConfigSectionKey(): string
+    {
+        return 'saas';
+    }
+
+    #[Override]
+    public function setPlatformRawConfig(array $rawConfig): void
+    {
+        $this->rawConfig = $rawConfig;
+    }
 
     #[Override]
     public function getPath(): string
@@ -35,5 +55,11 @@ final class SolidWorxPlatformSaasBundle extends Bundle
         parent::build($container);
         $container->addCompilerPass(new ResolveTargetEntityPass());
         $container->addCompilerPass(new WebhookCompilerPass());
+    }
+
+    #[Override]
+    protected function createContainerExtension(): ?ExtensionInterface
+    {
+        return new SolidWorxPlatformSaasExtension($this->rawConfig);
     }
 }

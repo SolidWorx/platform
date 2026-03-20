@@ -8,7 +8,8 @@
       "Bash(vendor/bin/ecs:*)",
       "Bash(vendor/bin/phpstan:*)",
       "Bash(vendor/bin/phpunit:*)",
-      "Bash(vendor/bin/rector process:*)"
+      "Bash(vendor/bin/rector process:*)",
+      "Bash(vendor/bin/rector)"
     ]
   }
 }

@@ -14,15 +14,41 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\UiBundle;
 
 use Override;
+use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigSectionInterface;
+use SolidWorx\Platform\UiBundle\DependencyInjection\SolidWorxPlatformUiExtension;
+use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-final class SolidWorxPlatformUiBundle extends Bundle
+final class SolidWorxPlatformUiBundle extends Bundle implements PlatformConfigSectionInterface
 {
-    public const string  NAMESPACE = __NAMESPACE__;
+    public const string NAMESPACE = __NAMESPACE__;
+
+    /**
+     * @var array<string, mixed>
+     */
+    private array $rawConfig = [];
+
+    #[Override]
+    public function getConfigSectionKey(): string
+    {
+        return 'ui';
+    }
+
+    #[Override]
+    public function setPlatformRawConfig(array $rawConfig): void
+    {
+        $this->rawConfig = $rawConfig;
+    }
 
     #[Override]
     public function getPath(): string
     {
         return __DIR__;
+    }
+
+    #[Override]
+    protected function createContainerExtension(): ?ExtensionInterface
+    {
+        return new SolidWorxPlatformUiExtension($this->rawConfig);
     }
 }

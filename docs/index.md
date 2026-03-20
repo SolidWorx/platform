@@ -4,4 +4,5 @@ Welcome to the SolidWorx Platform documentation. This platform provides the foun
 
 ## Contents
 
+- [Configuration](./configuration/index.md)
 - [Doctrine Types](./doctrine-types/index.md)

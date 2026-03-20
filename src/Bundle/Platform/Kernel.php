@@ -19,14 +19,9 @@ use Knp\Bundle\MenuBundle\KnpMenuBundle;
 use Override;
 use RuntimeException;
 use Scheb\TwoFactorBundle\SchebTwoFactorBundle;
-use SolidWorx\Platform\PlatformBundle\Config\Configuration;
-use SolidWorx\Platform\PlatformBundle\Config\PlatformConfig;
-use SolidWorx\Platform\PlatformBundle\DependencyInjection\SolidWorxPlatformExtension;
+use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigSectionInterface;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
-use Symfony\Component\Config\ConfigCache;
-use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\Loader\LoaderInterface;
-use Symfony\Component\Config\Util\XmlUtils;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpFoundation\Request;
@@ -36,15 +31,14 @@ use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\UX\Icons\UXIconsBundle;
-use SymfonyCasts\Bundle\ResetPassword\SymfonyCastsResetPasswordBundle;
 use Twig\Extra\TwigExtraBundle\TwigExtraBundle;
 use function defined;
 use function file_exists;
 use function glob;
 use function implode;
+use function is_file;
 use function pathinfo;
 use function sprintf;
-use function var_export;
 
 abstract class Kernel extends BaseKernel
 {
@@ -54,9 +48,12 @@ abstract class Kernel extends BaseKernel
         configureRoutes as private configureRoutesTrait;
     }
 
-    private const string PLATFORM_CONFIG_FILE = 'platform.{xml,yml,yaml}';
+    private const string DEFAULT_CONFIG_GLOB = 'platform.{yml,yaml,json,php}';
 
-    private ?PlatformConfig $platformConfig = null;
+    /**
+     * @var array<string, mixed>|null
+     */
+    private ?array $rawConfig = null;
 
     #[Override]
     public function boot(): void
@@ -84,12 +81,13 @@ abstract class Kernel extends BaseKernel
     {
         yield from $this->registerBundlesTrait();
 
-        if ($this->platformConfig?->get('security.2fa.enabled') === true) {
+        $platformConfig = $this->rawConfig['platform'] ?? [];
+
+        if (($platformConfig['security']['two_factor']['enabled'] ?? false) === true) {
             yield new SchebTwoFactorBundle();
         }
 
-        //yield new $builder->registerExtension(new SolidWorxPlatformExtension($this->platformConfig));
-        yield new SolidWorxPlatformBundle($this->platformConfig);
+        yield new SolidWorxPlatformBundle();
 
         yield new TwigExtraBundle();
         yield new KnpMenuBundle();
@@ -100,28 +98,29 @@ abstract class Kernel extends BaseKernel
     #[Override]
     protected function initializeBundles(): void
     {
-        // init bundles
         $this->bundles = [];
+
+        $rawPlatformConfig = $this->rawConfig['platform'] ?? [];
+
         foreach ($this->registerBundles() as $bundle) {
             $name = $bundle->getName();
             if (isset($this->bundles[$name])) {
-                // Bundle is already registered, let's skip it
+                // Bundle is already registered, skip it
                 continue;
+            }
+
+            if ($bundle instanceof PlatformConfigSectionInterface) {
+                $key = $bundle->getConfigSectionKey();
+                $section = $key !== '' ? ($rawPlatformConfig[$key] ?? []) : $rawPlatformConfig;
+                $bundle->setPlatformRawConfig($section);
             }
 
             $this->bundles[$name] = $bundle;
         }
     }
 
-    protected function getPlatformConfigFile(): string
-    {
-        return $this->getProjectDir() . '/' . self::PLATFORM_CONFIG_FILE;
-    }
-
     protected function configureContainer(ContainerConfigurator $container, LoaderInterface $loader, ContainerBuilder $builder): void
     {
-        // $builder->registerExtension(new SolidWorxPlatformExtension($this->platformConfig));
-
         $this->configureContainerTrait($container, $loader, $builder);
     }
 
@@ -134,29 +133,59 @@ abstract class Kernel extends BaseKernel
 
     private function processPlatformConfig(): void
     {
-        if ($this->platformConfig instanceof PlatformConfig) {
+        if ($this->rawConfig !== null) {
             return;
         }
 
-        $platformConfigFile = $this->getPlatformConfigFile();
+        $this->rawConfig = [];
 
-        $configCache = new ConfigCache($this->getCacheDir() . '/Platform/config.php', $this->debug);
+        $configFile = $this->resolveConfigFile();
 
-        if ($configCache->isFresh()) {
-            $this->platformConfig = new PlatformConfig(require $configCache->getPath());
+        if ($configFile === null) {
             return;
         }
+
+        $ext = pathinfo($configFile, PATHINFO_EXTENSION);
+
+        $this->rawConfig = match ($ext) {
+            'yaml', 'yml' => Yaml::parseFile($configFile) ?? [],
+            'json' => (static function (string $path): array {
+                $decoded = json_decode((string) file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+                return is_array($decoded) ? $decoded : [];
+            })($configFile),
+            'php' => (static function (string $path): array {
+                $result = require $path;
+                return is_array($result) ? $result : [];
+            })($configFile),
+            default => throw new RuntimeException(sprintf('Unsupported platform configuration file format: .%s', $ext)),
+        };
+    }
+
+    private function resolveConfigFile(): ?string
+    {
+        // Allow an explicit path override via environment variable
+        $envOverride = $_ENV['PLATFORM_CONFIG_FILE'] ?? $_SERVER['PLATFORM_CONFIG_FILE'] ?? null;
+        if ($envOverride !== null && is_file((string) $envOverride)) {
+            return (string) $envOverride;
+        }
+
+        $glob = $this->getProjectDir() . '/' . self::DEFAULT_CONFIG_GLOB;
 
         $configFiles = [];
 
         if (defined('GLOB_BRACE')) {
-            $configFiles = glob($platformConfigFile, defined('GLOB_BRACE') ? GLOB_BRACE : 0);
-        } elseif (file_exists($this->getProjectDir() . '/platform.yaml')) {
-            $configFiles = [$this->getProjectDir() . '/platform.yaml'];
+            $configFiles = glob($glob, GLOB_BRACE) ?: [];
+        } else {
+            foreach (['yml', 'yaml', 'json', 'php'] as $ext) {
+                $candidate = $this->getProjectDir() . '/platform.' . $ext;
+                if (file_exists($candidate)) {
+                    $configFiles[] = $candidate;
+                }
+            }
         }
 
         if ($configFiles === []) {
-            return;
+            return null;
         }
 
         if (count($configFiles) > 1) {
@@ -166,19 +195,6 @@ abstract class Kernel extends BaseKernel
             ));
         }
 
-        $ext = pathinfo($configFiles[0], PATHINFO_EXTENSION);
-
-        $parsedConfig = match ($ext) {
-            'xml' => XmlUtils::loadFile($configFiles[0]),
-            'yaml', 'yml' => Yaml::parseFile($configFiles[0]),
-            default => throw new RuntimeException(sprintf('Unsupported configuration file format: %s', $ext)),
-        };
-
-        $processor = new Processor();
-        $this->platformConfig = new PlatformConfig($processor->processConfiguration(new Configuration(), $parsedConfig));
-
-        $configCache->write(
-            '<?php return ' . var_export($this->platformConfig->toArray(), true) . ';',
-        );
+        return $configFiles[0];
     }
 }

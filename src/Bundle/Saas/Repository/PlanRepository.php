@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\Repository;
 
+use Doctrine\DBAL\LockMode;
 use Doctrine\Persistence\ManagerRegistry;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Repository\EntityRepository;
@@ -33,7 +34,7 @@ final class PlanRepository extends EntityRepository
      * @param string|Plan|Ulid $id
      */
     #[Override]
-    public function find($id, $lockMode = null, $lockVersion = null): ?Plan
+    public function find(mixed $id, LockMode|int|null $lockMode = null, int|null $lockVersion = null): ?Plan
     {
         return match (get_debug_type($id)) {
             Plan::class => $id,

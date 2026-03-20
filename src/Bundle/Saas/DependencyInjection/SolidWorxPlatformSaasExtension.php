@@ -14,11 +14,17 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\SaasBundle\DependencyInjection;
 
 use Override;
+use SolidWorx\Platform\SaasBundle\Config\SaasConfiguration;
+use SolidWorx\Platform\SaasBundle\Entity\Plan;
+use SolidWorx\Platform\SaasBundle\Entity\PlanFeature;
+use SolidWorx\Platform\SaasBundle\Entity\Subscription;
+use SolidWorx\Platform\SaasBundle\Entity\SubscriptionLog;
 use SolidWorx\Platform\SaasBundle\Exception\ExtensionRequiredException;
 use SolidWorx\Platform\SaasBundle\Feature\FeatureConfigRegistry;
 use SolidWorx\Platform\SaasBundle\Integration\LemonSqueezy;
 use SolidWorx\Platform\SaasBundle\SolidWorxPlatformSaasBundle;
 use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
+use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -27,11 +33,31 @@ use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 
 final class SolidWorxPlatformSaasExtension extends Extension implements PrependExtensionInterface
 {
+    /**
+     * @var array{
+     *   doctrine: array{
+     *     subscriptions: array{entity: string},
+     *     db_schema: array{table_names: array{plan: string, subscription: string, subscription_log: string, plan_feature: string}}
+     *   },
+     *   payment: array{return_route: string},
+     *   integration: array{lemon_squeezy: array{enabled: bool, api_key: string, webhook_secret: string, store_id: string}},
+     *   features: array<string, array{type: string, default: mixed, description: string}>
+     * }|null
+     */
+    private ?array $config = null;
+
+    /**
+     * @param array<string, mixed> $rawSection The raw (unvalidated) `platform.saas:` config section.
+     */
+    public function __construct(
+        private readonly array $rawSection
+    ) {
+    }
+
     #[Override]
     public function load(array $configs, ContainerBuilder $container): void
     {
-        $configuration = new Configuration();
-        $config = $this->processConfiguration($configuration, $configs);
+        $config = $this->getConfig();
 
         $loader = new PhpFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->import('services.php');
@@ -39,36 +65,40 @@ final class SolidWorxPlatformSaasExtension extends Extension implements PrependE
         if (isset($config['doctrine']['db_schema']['table_names'])) {
             $loader->import('doctrine.php');
 
-            $container->setParameter('solidworx_platform.saas.doctrine.db_schema.table_names', $config['doctrine']['db_schema']['table_names']);
-        }
+            // Convert simple name keys (plan, subscription, …) to FQCN keys required by MetadataSubscriber
+            $simpleToFqcn = [
+                'plan' => Plan::class,
+                'subscription' => Subscription::class,
+                'subscription_log' => SubscriptionLog::class,
+                'plan_feature' => PlanFeature::class,
+            ];
 
-        if (isset($config['doctrine']['subscriptions']['entity'])) {
-            $container->setParameter('solidworx_platform.saas.doctrine.subscribable_class', $config['doctrine']['subscriptions']['entity']);
-        }
-
-        if (isset($config['payment']['return_route'])) {
-            $container->setParameter('solidworx_platform.saas.payment.return_route', $config['payment']['return_route']);
-        }
-
-        foreach ($config['integration']['payment'] ?? [] as $key => $value) {
-            if ($value['enabled'] === false) {
-                continue;
+            $tableNames = [];
+            foreach ($config['doctrine']['db_schema']['table_names'] as $key => $tableName) {
+                $fqcn = $simpleToFqcn[$key] ?? $key;
+                $tableNames[$fqcn] = $tableName;
             }
 
-            if ($key === 'lemon_squeezy') {
-                $def = $container->getDefinition(LemonSqueezy::class);
-                $def->setBindings([
-                    '$apiKey' => $value['api_key'],
-                    '$storeId' => $value['store_id'],
-                ]);
-                $container->setParameter('solidworx_platform.saas.integration.payment.lemon_squeezy.api_key', $value['api_key']);
-                $container->setParameter('solidworx_platform.saas.integration.payment.lemon_squeezy.store_id', $value['store_id']);
-                $container->setParameter('solidworx_platform.saas.integration.payment.lemon_squeezy.webhook_secret', $value['webhook_secret']);
-                $container->setParameter('solidworx_platform.saas.integration.payment.lemon_squeezy.enabled', true);
-            }
+            $container->setParameter('solidworx_platform.saas.doctrine.db_schema.table_names', $tableNames);
         }
 
-        $features = $config['features'] ?? [];
+        $container->setParameter('solidworx_platform.saas.doctrine.subscribable_class', $config['doctrine']['subscriptions']['entity']);
+        $container->setParameter('solidworx_platform.saas.payment.return_route', $config['payment']['return_route']);
+
+        $lemonSqueezy = $config['integration']['lemon_squeezy'];
+        if ($lemonSqueezy['enabled']) {
+            $def = $container->getDefinition(LemonSqueezy::class);
+            $def->setBindings([
+                '$apiKey' => $lemonSqueezy['api_key'],
+                '$storeId' => $lemonSqueezy['store_id'],
+            ]);
+            $container->setParameter('solidworx_platform.saas.integration.payment.lemon_squeezy.api_key', $lemonSqueezy['api_key']);
+            $container->setParameter('solidworx_platform.saas.integration.payment.lemon_squeezy.store_id', $lemonSqueezy['store_id']);
+            $container->setParameter('solidworx_platform.saas.integration.payment.lemon_squeezy.webhook_secret', $lemonSqueezy['webhook_secret']);
+            $container->setParameter('solidworx_platform.saas.integration.payment.lemon_squeezy.enabled', true);
+        }
+
+        $features = $config['features'];
         $container->setParameter('solidworx_platform.saas.features', $features);
 
         if ($container->hasDefinition(FeatureConfigRegistry::class)) {
@@ -107,5 +137,46 @@ final class SolidWorxPlatformSaasExtension extends Extension implements PrependE
                 ],
             ],
         );
+    }
+
+    /**
+     * @return array{
+     *   doctrine: array{
+     *     subscriptions: array{entity: string},
+     *     db_schema: array{table_names: array{plan: string, subscription: string, subscription_log: string, plan_feature: string}}
+     *   },
+     *   payment: array{return_route: string},
+     *   integration: array{lemon_squeezy: array{enabled: bool, api_key: string, webhook_secret: string, store_id: string}},
+     *   features: array<string, array{type: string, default: mixed, description: string}>
+     * }
+     */
+    private function getConfig(): array
+    {
+        if ($this->config === null) {
+            $this->config = $this->processRawSection();
+        }
+
+        return $this->config;
+    }
+
+    /**
+     * @return array{
+     *   doctrine: array{
+     *     subscriptions: array{entity: string},
+     *     db_schema: array{table_names: array{plan: string, subscription: string, subscription_log: string, plan_feature: string}}
+     *   },
+     *   payment: array{return_route: string},
+     *   integration: array{lemon_squeezy: array{enabled: bool, api_key: string, webhook_secret: string, store_id: string}},
+     *   features: array<string, array{type: string, default: mixed, description: string}>
+     * }
+     */
+    private function processRawSection(): array
+    {
+        $treeBuilder = (new SaasConfiguration())->getTreeBuilder();
+
+        $processor = new Processor();
+
+        /** @var array{doctrine: array{subscriptions: array{entity: string}, db_schema: array{table_names: array{plan: string, subscription: string, subscription_log: string, plan_feature: string}}}, payment: array{return_route: string}, integration: array{lemon_squeezy: array{enabled: bool, api_key: string, webhook_secret: string, store_id: string}}, features: array<string, array{type: string, default: mixed, description: string}>} */
+        return $processor->process($treeBuilder->buildTree(), [$this->rawSection]);
     }
 }
