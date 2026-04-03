@@ -314,7 +314,7 @@ final class SaasConfigurationTest extends TestCase
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array{doctrine: array{subscriptions: array{entity: string}, trial: array{user_entity: string}}, payment: array{return_route: string}}
      */
     private function minimalConfig(): array
     {
