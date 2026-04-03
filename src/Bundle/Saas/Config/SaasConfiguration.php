@@ -19,7 +19,9 @@ use SolidWorx\Platform\SaasBundle\Entity\Plan;
 use SolidWorx\Platform\SaasBundle\Entity\PlanFeature;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Entity\SubscriptionLog;
+use SolidWorx\Platform\SaasBundle\Entity\Trial;
 use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
+use SolidWorx\Platform\SaasBundle\Trial\TrialUserInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use function in_array;
 use function is_subclass_of;
@@ -60,6 +62,20 @@ final class SaasConfiguration implements PlatformConfigurationInterface
                                 ->end()
                             ->end()
                         ->end()
+                        ->arrayNode('trial')
+                            ->isRequired()
+                            ->children()
+                                ->scalarNode('user_entity')
+                                    ->isRequired()
+                                    ->cannotBeEmpty()
+                                    ->info(sprintf('The class name of the user entity for trial tracking. Must implement %s', TrialUserInterface::class))
+                                    ->validate()
+                                        ->ifTrue(fn ($v): bool => ! is_subclass_of($v, TrialUserInterface::class))
+                                        ->thenInvalid(sprintf('The trial user entity must implement %s', TrialUserInterface::class))
+                                    ->end()
+                                ->end()
+                            ->end()
+                        ->end()
                         ->arrayNode('db_schema')
                             ->addDefaultsIfNotSet()
                             ->children()
@@ -93,6 +109,14 @@ final class SaasConfiguration implements PlatformConfigurationInterface
                                         ->scalarNode('plan_feature')
                                             ->defaultValue(PlanFeature::TABLE_NAME)
                                             ->info('The table name for the Plan Feature entity')
+                                            ->validate()
+                                                ->ifTrue(fn ($value): bool => in_array(preg_match('/^(?!\d)[A-Za-z_][A-Za-z0-9_$#]{0,64}$/u', (string) $value), [0, false], true))
+                                                ->thenInvalid('The table name is not valid')
+                                            ->end()
+                                        ->end()
+                                        ->scalarNode('trial')
+                                            ->defaultValue(Trial::TABLE_NAME)
+                                            ->info('The table name for the Trial entity')
                                             ->validate()
                                                 ->ifTrue(fn ($value): bool => in_array(preg_match('/^(?!\d)[A-Za-z_][A-Za-z0-9_$#]{0,64}$/u', (string) $value), [0, false], true))
                                                 ->thenInvalid('The table name is not valid')

@@ -175,6 +175,12 @@ platform:
         # Required.
         entity: App\Entity\Subscription
 
+      trial:
+        # Fully-qualified class name of the user entity used for trial tracking.
+        # The entity must implement TrialUserInterface.
+        # Required.
+        user_entity: App\Entity\User
+
       db_schema:
         table_names:
           # Override the database table names for the SaaS entities.
@@ -183,6 +189,7 @@ platform:
           subscription: subscriptions
           subscription_log: subscription_logs
           plan_feature: plan_features
+          trial: saas_trial
 
     payment:
       # The Symfony route name to redirect to after a successful payment.
@@ -281,12 +288,15 @@ platform:
     doctrine:
       subscriptions:
         entity: App\Entity\Subscription
+      trial:
+        user_entity: App\Entity\User
       db_schema:
         table_names:
           plan: plans
           subscription: subscriptions
           subscription_log: subscription_logs
           plan_feature: plan_features
+          trial: saas_trial
 
     payment:
       return_route: app_payment_success
@@ -347,6 +357,7 @@ return PlatformConfigBuilder::create()
     ->withSaasConfig(
         SaasConfigBuilder::create()
             ->subscriptionEntity(\App\Entity\Subscription::class)
+            ->trialUserEntity(\App\Entity\User::class)
             ->payment()
                 ->returnRoute('app_payment_success')
             ->end()
