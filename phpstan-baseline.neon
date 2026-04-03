@@ -666,11 +666,6 @@ parameters:
 			path: tests/Bundle/PlatformBundle/Response/RedirectResponseTest.php
 
 		-
-			message: "#^Cannot access offset 'db_schema' on mixed\\.$#"
-			count: 2
-			path: tests/Bundle/Saas/Config/SaasConfigurationTest.php
-
-		-
 			message: "#^Call to method method\\(\\) on an unknown class PHPUnit\\\\Framework\\\\MockObject\\\\Builder\\\\InvocationMocker\\.$#"
 			count: 6
 			path: tests/Bundle/Saas/Doctrine/EventSubscriber/MetadataSubscriberTest.php
