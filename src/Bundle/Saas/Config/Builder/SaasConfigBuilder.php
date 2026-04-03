@@ -34,6 +34,8 @@ final class SaasConfigBuilder
 {
     private ?string $subscriptionEntity = null;
 
+    private ?string $trialUserEntity = null;
+
     /**
      * @var array<string, string>
      */
@@ -66,6 +68,12 @@ final class SaasConfigBuilder
     public function subscriptionEntity(string $class): self
     {
         $this->subscriptionEntity = $class;
+        return $this;
+    }
+
+    public function trialUserEntity(string $class): self
+    {
+        $this->trialUserEntity = $class;
         return $this;
     }
 
@@ -110,6 +118,10 @@ final class SaasConfigBuilder
 
         if ($this->subscriptionEntity !== null) {
             $config['doctrine']['subscriptions']['entity'] = $this->subscriptionEntity;
+        }
+
+        if ($this->trialUserEntity !== null) {
+            $config['doctrine']['trial']['user_entity'] = $this->trialUserEntity;
         }
 
         if ($this->tableNames !== []) {

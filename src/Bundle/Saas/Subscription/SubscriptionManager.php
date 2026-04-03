@@ -85,8 +85,18 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
         return $this->paymentIntegration->getCustomerPortalUrl($subscription);
     }
 
-    public function startTrial(Subscription $subscription, DateTimeInterface $trialEndDate): void
+    public function startTrial(Subscription $subscription, ?DateTimeInterface $trialEndDate = null): void
     {
+        if ($trialEndDate === null) {
+            $trialDuration = $subscription->getPlan()->getTrialDuration();
+
+            if ($trialDuration === null) {
+                throw new \LogicException('Cannot start trial: no trial end date provided and the plan has no trial duration configured.');
+            }
+
+            $trialEndDate = CarbonImmutable::now('UTC')->add($trialDuration);
+        }
+
         $subscription->setStatus(SubscriptionStatus::TRIAL);
         $subscription->setStartDate(CarbonImmutable::now('UTC'));
         $subscription->setEndDate($trialEndDate);

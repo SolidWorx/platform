@@ -15,6 +15,7 @@ namespace SolidWorx\Platform\SaasBundle\DependencyInjection\CompilerPass;
 
 use Override;
 use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
+use SolidWorx\Platform\SaasBundle\Trial\TrialUserInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -23,16 +24,20 @@ final class ResolveTargetEntityPass implements CompilerPassInterface
     #[Override]
     public function process(ContainerBuilder $container): void
     {
-        if (! $container->hasParameter('solidworx_platform.saas.doctrine.subscribable_class')) {
-            return; // config missing → let the bundle extension throw earlier
+        $def = $container->getDefinition('doctrine.orm.listeners.resolve_target_entity');
+
+        if ($container->hasParameter('solidworx_platform.saas.doctrine.subscribable_class')) {
+            $def->addMethodCall(
+                'addResolveTargetEntity',
+                [SubscribableInterface::class, $container->getParameter('solidworx_platform.saas.doctrine.subscribable_class'), []]
+            );
         }
 
-        $target = $container->getParameter('solidworx_platform.saas.doctrine.subscribable_class');
-
-        $def = $container->getDefinition('doctrine.orm.listeners.resolve_target_entity');
-        $def->addMethodCall(
-            'addResolveTargetEntity',
-            [SubscribableInterface::class, $target, []]
-        );
+        if ($container->hasParameter('solidworx_platform.saas.doctrine.trial_user_class')) {
+            $def->addMethodCall(
+                'addResolveTargetEntity',
+                [TrialUserInterface::class, $container->getParameter('solidworx_platform.saas.doctrine.trial_user_class'), []]
+            );
+        }
     }
 }

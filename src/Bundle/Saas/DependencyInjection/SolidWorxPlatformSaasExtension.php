@@ -19,11 +19,13 @@ use SolidWorx\Platform\SaasBundle\Entity\Plan;
 use SolidWorx\Platform\SaasBundle\Entity\PlanFeature;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Entity\SubscriptionLog;
+use SolidWorx\Platform\SaasBundle\Entity\Trial;
 use SolidWorx\Platform\SaasBundle\Exception\ExtensionRequiredException;
 use SolidWorx\Platform\SaasBundle\Feature\FeatureConfigRegistry;
 use SolidWorx\Platform\SaasBundle\Integration\LemonSqueezy;
 use SolidWorx\Platform\SaasBundle\SolidWorxPlatformSaasBundle;
 use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
+use SolidWorx\Platform\SaasBundle\Trial\TrialUserInterface;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -37,7 +39,8 @@ final class SolidWorxPlatformSaasExtension extends Extension implements PrependE
      * @var array{
      *   doctrine: array{
      *     subscriptions: array{entity: string},
-     *     db_schema: array{table_names: array{plan: string, subscription: string, subscription_log: string, plan_feature: string}}
+     *     trial: array{user_entity: string},
+     *     db_schema: array{table_names: array{plan: string, subscription: string, subscription_log: string, plan_feature: string, trial: string}}
      *   },
      *   payment: array{return_route: string},
      *   integration: array{lemon_squeezy: array{enabled: bool, api_key: string, webhook_secret: string, store_id: string}},
@@ -71,6 +74,7 @@ final class SolidWorxPlatformSaasExtension extends Extension implements PrependE
                 'subscription' => Subscription::class,
                 'subscription_log' => SubscriptionLog::class,
                 'plan_feature' => PlanFeature::class,
+                'trial' => Trial::class,
             ];
 
             $tableNames = [];
@@ -83,6 +87,7 @@ final class SolidWorxPlatformSaasExtension extends Extension implements PrependE
         }
 
         $container->setParameter('solidworx_platform.saas.doctrine.subscribable_class', $config['doctrine']['subscriptions']['entity']);
+        $container->setParameter('solidworx_platform.saas.doctrine.trial_user_class', $config['doctrine']['trial']['user_entity']);
         $container->setParameter('solidworx_platform.saas.payment.return_route', $config['payment']['return_route']);
 
         $lemonSqueezy = $config['integration']['lemon_squeezy'];
@@ -133,6 +138,7 @@ final class SolidWorxPlatformSaasExtension extends Extension implements PrependE
                     ],
                     'resolve_target_entities' => [
                         SubscribableInterface::class => SubscribableInterface::class,
+                        TrialUserInterface::class => TrialUserInterface::class,
                     ],
                 ],
             ],
@@ -143,7 +149,8 @@ final class SolidWorxPlatformSaasExtension extends Extension implements PrependE
      * @return array{
      *   doctrine: array{
      *     subscriptions: array{entity: string},
-     *     db_schema: array{table_names: array{plan: string, subscription: string, subscription_log: string, plan_feature: string}}
+     *     trial: array{user_entity: string},
+     *     db_schema: array{table_names: array{plan: string, subscription: string, subscription_log: string, plan_feature: string, trial: string}}
      *   },
      *   payment: array{return_route: string},
      *   integration: array{lemon_squeezy: array{enabled: bool, api_key: string, webhook_secret: string, store_id: string}},
@@ -163,7 +170,8 @@ final class SolidWorxPlatformSaasExtension extends Extension implements PrependE
      * @return array{
      *   doctrine: array{
      *     subscriptions: array{entity: string},
-     *     db_schema: array{table_names: array{plan: string, subscription: string, subscription_log: string, plan_feature: string}}
+     *     trial: array{user_entity: string},
+     *     db_schema: array{table_names: array{plan: string, subscription: string, subscription_log: string, plan_feature: string, trial: string}}
      *   },
      *   payment: array{return_route: string},
      *   integration: array{lemon_squeezy: array{enabled: bool, api_key: string, webhook_secret: string, store_id: string}},
@@ -176,7 +184,7 @@ final class SolidWorxPlatformSaasExtension extends Extension implements PrependE
 
         $processor = new Processor();
 
-        /** @var array{doctrine: array{subscriptions: array{entity: string}, db_schema: array{table_names: array{plan: string, subscription: string, subscription_log: string, plan_feature: string}}}, payment: array{return_route: string}, integration: array{lemon_squeezy: array{enabled: bool, api_key: string, webhook_secret: string, store_id: string}}, features: array<string, array{type: string, default: mixed, description: string}>} */
+        /** @var array{doctrine: array{subscriptions: array{entity: string}, trial: array{user_entity: string}, db_schema: array{table_names: array{plan: string, subscription: string, subscription_log: string, plan_feature: string, trial: string}}}, payment: array{return_route: string}, integration: array{lemon_squeezy: array{enabled: bool, api_key: string, webhook_secret: string, store_id: string}}, features: array<string, array{type: string, default: mixed, description: string}>} */
         return $processor->process($treeBuilder->buildTree(), [$this->rawSection]);
     }
 }
