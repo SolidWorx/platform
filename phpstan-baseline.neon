@@ -26,11 +26,6 @@ parameters:
 			path: src/Bundle/Platform/DependencyInjection/CompilerPass/AuthenticationCompilerPass.php
 
 		-
-			message: "#^Parameter \\#1 \\$factory of method Symfony\\\\Component\\\\DependencyInjection\\\\Definition\\:\\:setFactory\\(\\) expects array\\|string\\|Symfony\\\\Component\\\\DependencyInjection\\\\Reference\\|null, Closure given\\.$#"
-			count: 1
-			path: src/Bundle/Platform/DependencyInjection/CompilerPass/MenuCompilerPass.php
-
-		-
 			message: "#^Call to method accessControl\\(\\) on an unknown class Symfony\\\\Config\\\\SecurityConfig\\.$#"
 			count: 1
 			path: src/Bundle/Platform/DependencyInjection/Extension/LoginExtension.php
@@ -342,11 +337,6 @@ parameters:
 
 		-
 			message: "#^Parameter \\#2 \\$endsAt of method SolidWorx\\\\Platform\\\\SaasBundle\\\\Subscription\\\\SubscriptionManager\\:\\:cancelSubscription\\(\\) expects DateTimeInterface, DateTimeInterface\\|null given\\.$#"
-			count: 1
-			path: src/Bundle/Saas/EventSubscriber/SubscriptionEventSubscriber.php
-
-		-
-			message: "#^Parameter \\#2 \\$trialEndDate of method SolidWorx\\\\Platform\\\\SaasBundle\\\\Subscription\\\\SubscriptionManager\\:\\:startTrial\\(\\) expects DateTimeInterface, DateTimeInterface\\|null given\\.$#"
 			count: 1
 			path: src/Bundle/Saas/EventSubscriber/SubscriptionEventSubscriber.php
 
