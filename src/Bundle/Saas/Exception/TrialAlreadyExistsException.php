@@ -22,7 +22,7 @@ final class TrialAlreadyExistsException extends RuntimeException
     public function __construct(TrialUserInterface $user, int $code = 0, ?Throwable $previous = null)
     {
         parent::__construct(
-            sprintf('A trial already exists for user "%s".', $user->getId()->toBase58()),
+            sprintf('A trial already exists for user "%s".', $user->getId()?->toBase58() ?? 'unknown'),
             $code,
             $previous,
         );

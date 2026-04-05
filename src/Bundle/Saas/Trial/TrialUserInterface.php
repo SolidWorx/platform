@@ -21,5 +21,5 @@ interface TrialUserInterface
      * Returns the persisted ULID for this user.
      * Implementations must be persisted entities with a real ULID before being passed to trial operations.
      */
-    public function getId(): Ulid;
+    public function getId(): ?Ulid;
 }
