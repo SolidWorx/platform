@@ -58,12 +58,9 @@ abstract class Kernel extends BaseKernel
     #[Override]
     public function boot(): void
     {
-        if ($this->booted) {
-            parent::boot();
-            return;
+        if (! $this->booted) {
+            $this->processPlatformConfig();
         }
-
-        $this->processPlatformConfig();
 
         parent::boot();
     }

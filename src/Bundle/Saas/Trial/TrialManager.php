@@ -13,15 +13,18 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\Trial;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Override;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Entity\Trial;
-use SolidWorx\Platform\SaasBundle\Repository\TrialRepository;
+use SolidWorx\Platform\SaasBundle\Exception\TrialAlreadyExistsException;
+use SolidWorx\Platform\SaasBundle\Repository\TrialRepositoryInterface;
 
 final readonly class TrialManager implements TrialManagerInterface
 {
     public function __construct(
-        private TrialRepository $trialRepository,
+        private TrialRepositoryInterface $trialRepository,
+        private EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -34,6 +37,14 @@ final readonly class TrialManager implements TrialManagerInterface
     #[Override]
     public function createTrial(TrialUserInterface $user, Subscription $subscription): Trial
     {
-        return $this->trialRepository->createTrial($user, $subscription);
+        if ($this->trialRepository->userHasTrial($user)) {
+            throw new TrialAlreadyExistsException($user);
+        }
+
+        $trial = $this->trialRepository->createTrial($user, $subscription);
+
+        $this->entityManager->flush();
+
+        return $trial;
     }
 }

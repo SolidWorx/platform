@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\SaasBundle\Repository;
 
 use Doctrine\Persistence\ManagerRegistry;
+use Override;
 use SolidWorx\Platform\PlatformBundle\Repository\EntityRepository;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Entity\Trial;
@@ -23,13 +24,14 @@ use Symfony\Bridge\Doctrine\Types\UlidType;
 /**
  * @extends EntityRepository<Trial>
  */
-final class TrialRepository extends EntityRepository
+final class TrialRepository extends EntityRepository implements TrialRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Trial::class);
     }
 
+    #[Override]
     public function userHasTrial(TrialUserInterface $user): bool
     {
         $qb = $this->createQueryBuilder('t')
@@ -40,14 +42,16 @@ final class TrialRepository extends EntityRepository
         return $qb->getQuery()->getSingleScalarResult() > 0;
     }
 
+    /**
+     * Persists a new Trial entity without flushing.
+     * The caller is responsible for flushing the EntityManager.
+     */
+    #[Override]
     public function createTrial(TrialUserInterface $user, Subscription $subscription): Trial
     {
-        $trial = new Trial();
-        $trial->setUser($user);
-        $trial->setSubscription($subscription);
+        $trial = Trial::create($user, $subscription);
 
         $this->getEntityManager()->persist($trial);
-        $this->getEntityManager()->flush();
 
         return $trial;
     }

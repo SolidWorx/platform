@@ -22,4 +22,6 @@ enum SubscriptionStatus: string
     case EXPIRED = 'expired';
     case TRIAL = 'trial';
     case PAUSED = 'paused';
+    case PAST_DUE = 'past_due';
+    case UNPAID = 'unpaid';
 }

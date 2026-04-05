@@ -23,14 +23,8 @@ use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
  * {@see SchemaGenerator} to build the JSON Schema for `platform.yaml` autocompletion.
  */
 #[AutoconfigureTag('solidworx_platform.configuration')]
-interface PlatformConfigurationInterface
+interface PlatformConfigurationInterface extends PlatformConfigKeyInterface
 {
-    /**
-     * The key within `platform:` that this configuration covers.
-     * Return an empty string to contribute directly to the root `platform:` section.
-     */
-    public function getConfigSectionKey(): string;
-
     /**
      * Build and return the TreeBuilder for this configuration section.
      * The root node name must match {@see getConfigSectionKey()} (or 'platform' for the root section).
