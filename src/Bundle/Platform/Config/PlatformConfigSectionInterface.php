@@ -20,18 +20,8 @@ namespace SolidWorx\Platform\PlatformBundle\Config;
  * the relevant raw config sub-array (keyed by {@see getConfigSectionKey()}) so that
  * each bundle's DI Extension can perform its own validation using a private TreeBuilder.
  */
-interface PlatformConfigSectionInterface
+interface PlatformConfigSectionInterface extends PlatformConfigKeyInterface
 {
-    /**
-     * Returns the key under `platform:` that belongs to this bundle.
-     *
-     * Use an empty string to indicate the bundle owns the root-level `platform:` section
-     * (i.e. name, version, security, doctrine, models).
-     *
-     * Examples: '', 'saas', 'ui'
-     */
-    public function getConfigSectionKey(): string;
-
     /**
      * Called by the Kernel after the raw config file is parsed.
      *

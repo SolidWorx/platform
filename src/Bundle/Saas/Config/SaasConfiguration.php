@@ -29,16 +29,18 @@ use function sprintf;
 
 final class SaasConfiguration implements PlatformConfigurationInterface
 {
+    public const string SECTION_KEY = 'saas';
+
     #[Override]
     public function getConfigSectionKey(): string
     {
-        return 'saas';
+        return self::SECTION_KEY;
     }
 
     #[Override]
     public function getTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder('saas');
+        $treeBuilder = new TreeBuilder(self::SECTION_KEY);
         $root = $treeBuilder->getRootNode();
 
         //@formatter:off
@@ -63,14 +65,13 @@ final class SaasConfiguration implements PlatformConfigurationInterface
                             ->end()
                         ->end()
                         ->arrayNode('trial')
-                            ->isRequired()
+                            ->addDefaultsIfNotSet()
                             ->children()
                                 ->scalarNode('user_entity')
-                                    ->isRequired()
-                                    ->cannotBeEmpty()
+                                    ->defaultNull()
                                     ->info(sprintf('The class name of the user entity for trial tracking. Must implement %s', TrialUserInterface::class))
                                     ->validate()
-                                        ->ifTrue(fn ($v): bool => ! is_subclass_of($v, TrialUserInterface::class))
+                                        ->ifTrue(fn ($v): bool => $v !== null && ! is_subclass_of($v, TrialUserInterface::class))
                                         ->thenInvalid(sprintf('The trial user entity must implement %s', TrialUserInterface::class))
                                     ->end()
                                 ->end()
@@ -145,17 +146,14 @@ final class SaasConfiguration implements PlatformConfigurationInterface
                             ->addDefaultsIfNotSet()
                             ->children()
                                 ->scalarNode('api_key')
-                                    ->isRequired()
                                     ->cannotBeEmpty()
                                     ->defaultValue('%env(LEMON_SQUEEZY_API_KEY)%')
                                 ->end()
                                 ->scalarNode('webhook_secret')
-                                    ->isRequired()
                                     ->cannotBeEmpty()
                                     ->defaultValue('%env(LEMON_SQUEEZY_WEBHOOK_SECRET)%')
                                 ->end()
                                 ->scalarNode('store_id')
-                                    ->isRequired()
                                     ->cannotBeEmpty()
                                     ->defaultValue('%env(LEMON_SQUEEZY_STORE_ID)%')
                                 ->end()

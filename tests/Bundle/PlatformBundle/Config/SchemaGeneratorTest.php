@@ -443,7 +443,7 @@ final class SchemaGeneratorTest extends TestCase
         self::assertArrayHasKey('templates', $ui['properties']);
     }
 
-    public function testWithAllThreeRealConfigurations(): void
+    public function testWithRealPlatformAndUiConfigurations(): void
     {
         $generator = new SchemaGenerator([
             new PlatformConfiguration(),

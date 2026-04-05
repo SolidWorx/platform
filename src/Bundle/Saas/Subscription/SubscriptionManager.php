@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\SaasBundle\Subscription;
 
 use Carbon\CarbonImmutable;
+use DateInterval;
 use DateTime;
 use DateTimeInterface;
 use Override;
@@ -21,10 +22,11 @@ use SolidWorx\Platform\SaasBundle\Entity\Plan;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Enum\SubscriptionStatus;
 use SolidWorx\Platform\SaasBundle\Exception\InvalidPlanException;
+use SolidWorx\Platform\SaasBundle\Exception\TrialConfigurationException;
 use SolidWorx\Platform\SaasBundle\Integration\Options;
 use SolidWorx\Platform\SaasBundle\Integration\PaymentIntegrationInterface;
-use SolidWorx\Platform\SaasBundle\Repository\PlanRepository;
-use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepository;
+use SolidWorx\Platform\SaasBundle\Repository\PlanRepositoryInterface;
+use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepositoryInterface;
 use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
 use Symfony\Component\Uid\Ulid;
 use function get_debug_type;
@@ -32,8 +34,8 @@ use function get_debug_type;
 final readonly class SubscriptionManager implements SubscriptionProviderInterface
 {
     public function __construct(
-        private SubscriptionRepository $subscriptionRepository,
-        private PlanRepository $planRepository,
+        private SubscriptionRepositoryInterface $subscriptionRepository,
+        private PlanRepositoryInterface $planRepository,
         private PaymentIntegrationInterface $paymentIntegration,
     ) {
     }
@@ -87,11 +89,15 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
 
     public function startTrial(Subscription $subscription, ?DateTimeInterface $trialEndDate = null): void
     {
-        if ($trialEndDate === null) {
+        if (! $trialEndDate instanceof DateTimeInterface) {
             $trialDuration = $subscription->getPlan()->getTrialDuration();
 
-            if ($trialDuration === null) {
-                throw new \LogicException('Cannot start trial: no trial end date provided and the plan has no trial duration configured.');
+            if (! $trialDuration instanceof DateInterval) {
+                throw new TrialConfigurationException(sprintf(
+                    'Cannot start trial for subscription "%s": plan "%s" has no trial duration and no explicit end date was provided.',
+                    $subscription->getId()->toBase58(),
+                    $subscription->getPlan()->getPlanId(),
+                ));
             }
 
             $trialEndDate = CarbonImmutable::now('UTC')->add($trialDuration);
@@ -131,6 +137,20 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
     public function pauseSubscription(Subscription $subscription): void
     {
         $subscription->setStatus(SubscriptionStatus::PAUSED);
+
+        $this->subscriptionRepository->save($subscription);
+    }
+
+    public function markAsPastDue(Subscription $subscription): void
+    {
+        $subscription->setStatus(SubscriptionStatus::PAST_DUE);
+
+        $this->subscriptionRepository->save($subscription);
+    }
+
+    public function markAsUnpaid(Subscription $subscription): void
+    {
+        $subscription->setStatus(SubscriptionStatus::UNPAID);
 
         $this->subscriptionRepository->save($subscription);
     }

@@ -21,6 +21,7 @@ use SolidWorx\Platform\SaasBundle\Entity\Plan;
 use SolidWorx\Platform\SaasBundle\Entity\PlanFeature;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Entity\SubscriptionLog;
+use SolidWorx\Platform\SaasBundle\Entity\Trial;
 use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
 use SolidWorx\Platform\SaasBundle\Trial\TrialUserInterface;
 use Symfony\Component\Config\Definition\ArrayNode;
@@ -57,9 +58,9 @@ final class SaasConfigurationTest extends TestCase
 
         // Create a minimal entity class implementing TrialUserInterface
         $trialUser = new class() implements TrialUserInterface {
-            public function getId(): ?Ulid
+            public function getId(): Ulid
             {
-                return null;
+                return new Ulid();
             }
         };
         $this->validTrialUserClass = $trialUser::class;
@@ -67,13 +68,13 @@ final class SaasConfigurationTest extends TestCase
 
     public function testGetConfigSectionKeyReturnsSaas(): void
     {
-        self::assertSame('saas', $this->configuration->getConfigSectionKey());
+        self::assertSame(SaasConfiguration::SECTION_KEY, $this->configuration->getConfigSectionKey());
     }
 
     public function testTreeBuilderRootNodeIsNamedSaas(): void
     {
         $tree = $this->configuration->getTreeBuilder()->buildTree();
-        self::assertSame('saas', $tree->getName());
+        self::assertSame(SaasConfiguration::SECTION_KEY, $tree->getName());
     }
 
     public function testTreeBuilderRootNodeIsArrayNode(): void
@@ -173,6 +174,12 @@ final class SaasConfigurationTest extends TestCase
         self::assertSame(PlanFeature::TABLE_NAME, $result['doctrine']['db_schema']['table_names']['plan_feature']);
     }
 
+    public function testDefaultTableNameForTrial(): void
+    {
+        $result = $this->process($this->minimalConfig());
+        self::assertSame(Trial::TABLE_NAME, $result['doctrine']['db_schema']['table_names']['trial']);
+    }
+
     public function testCustomTableNamesAreApplied(): void
     {
         $config = $this->minimalConfig();
@@ -182,6 +189,7 @@ final class SaasConfigurationTest extends TestCase
                 'subscription' => 'custom_subs',
                 'subscription_log' => 'custom_sub_logs',
                 'plan_feature' => 'custom_features',
+                'trial' => 'custom_trials',
             ],
         ];
 
@@ -191,6 +199,7 @@ final class SaasConfigurationTest extends TestCase
         self::assertSame('custom_subs', $result['doctrine']['db_schema']['table_names']['subscription']);
         self::assertSame('custom_sub_logs', $result['doctrine']['db_schema']['table_names']['subscription_log']);
         self::assertSame('custom_features', $result['doctrine']['db_schema']['table_names']['plan_feature']);
+        self::assertSame('custom_trials', $result['doctrine']['db_schema']['table_names']['trial']);
     }
 
     public function testInvalidTableNameIsRejected(): void
@@ -313,8 +322,46 @@ final class SaasConfigurationTest extends TestCase
         self::assertArrayHasKey('theme', $result['features']);
     }
 
+    public function testTrialSectionIsOptional(): void
+    {
+        $result = $this->process($this->minimalConfig());
+        self::assertNull($result['doctrine']['trial']['user_entity']);
+    }
+
+    public function testTrialUserEntityCanBeConfigured(): void
+    {
+        $config = $this->minimalConfig();
+        $config['doctrine']['trial'] = [
+            'user_entity' => $this->validTrialUserClass,
+        ];
+
+        $result = $this->process($config);
+
+        self::assertSame($this->validTrialUserClass, $result['doctrine']['trial']['user_entity']);
+    }
+
+    public function testTrialUserEntityMustImplementTrialUserInterface(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $config = $this->minimalConfig();
+        $config['doctrine']['trial'] = [
+            'user_entity' => \stdClass::class,
+        ];
+        $this->process($config);
+    }
+
+    public function testTrialUserEntityCannotBeEmptyString(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $config = $this->minimalConfig();
+        $config['doctrine']['trial'] = [
+            'user_entity' => '',
+        ];
+        $this->process($config);
+    }
+
     /**
-     * @return array{doctrine: array{subscriptions: array{entity: string}, trial: array{user_entity: string}}, payment: array{return_route: string}}
+     * @return array{doctrine: array{subscriptions: array{entity: string}}, payment: array{return_route: string}}
      */
     private function minimalConfig(): array
     {
@@ -323,9 +370,6 @@ final class SaasConfigurationTest extends TestCase
                 'subscriptions' => [
                     'entity' => $this->validEntityClass,
                 ],
-                'trial' => [
-                    'user_entity' => $this->validTrialUserClass,
-                ],
             ],
             'payment' => [
                 'return_route' => 'app_payment_success',
@@ -333,51 +377,14 @@ final class SaasConfigurationTest extends TestCase
         ];
     }
 
-    public function testTrialUserEntityIsRequired(): void
-    {
-        $this->expectException(InvalidConfigurationException::class);
-        $this->process([
-            'doctrine' => [
-                'subscriptions' => [
-                    'entity' => $this->validEntityClass,
-                ],
-            ],
-            'payment' => [
-                'return_route' => 'app_success',
-            ],
-        ]);
-    }
-
-    public function testTrialUserEntityMustImplementTrialUserInterface(): void
-    {
-        $this->expectException(InvalidConfigurationException::class);
-        $config = $this->minimalConfig();
-        $config['doctrine']['trial']['user_entity'] = \stdClass::class;
-        $this->process($config);
-    }
-
-    public function testTrialUserEntityCannotBeEmpty(): void
-    {
-        $this->expectException(InvalidConfigurationException::class);
-        $config = $this->minimalConfig();
-        $config['doctrine']['trial']['user_entity'] = '';
-        $this->process($config);
-    }
-
-    public function testDefaultTableNameForTrial(): void
-    {
-        $result = $this->process($this->minimalConfig());
-        self::assertSame('saas_trial', $result['doctrine']['db_schema']['table_names']['trial']);
-    }
-
     /**
      * @param array<string, mixed> $config
      *
-     * @return array{doctrine: array{subscriptions: array{entity: string}, trial: array{user_entity: string}, db_schema: array{table_names: array{plan: string, subscription: string, subscription_log: string, plan_feature: string, trial: string}}}, payment: array{return_route: string}, integration: array{lemon_squeezy: array{enabled: bool, api_key: string|null, webhook_secret: string|null, store_id: string|null}}, features: array<string, array{type: string, default: mixed, description: string}>}
+     * @return array{doctrine: array{subscriptions: array{entity: string}, trial: array{user_entity: string|null}, db_schema: array{table_names: array{plan: string, subscription: string, subscription_log: string, plan_feature: string, trial: string}}}, payment: array{return_route: string}, integration: array{lemon_squeezy: array{enabled: bool, api_key: string, webhook_secret: string, store_id: string}}, features: array<string, array{type: string, default: mixed, description: string}>}
      */
     private function process(array $config): array
     {
-        /** @var array{doctrine: array{subscriptions: array{entity: string}, trial: array{user_entity: string}, db_schema: array{table_names: array{plan: string, subscription: string, subscription_log: string, plan_feature: string, trial: string}}}, payment: array{return_route: string}, integration: array{lemon_squeezy: array{enabled: bool, api_key: string|null, webhook_secret: string|null, store_id: string|null}}, features: array<string, array{type: string, default: mixed, description: string}>} */
+        /** @var array{doctrine: array{subscriptions: array{entity: string}, trial: array{user_entity: string|null}, db_schema: array{table_names: array{plan: string, subscription: string, subscription_log: string, plan_feature: string, trial: string}}}, payment: array{return_route: string}, integration: array{lemon_squeezy: array{enabled: bool, api_key: string, webhook_secret: string, store_id: string}}, features: array<string, array{type: string, default: mixed, description: string}>} */
         return $this->processor->process($this->configuration->getTreeBuilder()->buildTree(), [$config]);
     }
 }

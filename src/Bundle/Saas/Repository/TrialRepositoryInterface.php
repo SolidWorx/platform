@@ -11,20 +11,19 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace SolidWorx\Platform\SaasBundle\Trial;
+namespace SolidWorx\Platform\SaasBundle\Repository;
 
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Entity\Trial;
-use SolidWorx\Platform\SaasBundle\Exception\TrialAlreadyExistsException;
+use SolidWorx\Platform\SaasBundle\Trial\TrialUserInterface;
 
-interface TrialManagerInterface
+interface TrialRepositoryInterface
 {
     public function userHasTrial(TrialUserInterface $user): bool;
 
     /**
-     * Creates and persists a new trial for the given user and subscription.
-     *
-     * @throws TrialAlreadyExistsException when the user already has an active trial
+     * Persists a new Trial entity without flushing.
+     * The caller is responsible for flushing the EntityManager.
      */
     public function createTrial(TrialUserInterface $user, Subscription $subscription): Trial;
 }

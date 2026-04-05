@@ -53,6 +53,19 @@ class Trial
         $this->createdAt = new DateTimeImmutable();
     }
 
+    /**
+     * Named constructor — preferred entry point for creating a new Trial.
+     * Produces a fully-initialized entity without two-phase construction.
+     */
+    public static function create(TrialUserInterface $user, Subscription $subscription): self
+    {
+        $trial = new self();
+        $trial->user = $user;
+        $trial->subscription = $subscription;
+
+        return $trial;
+    }
+
     public function getId(): Ulid
     {
         return $this->id;
@@ -68,6 +81,9 @@ class Trial
         return $this->user;
     }
 
+    /**
+     * For Doctrine hydration only — do not call on already-persisted entities.
+     */
     public function setUser(TrialUserInterface $user): static
     {
         $this->user = $user;
@@ -80,6 +96,9 @@ class Trial
         return $this->subscription;
     }
 
+    /**
+     * For Doctrine hydration only — do not call on already-persisted entities.
+     */
     public function setSubscription(Subscription $subscription): static
     {
         $this->subscription = $subscription;

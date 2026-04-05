@@ -326,21 +326,6 @@ parameters:
 			path: src/Bundle/Saas/Event/TrialStartedEvent.php
 
 		-
-			message: "#^Cannot access property \\$attributes on SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|null\\.$#"
-			count: 5
-			path: src/Bundle/Saas/EventSubscriber/SubscriptionEventSubscriber.php
-
-		-
-			message: "#^Parameter \\#2 \\$endDate of method SolidWorx\\\\Platform\\\\SaasBundle\\\\Subscription\\\\SubscriptionManager\\:\\:renewSubscription\\(\\) expects DateTimeInterface, DateTimeInterface\\|null given\\.$#"
-			count: 1
-			path: src/Bundle/Saas/EventSubscriber/SubscriptionEventSubscriber.php
-
-		-
-			message: "#^Parameter \\#2 \\$endsAt of method SolidWorx\\\\Platform\\\\SaasBundle\\\\Subscription\\\\SubscriptionManager\\:\\:cancelSubscription\\(\\) expects DateTimeInterface, DateTimeInterface\\|null given\\.$#"
-			count: 1
-			path: src/Bundle/Saas/EventSubscriber/SubscriptionEventSubscriber.php
-
-		-
 			message: "#^Call to an undefined method SolidWorx\\\\Platform\\\\SaasBundle\\\\Repository\\\\PlanFeatureRepositoryInterface\\:\\:remove\\(\\)\\.$#"
 			count: 1
 			path: src/Bundle/Saas/Feature/PlanFeatureManager.php
@@ -489,6 +474,61 @@ parameters:
 			message: "#^Call to method method\\(\\) on an unknown class PHPUnit\\\\Framework\\\\MockObject\\\\Builder\\\\InvocationMocker\\.$#"
 			count: 1
 			path: tests/Bundle/PlatformBundle/Command/GenerateSchemaCommandTest.php
+
+		-
+			message: "#^Call to static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertInstanceOf\\(\\) with 'SolidWorx\\\\\\\\Platform\\\\\\\\PlatformBundle\\\\\\\\Config\\\\\\\\Builder\\\\\\\\SecurityConfigBuilder' and SolidWorx\\\\Platform\\\\PlatformBundle\\\\Config\\\\Builder\\\\SecurityConfigBuilder will always evaluate to true\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/Builder/PlatformConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'doctrine' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/Builder/PlatformConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'enable_utc_date' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/Builder/PlatformConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'models' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/Builder/PlatformConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'name' on mixed\\.$#"
+			count: 2
+			path: tests/Bundle/PlatformBundle/Config/Builder/PlatformConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'saas' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/Builder/PlatformConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'types' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/Builder/PlatformConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'ui' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/Builder/PlatformConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'user' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/PlatformBundle/Config/Builder/PlatformConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'version' on mixed\\.$#"
+			count: 2
+			path: tests/Bundle/PlatformBundle/Config/Builder/PlatformConfigBuilderTest.php
+
+		-
+			message: "#^Parameter \\#2 \\$array of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertArrayNotHasKey\\(\\) expects array\\|ArrayAccess\\<\\(int\\|string\\), mixed\\>, mixed given\\.$#"
+			count: 4
+			path: tests/Bundle/PlatformBundle/Config/Builder/PlatformConfigBuilderTest.php
 
 		-
 			message: "#^Call to method arrayNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
@@ -666,6 +706,91 @@ parameters:
 			path: tests/Bundle/PlatformBundle/Response/RedirectResponseTest.php
 
 		-
+			message: "#^Call to static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertInstanceOf\\(\\) with 'SolidWorx\\\\\\\\Platform\\\\\\\\SaasBundle\\\\\\\\Config\\\\\\\\Builder\\\\\\\\SaasPaymentConfigBuilder' and SolidWorx\\\\Platform\\\\SaasBundle\\\\Config\\\\Builder\\\\SaasPaymentConfigBuilder will always evaluate to true\\.$#"
+			count: 1
+			path: tests/Bundle/Saas/Config/Builder/SaasConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'api_key' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/Saas/Config/Builder/SaasConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'db_schema' on mixed\\.$#"
+			count: 2
+			path: tests/Bundle/Saas/Config/Builder/SaasConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'enabled' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/Saas/Config/Builder/SaasConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'entity' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/Saas/Config/Builder/SaasConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'lemon_squeezy' on mixed\\.$#"
+			count: 4
+			path: tests/Bundle/Saas/Config/Builder/SaasConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'plan' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/Saas/Config/Builder/SaasConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'return_route' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/Saas/Config/Builder/SaasConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'store_id' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/Saas/Config/Builder/SaasConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'subscriptions' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/Saas/Config/Builder/SaasConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'table_names' on mixed\\.$#"
+			count: 2
+			path: tests/Bundle/Saas/Config/Builder/SaasConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'trial' on mixed\\.$#"
+			count: 2
+			path: tests/Bundle/Saas/Config/Builder/SaasConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'user_entity' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/Saas/Config/Builder/SaasConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'webhook_secret' on mixed\\.$#"
+			count: 1
+			path: tests/Bundle/Saas/Config/Builder/SaasConfigBuilderTest.php
+
+		-
+			message: "#^Parameter \\#2 \\$array of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertArrayHasKey\\(\\) expects array\\|ArrayAccess\\<\\(int\\|string\\), mixed\\>, mixed given\\.$#"
+			count: 1
+			path: tests/Bundle/Saas/Config/Builder/SaasConfigBuilderTest.php
+
+		-
+			message: "#^Parameter \\#2 \\$array of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertArrayNotHasKey\\(\\) expects array\\|ArrayAccess\\<\\(int\\|string\\), mixed\\>, mixed given\\.$#"
+			count: 1
+			path: tests/Bundle/Saas/Config/Builder/SaasConfigBuilderTest.php
+
+		-
+			message: "#^Parameter \\#2 \\$haystack of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertCount\\(\\) expects Countable\\|iterable, mixed given\\.$#"
+			count: 1
+			path: tests/Bundle/Saas/Config/Builder/SaasConfigBuilderTest.php
+
+		-
 			message: "#^Call to method method\\(\\) on an unknown class PHPUnit\\\\Framework\\\\MockObject\\\\Builder\\\\InvocationMocker\\.$#"
 			count: 6
 			path: tests/Bundle/Saas/Doctrine/EventSubscriber/MetadataSubscriberTest.php
@@ -717,6 +842,16 @@ parameters:
 
 		-
 			message: "#^Call to method method\\(\\) on an unknown class PHPUnit\\\\Framework\\\\MockObject\\\\Builder\\\\InvocationMocker\\.$#"
+			count: 3
+			path: tests/Bundle/Saas/Subscription/SubscriptionManagerStartTrialTest.php
+
+		-
+			message: "#^Call to method method\\(\\) on an unknown class PHPUnit\\\\Framework\\\\MockObject\\\\Builder\\\\InvocationMocker\\.$#"
+			count: 8
+			path: tests/Bundle/Saas/Trial/TrialManagerTest.php
+
+		-
+			message: "#^Call to method method\\(\\) on an unknown class PHPUnit\\\\Framework\\\\MockObject\\\\Builder\\\\InvocationMocker\\.$#"
 			count: 17
 			path: tests/Bundle/Saas/Twig/Runtime/FeatureRuntimeTest.php
 
@@ -729,3 +864,18 @@ parameters:
 			message: "#^Method Bundle\\\\Saas\\\\Webhook\\\\Converter\\\\LemonSqueezyPayloadConverterTest\\:\\:loadFixture\\(\\) should return array\\<string, mixed\\> but returns array\\.$#"
 			count: 1
 			path: tests/Bundle/Saas/Webhook/Converter/LemonSqueezyPayloadConverterTest.php
+
+		-
+			message: "#^Cannot access offset 'base' on mixed\\.$#"
+			count: 2
+			path: tests/Bundle/Ui/Config/Builder/UiConfigBuilderTest.php
+
+		-
+			message: "#^Cannot access offset 'login' on mixed\\.$#"
+			count: 2
+			path: tests/Bundle/Ui/Config/Builder/UiConfigBuilderTest.php
+
+		-
+			message: "#^Parameter \\#2 \\$array of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertArrayHasKey\\(\\) expects array\\|ArrayAccess\\<\\(int\\|string\\), mixed\\>, mixed given\\.$#"
+			count: 1
+			path: tests/Bundle/Ui/Config/Builder/UiConfigBuilderTest.php

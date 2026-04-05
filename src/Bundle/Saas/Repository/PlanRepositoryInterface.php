@@ -11,15 +11,16 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace SolidWorx\Platform\SaasBundle\Trial;
+namespace SolidWorx\Platform\SaasBundle\Repository;
 
+use Doctrine\DBAL\LockMode;
+use SolidWorx\Platform\SaasBundle\Entity\Plan;
 use Symfony\Component\Uid\Ulid;
 
-interface TrialUserInterface
+interface PlanRepositoryInterface
 {
     /**
-     * Returns the persisted ULID for this user.
-     * Implementations must be persisted entities with a real ULID before being passed to trial operations.
+     * @param string|Plan|Ulid $id
      */
-    public function getId(): Ulid;
+    public function find(mixed $id, LockMode|int|null $lockMode = null, int|null $lockVersion = null): ?Plan;
 }
