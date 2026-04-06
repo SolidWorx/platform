@@ -100,7 +100,7 @@ final class SchemaGeneratorTest extends TestCase
         self::assertArrayNotHasKey('root', $properties);
     }
 
-    public function testNestedSectionKeyAddsPropertyUnderPlatform(): void
+    public function testNonEmptySectionKeyAddsRootLevelProperty(): void
     {
         $config = $this->makeConfig('mymodule', static function (ArrayNodeDefinition $root): void {
             $root->addDefaultsIfNotSet()->children()
@@ -111,9 +111,9 @@ final class SchemaGeneratorTest extends TestCase
         $generator = new SchemaGenerator([$config]);
         $schema = $generator->generate();
 
-        $properties = $schema['properties']['platform']['properties'];
-        self::assertArrayHasKey('mymodule', $properties);
-        self::assertSame('object', $properties['mymodule']['type']);
+        self::assertArrayHasKey('mymodule', $schema['properties']);
+        self::assertArrayNotHasKey('mymodule', $schema['properties']['platform']['properties']);
+        self::assertSame('object', $schema['properties']['mymodule']['type']);
     }
 
     public function testScalarNodeGeneratesStringType(): void
@@ -406,10 +406,12 @@ final class SchemaGeneratorTest extends TestCase
         });
 
         $schema = (new SchemaGenerator([$config1, $config2]))->generate();
-        $properties = $schema['properties']['platform']['properties'];
 
-        self::assertArrayHasKey('name', $properties);
-        self::assertArrayHasKey('module', $properties);
+        // Root section children go under platform:
+        self::assertArrayHasKey('name', $schema['properties']['platform']['properties']);
+        // Non-empty section keys are root-level siblings of platform:
+        self::assertArrayHasKey('module', $schema['properties']);
+        self::assertArrayNotHasKey('module', $schema['properties']['platform']['properties']);
     }
 
     public function testWithRealPlatformConfiguration(): void
@@ -434,7 +436,7 @@ final class SchemaGeneratorTest extends TestCase
     {
         $generator = new SchemaGenerator([new UiConfiguration()]);
         $schema = $generator->generate();
-        $ui = $schema['properties']['platform']['properties']['ui'];
+        $ui = $schema['properties']['ui'];
 
         self::assertSame('object', $ui['type']);
         self::assertSame('UI / presentation configuration', $ui['description']);
@@ -450,14 +452,15 @@ final class SchemaGeneratorTest extends TestCase
             new UiConfiguration(),
         ]);
         $schema = $generator->generate();
-        $props = $schema['properties']['platform']['properties'];
+        $platformProps = $schema['properties']['platform']['properties'];
 
         // Root section keys (from PlatformConfiguration, key='')
-        self::assertArrayHasKey('name', $props);
-        self::assertArrayHasKey('security', $props);
+        self::assertArrayHasKey('name', $platformProps);
+        self::assertArrayHasKey('security', $platformProps);
 
-        // Nested section keys
-        self::assertArrayHasKey('ui', $props);
+        // Non-empty section keys are root-level siblings
+        self::assertArrayNotHasKey('ui', $platformProps);
+        self::assertArrayHasKey('ui', $schema['properties']);
     }
 
     /**

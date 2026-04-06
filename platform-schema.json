@@ -69,152 +69,152 @@
                         }
                     },
                     "additionalProperties": false
-                },
-                "saas": {
+                }
+            },
+            "additionalProperties": false
+        },
+        "saas": {
+            "type": "object",
+            "description": "SaaS / subscription configuration",
+            "properties": {
+                "doctrine": {
                     "type": "object",
-                    "description": "SaaS / subscription configuration",
+                    "required": [
+                        "subscriptions"
+                    ],
                     "properties": {
-                        "doctrine": {
+                        "subscriptions": {
                             "type": "object",
                             "required": [
-                                "subscriptions"
+                                "entity"
                             ],
                             "properties": {
-                                "subscriptions": {
-                                    "type": "object",
-                                    "required": [
-                                        "entity"
-                                    ],
-                                    "properties": {
-                                        "entity": {
-                                            "type": "string",
-                                            "description": "Fully-qualified class name of the subscription entity."
-                                        }
-                                    }
-                                },
-                                "db_schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "table_names": {
-                                            "type": "object",
-                                            "properties": {
-                                                "plan": {
-                                                    "type": "string",
-                                                    "default": "saas_plan"
-                                                },
-                                                "subscription": {
-                                                    "type": "string",
-                                                    "default": "saas_subscription"
-                                                },
-                                                "subscription_log": {
-                                                    "type": "string",
-                                                    "default": "saas_subscription_log"
-                                                },
-                                                "plan_feature": {
-                                                    "type": "string",
-                                                    "default": "saas_plan_feature"
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "payment": {
-                            "type": "object",
-                            "required": [
-                                "return_route"
-                            ],
-                            "properties": {
-                                "return_route": {
+                                "entity": {
                                     "type": "string",
-                                    "description": "Route name to redirect to after payment."
+                                    "description": "Fully-qualified class name of the subscription entity."
                                 }
                             }
                         },
-                        "integration": {
+                        "db_schema": {
                             "type": "object",
                             "properties": {
-                                "lemon_squeezy": {
+                                "table_names": {
                                     "type": "object",
                                     "properties": {
-                                        "enabled": {
-                                            "type": "boolean",
-                                            "default": false
+                                        "plan": {
+                                            "type": "string",
+                                            "default": "saas_plan"
                                         },
-                                        "api_key": {
-                                            "type": "string"
+                                        "subscription": {
+                                            "type": "string",
+                                            "default": "saas_subscription"
                                         },
-                                        "webhook_secret": {
-                                            "type": "string"
+                                        "subscription_log": {
+                                            "type": "string",
+                                            "default": "saas_subscription_log"
                                         },
-                                        "store_id": {
-                                            "type": "string"
+                                        "plan_feature": {
+                                            "type": "string",
+                                            "default": "saas_plan_feature"
                                         }
-                                    }
-                                }
-                            }
-                        },
-                        "features": {
-                            "type": "object",
-                            "description": "Named feature definitions.",
-                            "additionalProperties": {
-                                "type": "object",
-                                "required": [
-                                    "type",
-                                    "default"
-                                ],
-                                "properties": {
-                                    "type": {
-                                        "type": "string",
-                                        "enum": [
-                                            "boolean",
-                                            "integer",
-                                            "string",
-                                            "array"
-                                        ]
-                                    },
-                                    "default": {
-                                        "description": "Default value for the feature."
-                                    },
-                                    "description": {
-                                        "type": "string"
                                     }
                                 }
                             }
                         }
                     }
                 },
-                "ui": {
+                "payment": {
                     "type": "object",
-                    "description": "UI / presentation configuration",
+                    "required": [
+                        "return_route"
+                    ],
                     "properties": {
-                        "icon_pack": {
+                        "return_route": {
                             "type": "string",
-                            "description": "The icon pack to use.",
-                            "default": "tabler"
-                        },
-                        "templates": {
+                            "description": "Route name to redirect to after payment."
+                        }
+                    }
+                },
+                "integration": {
+                    "type": "object",
+                    "properties": {
+                        "lemon_squeezy": {
                             "type": "object",
                             "properties": {
-                                "base": {
-                                    "type": "string",
-                                    "description": "The base layout template.",
-                                    "default": "@Ui/Layout/base.html.twig"
+                                "enabled": {
+                                    "type": "boolean",
+                                    "default": false
                                 },
-                                "login": {
-                                    "type": "string",
-                                    "description": "The login page template.",
-                                    "default": "@Ui/Security/login.html.twig"
+                                "api_key": {
+                                    "type": "string"
+                                },
+                                "webhook_secret": {
+                                    "type": "string"
+                                },
+                                "store_id": {
+                                    "type": "string"
                                 }
+                            }
+                        }
+                    }
+                },
+                "features": {
+                    "type": "object",
+                    "description": "Named feature definitions.",
+                    "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                            "type",
+                            "default"
+                        ],
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": [
+                                    "boolean",
+                                    "integer",
+                                    "string",
+                                    "array"
+                                ]
                             },
-                            "additionalProperties": false
+                            "default": {
+                                "description": "Default value for the feature."
+                            },
+                            "description": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "ui": {
+            "type": "object",
+            "description": "UI / presentation configuration",
+            "properties": {
+                "icon_pack": {
+                    "type": "string",
+                    "description": "The icon pack to use.",
+                    "default": "tabler"
+                },
+                "templates": {
+                    "type": "object",
+                    "properties": {
+                        "base": {
+                            "type": "string",
+                            "description": "The base layout template.",
+                            "default": "@Ui/Layout/base.html.twig"
+                        },
+                        "login": {
+                            "type": "string",
+                            "description": "The login page template.",
+                            "default": "@Ui/Security/login.html.twig"
                         }
                     },
                     "additionalProperties": false
                 }
             },
-            "additionalProperties": true
+            "additionalProperties": false
         }
     },
     "additionalProperties": true

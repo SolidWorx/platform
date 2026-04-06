@@ -14,11 +14,14 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle\Config;
 
 /**
- * Implemented by any Bundle class that contributes a section under the `platform:` config root.
+ * Implemented by any Bundle class that owns a section in `platform.yaml`.
+ *
+ * Bundles returning an empty key own the `platform:` block itself. Bundles returning
+ * a non-empty key (e.g. 'saas', 'ui') own a root-level sibling block of the same name.
  *
  * The Kernel discovers these implementations during bundle initialisation and injects
- * the relevant raw config sub-array (keyed by {@see getConfigSectionKey()}) so that
- * each bundle's DI Extension can perform its own validation using a private TreeBuilder.
+ * the relevant raw config sub-array so that each bundle's DI Extension can perform
+ * its own validation using a private TreeBuilder.
  */
 interface PlatformConfigSectionInterface extends PlatformConfigKeyInterface
 {

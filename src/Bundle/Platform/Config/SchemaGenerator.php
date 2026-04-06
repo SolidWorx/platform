@@ -30,8 +30,9 @@ use Throwable;
  * Generates a JSON Schema array from the platform's registered {@see PlatformConfigurationInterface} sections.
  *
  * Each bundle contributes its own configuration section by implementing {@see PlatformConfigurationInterface}.
- * This generator collects those sections and converts their Symfony Config {@see NodeInterface} trees into a
- * single JSON Schema document suitable for IDE autocompletion of `platform.yaml`.
+ * Sections with an empty key define children of the `platform:` block; sections with a non-empty key
+ * (e.g. 'saas', 'ui') become root-level siblings of `platform:`. This generator converts their Symfony
+ * Config {@see NodeInterface} trees into a single JSON Schema document suitable for IDE autocompletion.
  */
 final readonly class SchemaGenerator implements SchemaGeneratorInterface
 {
@@ -53,6 +54,7 @@ final readonly class SchemaGenerator implements SchemaGeneratorInterface
     public function generate(): array
     {
         $platformProperties = [];
+        $rootProperties = [];
 
         foreach ($this->configurations as $configuration) {
             $tree = $configuration->getTreeBuilder()->buildTree();
@@ -66,8 +68,22 @@ final readonly class SchemaGenerator implements SchemaGeneratorInterface
                     }
                 }
             } else {
-                $platformProperties[$key] = $this->nodeToSchema($tree);
+                // Bundle sections are root-level siblings of `platform:`
+                $rootProperties[$key] = $this->nodeToSchema($tree);
             }
+        }
+
+        $properties = [
+            'platform' => [
+                'type' => 'object',
+                'description' => 'Platform configuration',
+                'properties' => $platformProperties,
+                'additionalProperties' => false,
+            ],
+        ];
+
+        foreach ($rootProperties as $key => $schema) {
+            $properties[$key] = $schema;
         }
 
         return [
@@ -75,14 +91,7 @@ final readonly class SchemaGenerator implements SchemaGeneratorInterface
             'title' => 'SolidWorx Platform Configuration',
             'description' => 'Configuration schema for platform.yaml',
             'type' => 'object',
-            'properties' => [
-                'platform' => [
-                    'type' => 'object',
-                    'description' => 'Platform configuration',
-                    'properties' => $platformProperties,
-                    'additionalProperties' => false,
-                ],
-            ],
+            'properties' => $properties,
             'additionalProperties' => true,
         ];
     }

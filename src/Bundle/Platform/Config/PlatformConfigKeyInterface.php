@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle\Config;
 
 /**
- * Shared base for any class that owns a named section under the `platform:` config root.
+ * Shared base for any class that owns a named section in `platform.yaml`.
  *
  * Both {@see PlatformConfigurationInterface} (schema-generation services) and
  * {@see PlatformConfigSectionInterface} (bundle classes that receive raw config) implement
@@ -23,10 +23,10 @@ namespace SolidWorx\Platform\PlatformBundle\Config;
 interface PlatformConfigKeyInterface
 {
     /**
-     * The key within `platform:` that this class covers.
-     * Return an empty string to contribute to / receive the root `platform:` section.
+     * The config section key this class covers.
      *
-     * Examples: '', 'saas', 'ui'
+     * Return an empty string to own the root `platform:` block.
+     * Return a non-empty string (e.g. 'saas', 'ui') to own a root-level sibling block.
      */
     public function getConfigSectionKey(): string;
 }

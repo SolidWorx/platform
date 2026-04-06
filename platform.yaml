@@ -15,28 +15,28 @@ platform:
   models:
     user: SolidWorx\Platform\PlatformBundle\Model\User
 
-  # saas:
-  #   doctrine:
-  #     subscriptions:
-  #       entity: App\Entity\Subscription
-  #     db_schema:
-  #       table_names:
-  #         plan: plans
-  #         subscription: subscriptions
-  #         subscription_log: subscription_logs
-  #         plan_feature: plan_features
-  #   payment:
-  #     return_route: app_payment_return
-  #   integration:
-  #     lemon_squeezy:
-  #       enabled: false
-  #       api_key: '%env(LEMON_SQUEEZY_API_KEY)%'
-  #       webhook_secret: '%env(LEMON_SQUEEZY_WEBHOOK_SECRET)%'
-  #       store_id: '%env(LEMON_SQUEEZY_STORE_ID)%'
-  #   features: {}
+# saas:
+#   doctrine:
+#     subscriptions:
+#       entity: App\Entity\Subscription
+#     db_schema:
+#       table_names:
+#         plan: plans
+#         subscription: subscriptions
+#         subscription_logs: subscription_logs
+#         plan_feature: plan_features
+#   payment:
+#     return_route: app_payment_return
+#   integration:
+#     lemon_squeezy:
+#       enabled: false
+#       api_key: '%env(LEMON_SQUEEZY_API_KEY)%'
+#       webhook_secret: '%env(LEMON_SQUEEZY_WEBHOOK_SECRET)%'
+#       store_id: '%env(LEMON_SQUEEZY_STORE_ID)%'
+#   features: {}
 
-  # ui:
-  #   icon_pack: tabler
-  #   templates:
-  #     base: '@Ui/Layout/base.html.twig'
-  #     login: '@Ui/Security/login.html.twig'
+# ui:
+#   icon_pack: tabler
+#   templates:
+#     base: '@Ui/Layout/base.html.twig'
+#     login: '@Ui/Security/login.html.twig'

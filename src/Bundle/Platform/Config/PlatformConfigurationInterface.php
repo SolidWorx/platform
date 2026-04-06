@@ -17,7 +17,10 @@ use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
 /**
- * Implemented by any service that contributes a section under `platform:` in the unified config.
+ * Implemented by any service that contributes a configuration section in `platform.yaml`.
+ *
+ * Services returning an empty key define the `platform:` block schema. Services returning
+ * a non-empty key define a root-level sibling block (e.g. `saas:`, `ui:`).
  *
  * Implementations are auto-tagged as `solidworx_platform.configuration` and collected by
  * {@see SchemaGenerator} to build the JSON Schema for `platform.yaml` autocompletion.

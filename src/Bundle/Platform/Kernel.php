@@ -97,8 +97,6 @@ abstract class Kernel extends BaseKernel
     {
         $this->bundles = [];
 
-        $rawPlatformConfig = $this->rawConfig['platform'] ?? [];
-
         foreach ($this->registerBundles() as $bundle) {
             $name = $bundle->getName();
             if (isset($this->bundles[$name])) {
@@ -108,7 +106,9 @@ abstract class Kernel extends BaseKernel
 
             if ($bundle instanceof PlatformConfigSectionInterface) {
                 $key = $bundle->getConfigSectionKey();
-                $section = $key !== '' ? ($rawPlatformConfig[$key] ?? []) : $rawPlatformConfig;
+                $section = $key !== ''
+                    ? ($this->rawConfig[$key] ?? [])
+                    : ($this->rawConfig['platform'] ?? []);
                 $bundle->setPlatformRawConfig($section);
             }
 
