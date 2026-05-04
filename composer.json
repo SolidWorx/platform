@@ -74,6 +74,6 @@
         "rector/rector": "^1.2",
         "roave/security-advisories": "dev-latest",
         "spatie/phpunit-snapshot-assertions": "^5.3",
-        "symplify/easy-coding-standard": "^13.0"
+        "symplify/easy-coding-standard": "^13.1"
     }
 }
