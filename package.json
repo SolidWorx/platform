@@ -33,7 +33,7 @@
   "devDependencies": {
     "@symfony/webpack-encore": "^5.2.0",
     "@types/bootstrap": "^5.2.10",
-    "eslint-webpack-plugin": "^5.0.2"
+    "eslint-webpack-plugin": "^6.0.0"
   },
   "dependencies": {
     "@stimulus-components/checkbox-select-all": "^6.1.0",
