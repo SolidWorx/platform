@@ -39,7 +39,7 @@
     "@stimulus-components/checkbox-select-all": "^6.1.0",
     "@stimulus-components/clipboard": "^5.0.0",
     "@stimulus-components/password-visibility": "^3.0.0",
-    "jquery": "^3.7.1",
+    "jquery": "^4.0.0",
     "bootstrap": "^5.3.8"
   }
 }
