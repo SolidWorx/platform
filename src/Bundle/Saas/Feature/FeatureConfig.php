@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\SaasBundle\Feature;
 
 use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
+use SolidWorx\Platform\PlatformBundle\Feature\FeatureValue;
 
 final readonly class FeatureConfig
 {

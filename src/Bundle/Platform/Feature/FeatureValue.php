@@ -11,9 +11,8 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace SolidWorx\Platform\SaasBundle\Feature;
+namespace SolidWorx\Platform\PlatformBundle\Feature;
 
-use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
 use function is_array;
 use function is_bool;
 use function is_int;

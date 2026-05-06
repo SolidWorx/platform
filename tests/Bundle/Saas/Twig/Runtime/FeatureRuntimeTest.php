@@ -18,7 +18,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
 use SolidWorx\Platform\SaasBundle\Exception\UndefinedFeatureException;
-use SolidWorx\Platform\SaasBundle\Feature\FeatureValue;
+use SolidWorx\Platform\PlatformBundle\Feature\FeatureValue;
 use SolidWorx\Platform\SaasBundle\Feature\PlanFeatureManager;
 use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
 use SolidWorx\Platform\SaasBundle\Twig\Runtime\FeatureRuntime;
