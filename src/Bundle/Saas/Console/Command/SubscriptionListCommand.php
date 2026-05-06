@@ -21,7 +21,7 @@ use Override;
 use SolidWorx\Platform\PlatformBundle\Console\Command;
 use SolidWorx\Platform\SaasBundle\Enum\SubscriptionStatus;
 use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepository;
-use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
+use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use Stringable;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;

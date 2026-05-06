@@ -25,7 +25,7 @@ use SolidWorx\Platform\SaasBundle\Exception\ExtensionRequiredException;
 use SolidWorx\Platform\SaasBundle\Feature\FeatureConfigRegistry;
 use SolidWorx\Platform\SaasBundle\Integration\LemonSqueezy;
 use SolidWorx\Platform\SaasBundle\SolidWorxPlatformSaasBundle;
-use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
+use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use SolidWorx\Platform\SaasBundle\Trial\TrialUserInterface;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;

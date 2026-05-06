@@ -27,7 +27,7 @@ use SolidWorx\Platform\SaasBundle\Integration\Options;
 use SolidWorx\Platform\SaasBundle\Integration\PaymentIntegrationInterface;
 use SolidWorx\Platform\SaasBundle\Repository\PlanRepositoryInterface;
 use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepositoryInterface;
-use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
+use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use Symfony\Component\Uid\Ulid;
 use function get_debug_type;
 

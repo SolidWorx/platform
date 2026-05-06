@@ -25,7 +25,7 @@ use SolidWorx\Platform\SaasBundle\Exception\UndefinedFeatureException;
 use SolidWorx\Platform\SaasBundle\Feature\FeatureConfigRegistry;
 use SolidWorx\Platform\SaasBundle\Feature\PlanFeatureManager;
 use SolidWorx\Platform\SaasBundle\Repository\PlanFeatureRepositoryInterface;
-use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
+use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use SolidWorx\Platform\SaasBundle\Subscription\SubscriptionProviderInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Uid\Ulid;

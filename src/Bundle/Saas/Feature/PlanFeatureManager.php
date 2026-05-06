@@ -22,7 +22,7 @@ use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
 use SolidWorx\Platform\PlatformBundle\Feature\FeatureValue;
 use SolidWorx\Platform\SaasBundle\Exception\UndefinedFeatureException;
 use SolidWorx\Platform\SaasBundle\Repository\PlanFeatureRepositoryInterface;
-use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
+use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use SolidWorx\Platform\SaasBundle\Subscription\SubscriptionProviderInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Service\ResetInterface;

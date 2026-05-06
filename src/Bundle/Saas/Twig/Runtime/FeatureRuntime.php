@@ -15,7 +15,7 @@ namespace SolidWorx\Platform\SaasBundle\Twig\Runtime;
 
 use SolidWorx\Platform\SaasBundle\Exception\UndefinedFeatureException;
 use SolidWorx\Platform\SaasBundle\Feature\PlanFeatureManager;
-use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
+use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use Twig\Extension\RuntimeExtensionInterface;
 
 /**

@@ -20,7 +20,7 @@ use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
 use SolidWorx\Platform\SaasBundle\Exception\UndefinedFeatureException;
 use SolidWorx\Platform\PlatformBundle\Feature\FeatureValue;
 use SolidWorx\Platform\SaasBundle\Feature\PlanFeatureManager;
-use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
+use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use SolidWorx\Platform\SaasBundle\Twig\Runtime\FeatureRuntime;
 
 #[CoversClass(FeatureRuntime::class)]

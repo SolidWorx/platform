@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\SaasBundle\Subscription;
 
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
-use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
+use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 
 /**
  * Interface for retrieving subscriptions.

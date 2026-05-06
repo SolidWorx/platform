@@ -11,7 +11,7 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace SolidWorx\Platform\SaasBundle\Subscriber;
+namespace SolidWorx\Platform\PlatformBundle\Feature;
 
 interface SubscribableInterface
 {

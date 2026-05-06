@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\Feature;
 
-use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
+use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 
 /**
  * Interface for feature toggle implementations.

@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\SaasBundle\DependencyInjection\CompilerPass;
 
 use Override;
-use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
+use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use SolidWorx\Platform\SaasBundle\Trial\TrialUserInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;

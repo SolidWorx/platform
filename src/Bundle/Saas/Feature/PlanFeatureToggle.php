@@ -15,7 +15,7 @@ namespace SolidWorx\Platform\SaasBundle\Feature;
 
 use Override;
 use SolidWorx\Platform\SaasBundle\Exception\UndefinedFeatureException;
-use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
+use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 
 /**
  * Default implementation of FeatureToggleInterface using PlanFeatureManager.
