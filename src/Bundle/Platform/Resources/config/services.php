@@ -12,6 +12,10 @@ declare(strict_types=1);
  */
 
 use SolidWorx\Platform\PlatformBundle\Controller\Security\Login;
+use SolidWorx\Platform\PlatformBundle\Feature\FeatureGate;
+use SolidWorx\Platform\PlatformBundle\Feature\NoopFeatureGate;
+use SolidWorx\Platform\PlatformBundle\Feature\NullSubscriberResolver;
+use SolidWorx\Platform\PlatformBundle\Feature\SubscriberResolver;
 use SolidWorx\Platform\PlatformBundle\SolidWorxPlatformBundle;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
@@ -31,4 +35,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
 
     $services->set(Login::class)
         ->tag('controller.service_arguments');
+
+    $services->alias(FeatureGate::class, NoopFeatureGate::class);
+    $services->alias(SubscriberResolver::class, NullSubscriberResolver::class);
 };
