@@ -145,7 +145,7 @@ $feature->asArray();   // array
 ### FeatureType Enum
 
 ```php
-use SolidWorx\Platform\SaasBundle\Enum\FeatureType;
+use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
 
 FeatureType::BOOLEAN;  // 'boolean'
 FeatureType::INTEGER;  // 'integer'
