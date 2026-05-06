@@ -15,6 +15,7 @@ namespace SolidWorx\Platform\SaasBundle;
 
 use Override;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigSectionInterface;
+use SolidWorx\Platform\SaasBundle\DependencyInjection\CompilerPass\FeatureGateAliasPass;
 use SolidWorx\Platform\SaasBundle\DependencyInjection\CompilerPass\ResolveTargetEntityPass;
 use SolidWorx\Platform\SaasBundle\DependencyInjection\CompilerPass\WebhookCompilerPass;
 use SolidWorx\Platform\SaasBundle\DependencyInjection\SolidWorxPlatformSaasExtension;
@@ -53,6 +54,7 @@ final class SolidWorxPlatformSaasBundle extends Bundle implements PlatformConfig
     public function build(ContainerBuilder $container): void
     {
         parent::build($container);
+        $container->addCompilerPass(new FeatureGateAliasPass());
         $container->addCompilerPass(new ResolveTargetEntityPass());
         $container->addCompilerPass(new WebhookCompilerPass());
     }
