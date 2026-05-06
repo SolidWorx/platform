@@ -15,7 +15,7 @@ namespace SolidWorx\Platform\SaasBundle\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use SolidWorx\Platform\SaasBundle\Enum\FeatureType;
+use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
 use SolidWorx\Platform\SaasBundle\Feature\FeatureValue;
 use SolidWorx\Platform\SaasBundle\Repository\PlanFeatureRepository;
 use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;

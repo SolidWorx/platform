@@ -20,7 +20,7 @@ use ReflectionClass;
 use SolidWorx\Platform\SaasBundle\Entity\Plan;
 use SolidWorx\Platform\SaasBundle\Entity\PlanFeature;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
-use SolidWorx\Platform\SaasBundle\Enum\FeatureType;
+use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
 use SolidWorx\Platform\SaasBundle\Exception\UndefinedFeatureException;
 use SolidWorx\Platform\SaasBundle\Feature\FeatureConfigRegistry;
 use SolidWorx\Platform\SaasBundle\Feature\PlanFeatureManager;

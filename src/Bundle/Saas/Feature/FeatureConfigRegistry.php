@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\Feature;
 
-use SolidWorx\Platform\SaasBundle\Enum\FeatureType;
+use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
 use SolidWorx\Platform\SaasBundle\Exception\UndefinedFeatureException;
 
 final class FeatureConfigRegistry

@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\Feature;
 
-use SolidWorx\Platform\SaasBundle\Enum\FeatureType;
+use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
 use function is_array;
 use function is_bool;
 use function is_int;

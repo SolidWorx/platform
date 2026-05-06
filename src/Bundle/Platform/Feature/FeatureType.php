@@ -11,7 +11,7 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace SolidWorx\Platform\SaasBundle\Enum;
+namespace SolidWorx\Platform\PlatformBundle\Feature;
 
 enum FeatureType: string
 {

@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\Feature;
 
-use SolidWorx\Platform\SaasBundle\Enum\FeatureType;
+use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
 
 final readonly class FeatureConfig
 {

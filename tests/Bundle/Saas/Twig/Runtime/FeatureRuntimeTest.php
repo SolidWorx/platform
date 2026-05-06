@@ -16,7 +16,7 @@ namespace SolidWorx\Platform\Tests\Bundle\Saas\Twig\Runtime;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use SolidWorx\Platform\SaasBundle\Enum\FeatureType;
+use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
 use SolidWorx\Platform\SaasBundle\Exception\UndefinedFeatureException;
 use SolidWorx\Platform\SaasBundle\Feature\FeatureValue;
 use SolidWorx\Platform\SaasBundle\Feature\PlanFeatureManager;

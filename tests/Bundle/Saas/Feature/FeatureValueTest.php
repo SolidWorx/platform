@@ -16,7 +16,7 @@ namespace SolidWorx\Platform\Tests\Bundle\Saas\Feature;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use SolidWorx\Platform\SaasBundle\Enum\FeatureType;
+use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
 use SolidWorx\Platform\SaasBundle\Feature\FeatureValue;
 
 #[CoversClass(FeatureValue::class)]
