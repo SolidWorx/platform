@@ -11,8 +11,6 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-use SolidWorx\Platform\PlatformBundle\Feature\FeatureGate;
-use SolidWorx\Platform\SaasBundle\Feature\PlanFeatureGate;
 use SolidWorx\Platform\SaasBundle\SolidWorxPlatformSaasBundle;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
@@ -30,5 +28,8 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         ->load(SolidWorxPlatformSaasBundle::NAMESPACE . '\\', dirname(__DIR__, 2))
         ->exclude(dirname(__DIR__, 2) . '/{DependencyInjection,Entity,Resources,Tests}');
 
-    $services->alias(FeatureGate::class, PlanFeatureGate::class);
+    // The FeatureGate alias is set by FeatureGateAliasPass (compiler pass) rather
+    // than here, so it deterministically wins regardless of bundle registration
+    // order — PlatformBundle's default alias would otherwise overwrite this one
+    // when PlatformBundle's extension loads after SaasBundle's.
 };

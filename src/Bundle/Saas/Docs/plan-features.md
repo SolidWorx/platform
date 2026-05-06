@@ -102,7 +102,7 @@ solidworx_platform_saas:
 For integer features, use `-1` to represent unlimited:
 
 ```php
-use SolidWorx\Platform\SaasBundle\Feature\FeatureValue;
+use SolidWorx\Platform\PlatformBundle\Feature\FeatureValue;
 
 // Check if a feature is unlimited
 if ($feature->isUnlimited()) {
@@ -122,7 +122,7 @@ $unlimited = FeatureValue::UNLIMITED; // -1
 The `FeatureValue` class is an immutable value object representing a resolved feature:
 
 ```php
-use SolidWorx\Platform\SaasBundle\Feature\FeatureValue;
+use SolidWorx\Platform\PlatformBundle\Feature\FeatureValue;
 
 // Properties (readonly)
 $feature->key;    // string - feature identifier
@@ -240,7 +240,7 @@ The most common use case is checking features for the currently logged-in user o
 Your User entity (or Company, Organization, etc.) must implement `SubscribableInterface`:
 
 ```php
-use SolidWorx\Platform\SaasBundle\Subscriber\SubscribableInterface;
+use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 
 class User implements SubscribableInterface
 {
