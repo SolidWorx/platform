@@ -243,6 +243,18 @@ readonly class PlanFeatureManager implements ResetInterface
     }
 
     /**
+     * Get a feature's configured default value, without consulting any plan-specific override.
+     *
+     * Used when no subscriber/plan is in context (e.g. CLI commands, message handlers).
+     *
+     * @throws UndefinedFeatureException If the feature is not defined in config.
+     */
+    public function getConfigDefault(string $featureKey): FeatureValue
+    {
+        return $this->configRegistry->get($featureKey)->toFeatureValue();
+    }
+
+    /**
      * Get all available feature configurations.
      *
      * @return array<string, FeatureConfig>

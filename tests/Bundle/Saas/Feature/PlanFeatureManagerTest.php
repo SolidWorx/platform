@@ -192,6 +192,25 @@ final class PlanFeatureManagerTest extends TestCase
         self::assertArrayHasKey('storage_gb', $features);
     }
 
+    public function testGetConfigDefaultReturnsRegistryDefault(): void
+    {
+        $manager = $this->createManager();
+
+        $value = $manager->getConfigDefault('max_users');
+
+        self::assertSame('max_users', $value->key);
+        self::assertSame(10, $value->value);
+    }
+
+    public function testGetConfigDefaultThrowsForUnknownKey(): void
+    {
+        $manager = $this->createManager();
+
+        $this->expectException(UndefinedFeatureException::class);
+
+        $manager->getConfigDefault('does_not_exist');
+    }
+
     /**
      * @param array<PlanFeature> $planFeatures
      */
