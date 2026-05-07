@@ -43,4 +43,49 @@ final class PlanRepository extends EntityRepository implements PlanRepositoryInt
             default => parent::find($id, $lockMode, $lockVersion),
         };
     }
+
+    /**
+     * Returns the default active plan, or the cheapest active plan when none
+     * is explicitly flagged. Used during signup and when more than one plan
+     * is configured to highlight a recommended option.
+     */
+    public function findDefault(): ?Plan
+    {
+        $default = $this->createQueryBuilder('p')
+            ->where('p.default = :default')
+            ->andWhere('p.active = :active')
+            ->setParameter('default', true)
+            ->setParameter('active', true)
+            ->orderBy('p.price', 'ASC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($default instanceof Plan) {
+            return $default;
+        }
+
+        return $this->createQueryBuilder('p')
+            ->where('p.active = :active')
+            ->setParameter('active', true)
+            ->orderBy('p.price', 'ASC')
+            ->addOrderBy('p.name', 'ASC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /**
+     * @return list<Plan>
+     */
+    public function findAllOrdered(): array
+    {
+        return $this->createQueryBuilder('p')
+            ->where('p.active = :active')
+            ->setParameter('active', true)
+            ->orderBy('p.price', 'ASC')
+            ->addOrderBy('p.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

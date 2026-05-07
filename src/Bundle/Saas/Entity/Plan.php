@@ -60,6 +60,16 @@ class Plan implements Stringable
     #[ORM\Column(type: Types::DATEINTERVAL, nullable: true)]
     private ?DateInterval $trialDuration = null;
 
+    #[ORM\Column(name: '`default`', type: Types::BOOLEAN, options: [
+        'default' => false,
+    ])]
+    private bool $default = false;
+
+    #[ORM\Column(type: Types::BOOLEAN, options: [
+        'default' => true,
+    ])]
+    private bool $active = true;
+
     #[ORM\OneToMany(targetEntity: Subscription::class, mappedBy: 'plan', orphanRemoval: true)]
     private Collection $subscriptions;
 
@@ -140,6 +150,30 @@ class Plan implements Stringable
     public function setTrialDuration(?DateInterval $trialDuration): static
     {
         $this->trialDuration = $trialDuration;
+
+        return $this;
+    }
+
+    public function isDefault(): bool
+    {
+        return $this->default;
+    }
+
+    public function setDefault(bool $default): static
+    {
+        $this->default = $default;
+
+        return $this;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->active;
+    }
+
+    public function setActive(bool $active): static
+    {
+        $this->active = $active;
 
         return $this;
     }

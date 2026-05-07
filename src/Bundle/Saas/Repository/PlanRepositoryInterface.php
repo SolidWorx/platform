@@ -23,4 +23,15 @@ interface PlanRepositoryInterface
      * @param string|Plan|Ulid $id
      */
     public function find(mixed $id, LockMode|int|null $lockMode = null, int|null $lockVersion = null): ?Plan;
+
+    /**
+     * Returns the default active plan, falling back to the cheapest active
+     * plan when no plan is explicitly flagged as default.
+     */
+    public function findDefault(): ?Plan;
+
+    /**
+     * @return list<Plan>
+     */
+    public function findAllOrdered(): array;
 }

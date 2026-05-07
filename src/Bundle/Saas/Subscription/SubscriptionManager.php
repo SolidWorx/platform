@@ -18,16 +18,17 @@ use DateInterval;
 use DateTime;
 use DateTimeInterface;
 use Override;
+use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use SolidWorx\Platform\SaasBundle\Entity\Plan;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Enum\SubscriptionStatus;
+use SolidWorx\Platform\SaasBundle\Exception\ActiveSubscriptionPlanChangeException;
 use SolidWorx\Platform\SaasBundle\Exception\InvalidPlanException;
 use SolidWorx\Platform\SaasBundle\Exception\TrialConfigurationException;
 use SolidWorx\Platform\SaasBundle\Integration\Options;
 use SolidWorx\Platform\SaasBundle\Integration\PaymentIntegrationInterface;
 use SolidWorx\Platform\SaasBundle\Repository\PlanRepositoryInterface;
 use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepositoryInterface;
-use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use Symfony\Component\Uid\Ulid;
 use function get_debug_type;
 
@@ -151,6 +152,24 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
     public function markAsUnpaid(Subscription $subscription): void
     {
         $subscription->setStatus(SubscriptionStatus::UNPAID);
+
+        $this->subscriptionRepository->save($subscription);
+    }
+
+    /**
+     * Swap the plan on a subscription that has not yet been activated. Plan
+     * changes for ACTIVE subscriptions go through the payment integration and
+     * are intentionally not handled here.
+     *
+     * @throws ActiveSubscriptionPlanChangeException
+     */
+    public function changePlan(Subscription $subscription, Plan $plan): void
+    {
+        if ($subscription->getStatus() === SubscriptionStatus::ACTIVE) {
+            throw new ActiveSubscriptionPlanChangeException($subscription);
+        }
+
+        $subscription->setPlan($plan);
 
         $this->subscriptionRepository->save($subscription);
     }
