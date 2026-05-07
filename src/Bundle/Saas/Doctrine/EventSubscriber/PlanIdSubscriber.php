@@ -18,7 +18,7 @@ use Doctrine\ORM\Events;
 use SolidWorx\Platform\SaasBundle\Entity\Plan;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-#[AsEntityListener(event: Events::prePersist, method: 'prePersist', entity: Plan::class)]
+#[AsEntityListener(event: Events::prePersist, method: 'prePersist', lazy: true, entity: Plan::class)]
 final readonly class PlanIdSubscriber
 {
     public function __construct(
