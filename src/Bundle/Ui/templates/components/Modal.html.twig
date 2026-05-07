@@ -10,7 +10,7 @@
     status = ''
 %}
 
-{% set modal = cva({
+{% set modal = html_cva({
     base: 'modal',
     variants: {
         show: {
@@ -20,7 +20,7 @@
     }
 }) %}
 
-{% set dialog = cva({
+{% set dialog = html_cva({
     base: 'modal-dialog',
     variants: {
         size: {
