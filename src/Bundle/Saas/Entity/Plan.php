@@ -113,9 +113,9 @@ class Plan implements Stringable
         return $this->description;
     }
 
-    public function setDescription(string $description): static
+    public function setDescription(?string $description): static
     {
-        $this->description = $description;
+        $this->description = (string) $description;
         return $this;
     }
 
