@@ -22,7 +22,7 @@ use Symfony\Component\Uid\Ulid;
 /**
  * @template-extends EntityRepository<Plan>
  */
-final class PlanRepository extends EntityRepository implements PlanRepositoryInterface
+class PlanRepository extends EntityRepository implements PlanRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
