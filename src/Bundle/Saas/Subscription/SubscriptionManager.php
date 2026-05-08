@@ -173,4 +173,18 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
 
         $this->subscriptionRepository->save($subscription);
     }
+
+    /**
+     * Marks a subscription as ACTIVE without going through the payment
+     * integration. Intended for free plans, where there is no external
+     * billing reference.
+     */
+    public function activate(Subscription $subscription, ?DateTimeInterface $endDate = null): void
+    {
+        $subscription->setStatus(SubscriptionStatus::ACTIVE);
+        $subscription->setStartDate(CarbonImmutable::now('UTC'));
+        $subscription->setEndDate($endDate ?? CarbonImmutable::now('UTC')->addYears(100));
+
+        $this->subscriptionRepository->save($subscription);
+    }
 }

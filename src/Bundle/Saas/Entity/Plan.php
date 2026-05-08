@@ -179,6 +179,15 @@ class Plan implements Stringable
     }
 
     /**
+     * A plan is "free" when it has no external billing identifier and a zero
+     * price — these subscriptions skip checkout and activate immediately.
+     */
+    public function isFree(): bool
+    {
+        return $this->price === 0 && $this->planId === '0';
+    }
+
+    /**
      * @return Collection<int, Subscription>
      */
     public function getSubscriptions(): Collection
