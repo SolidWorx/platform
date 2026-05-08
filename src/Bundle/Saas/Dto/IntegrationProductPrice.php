@@ -13,16 +13,14 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\Dto;
 
-final readonly class IntegrationProduct
+use DateInterval;
+
+final readonly class IntegrationProductPrice
 {
-    /**
-     * @param list<IntegrationProductPrice> $prices
-     */
     public function __construct(
-        public string $id,
-        public string $name,
-        public string $description,
-        public array $prices,
+        public string $variantId,
+        public int $price,
+        public DateInterval $interval,
     ) {
     }
 }

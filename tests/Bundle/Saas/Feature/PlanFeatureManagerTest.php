@@ -13,19 +13,21 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\Tests\Bundle\Saas\Feature;
 
+use DateInterval;
 use Override;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
+use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use SolidWorx\Platform\SaasBundle\Entity\Plan;
 use SolidWorx\Platform\SaasBundle\Entity\PlanFeature;
+use SolidWorx\Platform\SaasBundle\Entity\PlanPrice;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
-use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
 use SolidWorx\Platform\SaasBundle\Exception\UndefinedFeatureException;
 use SolidWorx\Platform\SaasBundle\Feature\FeatureConfigRegistry;
 use SolidWorx\Platform\SaasBundle\Feature\PlanFeatureManager;
 use SolidWorx\Platform\SaasBundle\Repository\PlanFeatureRepositoryInterface;
-use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use SolidWorx\Platform\SaasBundle\Subscription\SubscriptionProviderInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Uid\Ulid;
@@ -282,19 +284,31 @@ final class PlanFeatureManagerTest extends TestCase
         $plan = new Plan();
         $plan->setName('Test Plan');
         $plan->setPlanId('test-plan');
-        $plan->setPrice(1000);
 
         $reflection = new ReflectionClass($plan);
         $property = $reflection->getProperty('id');
         $property->setValue($plan, new Ulid());
+
+        $price = new PlanPrice();
+        $price->setVariantId('test-variant');
+        $price->setPrice(1000);
+        $price->setInterval(new DateInterval('P1M'));
+        $plan->addPrice($price);
+
+        $priceReflection = new ReflectionClass($price);
+        $priceIdProperty = $priceReflection->getProperty('id');
+        $priceIdProperty->setValue($price, new Ulid());
 
         return $plan;
     }
 
     private function createSubscription(Plan $plan): Subscription
     {
+        $price = $plan->getPrices()->first();
+        assert($price instanceof PlanPrice);
+
         $subscription = new Subscription();
-        $subscription->setPlan($plan);
+        $subscription->setPlanPrice($price);
 
         return $subscription;
     }

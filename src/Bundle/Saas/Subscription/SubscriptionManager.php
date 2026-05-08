@@ -19,7 +19,7 @@ use DateTime;
 use DateTimeInterface;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
-use SolidWorx\Platform\SaasBundle\Entity\Plan;
+use SolidWorx\Platform\SaasBundle\Entity\PlanPrice;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Enum\SubscriptionStatus;
 use SolidWorx\Platform\SaasBundle\Exception\ActiveSubscriptionPlanChangeException;
@@ -27,16 +27,15 @@ use SolidWorx\Platform\SaasBundle\Exception\InvalidPlanException;
 use SolidWorx\Platform\SaasBundle\Exception\TrialConfigurationException;
 use SolidWorx\Platform\SaasBundle\Integration\Options;
 use SolidWorx\Platform\SaasBundle\Integration\PaymentIntegrationInterface;
-use SolidWorx\Platform\SaasBundle\Repository\PlanRepositoryInterface;
+use SolidWorx\Platform\SaasBundle\Repository\PlanPriceRepositoryInterface;
 use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepositoryInterface;
 use Symfony\Component\Uid\Ulid;
-use function get_debug_type;
 
 final readonly class SubscriptionManager implements SubscriptionProviderInterface
 {
     public function __construct(
         private SubscriptionRepositoryInterface $subscriptionRepository,
-        private PlanRepositoryInterface $planRepository,
+        private PlanPriceRepositoryInterface $planPriceRepository,
         private PaymentIntegrationInterface $paymentIntegration,
     ) {
     }
@@ -51,19 +50,18 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
 
     public function createSubscription(
         SubscribableInterface $subscribable,
-        Plan|Ulid|string $planId,
+        PlanPrice|Ulid|string $priceId,
     ): Subscription {
-        $plan = $this->planRepository->find($planId);
+        $planPrice = $this->planPriceRepository->find($priceId);
 
-        if (! $plan instanceof Plan) {
-            $planIdString = match (get_debug_type($planId)) {
-                'string' => $planId,
-                Ulid::class => $planId->toBase58(),
-                Plan::class => $planId->getPlanId(),
-                default => (string) $planId,
+        if (! $planPrice instanceof PlanPrice) {
+            $priceIdString = match (true) {
+                $priceId instanceof Ulid => $priceId->toBase58(),
+                $priceId instanceof PlanPrice => $priceId->getVariantId(),
+                default => $priceId,
             };
 
-            throw new InvalidPlanException($planIdString);
+            throw new InvalidPlanException($priceIdString);
         }
 
         $subscription = new Subscription();
@@ -71,7 +69,7 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
         $subscription->setStatus(SubscriptionStatus::PENDING);
         $subscription->setStartDate(new DateTime('NOW'));
         $subscription->setEndDate((new DateTime('NOW')));
-        $subscription->setPlan($plan);
+        $subscription->setPlanPrice($planPrice);
 
         $this->subscriptionRepository->save($subscription);
 
@@ -157,19 +155,19 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
     }
 
     /**
-     * Swap the plan on a subscription that has not yet been activated. Plan
-     * changes for ACTIVE subscriptions go through the payment integration and
-     * are intentionally not handled here.
+     * Swap the price (variant) on a subscription that has not yet been
+     * activated. Plan changes for ACTIVE subscriptions go through the payment
+     * integration and are intentionally not handled here.
      *
      * @throws ActiveSubscriptionPlanChangeException
      */
-    public function changePlan(Subscription $subscription, Plan $plan): void
+    public function changePlan(Subscription $subscription, PlanPrice $planPrice): void
     {
         if ($subscription->getStatus() === SubscriptionStatus::ACTIVE) {
             throw new ActiveSubscriptionPlanChangeException($subscription);
         }
 
-        $subscription->setPlan($plan);
+        $subscription->setPlanPrice($planPrice);
 
         $this->subscriptionRepository->save($subscription);
     }

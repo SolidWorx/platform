@@ -45,17 +45,15 @@ class Plan implements Stringable
     private string $name;
 
     /**
-     * Unique value representing the plan id. This can be a unique value set by the user,
-     * or an external value (E.G variantId from LemonSqueezy)
+     * Unique value representing the plan / product id. This can be a unique
+     * value set by the user, or an external value (e.g. product id from
+     * LemonSqueezy). Variants/prices are tracked separately on PlanPrice.
      */
     #[ORM\Column(type: Types::STRING, length: 255, unique: true, nullable: false)]
     private string $planId;
 
     #[ORM\Column(type: Types::TEXT)]
     private string $description = '';
-
-    #[ORM\Column(type: Types::INTEGER)]
-    private int $price;
 
     #[ORM\Column(type: Types::DATEINTERVAL, nullable: true)]
     private ?DateInterval $trialDuration = null;
@@ -70,8 +68,11 @@ class Plan implements Stringable
     ])]
     private bool $active = true;
 
-    #[ORM\OneToMany(targetEntity: Subscription::class, mappedBy: 'plan', orphanRemoval: true)]
-    private Collection $subscriptions;
+    /**
+     * @var Collection<int, PlanPrice>
+     */
+    #[ORM\OneToMany(targetEntity: PlanPrice::class, mappedBy: 'plan', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $prices;
 
     /**
      * @var Collection<int, PlanFeature>
@@ -82,7 +83,7 @@ class Plan implements Stringable
     public function __construct()
     {
         $this->id = new NilUlid();
-        $this->subscriptions = new ArrayCollection();
+        $this->prices = new ArrayCollection();
         $this->features = new ArrayCollection();
     }
 
@@ -116,17 +117,6 @@ class Plan implements Stringable
     public function setDescription(?string $description): static
     {
         $this->description = (string) $description;
-        return $this;
-    }
-
-    public function getPrice(): int
-    {
-        return $this->price;
-    }
-
-    public function setPrice(int $price): static
-    {
-        $this->price = $price;
         return $this;
     }
 
@@ -179,20 +169,43 @@ class Plan implements Stringable
     }
 
     /**
-     * A plan is "free" when it has no external billing identifier and a zero
-     * price — these subscriptions skip checkout and activate immediately.
+     * A plan is "free" when any of its prices is free. Free plans skip checkout
+     * and activate immediately.
      */
     public function isFree(): bool
     {
-        return $this->price === 0 && $this->planId === '0';
+        foreach ($this->prices as $price) {
+            if ($price->isFree()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
-     * @return Collection<int, Subscription>
+     * @return Collection<int, PlanPrice>
      */
-    public function getSubscriptions(): Collection
+    public function getPrices(): Collection
     {
-        return $this->subscriptions;
+        return $this->prices;
+    }
+
+    public function addPrice(PlanPrice $price): static
+    {
+        if (! $this->prices->contains($price)) {
+            $this->prices->add($price);
+            $price->setPlan($this);
+        }
+
+        return $this;
+    }
+
+    public function removePrice(PlanPrice $price): static
+    {
+        $this->prices->removeElement($price);
+
+        return $this;
     }
 
     /**

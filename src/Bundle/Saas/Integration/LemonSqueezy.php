@@ -17,6 +17,7 @@ use Carbon\CarbonInterval;
 use InvalidArgumentException;
 use Override;
 use SolidWorx\Platform\SaasBundle\Dto\IntegrationProduct;
+use SolidWorx\Platform\SaasBundle\Dto\IntegrationProductPrice;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpClient\HttpClient;
@@ -85,6 +86,8 @@ class LemonSqueezy implements PaymentIntegrationInterface
 
             $variantsData = $variants->toArray();
 
+            $prices = [];
+
             foreach ($variantsData['data'] as $variant) {
                 $priceModel = $variant['relationships']['price-model']['links']['related'] ?? null;
 
@@ -99,22 +102,45 @@ class LemonSqueezy implements PaymentIntegrationInterface
 
                 $priceModelData = $priceModelResponse->toArray();
 
+                $unitPrice = $priceModelData['data']['attributes']['unit_price'] ?? 0;
+
+                // Skip the LS auto-generated default variant: it has no real
+                // price model / zero unit price and should not surface as a
+                // billable option.
+                if ((int) $unitPrice === 0) {
+                    continue;
+                }
+
+                $intervalQuantity = $priceModelData['data']['attributes']['renewal_interval_quantity'] ?? null;
+                $intervalUnit = $priceModelData['data']['attributes']['renewal_interval_unit'] ?? null;
+                if ($intervalQuantity === null) {
+                    continue;
+                }
+                if ($intervalUnit === null) {
+                    continue;
+                }
+
                 $interval = CarbonInterval::fromString(
-                    sprintf(
-                        '%s %s',
-                        $priceModelData['data']['attributes']['renewal_interval_quantity'],
-                        $priceModelData['data']['attributes']['renewal_interval_unit'],
-                    )
+                    sprintf('%s %s', $intervalQuantity, $intervalUnit)
                 );
 
-                yield new IntegrationProduct(
-                    id: $variant['id'],
-                    name: $attributes['name'],
-                    description: $attributes['description'],
-                    price: $priceModelData['data']['attributes']['unit_price'],
+                $prices[] = new IntegrationProductPrice(
+                    variantId: (string) $variant['id'],
+                    price: (int) $unitPrice,
                     interval: $interval,
                 );
             }
+
+            if ($prices === []) {
+                continue;
+            }
+
+            yield new IntegrationProduct(
+                id: (string) $product['id'],
+                name: $attributes['name'],
+                description: $attributes['description'] ?? '',
+                prices: $prices,
+            );
         }
     }
 
@@ -159,7 +185,7 @@ class LemonSqueezy implements PaymentIntegrationInterface
                             'variant' => [
                                 'data' => [
                                     'type' => 'variants',
-                                    'id' => $subscription->getPlan()->getPlanId(),
+                                    'id' => $subscription->getPlanPrice()->getVariantId(),
                                 ],
                             ],
                         ],

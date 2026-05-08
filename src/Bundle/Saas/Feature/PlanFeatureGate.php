@@ -35,9 +35,9 @@ final readonly class PlanFeatureGate implements FeatureGate
     {
         $for ??= $this->resolver->resolve();
 
-        return $for === null
-            ? $this->manager->getConfigDefault($featureKey)
-            : $this->manager->getFeatureForSubscriber($for, $featureKey);
+        return $for instanceof SubscribableInterface
+            ? $this->manager->getFeatureForSubscriber($for, $featureKey)
+            : $this->manager->getConfigDefault($featureKey);
     }
 
     #[Override]

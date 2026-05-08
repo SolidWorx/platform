@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\Repository;
 
+use Doctrine\DBAL\LockMode;
 use Doctrine\Persistence\ManagerRegistry;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Repository\EntityRepository;
@@ -33,15 +34,19 @@ class PlanRepository extends EntityRepository implements PlanRepositoryInterface
      * @param string|Plan|Ulid $id
      */
     #[Override]
-    public function find(mixed $id, $lockMode = null, $lockVersion = null): ?Plan
+    public function find(mixed $id, LockMode|int|null $lockMode = null, int|null $lockVersion = null): ?Plan
     {
-        return match (get_debug_type($id)) {
-            Plan::class => $id,
-            'string' => $this->findOneBy([
+        if ($id instanceof Plan) {
+            return $id;
+        }
+
+        if (is_string($id)) {
+            return $this->findOneBy([
                 'planId' => $id,
-            ]),
-            default => parent::find($id, $lockMode, $lockVersion),
-        };
+            ]);
+        }
+
+        return parent::find($id, $lockMode instanceof LockMode ? null : $lockMode, $lockVersion);
     }
 
     /**
@@ -49,43 +54,35 @@ class PlanRepository extends EntityRepository implements PlanRepositoryInterface
      * is explicitly flagged. Used during signup and when more than one plan
      * is configured to highlight a recommended option.
      */
+    #[Override]
     public function findDefault(): ?Plan
     {
-        $default = $this->createQueryBuilder('p')
-            ->where('p.default = :default')
-            ->andWhere('p.active = :active')
-            ->setParameter('default', true)
-            ->setParameter('active', true)
-            ->orderBy('p.price', 'ASC')
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult();
+        $default = $this->findOneBy([
+            'default' => true,
+            'active' => true,
+        ]);
 
         if ($default instanceof Plan) {
             return $default;
         }
 
-        return $this->createQueryBuilder('p')
-            ->where('p.active = :active')
-            ->setParameter('active', true)
-            ->orderBy('p.price', 'ASC')
-            ->addOrderBy('p.name', 'ASC')
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult();
+        return $this->findOneBy([
+            'active' => true,
+        ], [
+            'name' => 'ASC',
+        ]);
     }
 
     /**
      * @return list<Plan>
      */
+    #[Override]
     public function findAllOrdered(): array
     {
-        return $this->createQueryBuilder('p')
-            ->where('p.active = :active')
-            ->setParameter('active', true)
-            ->orderBy('p.price', 'ASC')
-            ->addOrderBy('p.name', 'ASC')
-            ->getQuery()
-            ->getResult();
+        return array_values($this->findBy([
+            'active' => true,
+        ], [
+            'name' => 'ASC',
+        ]));
     }
 }
