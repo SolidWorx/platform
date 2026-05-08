@@ -9,31 +9,27 @@
     class = '',
 %}
 
-{% set button = html_cva({
-    base: 'btn',
-    variants: {
-        color: {
-            primary: 'btn-primary',
-            secondary: 'btn-secondary',
-            success: 'btn-success',
-            danger: 'btn-danger',
-            warning: 'btn-warning',
-            info: 'btn-info',
-            light: 'btn-light',
-            dark: 'btn-dark',
-            link: 'btn-link',
-        },
-        size: {
-            sm: 'btn-sm',
-            lg: 'btn-lg',
-        },
-        outline: {
-            true: 'btn-outline',
-        },
+{% set button = html_cva(base='btn', variants={
+    color: {
+        primary: 'btn-primary',
+        secondary: 'btn-secondary',
+        success: 'btn-success',
+        danger: 'btn-danger',
+        warning: 'btn-warning',
+        info: 'btn-info',
+        light: 'btn-light',
+        dark: 'btn-dark',
+        link: 'btn-link',
     },
-    defaultVariants: {
-        color: 'link',
-    }
+    size: {
+        sm: 'btn-sm',
+        lg: 'btn-lg',
+    },
+    outline: {
+        true: 'btn-outline',
+    },
+}, defaultVariant={
+    color: 'link',
 }) %}
 
 <form method="post" action="{{ logout_path(firewall) }}">

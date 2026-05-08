@@ -8,30 +8,26 @@
     link = ''
 %}
 
-{% set alert = html_cva({
-    base: 'alert',
-    variants: {
-        type: {
-            primary: 'alert-primary',
-            secondary: 'alert-secondary',
-            success: 'alert-success',
-            info: 'alert-info',
-            warning: 'alert-warning',
-            danger: 'alert-danger',
-        },
-        dismissible: {
-            true: 'alert-dismissible',
-        },
-        important: {
-            true: 'alert-important',
-        },
-        link: {
-            true: 'alert-link',
-        }
+{% set alert = html_cva(base='alert', variants={
+    type: {
+        primary: 'alert-primary',
+        secondary: 'alert-secondary',
+        success: 'alert-success',
+        info: 'alert-info',
+        warning: 'alert-warning',
+        danger: 'alert-danger',
     },
-    defaultVariants: {
-        type: 'info',
+    dismissible: {
+        true: 'alert-dismissible',
+    },
+    important: {
+        true: 'alert-important',
+    },
+    link: {
+        true: 'alert-link',
     }
+}, defaultVariant={
+    type: 'info',
 }) %}
 
 {% set isLink = link is not empty %}

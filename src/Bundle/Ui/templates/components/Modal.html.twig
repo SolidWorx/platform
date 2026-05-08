@@ -10,31 +10,25 @@
     status = ''
 %}
 
-{% set modal = html_cva({
-    base: 'modal',
-    variants: {
-        show: {
-            true: 'show',
-            false: 'fade',
-        }
+{% set modal = html_cva(base='modal', variants={
+    show: {
+        true: 'show',
+        false: 'fade',
     }
 }) %}
 
-{% set dialog = html_cva({
-    base: 'modal-dialog',
-    variants: {
-        size: {
-            sm: 'modal-sm',
-            lg: 'modal-lg',
-            xl: 'modal-xl',
-            full: 'modal-fullscreen',
-        },
-        centered: {
-            true: 'modal-dialog-centered',
-        },
-        scrollable: {
-            true: 'modal-dialog-scrollable',
-        }
+{% set dialog = html_cva(base='modal-dialog', variants={
+    size: {
+        sm: 'modal-sm',
+        lg: 'modal-lg',
+        xl: 'modal-xl',
+        full: 'modal-fullscreen',
+    },
+    centered: {
+        true: 'modal-dialog-centered',
+    },
+    scrollable: {
+        true: 'modal-dialog-scrollable',
     }
 }) %}
 
