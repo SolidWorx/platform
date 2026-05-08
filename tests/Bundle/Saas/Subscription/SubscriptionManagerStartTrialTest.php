@@ -23,7 +23,7 @@ use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Enum\SubscriptionStatus;
 use SolidWorx\Platform\SaasBundle\Exception\TrialConfigurationException;
 use SolidWorx\Platform\SaasBundle\Integration\PaymentIntegrationInterface;
-use SolidWorx\Platform\SaasBundle\Repository\PlanRepositoryInterface;
+use SolidWorx\Platform\SaasBundle\Repository\PlanPriceRepositoryInterface;
 use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepositoryInterface;
 use SolidWorx\Platform\SaasBundle\Subscription\SubscriptionManager;
 use Symfony\Component\Uid\Ulid;
@@ -41,7 +41,7 @@ final class SubscriptionManagerStartTrialTest extends TestCase
 
         $this->manager = new SubscriptionManager(
             $this->subscriptionRepository,
-            $this->createMock(PlanRepositoryInterface::class),
+            $this->createMock(PlanPriceRepositoryInterface::class),
             $this->createMock(PaymentIntegrationInterface::class),
         );
     }

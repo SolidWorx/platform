@@ -19,9 +19,9 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use SolidWorx\Platform\SaasBundle\Enum\SubscriptionStatus;
 use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepository;
-use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
 use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\Uid\NilUlid;
@@ -51,9 +51,9 @@ class Subscription
     #[ORM\JoinColumn(name: 'subscriber_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private SubscribableInterface $subscriber;
 
-    #[ORM\ManyToOne(targetEntity: Plan::class, inversedBy: 'subscriptions')]
-    #[ORM\JoinColumn(name: 'plan_id', referencedColumnName: 'id', nullable: false)]
-    private Plan $plan;
+    #[ORM\ManyToOne(targetEntity: PlanPrice::class)]
+    #[ORM\JoinColumn(name: 'plan_price_id', referencedColumnName: 'id', nullable: false)]
+    private PlanPrice $planPrice;
 
     #[ORM\Column(type: Types::STRING, length: 45, enumType: SubscriptionStatus::class)]
     private SubscriptionStatus $status = SubscriptionStatus::PENDING;
@@ -119,16 +119,26 @@ class Subscription
         return $this;
     }
 
-    public function getPlan(): Plan
+    public function getPlanPrice(): PlanPrice
     {
-        return $this->plan;
+        return $this->planPrice;
     }
 
-    public function setPlan(Plan $plan): static
+    public function setPlanPrice(PlanPrice $planPrice): static
     {
-        $this->plan = $plan;
+        $this->planPrice = $planPrice;
 
         return $this;
+    }
+
+    /**
+     * Convenience accessor returning the plan that owns this subscription's
+     * price. Subscriptions are tied to a specific PlanPrice (variant); the
+     * plan is reachable via that relationship.
+     */
+    public function getPlan(): Plan
+    {
+        return $this->planPrice->getPlan();
     }
 
     public function getSubscriber(): SubscribableInterface

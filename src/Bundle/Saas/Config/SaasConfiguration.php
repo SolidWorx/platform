@@ -15,12 +15,12 @@ namespace SolidWorx\Platform\SaasBundle\Config;
 
 use Override;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigurationInterface;
+use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use SolidWorx\Platform\SaasBundle\Entity\Plan;
 use SolidWorx\Platform\SaasBundle\Entity\PlanFeature;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Entity\SubscriptionLog;
 use SolidWorx\Platform\SaasBundle\Entity\Trial;
-use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use SolidWorx\Platform\SaasBundle\Trial\TrialUserInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use function in_array;

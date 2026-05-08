@@ -1,17 +1,7 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Call to method scalarNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
-			count: 1
-			path: src/Bundle/Platform/Config/PlatformConfiguration.php
-
-		-
 			message: "#^Argument of an invalid type array\\|bool\\|float\\|int\\|string\\|null supplied for foreach, only iterables are supported\\.$#"
-			count: 1
-			path: src/Bundle/Platform/DependencyInjection/CompilerPass/AuthenticationCompilerPass.php
-
-		-
-			message: "#^Binary operation \"\\+\" between mixed and array\\{remember_me_parameter\\: null, always_remember_me\\: false\\} results in an error\\.$#"
 			count: 1
 			path: src/Bundle/Platform/DependencyInjection/CompilerPass/AuthenticationCompilerPass.php
 
@@ -79,6 +69,31 @@ parameters:
 			message: "#^Parameter \\#2 \\$configurator of method Symfony\\\\Component\\\\DependencyInjection\\\\ContainerBuilder\\:\\:registerAttributeForAutoconfiguration\\(\\) expects callable\\(Symfony\\\\Component\\\\DependencyInjection\\\\ChildDefinition, SolidWorx\\\\Platform\\\\PlatformBundle\\\\Attributes\\\\Menu\\\\MenuBuilder, Reflector\\)\\: void, Closure\\(Symfony\\\\Component\\\\DependencyInjection\\\\ChildDefinition, SolidWorx\\\\Platform\\\\PlatformBundle\\\\Attributes\\\\Menu\\\\MenuBuilder, ReflectionMethod\\)\\: void given\\.$#"
 			count: 1
 			path: src/Bundle/Platform/DependencyInjection/SolidWorxPlatformExtension.php
+
+		-
+			message: "#^Call to static method new\\(\\) on an unknown class Doctrine\\\\DBAL\\\\Types\\\\Exception\\\\InvalidType\\.$#"
+			count: 2
+			path: src/Bundle/Platform/Doctrine/Type/URLType.php
+
+		-
+			message: "#^Call to static method new\\(\\) on an unknown class Doctrine\\\\DBAL\\\\Types\\\\Exception\\\\InvalidFormat\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Doctrine/Type/UTCDateTimeType.php
+
+		-
+			message: "#^Call to static method new\\(\\) on an unknown class Doctrine\\\\DBAL\\\\Types\\\\Exception\\\\InvalidType\\.$#"
+			count: 1
+			path: src/Bundle/Platform/Doctrine/Type/UTCDateTimeType.php
+
+		-
+			message: "#^PHPDoc tag @throws with type Doctrine\\\\DBAL\\\\Types\\\\Exception\\\\InvalidFormat\\|Doctrine\\\\DBAL\\\\Types\\\\Exception\\\\InvalidType is not subtype of Throwable$#"
+			count: 1
+			path: src/Bundle/Platform/Doctrine/Type/UTCDateTimeType.php
+
+		-
+			message: "#^PHPDoc tag @throws with type Doctrine\\\\DBAL\\\\Types\\\\Exception\\\\InvalidType is not subtype of Throwable$#"
+			count: 1
+			path: src/Bundle/Platform/Doctrine/Type/UTCDateTimeType.php
 
 		-
 			message: "#^Parameter \\#1 \\$child of method Symfony\\\\Component\\\\Form\\\\FormBuilderInterface\\<array\\<string, string\\|null\\>\\|null\\>\\:\\:add\\(\\) expects string\\|Symfony\\\\Component\\\\Form\\\\FormBuilderInterface, mixed given\\.$#"
@@ -166,7 +181,7 @@ parameters:
 			path: src/Bundle/Platform/Model/User.php
 
 		-
-			message: "#^Method SolidWorx\\\\Platform\\\\PlatformBundle\\\\Model\\\\User\\:\\:getUserIdentifier\\(\\) should return non\\-empty\\-string but returns string\\|null\\.$#"
+			message: "#^Method SolidWorx\\\\Platform\\\\PlatformBundle\\\\Model\\\\User\\:\\:getUserIdentifier\\(\\) should return string but returns string\\|null\\.$#"
 			count: 1
 			path: src/Bundle/Platform/Model/User.php
 
@@ -226,42 +241,12 @@ parameters:
 			path: src/Bundle/Platform/Twig/Components/Security/TwoFactor.php
 
 		-
-			message: "#^Call to method arrayNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
-			count: 1
-			path: src/Bundle/Saas/Config/SaasConfiguration.php
-
-		-
-			message: "#^Call to static method getClass\\(\\) on an unknown class Doctrine\\\\Common\\\\Util\\\\ClassUtils\\.$#"
-			count: 2
-			path: src/Bundle/Saas/Console/Command/SubscriptionListCommand.php
-
-		-
-			message: "#^Cannot call method getEndDate\\(\\) on mixed\\.$#"
+			message: "#^Access to constant Ascending on an unknown class Doctrine\\\\Common\\\\Collections\\\\Order\\.$#"
 			count: 1
 			path: src/Bundle/Saas/Console/Command/SubscriptionListCommand.php
 
 		-
-			message: "#^Cannot call method getPlan\\(\\) on mixed\\.$#"
-			count: 1
-			path: src/Bundle/Saas/Console/Command/SubscriptionListCommand.php
-
-		-
-			message: "#^Cannot call method getStartDate\\(\\) on mixed\\.$#"
-			count: 1
-			path: src/Bundle/Saas/Console/Command/SubscriptionListCommand.php
-
-		-
-			message: "#^Cannot call method getStatus\\(\\) on mixed\\.$#"
-			count: 1
-			path: src/Bundle/Saas/Console/Command/SubscriptionListCommand.php
-
-		-
-			message: "#^Cannot call method getSubscriber\\(\\) on mixed\\.$#"
-			count: 1
-			path: src/Bundle/Saas/Console/Command/SubscriptionListCommand.php
-
-		-
-			message: "#^Cannot call method getSubscriptionId\\(\\) on mixed\\.$#"
+			message: "#^Access to constant Descending on an unknown class Doctrine\\\\Common\\\\Collections\\\\Order\\.$#"
 			count: 1
 			path: src/Bundle/Saas/Console/Command/SubscriptionListCommand.php
 
@@ -306,19 +291,14 @@ parameters:
 			path: src/Bundle/Saas/Dto/LemonSqueezy/Meta.php
 
 		-
-			message: "#^Property SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\Plan\\:\\:\\$subscriptions type mapping mismatch\\: property can contain Doctrine\\\\Common\\\\Collections\\\\Collection but database expects Doctrine\\\\Common\\\\Collections\\\\Collection&iterable\\<SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\Subscription\\>\\.$#"
-			count: 1
-			path: src/Bundle/Saas/Entity/Plan.php
-
-		-
-			message: "#^Property SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\Plan\\:\\:\\$subscriptions with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: src/Bundle/Saas/Entity/Plan.php
-
-		-
 			message: "#^Cannot access property \\$attributes on SolidWorx\\\\Platform\\\\SaasBundle\\\\Dto\\\\LemonSqueezy\\\\Subscription\\|null\\.$#"
 			count: 1
 			path: src/Bundle/Saas/Event/TrialStartedEvent.php
+
+		-
+			message: "#^Parameter \\#1 \\$plans of class SolidWorx\\\\Platform\\\\PlatformBundle\\\\Feature\\\\UpgradeOptions constructor expects list\\<SolidWorx\\\\Platform\\\\PlatformBundle\\\\Feature\\\\PlanReference\\>, array\\<SolidWorx\\\\Platform\\\\PlatformBundle\\\\Feature\\\\PlanReference\\> given\\.$#"
+			count: 1
+			path: src/Bundle/Saas/Feature/PlanFeatureGate.php
 
 		-
 			message: "#^Call to an undefined method SolidWorx\\\\Platform\\\\SaasBundle\\\\Repository\\\\PlanFeatureRepositoryInterface\\:\\:remove\\(\\)\\.$#"
@@ -353,16 +333,6 @@ parameters:
 		-
 			message: "#^Access to an undefined property SolidWorx\\\\Platform\\\\SaasBundle\\\\RemoteEvent\\\\SubscriptionPaymentRemoteEvent\\|SolidWorx\\\\Platform\\\\SaasBundle\\\\RemoteEvent\\\\SubscriptionRemoteEvent\\:\\:\\$subscriptionInvoice\\.$#"
 			count: 5
-			path: src/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumer.php
-
-		-
-			message: "#^Call to function is_a\\(\\) with arguments 'SolidWorx\\\\\\\\Platform\\\\\\\\SaasBundle\\\\\\\\Event\\\\\\\\SubscriptionPaymentFailedEvent'\\|'SolidWorx\\\\\\\\Platform\\\\\\\\SaasBundle\\\\\\\\Event\\\\\\\\SubscriptionPaymentPaidEvent'\\|'SolidWorx\\\\\\\\Platform\\\\\\\\SaasBundle\\\\\\\\Event\\\\\\\\SubscriptionPaymentRecoveredEvent'\\|'SolidWorx\\\\\\\\Platform\\\\\\\\SaasBundle\\\\\\\\Event\\\\\\\\SubscriptionPaymentRefundedEvent', 'SolidWorx\\\\\\\\Platform\\\\\\\\SaasBundle\\\\\\\\Event\\\\\\\\PaymentEvent' and true will always evaluate to true\\.$#"
-			count: 1
-			path: src/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumer.php
-
-		-
-			message: "#^Match arm comparison between SolidWorx\\\\Platform\\\\SaasBundle\\\\Enum\\\\LemonSqueezy\\\\Event\\:\\:SUBSCRIPTION_PAYMENT_REFUNDED and SolidWorx\\\\Platform\\\\SaasBundle\\\\Enum\\\\LemonSqueezy\\\\Event\\:\\:SUBSCRIPTION_PAYMENT_REFUNDED is always true\\.$#"
-			count: 1
 			path: src/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumer.php
 
 		-
@@ -431,6 +401,16 @@ parameters:
 			path: src/Bundle/Saas/RemoteEvent/SubscriptionRemoteEvent.php
 
 		-
+			message: "#^Parameter \\#1 \\$id \\(SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\PlanPrice\\|string\\|Symfony\\\\Component\\\\Uid\\\\Ulid\\) of method SolidWorx\\\\Platform\\\\SaasBundle\\\\Repository\\\\PlanPriceRepository\\:\\:find\\(\\) should be contravariant with parameter \\$id \\(mixed\\) of method Doctrine\\\\ORM\\\\EntityRepository\\<SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\PlanPrice\\>\\:\\:find\\(\\)$#"
+			count: 1
+			path: src/Bundle/Saas/Repository/PlanPriceRepository.php
+
+		-
+			message: "#^Parameter \\#1 \\$id \\(SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\PlanPrice\\|string\\|Symfony\\\\Component\\\\Uid\\\\Ulid\\) of method SolidWorx\\\\Platform\\\\SaasBundle\\\\Repository\\\\PlanPriceRepository\\:\\:find\\(\\) should be contravariant with parameter \\$id \\(mixed\\) of method Doctrine\\\\Persistence\\\\ObjectRepository\\<SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\PlanPrice\\>\\:\\:find\\(\\)$#"
+			count: 1
+			path: src/Bundle/Saas/Repository/PlanPriceRepository.php
+
+		-
 			message: "#^Parameter \\#1 \\$id \\(SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\Plan\\|string\\|Symfony\\\\Component\\\\Uid\\\\Ulid\\) of method SolidWorx\\\\Platform\\\\SaasBundle\\\\Repository\\\\PlanRepository\\:\\:find\\(\\) should be contravariant with parameter \\$id \\(mixed\\) of method Doctrine\\\\ORM\\\\EntityRepository\\<SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\Plan\\>\\:\\:find\\(\\)$#"
 			count: 1
 			path: src/Bundle/Saas/Repository/PlanRepository.php
@@ -441,24 +421,19 @@ parameters:
 			path: src/Bundle/Saas/Repository/PlanRepository.php
 
 		-
+			message: "#^Parameter \\$vote of method SolidWorx\\\\Platform\\\\SaasBundle\\\\Security\\\\Voter\\\\PlanFeatureVoter\\:\\:voteOnAttribute\\(\\) has invalid type Symfony\\\\Component\\\\Security\\\\Core\\\\Authorization\\\\Voter\\\\Vote\\.$#"
+			count: 1
+			path: src/Bundle/Saas/Security/Voter/PlanFeatureVoter.php
+
+		-
 			message: "#^Method SolidWorx\\\\Platform\\\\SaasBundle\\\\SolidWorxPlatformSaasBundle\\:\\:createContainerExtension\\(\\) never returns null so it can be removed from the return type\\.$#"
 			count: 1
 			path: src/Bundle/Saas/SolidWorxPlatformSaasBundle.php
 
 		-
-			message: "#^Parameter \\#1 \\$plan of class SolidWorx\\\\Platform\\\\SaasBundle\\\\Exception\\\\InvalidPlanException constructor expects string, SolidWorx\\\\Platform\\\\SaasBundle\\\\Entity\\\\Plan\\|string\\|Symfony\\\\Component\\\\Uid\\\\Ulid given\\.$#"
-			count: 1
-			path: src/Bundle/Saas/Subscription/SubscriptionManager.php
-
-		-
 			message: "#^Method SolidWorx\\\\Platform\\\\SaasBundle\\\\Webhook\\\\Converter\\\\LemonSqueezyPayloadConverter\\:\\:convert\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: src/Bundle/Saas/Webhook/Converter/LemonSqueezyPayloadConverter.php
-
-		-
-			message: "#^Call to method scalarNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
-			count: 1
-			path: src/Bundle/Ui/Config/UiConfiguration.php
 
 		-
 			message: "#^Method SolidWorx\\\\Platform\\\\UiBundle\\\\SolidWorxPlatformUiBundle\\:\\:createContainerExtension\\(\\) never returns null so it can be removed from the return type\\.$#"
@@ -524,41 +499,6 @@ parameters:
 			message: "#^Parameter \\#2 \\$array of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertArrayNotHasKey\\(\\) expects array\\|ArrayAccess\\<\\(int\\|string\\), mixed\\>, mixed given\\.$#"
 			count: 4
 			path: tests/Bundle/PlatformBundle/Config/Builder/PlatformConfigBuilderTest.php
-
-		-
-			message: "#^Call to method arrayNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
-			count: 5
-			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
-
-		-
-			message: "#^Call to method booleanNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
-			count: 3
-			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
-
-		-
-			message: "#^Call to method enumNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
-			count: 1
-			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
-
-		-
-			message: "#^Call to method floatNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
-			count: 1
-			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
-
-		-
-			message: "#^Call to method integerNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
-			count: 1
-			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
-
-		-
-			message: "#^Call to method scalarNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
-			count: 9
-			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
-
-		-
-			message: "#^Call to method variableNode\\(\\) on an unknown class Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\NodeBuilder\\<Symfony\\\\Component\\\\Config\\\\Definition\\\\Builder\\\\ArrayNodeDefinition\\>\\.$#"
-			count: 1
-			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
 
 		-
 			message: "#^Cannot access offset 'active' on mixed\\.$#"
@@ -691,14 +631,19 @@ parameters:
 			path: tests/Bundle/PlatformBundle/Config/SchemaGeneratorTest.php
 
 		-
+			message: "#^Class Doctrine\\\\DBAL\\\\Types\\\\Exception\\\\InvalidType not found\\.$#"
+			count: 2
+			path: tests/Bundle/PlatformBundle/Doctrine/Type/URLTypeTest.php
+
+		-
+			message: "#^Parameter \\#1 \\$exception of method PHPUnit\\\\Framework\\\\TestCase\\:\\:expectException\\(\\) expects class\\-string\\<Throwable\\>, string given\\.$#"
+			count: 2
+			path: tests/Bundle/PlatformBundle/Doctrine/Type/URLTypeTest.php
+
+		-
 			message: "#^Call to method method\\(\\) on an unknown class PHPUnit\\\\Framework\\\\MockObject\\\\Builder\\\\InvocationMocker\\.$#"
 			count: 1
 			path: tests/Bundle/PlatformBundle/EventSubscriber/ConsoleCommandEventSubscriberTest.php
-
-		-
-			message: "#^Call to function is_a\\(\\) with arguments 'SolidWorx\\\\\\\\Platform\\\\\\\\PlatformBundle\\\\\\\\Response\\\\\\\\RedirectResponse', 'Symfony\\\\\\\\Component\\\\\\\\HttpFoundation\\\\\\\\RedirectResponse' and true will always evaluate to true\\.$#"
-			count: 1
-			path: tests/Bundle/PlatformBundle/Response/RedirectResponseTest.php
 
 		-
 			message: "#^Call to static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertInstanceOf\\(\\) with 'SolidWorx\\\\\\\\Platform\\\\\\\\SaasBundle\\\\\\\\Config\\\\\\\\Builder\\\\\\\\SaasPaymentConfigBuilder' and SolidWorx\\\\Platform\\\\SaasBundle\\\\Config\\\\Builder\\\\SaasPaymentConfigBuilder will always evaluate to true\\.$#"
@@ -792,6 +737,11 @@ parameters:
 
 		-
 			message: "#^Call to method method\\(\\) on an unknown class PHPUnit\\\\Framework\\\\MockObject\\\\Builder\\\\InvocationMocker\\.$#"
+			count: 6
+			path: tests/Bundle/Saas/Feature/PlanFeatureGateTest.php
+
+		-
+			message: "#^Call to method method\\(\\) on an unknown class PHPUnit\\\\Framework\\\\MockObject\\\\Builder\\\\InvocationMocker\\.$#"
 			count: 2
 			path: tests/Bundle/Saas/RemoteEvent/LemonSqueezyWebhookConsumerTest.php
 
@@ -844,11 +794,6 @@ parameters:
 			message: "#^Call to method method\\(\\) on an unknown class PHPUnit\\\\Framework\\\\MockObject\\\\Builder\\\\InvocationMocker\\.$#"
 			count: 8
 			path: tests/Bundle/Saas/Trial/TrialManagerTest.php
-
-		-
-			message: "#^Call to method method\\(\\) on an unknown class PHPUnit\\\\Framework\\\\MockObject\\\\Builder\\\\InvocationMocker\\.$#"
-			count: 17
-			path: tests/Bundle/Saas/Twig/Runtime/FeatureRuntimeTest.php
 
 		-
 			message: "#^Dynamic call to static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertInstanceOf\\(\\)\\.$#"
