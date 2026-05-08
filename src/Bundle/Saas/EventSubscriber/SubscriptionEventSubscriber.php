@@ -18,6 +18,7 @@ use Override;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Enum\LemonSqueezy\SubscriptionStatus;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionCreatedEvent;
+use SolidWorx\Platform\SaasBundle\Event\SubscriptionExpiredEvent;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionUpdatedEvent;
 use SolidWorx\Platform\SaasBundle\Exception\InvalidSubscriptionException;
 use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepository;
@@ -39,7 +40,25 @@ readonly class SubscriptionEventSubscriber implements EventSubscriberInterface
         return [
             SubscriptionCreatedEvent::class => ['onSubscriptionCreated'],
             SubscriptionUpdatedEvent::class => ['onSubscriptionUpdated'],
+            SubscriptionExpiredEvent::class => ['onSubscriptionExpired'],
         ];
+    }
+
+    public function onSubscriptionExpired(SubscriptionExpiredEvent $event): void
+    {
+        $subscription = $this->subscriptionRepository->find($event->subscriptionId);
+
+        if (! $subscription instanceof Subscription) {
+            throw new InvalidSubscriptionException($event->subscriptionId->toBase58());
+        }
+
+        if ($subscription->hasPendingPlanChange()) {
+            $this->subscriptionManager->applyScheduledPlanChange($subscription);
+
+            return;
+        }
+
+        $this->subscriptionManager->expireSubscription($subscription);
     }
 
     public function onSubscriptionUpdated(SubscriptionUpdatedEvent $event): void

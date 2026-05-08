@@ -14,10 +14,13 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\SaasBundle\Integration;
 
 use Carbon\CarbonInterval;
+use DateTimeImmutable;
 use InvalidArgumentException;
 use Override;
 use SolidWorx\Platform\SaasBundle\Dto\IntegrationProduct;
+use SolidWorx\Platform\SaasBundle\Entity\Plan;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
+use SolidWorx\Platform\SaasBundle\Exception\PaymentIntegrationException;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\Request;
@@ -190,5 +193,130 @@ class LemonSqueezy implements PaymentIntegrationInterface
         $data = $response->toArray();
 
         return $data['data']['attributes']['urls']['customer_portal'];
+    }
+
+    #[Override]
+    public function changePlan(Subscription $subscription, Plan $newPlan): DateTimeImmutable
+    {
+        $subscriptionId = $this->requireSubscriptionId($subscription);
+
+        $response = $this->httpClient->request(
+            Request::METHOD_PATCH,
+            'subscriptions/' . $subscriptionId,
+            [
+                'json' => [
+                    'data' => [
+                        'type' => 'subscriptions',
+                        'id' => $subscriptionId,
+                        'attributes' => [
+                            'variant_id' => (int) $newPlan->getPlanId(),
+                            'invoice_immediately' => true,
+                            'disable_prorations' => false,
+                        ],
+                    ],
+                ],
+            ]
+        );
+
+        $this->assertOk($response->getStatusCode(), 'change plan', $subscriptionId);
+
+        return $this->extractRenewDate($response->toArray(), $subscriptionId);
+    }
+
+    #[Override]
+    public function cancelAtPeriodEnd(Subscription $subscription): DateTimeImmutable
+    {
+        $subscriptionId = $this->requireSubscriptionId($subscription);
+
+        $response = $this->httpClient->request(
+            Request::METHOD_DELETE,
+            'subscriptions/' . $subscriptionId,
+        );
+
+        $this->assertOk($response->getStatusCode(), 'cancel', $subscriptionId);
+
+        $data = $response->toArray();
+        $endsAt = $data['data']['attributes']['ends_at'] ?? null;
+
+        if (! is_string($endsAt) || $endsAt === '') {
+            throw new PaymentIntegrationException(sprintf(
+                'Lemon Squeezy did not return an ends_at date for cancellation of subscription "%s".',
+                $subscriptionId,
+            ));
+        }
+
+        return new DateTimeImmutable($endsAt);
+    }
+
+    #[Override]
+    public function resume(Subscription $subscription): DateTimeImmutable
+    {
+        $subscriptionId = $this->requireSubscriptionId($subscription);
+
+        $response = $this->httpClient->request(
+            Request::METHOD_PATCH,
+            'subscriptions/' . $subscriptionId,
+            [
+                'json' => [
+                    'data' => [
+                        'type' => 'subscriptions',
+                        'id' => $subscriptionId,
+                        'attributes' => [
+                            'cancelled' => false,
+                        ],
+                    ],
+                ],
+            ]
+        );
+
+        $this->assertOk($response->getStatusCode(), 'resume', $subscriptionId);
+
+        return $this->extractRenewDate($response->toArray(), $subscriptionId);
+    }
+
+    private function requireSubscriptionId(Subscription $subscription): string
+    {
+        $subscriptionId = $subscription->getSubscriptionId();
+
+        if ($subscriptionId === null || $subscriptionId === '') {
+            throw new InvalidArgumentException(sprintf(
+                'Subscription "%s" has no external Lemon Squeezy id.',
+                $subscription->getId()->toBase58(),
+            ));
+        }
+
+        return $subscriptionId;
+    }
+
+    private function assertOk(int $statusCode, string $action, string $subscriptionId): void
+    {
+        if ($statusCode >= 200 && $statusCode < 300) {
+            return;
+        }
+
+        throw new PaymentIntegrationException(sprintf(
+            'Lemon Squeezy %s failed for subscription "%s" (HTTP %d).',
+            $action,
+            $subscriptionId,
+            $statusCode,
+        ));
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function extractRenewDate(array $payload, string $subscriptionId): DateTimeImmutable
+    {
+        $attributes = $payload['data']['attributes'] ?? [];
+        $renewsAt = $attributes['renews_at'] ?? $attributes['ends_at'] ?? null;
+
+        if (! is_string($renewsAt) || $renewsAt === '') {
+            throw new PaymentIntegrationException(sprintf(
+                'Lemon Squeezy did not return a renews_at/ends_at date for subscription "%s".',
+                $subscriptionId,
+            ));
+        }
+
+        return new DateTimeImmutable($renewsAt);
     }
 }

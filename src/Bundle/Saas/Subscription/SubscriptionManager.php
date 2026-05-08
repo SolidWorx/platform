@@ -16,6 +16,7 @@ namespace SolidWorx\Platform\SaasBundle\Subscription;
 use Carbon\CarbonImmutable;
 use DateInterval;
 use DateTime;
+use DateTimeImmutable;
 use DateTimeInterface;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
@@ -157,15 +158,16 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
     }
 
     /**
-     * Swap the plan on a subscription that has not yet been activated. Plan
-     * changes for ACTIVE subscriptions go through the payment integration and
-     * are intentionally not handled here.
+     * Swap the plan on a subscription that is either pending or already
+     * active on the free plan (i.e. not externally billed). Plan changes
+     * for externally-billed ACTIVE subscriptions must go through the
+     * payment integration via {@see self::changeActivePlan()}.
      *
      * @throws ActiveSubscriptionPlanChangeException
      */
     public function changePlan(Subscription $subscription, Plan $plan): void
     {
-        if ($subscription->getStatus() === SubscriptionStatus::ACTIVE) {
+        if ($subscription->getStatus() === SubscriptionStatus::ACTIVE && $subscription->isExternallyBilled()) {
             throw new ActiveSubscriptionPlanChangeException($subscription);
         }
 
@@ -184,6 +186,85 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
         $subscription->setStatus(SubscriptionStatus::ACTIVE);
         $subscription->setStartDate(CarbonImmutable::now('UTC'));
         $subscription->setEndDate($endDate ?? CarbonImmutable::now('UTC')->addYears(100));
+
+        $this->subscriptionRepository->save($subscription);
+    }
+
+    /**
+     * Switch the plan on an already-active, externally-billed subscription
+     * via the payment integration. Persists the new plan and the renew date
+     * returned by the provider. Clears any previously scheduled downgrade.
+     */
+    public function changeActivePlan(Subscription $subscription, Plan $newPlan): void
+    {
+        $renewDate = $this->paymentIntegration->changePlan($subscription, $newPlan);
+
+        $subscription->setPlan($newPlan);
+        $subscription->setEndDate($renewDate);
+        $subscription->setStatus(SubscriptionStatus::ACTIVE);
+        $subscription->setPendingPlan(null);
+        $subscription->setPendingPlanChangeAt(null);
+
+        $this->subscriptionRepository->save($subscription);
+    }
+
+    /**
+     * Schedule a plan switch (typically a downgrade) for the end of the
+     * current paid period. The current plan keeps applying until then.
+     */
+    public function scheduleDowngrade(Subscription $subscription, Plan $newPlan): DateTimeImmutable
+    {
+        $effectiveAt = $this->paymentIntegration->cancelAtPeriodEnd($subscription);
+
+        $subscription->setPendingPlan($newPlan);
+        $subscription->setPendingPlanChangeAt($effectiveAt);
+        $subscription->setEndDate($effectiveAt);
+
+        $this->subscriptionRepository->save($subscription);
+
+        return $effectiveAt;
+    }
+
+    /**
+     * Cancel a previously scheduled downgrade and resume the current plan.
+     */
+    public function cancelScheduledDowngrade(Subscription $subscription): void
+    {
+        $renewDate = $this->paymentIntegration->resume($subscription);
+
+        $subscription->setPendingPlan(null);
+        $subscription->setPendingPlanChangeAt(null);
+        $subscription->setEndDate($renewDate);
+        $subscription->setStatus(SubscriptionStatus::ACTIVE);
+
+        $this->subscriptionRepository->save($subscription);
+    }
+
+    /**
+     * Apply a previously scheduled plan switch. Called when the period ends
+     * (e.g. from the LS subscription_expired webhook). Only operates if the
+     * pending plan is still set.
+     */
+    public function applyScheduledPlanChange(Subscription $subscription): void
+    {
+        $pendingPlan = $subscription->getPendingPlan();
+
+        if (! $pendingPlan instanceof Plan) {
+            return;
+        }
+
+        $subscription->setPlan($pendingPlan);
+        $subscription->setPendingPlan(null);
+        $subscription->setPendingPlanChangeAt(null);
+
+        if ($pendingPlan->isFree()) {
+            $subscription->setStatus(SubscriptionStatus::ACTIVE);
+            $subscription->setStartDate(CarbonImmutable::now('UTC'));
+            $subscription->setEndDate(CarbonImmutable::now('UTC')->addYears(100));
+            // Drop the now-stale external billing id so the subscription
+            // matches the canonical free-plan shape (active, no provider id).
+            $subscription->setSubscriptionId(null);
+        }
 
         $this->subscriptionRepository->save($subscription);
     }

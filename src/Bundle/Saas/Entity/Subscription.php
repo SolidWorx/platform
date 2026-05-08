@@ -19,9 +19,9 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use SolidWorx\Platform\SaasBundle\Enum\SubscriptionStatus;
 use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepository;
-use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
 use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\Uid\NilUlid;
@@ -63,6 +63,22 @@ class Subscription
      */
     #[ORM\Column(type: Types::STRING, length: 255, unique: true, nullable: true)]
     private ?string $subscriptionId = null;
+
+    /**
+     * Plan the subscription should switch to at the end of the current paid
+     * period. Set when a downgrade is scheduled; cleared once the switch
+     * has been applied or the user resumes the current plan.
+     */
+    #[ORM\ManyToOne(targetEntity: Plan::class)]
+    #[ORM\JoinColumn(name: 'pending_plan_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?Plan $pendingPlan = null;
+
+    /**
+     * Date at which the pending plan switch should take effect. Mirrors the
+     * payment provider's reported period end.
+     */
+    #[ORM\Column(name: 'pending_plan_change_at', type: Types::DATETIMETZ_IMMUTABLE, precision: 3, nullable: true)]
+    private ?DateTimeImmutable $pendingPlanChangeAt = null;
 
     /**
      * @var Collection<int, SubscriptionLog>
@@ -178,10 +194,49 @@ class Subscription
         return $this->subscriptionId;
     }
 
-    public function setSubscriptionId(string $subscriptionId): static
+    public function setSubscriptionId(?string $subscriptionId): static
     {
         $this->subscriptionId = $subscriptionId;
 
         return $this;
+    }
+
+    /**
+     * Whether this subscription is tracked by an external payment provider.
+     * Free-plan subscriptions are activated in-app and never carry an
+     * external id; paid subscriptions get one once the provider issues it.
+     */
+    public function isExternallyBilled(): bool
+    {
+        return $this->subscriptionId !== null && $this->subscriptionId !== '';
+    }
+
+    public function getPendingPlan(): ?Plan
+    {
+        return $this->pendingPlan;
+    }
+
+    public function setPendingPlan(?Plan $pendingPlan): static
+    {
+        $this->pendingPlan = $pendingPlan;
+
+        return $this;
+    }
+
+    public function getPendingPlanChangeAt(): ?DateTimeImmutable
+    {
+        return $this->pendingPlanChangeAt;
+    }
+
+    public function setPendingPlanChangeAt(?DateTimeImmutable $pendingPlanChangeAt): static
+    {
+        $this->pendingPlanChangeAt = $pendingPlanChangeAt;
+
+        return $this;
+    }
+
+    public function hasPendingPlanChange(): bool
+    {
+        return $this->pendingPlan instanceof Plan;
     }
 }
