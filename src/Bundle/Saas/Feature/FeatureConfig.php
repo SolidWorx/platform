@@ -31,6 +31,6 @@ final readonly class FeatureConfig
 
     public function toFeatureValue(): FeatureValue
     {
-        return new FeatureValue($this->key, $this->type, is_string($this->defaultValue) ? json_decode($this->defaultValue) : $this->defaultValue);
+        return new FeatureValue($this->key, $this->type, $this->defaultValue);
     }
 }
