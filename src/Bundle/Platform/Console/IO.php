@@ -30,4 +30,9 @@ final class IO extends SymfonyStyle
     {
         return $this->input->getOption($name);
     }
+
+    public function getArgument(string $name): mixed
+    {
+        return $this->input->getArgument($name);
+    }
 }
