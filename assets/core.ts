@@ -3,6 +3,7 @@ import './scss/platform.scss';
 import '@tabler/core';
 
 import { startStimulusApp } from '@symfony/stimulus-bridge';
+import { definitionsFromContext } from '@hotwired/stimulus-webpack-helpers';
 
 import CheckboxSelectAll from '@stimulus-components/checkbox-select-all';
 import PasswordVisibility from '@stimulus-components/password-visibility';
@@ -38,7 +39,7 @@ app.register('clipboard', Clipboard);
  * ));
  */
 export function registerControllers(context) {
-    app.load(context);
+    app.load(definitionsFromContext(context));
 }
 
 /**
