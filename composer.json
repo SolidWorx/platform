@@ -53,7 +53,8 @@
             "SolidWorx\\Platform\\UiBundle\\": "src/Bundle/Ui",
             "SolidWorx\\Platform\\PlatformBundle\\": "src/Bundle/Platform",
             "SolidWorx\\Platform\\SaasBundle\\": "src/Bundle/Saas",
-            "SolidWorx\\Platform\\Test\\": "src/Test"
+            "SolidWorx\\Platform\\Test\\": "src/Test",
+            "SolidWorx\\Platform\\Tools\\": "src/Tools/"
         }
     },
     "autoload-dev": {
@@ -65,14 +66,14 @@
         "ergebnis/composer-normalize": "^2.48",
         "ergebnis/phpunit-slow-test-detector": "^2.23",
         "phpstan/extension-installer": "^1.4",
-        "phpstan/phpstan": "^1.11",
-        "phpstan/phpstan-deprecation-rules": "^1.2",
-        "phpstan/phpstan-doctrine": "^1.4",
-        "phpstan/phpstan-phpunit": "^1.4",
-        "phpstan/phpstan-strict-rules": "^1.6",
-        "phpstan/phpstan-symfony": "^1.4",
+        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-deprecation-rules": "^2.0",
+        "phpstan/phpstan-doctrine": "^2.0",
+        "phpstan/phpstan-phpunit": "^2.0",
+        "phpstan/phpstan-strict-rules": "^2.0.",
+        "phpstan/phpstan-symfony": "^2.0",
         "phpunit/phpunit": "^12.5",
-        "rector/rector": "^1.2",
+        "rector/rector": "^2.4",
         "roave/security-advisories": "dev-latest",
         "spatie/phpunit-snapshot-assertions": "^5.3",
         "symplify/easy-coding-standard": "^13.0"
