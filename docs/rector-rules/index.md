@@ -1,26 +1,35 @@
 # Custom Rector Rules
 
-SolidWorx Platform ships custom Rector rules that add PHPStan generic type annotations to classes and methods. These rules target the `missingType.generics` PHPStan error and are safe to run automatically — they only emit annotations when the types can be inferred with high confidence.
+SolidWorx Platform ships custom Rector rules that enforce architectural conventions and add PHPStan generic type annotations. These rules are safe to run automatically and target common `missingType.generics` PHPStan errors.
 
 ## Available Rules
 
 | Rule | Targets | Description |
 |------|---------|-------------|
+| [`EnforcePlatformEntityRepositoryRector`](./enforce-platform-entity-repository.md) | Repository classes | Enforces that repositories extend the platform's `EntityRepository` |
 | [`AddGenericTemplateExtendsRector`](./add-generic-template-extends.md) | Class declarations | Adds `@extends` annotations to classes extending generic parents |
 | [`AddGenericMethodPhpDocRector`](./add-generic-method-phpdoc.md) | Method signatures | Adds `@return` and `@param` annotations for generic return/parameter types |
 
 ## Setup
 
-Both rules are registered in `rector.php`:
+All rules are registered in `rector.php`:
 
 ```php
+use Rector\Doctrine\Bundle230\Rector\Class_\AddAnnotationToRepositoryRector;
 use SolidWorx\Platform\Tools\Rector\Rules\AddGenericMethodPhpDocRector;
 use SolidWorx\Platform\Tools\Rector\Rules\AddGenericTemplateExtendsRector;
+use SolidWorx\Platform\Tools\Rector\Rules\EnforcePlatformEntityRepositoryRector;
 
 return RectorConfig::configure()
     ->withRules([
+        EnforcePlatformEntityRepositoryRector::class,
         AddGenericMethodPhpDocRector::class,
         AddGenericTemplateExtendsRector::class,
+    ])
+    ->withSkip([
+        // Conflicts with EnforcePlatformEntityRepositoryRector — our rules
+        // handle the @extends annotation with the correct parent class.
+        AddAnnotationToRepositoryRector::class,
     ])
     // ...
 ```
