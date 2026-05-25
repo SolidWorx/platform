@@ -12,7 +12,24 @@ SolidWorx Platform ships custom Rector rules that enforce architectural conventi
 
 ## Setup
 
-All rules are registered in `rector.php`:
+All rules are bundled into a single set that can be included in any `rector.php`:
+
+```php
+use SolidWorx\Platform\Tools\Rector\Set\SolidWorxSetList;
+
+return RectorConfig::configure()
+    ->withSets([
+        SolidWorxSetList::PLATFORM,
+        // ... other sets
+    ])
+    // ...
+```
+
+The set registers all custom rules and skips conflicting built-in rules (e.g., `AddAnnotationToRepositoryRector`).
+
+### Manual Registration
+
+If you prefer to register rules individually instead of using the set:
 
 ```php
 use Rector\Doctrine\Bundle230\Rector\Class_\AddAnnotationToRepositoryRector;

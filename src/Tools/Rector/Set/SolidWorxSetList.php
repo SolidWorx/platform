@@ -1,0 +1,19 @@
+<?php
+
+declare(strict_types=1);
+
+/*
+ * This file is part of SolidWorx Platform project.
+ *
+ * (c) Pierre du Plessis <open-source@solidworx.co>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
+namespace SolidWorx\Platform\Tools\Rector\Set;
+
+final class SolidWorxSetList
+{
+    public const string PLATFORM = __DIR__ . '/../../config/rector/platform.php';
+}
