@@ -16,15 +16,17 @@ use Rector\PHPUnit\Set\PHPUnitSetList;
 use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
 use Rector\ValueObject\PhpVersion;
+use SolidWorx\Platform\Tools\Rector\Set\SolidWorxSetList;
 
-return static function (RectorConfig $rectorConfig): void {
-    $rectorConfig->paths([__DIR__ . '/src']);
-
-    $rectorConfig->importNames();
-    $rectorConfig->importShortClasses();
-    $rectorConfig->phpVersion(PhpVersion::PHP_84);
-
-    $rectorConfig->sets([
+return RectorConfig::configure()
+    ->withPaths([
+        __DIR__ . '/src',
+    ])
+    ->withImportNames()
+    ->withComposerBased(twig: true, doctrine: true, phpunit: true, symfony: true)
+    ->withPhpVersion(PhpVersion::PHP_84)
+    ->withSets([
+        SolidWorxSetList::PLATFORM,
         // General
         SetList::CODE_QUALITY,
         SetList::CODING_STYLE,
@@ -32,9 +34,12 @@ return static function (RectorConfig $rectorConfig): void {
         SetList::EARLY_RETURN,
         SetList::INSTANCEOF,
         SetList::PHP_84,
-        SetList::STRICT_BOOLEANS,
+        SetList::RECTOR_PRESET,
         SetList::TYPE_DECLARATION,
+        SetList::TYPE_DECLARATION_DOCBLOCKS,
+        SetList::CARBON,
         SetList::PRIVATIZATION,
+        SetList::ASSERT,
 
         // PHP
         LevelSetList::UP_TO_PHP_84,
@@ -45,4 +50,4 @@ return static function (RectorConfig $rectorConfig): void {
         PHPUnitSetList::ANNOTATIONS_TO_ATTRIBUTES,
         PHPUnitSetList::PHPUNIT_CODE_QUALITY,
     ]);
-};
+
