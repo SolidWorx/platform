@@ -9,6 +9,7 @@ Welcome to the SolidWorx Platform documentation. This platform provides the foun
 - [Frontend Assets](./frontend/index.md) — webpack config, Stimulus controllers, theming
 - [Doctrine Types](./doctrine-types/index.md)
 - [Form Types](./form-types/index.md) — reusable form types, including the rich text editor
+- [Multi-Tenancy](./multi-tenancy/index.md)
 - [Rector Rules](./rector-rules/index.md)
 
 ## Upgrading
