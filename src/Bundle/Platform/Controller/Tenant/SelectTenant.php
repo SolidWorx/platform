@@ -37,6 +37,8 @@ use function is_string;
 #[IsGranted('IS_AUTHENTICATED_FULLY')]
 final class SelectTenant extends AbstractController
 {
+    private const string CSRF_TOKEN_ID = 'tenant_select';
+
     public function __construct(
         private readonly UserTenantRepository $userTenantRepository,
         private readonly TenantRepository $tenantRepository,
@@ -66,6 +68,12 @@ final class SelectTenant extends AbstractController
 
     private function select(Request $request): RedirectResponse
     {
+        $token = $request->request->get('_token');
+
+        if (! is_string($token) || ! $this->isCsrfTokenValid(self::CSRF_TOKEN_ID, $token)) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
         $submitted = $request->request->get('tenant');
 
         if (! is_string($submitted)) {

@@ -88,6 +88,7 @@ final class TenantMetadataListenerTest extends TestCase
         $event = self::createStub(LoadClassMetadataEventArgs::class);
         $event->method('getClassMetadata')->willReturn($metadata);
 
-        new TenantMetadataListener()->loadClassMetadata($event);
+        $listener = new TenantMetadataListener();
+        $listener->loadClassMetadata($event);
     }
 }
