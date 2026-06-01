@@ -15,6 +15,7 @@
                 <div class="list-group list-group-flush">
                     {% for tenant in tenants %}
                         <form method="post" action="{{ path('solidworx_platform_tenant_select') }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('tenant_select') }}" />
                             <input type="hidden" name="tenant" value="{{ tenant.id }}" />
                             <button type="submit" class="list-group-item list-group-item-action d-flex align-items-center">
                                 <span class="avatar avatar-sm me-3">{{ tenant.name|slice(0, 1)|upper }}</span>

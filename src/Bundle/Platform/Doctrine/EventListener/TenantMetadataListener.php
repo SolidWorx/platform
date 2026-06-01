@@ -18,6 +18,7 @@ use Doctrine\ORM\Events;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantAwareInterface;
 use function array_filter;
+use function array_map;
 use function array_merge;
 use function array_values;
 use function in_array;
@@ -97,6 +98,8 @@ final class TenantMetadataListener
      */
     private function hasStandaloneIndex(array $indexes, string $column): bool
     {
-        return array_any($indexes, fn($definition): bool => ($definition['columns'] ?? []) === [$column]);
+        $columnSets = array_map(static fn (array $definition): array => $definition['columns'] ?? [], $indexes);
+
+        return in_array([$column], $columnSets, true);
     }
 }
