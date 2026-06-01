@@ -18,6 +18,11 @@ platform:
         session_key: _tenant_id          # session key holding the selected tenant id
         route_param: tenant              # route parameter for the route resolver
         validate_user_access: true       # deny entering a tenant the user is not a member of
+        models:
+            # The tenant + membership entities. Defaults are the platform's own entities;
+            # override with your own to add fields (see "Customizing the tenant entity").
+            tenant: SolidWorx\Platform\PlatformBundle\Entity\Tenant
+            user_tenant: SolidWorx\Platform\PlatformBundle\Entity\UserTenant
         resolvers:
             domain: true                 # resolve by custom request host (highest priority)
             session: true                # resolve from the session (post-login default)
@@ -26,9 +31,44 @@ platform:
             check_user_access: false     # also verify the user is a member on write
 ```
 
-Enabling multi-tenancy maps two entities — `Tenant` (`platform_tenant`) and `UserTenant`
+Enabling multi-tenancy maps two entities by default — `Tenant` (`platform_tenant`) and `UserTenant`
 (`platform_user_tenant`) — and registers the `tenant` Doctrine filter (disabled until a tenant is in
 scope). Generate/refresh your schema afterwards (e.g. a Doctrine migration).
+
+## Customizing the tenant entity
+
+The shipped entities work out of the box. To add your own fields, extend the mapped base model and
+register your class — mirroring how `platform.models.user` works:
+
+```php
+namespace App\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use SolidWorx\Platform\PlatformBundle\Model\Tenant as BaseTenant;
+
+#[ORM\Entity]
+#[ORM\Table(name: 'tenant')]
+class Tenant extends BaseTenant
+{
+    #[ORM\Column(type: 'string', nullable: true)]
+    private ?string $plan = null;
+
+    // ... your accessors
+}
+```
+
+```yaml
+platform:
+    multi_tenancy:
+        models:
+            tenant: App\Entity\Tenant
+```
+
+Your class must implement `TenantInterface` (the base model already does). The platform wires the
+interface to your class with Doctrine `resolve_target_entities`, and the now-superseded default
+entity is automatically demoted to a mapped superclass so it does not create a second table. The
+membership entity (`UserTenant` / `UserTenantInterface`) is customizable the same way via
+`models.user_tenant`.
 
 ## Making an entity tenant-aware
 

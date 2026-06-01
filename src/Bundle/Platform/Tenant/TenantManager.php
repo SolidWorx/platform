@@ -15,7 +15,7 @@ namespace SolidWorx\Platform\PlatformBundle\Tenant;
 
 use Doctrine\ORM\EntityManagerInterface;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Filter\TenantFilter;
-use SolidWorx\Platform\PlatformBundle\Entity\Tenant;
+use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
 use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\Uid\Ulid;
 
@@ -33,7 +33,7 @@ final readonly class TenantManager
     ) {
     }
 
-    public function switchTo(Ulid|Tenant $tenant): void
+    public function switchTo(Ulid|TenantInterface $tenant): void
     {
         $this->tenantContext->setTenant($tenant);
     }
@@ -107,7 +107,7 @@ final readonly class TenantManager
      *
      * @return T
      */
-    public function runAs(Ulid|Tenant $tenant, callable $callback): mixed
+    public function runAs(Ulid|TenantInterface $tenant, callable $callback): mixed
     {
         $this->tenantContext->push($tenant);
 
