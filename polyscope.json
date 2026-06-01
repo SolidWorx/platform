@@ -1,3 +1,15 @@
 {
+  "scripts": {
+    "setup": ["composer install"],
+    "run": [
+      { "label": "Unit Tests", "command": "vendor/bin/phpunit" },
+      { "label": "Static Analysis", "command": "vendor/bin/phpstan" },
+      { "label": "Rector", "command": "vendor/bin/rector" }
+    ],
+  },
+  "preview": {
+      "command": "symfony server:start"
+  },
+  "runMode": "replace",
   "copyGitignored": true
 }
