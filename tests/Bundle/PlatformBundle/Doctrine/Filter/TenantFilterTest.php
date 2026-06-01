@@ -59,8 +59,12 @@ final class TenantFilterTest extends TenantOrmTestCase
 
         $repository = $this->entityManager->getRepository(TenantAwareItem::class);
 
-        $this->assertInstanceOf(TenantAwareItem::class, $repository->findOneBy(['name' => 'B-one']));
-        $this->assertNotInstanceOf(TenantAwareItem::class, $repository->findOneBy(['name' => 'A-one']));
+        $this->assertInstanceOf(TenantAwareItem::class, $repository->findOneBy([
+            'name' => 'B-one',
+        ]));
+        $this->assertNotInstanceOf(TenantAwareItem::class, $repository->findOneBy([
+            'name' => 'A-one',
+        ]));
     }
 
     public function testQueryBuilderIsScoped(): void
@@ -110,6 +114,6 @@ final class TenantFilterTest extends TenantOrmTestCase
     {
         $this->entityManager->getFilters()
             ->enable(TenantFilter::NAME)
-            ->setParameter(TenantFilter::PARAMETER, $tenantId, UlidType::NAME);
+            ->setParameter(TenantFilter::PARAMETER, $tenantId->toBinary(), UlidType::NAME);
     }
 }

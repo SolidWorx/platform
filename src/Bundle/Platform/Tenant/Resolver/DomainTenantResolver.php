@@ -24,7 +24,9 @@ use Symfony\Component\Uid\Ulid;
  * Highest priority in the chain: a custom domain is an unambiguous, infrastructure-level signal and
  * must win over session or route hints.
  */
-#[AutoconfigureTag('platform.tenant_resolver', ['priority' => 30])]
+#[AutoconfigureTag('platform.tenant_resolver', [
+    'priority' => 30,
+])]
 final readonly class DomainTenantResolver implements TenantResolverInterface
 {
     public function __construct(

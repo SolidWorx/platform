@@ -175,7 +175,6 @@ final class AddGenericTemplateExtendsRector extends AbstractRector
     public function refactor(Node $node): ?Node
     {
         /** @var Class_ $node */
-
         if ($node->extends === null) {
             return null;
         }

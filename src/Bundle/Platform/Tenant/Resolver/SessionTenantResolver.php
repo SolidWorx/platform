@@ -14,8 +14,8 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle\Tenant\Resolver;
 
 use InvalidArgumentException;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Uid\Ulid;
 use function is_string;
@@ -26,7 +26,9 @@ use function is_string;
  * This is the default for an authenticated user once they have selected a tenant. Membership is not
  * checked here — the access-validation listener enforces it uniformly when the tenant is applied.
  */
-#[AutoconfigureTag('platform.tenant_resolver', ['priority' => 20])]
+#[AutoconfigureTag('platform.tenant_resolver', [
+    'priority' => 20,
+])]
 final readonly class SessionTenantResolver implements TenantResolverInterface
 {
     public function __construct(

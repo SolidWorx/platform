@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Model;
 
+use Carbon\CarbonImmutable;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -38,22 +39,18 @@ abstract class UserTenant implements UserTenantInterface
     #[ORM\CustomIdGenerator(class: UlidGenerator::class)]
     protected Ulid $id;
 
-    #[ORM\Column(name: 'user_id', type: UlidType::NAME)]
-    protected Ulid $userId;
-
-    #[ORM\ManyToOne(targetEntity: TenantInterface::class)]
-    #[ORM\JoinColumn(name: 'tenant_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    protected TenantInterface $tenant;
-
     #[ORM\Column(name: 'created_at', type: Types::DATETIME_IMMUTABLE)]
     protected DateTimeImmutable $createdAt;
 
-    public function __construct(Ulid $userId, TenantInterface $tenant)
-    {
+    public function __construct(
+        #[ORM\Column(name: 'user_id', type: UlidType::NAME)]
+        protected Ulid $userId,
+        #[ORM\ManyToOne(targetEntity: TenantInterface::class)]
+        #[ORM\JoinColumn(name: 'tenant_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+        protected TenantInterface $tenant
+    ) {
         $this->id = new NilUlid();
-        $this->userId = $userId;
-        $this->tenant = $tenant;
-        $this->createdAt = new DateTimeImmutable();
+        $this->createdAt = CarbonImmutable::now();
     }
 
     #[Override]

@@ -14,8 +14,8 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle\Tenant\Resolver;
 
 use InvalidArgumentException;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Uid\Ulid;
 use function is_array;
@@ -27,7 +27,9 @@ use function is_string;
  * Lowest priority in the chain and disabled by default; enable it for path-based tenancy. It is
  * safe because membership is validated when the tenant is applied.
  */
-#[AutoconfigureTag('platform.tenant_resolver', ['priority' => 10])]
+#[AutoconfigureTag('platform.tenant_resolver', [
+    'priority' => 10,
+])]
 final readonly class RouteTenantResolver implements TenantResolverInterface
 {
     public function __construct(

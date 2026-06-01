@@ -34,9 +34,11 @@ class TenantAwareItem implements TenantAwareInterface
     #[ORM\Column(type: UlidType::NAME)]
     private Ulid $id;
 
-    public function __construct(#[ORM\Column(type: Types::STRING)]
-    private string $name, ?Ulid $id = null)
-    {
+    public function __construct(
+        #[ORM\Column(type: Types::STRING)]
+        private string $name,
+        ?Ulid $id = null
+    ) {
         $this->id = $id ?? new Ulid();
     }
 

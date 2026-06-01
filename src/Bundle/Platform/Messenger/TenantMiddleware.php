@@ -13,13 +13,13 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Messenger;
 
-use Symfony\Component\Messenger\Stamp\StampInterface;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantManager;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
 use Symfony\Component\Messenger\Middleware\StackInterface;
 use Symfony\Component\Messenger\Stamp\ReceivedStamp;
+use Symfony\Component\Messenger\Stamp\StampInterface;
 use Symfony\Component\Uid\Ulid;
 
 /**
@@ -40,13 +40,13 @@ final readonly class TenantMiddleware implements MiddlewareInterface
 
     public function handle(Envelope $envelope, StackInterface $stack): Envelope
     {
-        if (!$envelope->last(ReceivedStamp::class) instanceof StampInterface) {
+        if (! $envelope->last(ReceivedStamp::class) instanceof StampInterface) {
             return $stack->next()->handle($this->stampOnSend($envelope), $stack);
         }
 
         $tenantId = $this->resolveIncomingTenant($envelope);
 
-        if (!$tenantId instanceof Ulid) {
+        if (! $tenantId instanceof Ulid) {
             return $stack->next()->handle($envelope, $stack);
         }
 
@@ -57,7 +57,7 @@ final readonly class TenantMiddleware implements MiddlewareInterface
     {
         $message = $envelope->getMessage();
 
-        if ($message instanceof TenantAwareMessageInterface && !$message->getTenantId() instanceof Ulid && $this->tenantContext->hasTenant()) {
+        if ($message instanceof TenantAwareMessageInterface && ! $message->getTenantId() instanceof Ulid && $this->tenantContext->hasTenant()) {
             $message->setTenantId($this->tenantContext->getTenantId());
         }
 
@@ -69,7 +69,7 @@ final readonly class TenantMiddleware implements MiddlewareInterface
             ? $message->getTenantId()
             : $this->tenantContext->getTenantId();
 
-        if (!$tenantId instanceof Ulid) {
+        if (! $tenantId instanceof Ulid) {
             return $envelope;
         }
 

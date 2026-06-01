@@ -33,8 +33,9 @@ final class TenantFilterAwareTraitTest extends TenantOrmTestCase
         $repository = new readonly class($entityManager) {
             use TenantFilterAwareTrait;
 
-            public function __construct(private EntityManagerInterface $entityManager)
-            {
+            public function __construct(
+                private EntityManagerInterface $entityManager
+            ) {
             }
 
             /**

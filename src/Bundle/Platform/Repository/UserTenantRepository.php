@@ -37,7 +37,7 @@ class UserTenantRepository extends EntityRepository
         parent::__construct($registry, $className);
     }
 
-    public function hasAccess(Ulid $userId, TenantInterface|Ulid $tenant): bool
+    public function hasAccess(Ulid $userId, TenantInterface | Ulid $tenant): bool
     {
         $tenantId = $tenant instanceof TenantInterface ? $tenant->getId() : $tenant;
 

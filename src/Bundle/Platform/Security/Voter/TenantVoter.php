@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Security\Voter;
 
-use Symfony\Component\Uid\Ulid;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
 use SolidWorx\Platform\PlatformBundle\Model\User;
@@ -21,6 +20,7 @@ use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
+use Symfony\Component\Uid\Ulid;
 
 /**
  * Grants access to a {@see Tenant} when the authenticated user is a member of it.
@@ -53,7 +53,7 @@ final class TenantVoter extends Voter
 
         $userId = $user->getId();
 
-        if (!$userId instanceof Ulid) {
+        if (! $userId instanceof Ulid) {
             return false;
         }
 

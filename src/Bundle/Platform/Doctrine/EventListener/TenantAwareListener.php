@@ -13,12 +13,12 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Doctrine\EventListener;
 
-use Symfony\Component\Uid\Ulid;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\PrePersistEventArgs;
 use Doctrine\ORM\Events;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantAwareInterface;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
+use Symfony\Component\Uid\Ulid;
 
 /**
  * Stamps newly persisted {@see TenantAwareInterface} entities with the tenant currently in scope,
@@ -45,7 +45,7 @@ final readonly class TenantAwareListener
 
         $tenantId = $this->tenantContext->getTenantId();
 
-        if (!$tenantId instanceof Ulid) {
+        if (! $tenantId instanceof Ulid) {
             return;
         }
 

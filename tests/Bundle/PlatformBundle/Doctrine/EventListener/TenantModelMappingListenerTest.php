@@ -20,6 +20,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantModelMappingListener;
 use SolidWorx\Platform\PlatformBundle\Entity\Tenant;
+use stdClass;
 
 #[CoversClass(TenantModelMappingListener::class)]
 final class TenantModelMappingListenerTest extends TestCase
@@ -29,7 +30,7 @@ final class TenantModelMappingListenerTest extends TestCase
         $metadata = $this->metadataFor(Tenant::class);
 
         // A different configured tenant class -> the default should become a mapped superclass.
-        $this->listener('App\\Entity\\Tenant', 'App\\Entity\\UserTenant')->loadClassMetadata(
+        $this->listener(stdClass::class, stdClass::class)->loadClassMetadata(
             $this->event($metadata),
         );
 
@@ -40,7 +41,7 @@ final class TenantModelMappingListenerTest extends TestCase
     {
         $metadata = $this->metadataFor(Tenant::class);
 
-        $this->listener(Tenant::class, 'App\\Entity\\UserTenant')->loadClassMetadata(
+        $this->listener(Tenant::class, stdClass::class)->loadClassMetadata(
             $this->event($metadata),
         );
 

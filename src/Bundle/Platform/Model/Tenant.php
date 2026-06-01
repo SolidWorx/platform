@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Model;
 
+use Carbon\CarbonImmutable;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -38,27 +39,23 @@ abstract class Tenant implements TenantInterface
     #[ORM\CustomIdGenerator(class: UlidGenerator::class)]
     protected Ulid $id;
 
-    #[ORM\Column(name: 'name', type: Types::STRING, length: 255)]
-    protected string $name;
-
     /**
      * The custom hostname mapped to this tenant, used for domain-based resolution.
      */
     #[ORM\Column(name: 'domain', type: Types::STRING, length: 255, unique: true, nullable: true)]
     protected ?string $domain = null;
 
-    #[ORM\Column(name: 'created_by_id', type: UlidType::NAME, nullable: true)]
-    protected ?Ulid $createdById = null;
-
     #[ORM\Column(name: 'created_at', type: Types::DATETIME_IMMUTABLE)]
     protected DateTimeImmutable $createdAt;
 
-    public function __construct(string $name, ?Ulid $createdById = null)
-    {
+    public function __construct(
+        #[ORM\Column(name: 'name', type: Types::STRING, length: 255)]
+        protected string $name,
+        #[ORM\Column(name: 'created_by_id', type: UlidType::NAME, nullable: true)]
+        protected ?Ulid $createdById = null
+    ) {
         $this->id = new NilUlid();
-        $this->name = $name;
-        $this->createdById = $createdById;
-        $this->createdAt = new DateTimeImmutable();
+        $this->createdAt = CarbonImmutable::now();
     }
 
     #[Override]

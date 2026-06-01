@@ -21,13 +21,13 @@ use SolidWorx\Platform\PlatformBundle\Messenger\TenantStamp;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantManager;
 use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\Message\TenantAwareMessage;
+use stdClass;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
 use Symfony\Component\Messenger\Middleware\StackInterface;
 use Symfony\Component\Messenger\Stamp\ReceivedStamp;
 use Symfony\Component\Uid\Ulid;
-use stdClass;
 
 #[CoversClass(TenantMiddleware::class)]
 #[CoversClass(TenantStamp::class)]
@@ -104,8 +104,9 @@ final class TenantMiddlewareTest extends TestCase
             /**
              * @param callable(Envelope): void $onHandle
              */
-            public function __construct(private $onHandle)
-            {
+            public function __construct(
+                private $onHandle
+            ) {
             }
 
             public function handle(Envelope $envelope, StackInterface $stack): Envelope
@@ -117,8 +118,9 @@ final class TenantMiddlewareTest extends TestCase
         };
 
         return new readonly class($next) implements StackInterface {
-            public function __construct(private MiddlewareInterface $next)
-            {
+            public function __construct(
+                private MiddlewareInterface $next
+            ) {
             }
 
             public function next(): MiddlewareInterface
