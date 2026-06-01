@@ -34,7 +34,7 @@ trait InteractsWithTenantsTrait
         return new Tenant($name, $createdById);
     }
 
-    protected function setCurrentTenant(TenantContext $tenantContext, Ulid|Tenant $tenant): void
+    protected function setCurrentTenant(TenantContext $tenantContext, Ulid | Tenant $tenant): void
     {
         $tenantContext->setTenant($tenant);
     }
@@ -51,7 +51,7 @@ trait InteractsWithTenantsTrait
      *
      * @return T
      */
-    protected function runAsTenant(TenantManager $tenantManager, Ulid|Tenant $tenant, callable $callback): mixed
+    protected function runAsTenant(TenantManager $tenantManager, Ulid | Tenant $tenant, callable $callback): mixed
     {
         return $tenantManager->runAs($tenant, $callback);
     }

@@ -33,7 +33,7 @@ final readonly class TenantManager
     ) {
     }
 
-    public function switchTo(Ulid|TenantInterface $tenant): void
+    public function switchTo(Ulid | TenantInterface $tenant): void
     {
         $this->tenantContext->setTenant($tenant);
     }
@@ -52,7 +52,7 @@ final readonly class TenantManager
     {
         $tenantId = $this->tenantContext->getTenantId();
 
-        if (!$tenantId instanceof Ulid) {
+        if (! $tenantId instanceof Ulid) {
             return;
         }
 
@@ -107,7 +107,7 @@ final readonly class TenantManager
      *
      * @return T
      */
-    public function runAs(Ulid|TenantInterface $tenant, callable $callback): mixed
+    public function runAs(Ulid | TenantInterface $tenant, callable $callback): mixed
     {
         $this->tenantContext->push($tenant);
 

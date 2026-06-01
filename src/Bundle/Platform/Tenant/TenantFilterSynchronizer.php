@@ -13,12 +13,12 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Tenant;
 
-use Symfony\Component\Uid\Ulid;
 use Doctrine\ORM\EntityManagerInterface;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Filter\TenantFilter;
 use SolidWorx\Platform\PlatformBundle\Tenant\Event\TenantSwitchedEvent;
 use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\Uid\Ulid;
 
 /**
  * Keeps the Doctrine {@see TenantFilter} in sync with the tenant in scope.
@@ -40,7 +40,7 @@ final readonly class TenantFilterSynchronizer
         $filters = $this->entityManager->getFilters();
         $tenantId = $event->getTenantId();
 
-        if (!$tenantId instanceof Ulid) {
+        if (! $tenantId instanceof Ulid) {
             if ($filters->isEnabled(TenantFilter::NAME)) {
                 $filters->disable(TenantFilter::NAME);
             }

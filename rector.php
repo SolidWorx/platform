@@ -15,6 +15,8 @@ use Rector\Config\RectorConfig;
 use Rector\PHPUnit\Set\PHPUnitSetList;
 use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
+use Rector\TypeDeclaration\Rector\ClassMethod\AddReturnDocblockForScalarArrayFromAssignsRector;
+use Rector\TypeDeclarationDocblocks\Rector\Class_\AddParamTypeToRefactorMethodRector;
 use Rector\ValueObject\PhpVersion;
 use SolidWorx\Platform\Tools\Rector\Set\SolidWorxSetList;
 
@@ -49,4 +51,8 @@ return RectorConfig::configure()
         PHPUnitSetList::PHPUNIT_MOCK_TO_STUB,
         PHPUnitSetList::PHPUNIT_NARROW_ASSERTS,
         PHPUnitSetList::COMPOSER_BASED,
+    ])
+    ->withSkip([
+        AddReturnDocblockForScalarArrayFromAssignsRector::class,
+        AddParamTypeToRefactorMethodRector::class,
     ]);

@@ -40,6 +40,7 @@ final class TenantFilter extends SQLFilter
 
     /**
      * @param string $targetTableAlias
+     * @param ClassMetadata<object> $targetEntity
      */
     #[Override]
     public function addFilterConstraint(ClassMetadata $targetEntity, $targetTableAlias): string

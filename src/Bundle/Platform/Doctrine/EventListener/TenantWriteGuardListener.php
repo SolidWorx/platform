@@ -15,7 +15,6 @@ namespace SolidWorx\Platform\PlatformBundle\Doctrine\EventListener;
 
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
 use SolidWorx\Platform\PlatformBundle\Exception\CrossTenantOperationException;
 use SolidWorx\Platform\PlatformBundle\Exception\TenantAccessDeniedException;
@@ -53,9 +52,10 @@ final readonly class TenantWriteGuardListener
     public function onFlush(): void
     {
         $tenantId = $this->tenantContext->getTenantId();
-        if (!$tenantId instanceof Ulid) {
+        if (! $tenantId instanceof Ulid) {
             return;
         }
+
         $unitOfWork = $this->entityManager->getUnitOfWork();
         $entities = array_merge(
             $unitOfWork->getScheduledEntityInsertions(),
@@ -72,6 +72,7 @@ final readonly class TenantWriteGuardListener
                 throw CrossTenantOperationException::forEntity($entity::class);
             }
         }
+
         if ($entities !== []) {
             $this->assertUserAccess($tenantId);
         }
@@ -91,7 +92,7 @@ final readonly class TenantWriteGuardListener
 
         $userId = $user->getId();
 
-        if (!$userId instanceof Ulid) {
+        if (! $userId instanceof Ulid) {
             return;
         }
 

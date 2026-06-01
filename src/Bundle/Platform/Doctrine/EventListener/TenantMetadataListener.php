@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Doctrine\EventListener;
 
+use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Events;
-use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantAwareInterface;
 use function array_filter;
 use function array_map;

@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Doctrine\EventListener;
 
-use Symfony\Component\Uid\Ulid;
 use Doctrine\Common\EventManager;
 use Doctrine\ORM\Events;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -22,6 +21,7 @@ use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
 use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\Entity\TenantAwareItem;
 use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\TenantOrmTestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\Uid\Ulid;
 
 #[CoversClass(TenantAwareListener::class)]
 final class TenantAwareListenerTest extends TenantOrmTestCase

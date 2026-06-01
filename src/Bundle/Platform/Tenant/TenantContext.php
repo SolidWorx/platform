@@ -43,7 +43,7 @@ final class TenantContext implements ResetInterface
     ) {
     }
 
-    public function setTenant(Ulid|TenantInterface|null $tenant): void
+    public function setTenant(Ulid | TenantInterface | null $tenant): void
     {
         $new = $this->normalize($tenant);
 
@@ -75,7 +75,7 @@ final class TenantContext implements ResetInterface
     /**
      * Sets a tenant while remembering the previous one, so it can be restored with {@see pop()}.
      */
-    public function push(Ulid|TenantInterface|null $tenant): void
+    public function push(Ulid | TenantInterface | null $tenant): void
     {
         $this->stack[] = $this->tenantId;
         $this->setTenant($tenant);
@@ -102,7 +102,7 @@ final class TenantContext implements ResetInterface
         $this->setTenant(null);
     }
 
-    private function normalize(Ulid|TenantInterface|null $tenant): ?Ulid
+    private function normalize(Ulid | TenantInterface | null $tenant): ?Ulid
     {
         if ($tenant instanceof TenantInterface) {
             return $tenant->getId();

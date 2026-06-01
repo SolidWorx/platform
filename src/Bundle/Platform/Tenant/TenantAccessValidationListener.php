@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Tenant;
 
-use Symfony\Component\Uid\Ulid;
 use SolidWorx\Platform\PlatformBundle\Exception\TenantAccessDeniedException;
 use SolidWorx\Platform\PlatformBundle\Model\User;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
@@ -21,6 +20,7 @@ use SolidWorx\Platform\PlatformBundle\Tenant\Event\TenantSwitchedEvent;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\Uid\Ulid;
 use function sprintf;
 
 /**
@@ -53,7 +53,7 @@ final readonly class TenantAccessValidationListener
 
         $tenantId = $event->getTenantId();
 
-        if (!$tenantId instanceof Ulid) {
+        if (! $tenantId instanceof Ulid) {
             return;
         }
 
@@ -65,7 +65,7 @@ final readonly class TenantAccessValidationListener
 
         $userId = $user->getId();
 
-        if (!$userId instanceof Ulid) {
+        if (! $userId instanceof Ulid) {
             return;
         }
 
