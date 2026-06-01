@@ -23,11 +23,14 @@ use SolidWorx\Platform\PlatformBundle\Controller\Tenant\SelectTenant;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\Extension\TwoFactorExtension;
 use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantAwareListener;
 use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantMetadataListener;
+use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantModelMappingListener;
 use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantWriteGuardListener;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Filter\TenantFilter;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Type\URLType;
 use SolidWorx\Platform\PlatformBundle\Messenger\TenantMiddleware;
+use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
 use SolidWorx\Platform\PlatformBundle\Model\User;
+use SolidWorx\Platform\PlatformBundle\Model\UserTenantInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\TenantRepository;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
 use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantVoter;
@@ -64,6 +67,7 @@ use function interface_exists;
  *     session_key: string,
  *     route_param: string,
  *     validate_user_access: bool,
+ *     models: array{tenant: class-string, user_tenant: class-string},
  *     resolvers: array{domain: bool, session: bool, route: bool},
  *     write_guard: array{check_user_access: bool}
  *   }
@@ -83,6 +87,7 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         TenantAccessValidationListener::class,
         TenantRequestListener::class,
         TenantMetadataListener::class,
+        TenantModelMappingListener::class,
         TenantAwareListener::class,
         TenantWriteGuardListener::class,
         DomainTenantResolver::class,
@@ -148,6 +153,7 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
      *   session_key: string,
      *   route_param: string,
      *   validate_user_access: bool,
+     *   models: array{tenant: class-string, user_tenant: class-string},
      *   resolvers: array{domain: bool, session: bool, route: bool},
      *   write_guard: array{check_user_access: bool}
      * } $config
@@ -158,6 +164,8 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         $container->setParameter('solidworx_platform.multi_tenancy.session_key', $config['session_key']);
         $container->setParameter('solidworx_platform.multi_tenancy.route_param', $config['route_param']);
         $container->setParameter('solidworx_platform.multi_tenancy.validate_user_access', $config['validate_user_access']);
+        $container->setParameter('solidworx_platform.multi_tenancy.models.tenant', $config['models']['tenant']);
+        $container->setParameter('solidworx_platform.multi_tenancy.models.user_tenant', $config['models']['user_tenant']);
         $container->setParameter('solidworx_platform.multi_tenancy.write_guard.check_user_access', $config['write_guard']['check_user_access']);
 
         if (! $config['enabled']) {
@@ -206,6 +214,8 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
             ];
 
             if ($this->getConfig()['multi_tenancy']['enabled']) {
+                $multiTenancy = $this->getConfig()['multi_tenancy'];
+
                 $orm['mappings']['PlatformEntity'] = [
                     'is_bundle' => false,
                     'type' => 'attribute',
@@ -219,6 +229,11 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
                         'class' => TenantFilter::class,
                         'enabled' => false,
                     ],
+                ];
+
+                $orm['resolve_target_entities'] = [
+                    TenantInterface::class => $multiTenancy['models']['tenant'],
+                    UserTenantInterface::class => $multiTenancy['models']['user_tenant'],
                 ];
             }
 

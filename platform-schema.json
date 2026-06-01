@@ -98,6 +98,10 @@
                         "session_key": "_tenant_id",
                         "route_param": "tenant",
                         "validate_user_access": true,
+                        "models": {
+                            "tenant": "SolidWorx\\Platform\\PlatformBundle\\Entity\\Tenant",
+                            "user_tenant": "SolidWorx\\Platform\\PlatformBundle\\Entity\\UserTenant"
+                        },
                         "resolvers": {
                             "domain": true,
                             "session": true,
@@ -128,6 +132,26 @@
                             "description": "Deny entering a tenant the authenticated user is not a member of.",
                             "default": true,
                             "type": "boolean"
+                        },
+                        "models": {
+                            "default": {
+                                "tenant": "SolidWorx\\Platform\\PlatformBundle\\Entity\\Tenant",
+                                "user_tenant": "SolidWorx\\Platform\\PlatformBundle\\Entity\\UserTenant"
+                            },
+                            "type": "object",
+                            "properties": {
+                                "tenant": {
+                                    "description": "The Tenant entity class. Must implement SolidWorx\\Platform\\PlatformBundle\\Model\\TenantInterface",
+                                    "default": "SolidWorx\\Platform\\PlatformBundle\\Entity\\Tenant",
+                                    "type": "string"
+                                },
+                                "user_tenant": {
+                                    "description": "The UserTenant (membership) entity class. Must implement SolidWorx\\Platform\\PlatformBundle\\Model\\UserTenantInterface",
+                                    "default": "SolidWorx\\Platform\\PlatformBundle\\Entity\\UserTenant",
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
                         },
                         "resolvers": {
                             "default": {

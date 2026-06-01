@@ -14,8 +14,15 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle\Config;
 
 use Override;
+use SolidWorx\Platform\PlatformBundle\Entity\Tenant;
+use SolidWorx\Platform\PlatformBundle\Entity\UserTenant;
+use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
 use SolidWorx\Platform\PlatformBundle\Model\User;
+use SolidWorx\Platform\PlatformBundle\Model\UserTenantInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use function is_string;
+use function is_subclass_of;
+use function sprintf;
 
 final class PlatformConfiguration implements PlatformConfigurationInterface
 {
@@ -102,6 +109,27 @@ final class PlatformConfiguration implements PlatformConfigurationInterface
                         ->booleanNode('validate_user_access')
                             ->defaultTrue()
                             ->info('Deny entering a tenant the authenticated user is not a member of.')
+                        ->end()
+                        ->arrayNode('models')
+                            ->addDefaultsIfNotSet()
+                            ->children()
+                                ->scalarNode('tenant')
+                                    ->defaultValue(Tenant::class)
+                                    ->info(sprintf('The Tenant entity class. Must implement %s', TenantInterface::class))
+                                    ->validate()
+                                        ->ifTrue(static fn ($v): bool => ! is_string($v) || ! is_subclass_of($v, TenantInterface::class))
+                                        ->thenInvalid(sprintf('The tenant entity must implement %s', TenantInterface::class))
+                                    ->end()
+                                ->end()
+                                ->scalarNode('user_tenant')
+                                    ->defaultValue(UserTenant::class)
+                                    ->info(sprintf('The UserTenant (membership) entity class. Must implement %s', UserTenantInterface::class))
+                                    ->validate()
+                                        ->ifTrue(static fn ($v): bool => ! is_string($v) || ! is_subclass_of($v, UserTenantInterface::class))
+                                        ->thenInvalid(sprintf('The user tenant entity must implement %s', UserTenantInterface::class))
+                                    ->end()
+                                ->end()
+                            ->end()
                         ->end()
                         ->arrayNode('resolvers')
                             ->addDefaultsIfNotSet()
