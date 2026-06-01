@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle\Tenant;
 
 use Override;
-use SolidWorx\Platform\PlatformBundle\Entity\Tenant;
+use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
 use SolidWorx\Platform\PlatformBundle\Tenant\Event\TenantSwitchedEvent;
 use Symfony\Component\Uid\Ulid;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -43,7 +43,7 @@ final class TenantContext implements ResetInterface
     ) {
     }
 
-    public function setTenant(Ulid|Tenant|null $tenant): void
+    public function setTenant(Ulid|TenantInterface|null $tenant): void
     {
         $new = $this->normalize($tenant);
 
@@ -75,7 +75,7 @@ final class TenantContext implements ResetInterface
     /**
      * Sets a tenant while remembering the previous one, so it can be restored with {@see pop()}.
      */
-    public function push(Ulid|Tenant|null $tenant): void
+    public function push(Ulid|TenantInterface|null $tenant): void
     {
         $this->stack[] = $this->tenantId;
         $this->setTenant($tenant);
@@ -102,9 +102,9 @@ final class TenantContext implements ResetInterface
         $this->setTenant(null);
     }
 
-    private function normalize(Ulid|Tenant|null $tenant): ?Ulid
+    private function normalize(Ulid|TenantInterface|null $tenant): ?Ulid
     {
-        if ($tenant instanceof Tenant) {
+        if ($tenant instanceof TenantInterface) {
             return $tenant->getId();
         }
 

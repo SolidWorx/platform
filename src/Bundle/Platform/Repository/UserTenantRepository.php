@@ -14,24 +14,32 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle\Repository;
 
 use Doctrine\Persistence\ManagerRegistry;
-use SolidWorx\Platform\PlatformBundle\Entity\Tenant;
 use SolidWorx\Platform\PlatformBundle\Entity\UserTenant;
+use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
+use SolidWorx\Platform\PlatformBundle\Model\UserTenantInterface;
 use Symfony\Bridge\Doctrine\Types\UlidType;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Uid\Ulid;
 
 /**
- * @extends EntityRepository<UserTenant>
+ * @extends EntityRepository<UserTenantInterface>
  */
 class UserTenantRepository extends EntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
-    {
-        parent::__construct($registry, UserTenant::class);
+    /**
+     * @param class-string<UserTenantInterface> $className
+     */
+    public function __construct(
+        ManagerRegistry $registry,
+        #[Autowire(param: 'solidworx_platform.multi_tenancy.models.user_tenant')]
+        string $className = UserTenant::class,
+    ) {
+        parent::__construct($registry, $className);
     }
 
-    public function hasAccess(Ulid $userId, Tenant|Ulid $tenant): bool
+    public function hasAccess(Ulid $userId, TenantInterface|Ulid $tenant): bool
     {
-        $tenantId = $tenant instanceof Tenant ? $tenant->getId() : $tenant;
+        $tenantId = $tenant instanceof TenantInterface ? $tenant->getId() : $tenant;
 
         $count = $this->createQueryBuilder('ut')
             ->select('COUNT(ut.id)')
@@ -46,11 +54,11 @@ class UserTenantRepository extends EntityRepository
     }
 
     /**
-     * @return list<Tenant>
+     * @return list<TenantInterface>
      */
     public function findTenantsForUser(Ulid $userId): array
     {
-        /** @var list<Tenant> */
+        /** @var list<TenantInterface> */
         return $this->createQueryBuilder('ut')
             ->select('t')
             ->join('ut.tenant', 't')

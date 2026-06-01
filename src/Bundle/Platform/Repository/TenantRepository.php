@@ -15,18 +15,26 @@ namespace SolidWorx\Platform\PlatformBundle\Repository;
 
 use Doctrine\Persistence\ManagerRegistry;
 use SolidWorx\Platform\PlatformBundle\Entity\Tenant;
+use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
- * @extends EntityRepository<Tenant>
+ * @extends EntityRepository<TenantInterface>
  */
 class TenantRepository extends EntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
-    {
-        parent::__construct($registry, Tenant::class);
+    /**
+     * @param class-string<TenantInterface> $className
+     */
+    public function __construct(
+        ManagerRegistry $registry,
+        #[Autowire(param: 'solidworx_platform.multi_tenancy.models.tenant')]
+        string $className = Tenant::class,
+    ) {
+        parent::__construct($registry, $className);
     }
 
-    public function findOneByDomain(string $domain): ?Tenant
+    public function findOneByDomain(string $domain): ?TenantInterface
     {
         return $this->findOneBy([
             'domain' => $domain,

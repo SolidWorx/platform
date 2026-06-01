@@ -15,7 +15,7 @@ namespace SolidWorx\Platform\PlatformBundle\Security\Voter;
 
 use Symfony\Component\Uid\Ulid;
 use Override;
-use SolidWorx\Platform\PlatformBundle\Entity\Tenant;
+use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
 use SolidWorx\Platform\PlatformBundle\Model\User;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -25,7 +25,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 /**
  * Grants access to a {@see Tenant} when the authenticated user is a member of it.
  *
- * @extends Voter<string, Tenant>
+ * @extends Voter<string, TenantInterface>
  */
 final class TenantVoter extends Voter
 {
@@ -39,7 +39,7 @@ final class TenantVoter extends Voter
     #[Override]
     protected function supports(string $attribute, mixed $subject): bool
     {
-        return $attribute === self::TENANT_ACCESS && $subject instanceof Tenant;
+        return $attribute === self::TENANT_ACCESS && $subject instanceof TenantInterface;
     }
 
     #[Override]
@@ -57,6 +57,6 @@ final class TenantVoter extends Voter
             return false;
         }
 
-        return $subject instanceof Tenant && $this->userTenantRepository->hasAccess($userId, $subject);
+        return $subject instanceof TenantInterface && $this->userTenantRepository->hasAccess($userId, $subject);
     }
 }

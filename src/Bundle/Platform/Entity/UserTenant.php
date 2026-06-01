@@ -13,60 +13,18 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Entity;
 
-use DateTimeImmutable;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use SolidWorx\Platform\PlatformBundle\Model\UserTenant as UserTenantModel;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
-use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
-use Symfony\Bridge\Doctrine\Types\UlidType;
-use Symfony\Component\Uid\NilUlid;
-use Symfony\Component\Uid\Ulid;
 
 /**
- * Membership record linking a user to a tenant they may operate within.
+ * Default concrete membership entity. Replace it by extending {@see UserTenantModel} and configuring
+ * `platform.multi_tenancy.models.user_tenant` with your class.
  */
 #[ORM\Entity(repositoryClass: UserTenantRepository::class)]
 #[ORM\Table(name: UserTenant::TABLE_NAME)]
 #[ORM\UniqueConstraint(name: 'uniq_user_tenant', fields: ['userId', 'tenant'])]
-class UserTenant
+class UserTenant extends UserTenantModel
 {
     final public const string TABLE_NAME = 'platform_user_tenant';
-
-    #[ORM\Id]
-    #[ORM\Column(type: UlidType::NAME, unique: true)]
-    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[ORM\CustomIdGenerator(class: UlidGenerator::class)]
-    private Ulid $id;
-
-    #[ORM\Column(name: 'created_at', type: Types::DATETIME_IMMUTABLE)]
-    private DateTimeImmutable $createdAt;
-
-    public function __construct(#[ORM\Column(name: 'user_id', type: UlidType::NAME)]
-    private Ulid $userId, #[ORM\ManyToOne(targetEntity: Tenant::class)]
-    #[ORM\JoinColumn(name: 'tenant_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private Tenant $tenant)
-    {
-        $this->id = new NilUlid();
-        $this->createdAt = new DateTimeImmutable();
-    }
-
-    public function getId(): Ulid
-    {
-        return $this->id;
-    }
-
-    public function getUserId(): Ulid
-    {
-        return $this->userId;
-    }
-
-    public function getTenant(): Tenant
-    {
-        return $this->tenant;
-    }
-
-    public function getCreatedAt(): DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
 }
