@@ -9,3 +9,4 @@
 /composer.lock
 /vendor/
 /.claude/settings.local.json
+/docs/superpowers
