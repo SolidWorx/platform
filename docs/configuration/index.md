@@ -136,6 +136,11 @@ When 2FA is enabled the platform automatically:
 > automatically. See the [Authentication & Security](../security/index.md) guide, and
 > [Two-Factor Authentication](../security/two-factor.md) for the full setup.
 
+> This flag is only half of enabling 2FA — you also wire the firewall via
+> `LoginExtension::defaultFormLoginConfig(enableTwoFactor: true)`. See the
+> [Authentication & Security](../security/index.md) guide, and
+> [Two-Factor Authentication](../security/two-factor.md) for the full setup.
+
 ---
 
 ### Doctrine (`platform.doctrine`)
