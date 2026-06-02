@@ -17,7 +17,9 @@ use Doctrine\DBAL\Exception;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigSectionInterface;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\AuthenticationCompilerPass;
+use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\ClearPlatformConfigStatePass;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\MenuCompilerPass;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
@@ -51,6 +53,7 @@ final class SolidWorxPlatformBundle extends Bundle implements PlatformConfigSect
 
         $container->addCompilerPass(new MenuCompilerPass());
         $container->addCompilerPass(new AuthenticationCompilerPass());
+        $container->addCompilerPass(new ClearPlatformConfigStatePass(), PassConfig::TYPE_AFTER_REMOVING);
     }
 
     /**

@@ -20,6 +20,7 @@ use Override;
 use RuntimeException;
 use Scheb\TwoFactorBundle\SchebTwoFactorBundle;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigSectionInterface;
+use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigState;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -139,6 +140,8 @@ abstract class Kernel extends BaseKernel
         $configFile = $this->resolveConfigFile();
 
         if ($configFile === null) {
+            $this->publishPlatformConfigState();
+
             return;
         }
 
@@ -156,6 +159,19 @@ abstract class Kernel extends BaseKernel
             })($configFile),
             default => throw new RuntimeException(sprintf('Unsupported platform configuration file format: .%s', $ext)),
         };
+
+        $this->publishPlatformConfigState();
+    }
+
+    /**
+     * Publishes the parsed `platform:` section so compile-time helpers (e.g. the security
+     * config helpers) can read it while the container is being built.
+     */
+    private function publishPlatformConfigState(): void
+    {
+        $platformConfig = $this->rawConfig['platform'] ?? [];
+
+        PlatformConfigState::set(is_array($platformConfig) ? $platformConfig : []);
     }
 
     private function resolveConfigFile(): ?string
