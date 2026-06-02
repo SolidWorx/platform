@@ -126,11 +126,14 @@ When 2FA is enabled the platform automatically:
 - Registers `SchebTwoFactorBundle`
 - Configures TOTP and email-based second factors
 - Adds trusted-device support (30-day lifetime)
-- Registers 2FA routes and access control rules
+- Registers the 2FA routes
+- Wires the `two_factor` firewall block and 2FA access-control rules into the security
+  config produced by `LoginExtension::defaultFormLoginConfig()`
 
-> This flag is only half of enabling 2FA — you also wire the firewall via
-> `LoginExtension::defaultFormLoginConfig(enableTwoFactor: true)`. See the
-> [Authentication & Security](../security/index.md) guide, and
+> This flag is the **only** switch — you don't touch `security.php` for 2FA. As long as
+> your security config is built from `App::config(LoginExtension::defaultFormLoginConfig())`,
+> the helper detects this flag at container-build time and folds the 2FA wiring in
+> automatically. See the [Authentication & Security](../security/index.md) guide, and
 > [Two-Factor Authentication](../security/two-factor.md) for the full setup.
 
 ---
