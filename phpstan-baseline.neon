@@ -26,52 +26,7 @@ parameters:
 			path: src/Bundle/Platform/DependencyInjection/CompilerPass/AuthenticationCompilerPass.php
 
 		-
-			message: "#^Call to method accessControl\\(\\) on an unknown class Symfony\\\\Config\\\\SecurityConfig\\.$#"
-			count: 1
-			path: src/Bundle/Platform/DependencyInjection/Extension/LoginExtension.php
-
-		-
-			message: "#^Call to method firewall\\(\\) on an unknown class Symfony\\\\Config\\\\SecurityConfig\\.$#"
-			count: 1
-			path: src/Bundle/Platform/DependencyInjection/Extension/LoginExtension.php
-
-		-
-			message: "#^Call to method passwordHasher\\(\\) on an unknown class Symfony\\\\Config\\\\SecurityConfig\\.$#"
-			count: 1
-			path: src/Bundle/Platform/DependencyInjection/Extension/LoginExtension.php
-
-		-
-			message: "#^Method SolidWorx\\\\Platform\\\\PlatformBundle\\\\DependencyInjection\\\\Extension\\\\LoginExtension\\:\\:configureDefaultFormLogin\\(\\) has invalid return type Symfony\\\\Config\\\\Security\\\\FirewallConfig\\.$#"
-			count: 1
-			path: src/Bundle/Platform/DependencyInjection/Extension/LoginExtension.php
-
-		-
-			message: "#^Parameter \\$config of method SolidWorx\\\\Platform\\\\PlatformBundle\\\\DependencyInjection\\\\Extension\\\\LoginExtension\\:\\:configureDefaultFormLogin\\(\\) has invalid type Symfony\\\\Config\\\\SecurityConfig\\.$#"
-			count: 1
-			path: src/Bundle/Platform/DependencyInjection/Extension/LoginExtension.php
-
-		-
-			message: "#^Call to method path\\(\\) on an unknown class Symfony\\\\Config\\\\Security\\\\AccessControlConfig\\.$#"
-			count: 2
-			path: src/Bundle/Platform/DependencyInjection/Extension/TwoFactorExtension.php
-
-		-
-			message: "#^Call to method twoFactor\\(\\) on an unknown class Symfony\\\\Config\\\\Security\\\\FirewallConfig\\.$#"
-			count: 1
-			path: src/Bundle/Platform/DependencyInjection/Extension/TwoFactorExtension.php
-
-		-
 			message: "#^Default value of the parameter \\#2 \\$config \\(array\\{\\}\\) of method SolidWorx\\\\Platform\\\\PlatformBundle\\\\DependencyInjection\\\\Extension\\\\TwoFactorExtension\\:\\:enable\\(\\) is incompatible with type array\\{name\\: string, base_template\\: string\\}\\.$#"
-			count: 1
-			path: src/Bundle/Platform/DependencyInjection/Extension/TwoFactorExtension.php
-
-		-
-			message: "#^Parameter \\$accessControlConfig of method SolidWorx\\\\Platform\\\\PlatformBundle\\\\DependencyInjection\\\\Extension\\\\TwoFactorExtension\\:\\:configureSecurity\\(\\) has invalid type Symfony\\\\Config\\\\Security\\\\AccessControlConfig\\.$#"
-			count: 1
-			path: src/Bundle/Platform/DependencyInjection/Extension/TwoFactorExtension.php
-
-		-
-			message: "#^Parameter \\$config of method SolidWorx\\\\Platform\\\\PlatformBundle\\\\DependencyInjection\\\\Extension\\\\TwoFactorExtension\\:\\:configureSecurity\\(\\) has invalid type Symfony\\\\Config\\\\Security\\\\FirewallConfig\\.$#"
 			count: 1
 			path: src/Bundle/Platform/DependencyInjection/Extension/TwoFactorExtension.php
 

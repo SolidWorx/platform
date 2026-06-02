@@ -21,9 +21,24 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route(path: '/2fa/resend', name: '_solidworx_platform_security_two_factor_resend')]
+#[Route(path: self::PATH, name: self::ROUTE_NAME)]
 class ResendTwoFactorCode extends AbstractController
 {
+    /**
+     * The path of the resend-code endpoint.
+     *
+     * This is the single source of truth for the route: it is referenced both by the
+     * route attribute above and by the 2FA access-control rule in
+     * {@see \SolidWorx\Platform\PlatformBundle\DependencyInjection\Extension\TwoFactorExtension::securityConfig()},
+     * so the two can never drift.
+     */
+    public const string PATH = '/2fa/resend';
+
+    /**
+     * The route name of the resend-code endpoint (used by the 2FA Twig templates).
+     */
+    public const string ROUTE_NAME = '_solidworx_platform_security_two_factor_resend';
+
     public function __construct(
         private readonly CodeGeneratorInterface $codeGenerator
     ) {
