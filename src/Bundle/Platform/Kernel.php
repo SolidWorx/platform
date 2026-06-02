@@ -13,9 +13,6 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle;
 
-use Symfony\Component\DependencyInjection\Kernel\BundleInterface;
-use const GLOB_BRACE;
-use const PATHINFO_EXTENSION;
 use Override;
 use RuntimeException;
 use Scheb\TwoFactorBundle\SchebTwoFactorBundle;
@@ -24,6 +21,7 @@ use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigState;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Kernel\BundleInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -39,6 +37,8 @@ use function is_file;
 use function is_string;
 use function pathinfo;
 use function sprintf;
+use const GLOB_BRACE;
+use const PATHINFO_EXTENSION;
 
 abstract class Kernel extends BaseKernel
 {
@@ -64,7 +64,7 @@ abstract class Kernel extends BaseKernel
     #[Override]
     public function boot(): void
     {
-        if (! $this->booted) {
+        if (!$this->booted) {
             $this->processPlatformConfig();
         }
 
@@ -123,17 +123,17 @@ abstract class Kernel extends BaseKernel
     private function isTwoFactorEnabled(): bool
     {
         $platformConfig = $this->rawConfig['platform'] ?? [];
-        if (! is_array($platformConfig)) {
+        if (!is_array($platformConfig)) {
             return false;
         }
 
         $security = $platformConfig['security'] ?? [];
-        if (! is_array($security)) {
+        if (!is_array($security)) {
             return false;
         }
 
         $twoFactor = $security['two_factor'] ?? [];
-        if (! is_array($twoFactor)) {
+        if (!is_array($twoFactor)) {
             return false;
         }
 
@@ -160,44 +160,22 @@ abstract class Kernel extends BaseKernel
 
         $configFile = $this->resolveConfigFile();
 
-        if ($configFile !== null) {
-            $ext = pathinfo($configFile, PATHINFO_EXTENSION);
+        if ($configFile === null) {
+            $this->publishPlatformConfigState();
 
-            $this->rawConfig = match ($ext) {
-                'yaml', 'yml' => $this->toConfigArray(Yaml::parseFile($configFile, Yaml::PARSE_CONSTANT)),
-                'json' => $this->toConfigArray(json_decode((string) file_get_contents($configFile), true, 512, JSON_THROW_ON_ERROR)),
-                'php' => $this->toConfigArray(require $configFile),
-                default => throw new RuntimeException(sprintf('Unsupported platform configuration file format: .%s', $ext)),
-            };
+            return;
         }
 
-        $content = "<?php\n\n return " . var_export($this->rawConfig, true) . ";\n";
+        $ext = pathinfo($configFile, PATHINFO_EXTENSION);
 
-        $cache->write($content);
+        $this->rawConfig = match ($ext) {
+            'yaml', 'yml' => $this->toConfigArray(Yaml::parseFile($configFile, Yaml::PARSE_CONSTANT)),
+            'json' => $this->toConfigArray(json_decode((string) file_get_contents($configFile), true, 512, JSON_THROW_ON_ERROR)),
+            'php' => $this->toConfigArray(require $configFile),
+            default => throw new RuntimeException(sprintf('Unsupported platform configuration file format: .%s', $ext)),
+        };
+
         $this->publishPlatformConfigState();
-    }
-
-    /**
-     * Normalises a decoded configuration value into a string-keyed map.
-     *
-     * The root of a configuration file is always an associative map, so any non-array
-     * value is treated as empty and the keys are normalised to strings.
-     *
-     * @return array<string, mixed>
-     */
-    private function toConfigArray(mixed $value): array
-    {
-        if (! is_array($value)) {
-            return [];
-        }
-
-        $config = [];
-
-        foreach ($value as $key => $item) {
-            $config[(string) $key] = $item;
-        }
-
-        return $config;
     }
 
     /**
@@ -209,6 +187,30 @@ abstract class Kernel extends BaseKernel
         $platformConfig = $this->rawConfig['platform'] ?? [];
 
         PlatformConfigState::set(is_array($platformConfig) ? $platformConfig : []);
+    }
+
+
+    /**
+     * Normalises a decoded configuration value into a string-keyed map.
+     *
+     * The root of a configuration file is always an associative map, so any non-array
+     * value is treated as empty and the keys are normalised to strings.
+     *
+     * @return array<string, mixed>
+     */
+    private function toConfigArray(mixed $value): array
+    {
+        if (!is_array($value)) {
+            return [];
+        }
+
+        $config = [];
+
+        foreach ($value as $key => $item) {
+            $config[(string) $key] = $item;
+        }
+
+        return $config;
     }
 
     private function resolveConfigFile(): ?string
