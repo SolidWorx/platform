@@ -29,6 +29,10 @@
         "symfony/http-kernel": "^7.2",
         "symfony/property-access": "^7.2",
         "symfony/routing": "^7.2",
+        "symfony/security-bundle": "^7.4",
+        "symfony/security-core": "^7.4",
+        "symfony/security-csrf": "^7.4",
+        "symfony/security-http": "^7.4",
         "symfony/serializer": "^7.2",
         "symfony/uid": "^7.2",
         "symfony/ux-icons": "^2.29",
@@ -76,6 +80,7 @@
         "rector/rector": "^2.4",
         "roave/security-advisories": "dev-latest",
         "spatie/phpunit-snapshot-assertions": "^5.3",
+        "symfony/messenger": "^7.2",
         "symplify/easy-coding-standard": "^13.0"
     }
 }

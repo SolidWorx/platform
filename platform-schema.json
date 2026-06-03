@@ -6,35 +6,46 @@
     "properties": {
         "platform": {
             "type": "object",
-            "description": "Core platform configuration",
+            "description": "Platform configuration",
             "properties": {
                 "name": {
-                    "type": "string",
                     "description": "The name of the platform.",
-                    "default": "SolidWorx Platform"
+                    "default": "SolidWorx Platform",
+                    "type": "string"
                 },
                 "version": {
-                    "type": "string",
                     "description": "The version of the platform.",
-                    "default": "1.0.0"
+                    "default": "1.0.0",
+                    "type": "string"
                 },
                 "security": {
+                    "default": {
+                        "two_factor": {
+                            "enabled": false,
+                            "base_template": null
+                        }
+                    },
                     "type": "object",
                     "properties": {
                         "two_factor": {
+                            "default": {
+                                "enabled": false,
+                                "base_template": null
+                            },
                             "type": "object",
                             "properties": {
                                 "enabled": {
-                                    "type": "boolean",
                                     "description": "Enable two-factor authentication.",
-                                    "default": false
+                                    "default": false,
+                                    "type": "boolean"
                                 },
                                 "base_template": {
+                                    "description": "The base layout template for 2FA pages.",
+                                    "default": null,
                                     "type": [
                                         "string",
                                         "null"
-                                    ],
-                                    "description": "The base layout template for 2FA pages."
+                                    ]
                                 }
                             },
                             "additionalProperties": false
@@ -43,15 +54,23 @@
                     "additionalProperties": false
                 },
                 "doctrine": {
+                    "default": {
+                        "types": {
+                            "enable_utc_date": true
+                        }
+                    },
                     "type": "object",
                     "properties": {
                         "types": {
+                            "default": {
+                                "enable_utc_date": true
+                            },
                             "type": "object",
                             "properties": {
                                 "enable_utc_date": {
-                                    "type": "boolean",
                                     "description": "Enable UTC date type.",
-                                    "default": true
+                                    "default": true,
+                                    "type": "boolean"
                                 }
                             },
                             "additionalProperties": false
@@ -60,12 +79,119 @@
                     "additionalProperties": false
                 },
                 "models": {
+                    "default": {
+                        "user": "SolidWorx\\Platform\\PlatformBundle\\Model\\User"
+                    },
                     "type": "object",
                     "properties": {
                         "user": {
-                            "type": "string",
                             "description": "The User model class.",
-                            "default": "SolidWorx\\Platform\\PlatformBundle\\Model\\User"
+                            "default": "SolidWorx\\Platform\\PlatformBundle\\Model\\User",
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "multi_tenancy": {
+                    "default": {
+                        "enabled": false,
+                        "session_key": "_tenant_id",
+                        "route_param": "tenant",
+                        "validate_user_access": true,
+                        "models": {
+                            "tenant": "SolidWorx\\Platform\\PlatformBundle\\Entity\\Tenant",
+                            "user_tenant": "SolidWorx\\Platform\\PlatformBundle\\Entity\\UserTenant"
+                        },
+                        "resolvers": {
+                            "domain": true,
+                            "session": true,
+                            "route": false
+                        },
+                        "write_guard": {
+                            "check_user_access": false
+                        }
+                    },
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Enable multi-tenancy (data isolation per tenant).",
+                            "default": false,
+                            "type": "boolean"
+                        },
+                        "session_key": {
+                            "description": "The session key holding the selected tenant id.",
+                            "default": "_tenant_id",
+                            "type": "string"
+                        },
+                        "route_param": {
+                            "description": "The route parameter holding the tenant id (route resolver).",
+                            "default": "tenant",
+                            "type": "string"
+                        },
+                        "validate_user_access": {
+                            "description": "Deny entering a tenant the authenticated user is not a member of.",
+                            "default": true,
+                            "type": "boolean"
+                        },
+                        "models": {
+                            "default": {
+                                "tenant": "SolidWorx\\Platform\\PlatformBundle\\Entity\\Tenant",
+                                "user_tenant": "SolidWorx\\Platform\\PlatformBundle\\Entity\\UserTenant"
+                            },
+                            "type": "object",
+                            "properties": {
+                                "tenant": {
+                                    "description": "The Tenant entity class. Must implement SolidWorx\\Platform\\PlatformBundle\\Model\\TenantInterface",
+                                    "default": "SolidWorx\\Platform\\PlatformBundle\\Entity\\Tenant",
+                                    "type": "string"
+                                },
+                                "user_tenant": {
+                                    "description": "The UserTenant (membership) entity class. Must implement SolidWorx\\Platform\\PlatformBundle\\Model\\UserTenantInterface",
+                                    "default": "SolidWorx\\Platform\\PlatformBundle\\Entity\\UserTenant",
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "resolvers": {
+                            "default": {
+                                "domain": true,
+                                "session": true,
+                                "route": false
+                            },
+                            "type": "object",
+                            "properties": {
+                                "domain": {
+                                    "description": "Resolve the tenant from a custom request host.",
+                                    "default": true,
+                                    "type": "boolean"
+                                },
+                                "session": {
+                                    "description": "Resolve the tenant from the session.",
+                                    "default": true,
+                                    "type": "boolean"
+                                },
+                                "route": {
+                                    "description": "Resolve the tenant from a route parameter.",
+                                    "default": false,
+                                    "type": "boolean"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "write_guard": {
+                            "default": {
+                                "check_user_access": false
+                            },
+                            "type": "object",
+                            "properties": {
+                                "check_user_access": {
+                                    "description": "Also verify the current user is a member of the tenant on write.",
+                                    "default": false,
+                                    "type": "boolean"
+                                }
+                            },
+                            "additionalProperties": false
                         }
                     },
                     "additionalProperties": false
@@ -74,101 +200,164 @@
             "additionalProperties": false
         },
         "saas": {
-            "type": "object",
             "description": "SaaS / subscription configuration",
+            "type": "object",
             "properties": {
                 "doctrine": {
                     "type": "object",
-                    "required": [
-                        "subscriptions"
-                    ],
                     "properties": {
                         "subscriptions": {
                             "type": "object",
+                            "properties": {
+                                "entity": {
+                                    "description": "The class name of the subscription entity. Must implement SolidWorx\\Platform\\PlatformBundle\\Feature\\SubscribableInterface",
+                                    "type": "string"
+                                }
+                            },
                             "required": [
                                 "entity"
                             ],
+                            "additionalProperties": false
+                        },
+                        "trial": {
+                            "default": {
+                                "user_entity": null
+                            },
+                            "type": "object",
                             "properties": {
-                                "entity": {
-                                    "type": "string",
-                                    "description": "Fully-qualified class name of the subscription entity."
+                                "user_entity": {
+                                    "description": "The class name of the user entity for trial tracking. Must implement SolidWorx\\Platform\\SaasBundle\\Trial\\TrialUserInterface",
+                                    "default": null,
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "db_schema": {
+                            "default": {
+                                "table_names": {
+                                    "plan": "saas_plan",
+                                    "subscription": "saas_subscription",
+                                    "subscription_log": "saas_subscription_log",
+                                    "plan_feature": "saas_plan_feature",
+                                    "trial": "saas_trial"
+                                }
+                            },
                             "type": "object",
                             "properties": {
                                 "table_names": {
+                                    "default": {
+                                        "plan": "saas_plan",
+                                        "subscription": "saas_subscription",
+                                        "subscription_log": "saas_subscription_log",
+                                        "plan_feature": "saas_plan_feature",
+                                        "trial": "saas_trial"
+                                    },
                                     "type": "object",
                                     "properties": {
                                         "plan": {
-                                            "type": "string",
-                                            "default": "saas_plan"
+                                            "description": "The table name for the Plan entity",
+                                            "default": "saas_plan",
+                                            "type": "string"
                                         },
                                         "subscription": {
-                                            "type": "string",
-                                            "default": "saas_subscription"
+                                            "description": "The table name for the Subscription entity",
+                                            "default": "saas_subscription",
+                                            "type": "string"
                                         },
                                         "subscription_log": {
-                                            "type": "string",
-                                            "default": "saas_subscription_log"
+                                            "description": "The table name for the Subscription logs entity",
+                                            "default": "saas_subscription_log",
+                                            "type": "string"
                                         },
                                         "plan_feature": {
-                                            "type": "string",
-                                            "default": "saas_plan_feature"
+                                            "description": "The table name for the Plan Feature entity",
+                                            "default": "saas_plan_feature",
+                                            "type": "string"
+                                        },
+                                        "trial": {
+                                            "description": "The table name for the Trial entity",
+                                            "default": "saas_trial",
+                                            "type": "string"
                                         }
-                                    }
+                                    },
+                                    "additionalProperties": false
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         }
-                    }
+                    },
+                    "required": [
+                        "subscriptions"
+                    ],
+                    "additionalProperties": false
                 },
                 "payment": {
                     "type": "object",
+                    "properties": {
+                        "return_route": {
+                            "type": "string"
+                        }
+                    },
                     "required": [
                         "return_route"
                     ],
-                    "properties": {
-                        "return_route": {
-                            "type": "string",
-                            "description": "Route name to redirect to after payment."
-                        }
-                    }
+                    "additionalProperties": false
                 },
                 "integration": {
+                    "default": {
+                        "lemon_squeezy": {
+                            "enabled": false,
+                            "api_key": "%env(LEMON_SQUEEZY_API_KEY)%",
+                            "webhook_secret": "%env(LEMON_SQUEEZY_WEBHOOK_SECRET)%",
+                            "store_id": "%env(LEMON_SQUEEZY_STORE_ID)%"
+                        }
+                    },
                     "type": "object",
                     "properties": {
                         "lemon_squeezy": {
+                            "default": {
+                                "enabled": false,
+                                "api_key": "%env(LEMON_SQUEEZY_API_KEY)%",
+                                "webhook_secret": "%env(LEMON_SQUEEZY_WEBHOOK_SECRET)%",
+                                "store_id": "%env(LEMON_SQUEEZY_STORE_ID)%"
+                            },
                             "type": "object",
                             "properties": {
                                 "enabled": {
-                                    "type": "boolean",
-                                    "default": false
+                                    "default": false,
+                                    "type": "boolean"
                                 },
                                 "api_key": {
+                                    "default": "%env(LEMON_SQUEEZY_API_KEY)%",
                                     "type": "string"
                                 },
                                 "webhook_secret": {
+                                    "default": "%env(LEMON_SQUEEZY_WEBHOOK_SECRET)%",
                                     "type": "string"
                                 },
                                 "store_id": {
+                                    "default": "%env(LEMON_SQUEEZY_STORE_ID)%",
                                     "type": "string"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 },
                 "features": {
+                    "description": "Define available plan features and their defaults",
+                    "default": [],
                     "type": "object",
-                    "description": "Named feature definitions.",
                     "additionalProperties": {
                         "type": "object",
-                        "required": [
-                            "type",
-                            "default"
-                        ],
                         "properties": {
                             "type": {
+                                "description": "The data type of the feature value",
                                 "type": "string",
                                 "enum": [
                                     "boolean",
@@ -178,37 +367,60 @@
                                 ]
                             },
                             "default": {
-                                "description": "Default value for the feature."
+                                "description": "The default value for this feature"
                             },
                             "description": {
+                                "description": "A human-readable description of this feature",
+                                "default": "",
                                 "type": "string"
                             }
-                        }
+                        },
+                        "required": [
+                            "type",
+                            "default"
+                        ],
+                        "additionalProperties": false
                     }
                 }
-            }
+            },
+            "required": [
+                "doctrine",
+                "payment"
+            ],
+            "additionalProperties": false
         },
         "ui": {
-            "type": "object",
             "description": "UI / presentation configuration",
+            "default": {
+                "icon_pack": "tabler",
+                "templates": {
+                    "base": "@Ui/Layout/base.html.twig",
+                    "login": "@Ui/Security/login.html.twig"
+                }
+            },
+            "type": "object",
             "properties": {
                 "icon_pack": {
-                    "type": "string",
-                    "description": "The icon pack to use.",
-                    "default": "tabler"
+                    "description": "The icon pack to use",
+                    "default": "tabler",
+                    "type": "string"
                 },
                 "templates": {
+                    "default": {
+                        "base": "@Ui/Layout/base.html.twig",
+                        "login": "@Ui/Security/login.html.twig"
+                    },
                     "type": "object",
                     "properties": {
                         "base": {
-                            "type": "string",
-                            "description": "The base layout template.",
-                            "default": "@Ui/Layout/base.html.twig"
+                            "description": "The base template",
+                            "default": "@Ui/Layout/base.html.twig",
+                            "type": "string"
                         },
                         "login": {
-                            "type": "string",
-                            "description": "The login page template.",
-                            "default": "@Ui/Security/login.html.twig"
+                            "description": "The standard login template",
+                            "default": "@Ui/Security/login.html.twig",
+                            "type": "string"
                         }
                     },
                     "additionalProperties": false

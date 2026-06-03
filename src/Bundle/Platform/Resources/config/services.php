@@ -31,7 +31,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
 
     $services
         ->load(SolidWorxPlatformBundle::NAMESPACE . '\\', dirname(__DIR__, 2))
-        ->exclude(dirname(__DIR__, 2) . '/{DependencyInjection,Entity,Resources,Tests}');
+        ->exclude(dirname(__DIR__, 2) . '/{DependencyInjection,Entity,Resources,Tests,Tenant/Event,Doctrine/Filter,Messenger}');
 
     $services->set(Login::class)
         ->tag('controller.service_arguments');
