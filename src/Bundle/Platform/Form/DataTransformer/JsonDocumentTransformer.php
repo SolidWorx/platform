@@ -134,11 +134,19 @@ final readonly class JsonDocumentTransformer implements DataTransformerInterface
             }
         }
 
-        if (isset($node['marks']) && is_array($node['marks'])) {
+        if (\array_key_exists('marks', $node)) {
+            if (! is_array($node['marks'])) {
+                throw new TransformationFailedException('Invalid marks.');
+            }
+
             $node['marks'] = $this->sanitizeMarks($node['marks']);
         }
 
-        if (isset($node['content']) && is_array($node['content'])) {
+        if (\array_key_exists('content', $node)) {
+            if (! is_array($node['content'])) {
+                throw new TransformationFailedException('Invalid node content.');
+            }
+
             $node['content'] = array_values(array_map(
                 function (mixed $child): array {
                     if (! is_array($child)) {
