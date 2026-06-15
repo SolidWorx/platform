@@ -70,8 +70,8 @@ export default class extends Controller<HTMLElement> {
             onTransaction: () => this.refreshToolbar(),
         });
 
-        if (this.heightValue !== '') {
-            this.editorTarget.style.minHeight = this.heightValue;
+        if (this.heightValue !== '' && this.editor !== null) {
+            this.editor.view.dom.style.minHeight = this.heightValue;
         }
 
         // The textarea is now driven by the editor; hide it and let the server enforce "required".
