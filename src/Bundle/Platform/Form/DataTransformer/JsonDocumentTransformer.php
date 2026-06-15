@@ -200,6 +200,12 @@ final readonly class JsonDocumentTransformer implements DataTransformerInterface
 
     private function isSafeUrl(string $url): bool
     {
+        $url = trim($url);
+
+        if (str_starts_with($url, '//')) {
+            return false;
+        }
+
         $scheme = parse_url($url, PHP_URL_SCHEME);
 
         if (! is_string($scheme)) {
