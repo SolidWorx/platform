@@ -27,6 +27,12 @@
         "webpackMode": "lazy",
         "fetch": "lazy",
         "enabled": true
+      },
+      "text-editor": {
+        "main": "controllers/text_editor_controller.ts",
+        "webpackMode": "lazy",
+        "fetch": "lazy",
+        "enabled": true
       }
     },
     "importmap": {
@@ -53,6 +59,10 @@
     "@symfony/ux-chartjs": "^2.31.0",
     "@symfony/ux-autocomplete": "^2.31.0",
     "@tabler/core": "^1.4.0",
+    "@tiptap/core": "^2.11.5",
+    "@tiptap/extension-link": "^2.11.5",
+    "@tiptap/extension-placeholder": "^2.11.5",
+    "@tiptap/starter-kit": "^2.11.5",
     "bootstrap": "^5.3.8"
   },
   "devDependencies": {

@@ -7,6 +7,7 @@ Welcome to the SolidWorx Platform documentation. This platform provides the foun
 - [Configuration](./configuration/index.md)
 - [Authentication & Security](./security/index.md) — default form login and two-factor authentication
 - [Doctrine Types](./doctrine-types/index.md)
+- [Form Types](./form-types/index.md) — reusable form types, including the rich text editor
 - [Rector Rules](./rector-rules/index.md)
 
 ## Upgrading
