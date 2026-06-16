@@ -16,6 +16,7 @@ namespace SolidWorx\Platform\PlatformBundle\Model;
 use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use EmailChecker\Constraints as EmailCheckerAssert;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Contracts\Security\TwoFactor\UserTwoFactorInterface;
 use SolidWorx\Platform\PlatformBundle\Security\TwoFactor\Traits\UserTwoFactor;
@@ -65,6 +66,7 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         message: 'The email "{{ value }}" is not a valid email address.',
         mode: Assert\Email::VALIDATION_MODE_STRICT,
     )]
+    #[EmailCheckerAssert\NotThrowawayEmail(message: 'Disposable or temporary email addresses are not allowed. Please use a permanent email address.')]
     protected ?string $email = null;
 
     #[ORM\Column(name: 'enabled', type: Types::BOOLEAN)]
@@ -125,7 +127,6 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    #[Override]
     public function eraseCredentials(): void
     {
     }
