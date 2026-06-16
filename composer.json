@@ -14,6 +14,7 @@
         "endroid/qr-code": "^6.0",
         "knplabs/knp-menu-bundle": "^3.6",
         "league/uri": "^7.8",
+        "mattketmo/email-checker": "^3.0",
         "nesbot/carbon": "^3.9",
         "scheb/2fa-backup-code": "^7.10",
         "scheb/2fa-bundle": "^7.10",
