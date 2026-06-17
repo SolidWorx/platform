@@ -1,0 +1,55 @@
+name: Update Disposable Email Blocklist
+
+on:
+  schedule:
+    # Every Monday at 06:00 UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    name: Sync disposable email blocklist with upstream
+
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 5
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    env:
+      BLOCKLIST_FILE: src/Bundle/Platform/Resources/data/disposable_email_blocklist.conf
+      UPSTREAM_URL: https://raw.githubusercontent.com/disposable-email-domains/disposable-email-domains/master/disposable_email_blocklist.conf
+
+    steps:
+      - uses: actions/checkout@v6.0.2
+
+      - name: Download latest blocklist from upstream
+        run: |
+          curl --fail --silent --show-error --location \
+            "${UPSTREAM_URL}" \
+            --output "${BLOCKLIST_FILE}"
+
+      - name: Verify downloaded file is not empty
+        run: test -s "${BLOCKLIST_FILE}"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          add-paths: ${{ env.BLOCKLIST_FILE }}
+          branch: automated/update-disposable-email-blocklist
+          delete-branch: true
+          commit-message: Update disposable email blocklist from upstream
+          title: Update disposable email blocklist
+          body: |
+            Automated weekly sync of `${{ env.BLOCKLIST_FILE }}` with the upstream
+            [disposable-email-domains](https://github.com/disposable-email-domains/disposable-email-domains)
+            blocklist (`disposable_email_blocklist.conf`).
+
+            This PR is opened only when the upstream list has changed. Review the diff
+            before merging.
+          labels: dependencies
