@@ -28,7 +28,7 @@ jobs:
       - name: "Set up problem matchers for PHP"
         run: "echo \"::add-matcher::${{ runner.tool_cache }}/php.json\""
 
-      - uses: "ramsey/composer-install@v3"
+      - uses: "ramsey/composer-install@v4"
 
       - name: Run EasyCodingStandard
         run: vendor/bin/ecs check
@@ -55,7 +55,7 @@ jobs:
       - name: "Set up problem matchers for PHP"
         run: "echo \"::add-matcher::${{ runner.tool_cache }}/php.json\""
 
-      - uses: "ramsey/composer-install@v3"
+      - uses: "ramsey/composer-install@v4"
 
       - name: Run Rector
         run: vendor/bin/rector --dry-run
@@ -75,7 +75,7 @@ jobs:
           php-version-file: ".php-version"
           extensions: intl, ctype, iconv
 
-      - uses: "ramsey/composer-install@v3"
+      - uses: "ramsey/composer-install@v4"
 
       - name: Run composer normalize
         run: composer normalize --no-update-lock --diff --dry-run
