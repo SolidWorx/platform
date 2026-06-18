@@ -243,7 +243,7 @@ final class PlanFeatureManagerTest extends TestCase
 
             public function findByPlans(array $plans): array
             {
-                return $this->planFeatures;
+                return array_values($this->planFeatures);
             }
 
             /**
@@ -252,6 +252,14 @@ final class PlanFeatureManagerTest extends TestCase
             public function findByFeatureKey(string $featureKey): array
             {
                 return array_filter($this->planFeatures, fn (PlanFeature $f): bool => $f->getFeatureKey() === $featureKey);
+            }
+
+            public function save(PlanFeature $entity, bool $flush = true): void
+            {
+            }
+
+            public function remove(PlanFeature $entity, bool $flush = true): void
+            {
             }
         };
 

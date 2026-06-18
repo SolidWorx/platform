@@ -51,7 +51,7 @@ final class LemonSqueezyWebhookConsumerTest extends TestCase
      * Tests that the consumer correctly dispatches events based on the remote event type.
      *
      * @param RemoteEvent $remoteEvent The remote event to consume
-     * @param class-string<SubscriptionRemoteEvent|SubscriptionPaymentRemoteEvent> $expectedEventClass The expected event class to be dispatched
+     * @param class-string<SubscriptionEvent|PaymentEvent> $expectedEventClass The expected event class to be dispatched
      * @throws Exception
      */
     #[DataProvider('eventProvider')]

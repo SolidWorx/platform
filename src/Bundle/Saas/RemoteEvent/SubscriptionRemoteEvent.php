@@ -20,6 +20,9 @@ use Symfony\Component\Uid\Ulid;
 
 final class SubscriptionRemoteEvent extends RemoteEvent
 {
+    /**
+     * @param array<string, mixed> $payload
+     */
     public function __construct(
         public readonly Ulid $subscriptionId,
         public readonly Subscription $subscription,

@@ -143,7 +143,7 @@ readonly class SubscriptionEventSubscriber implements EventSubscriberInterface
                 break;
 
             default:
-                throw new InvalidSubscriptionException(sprintf('Unsupported subscription status: %s', $attrs->status->name));
+                throw new InvalidSubscriptionException(sprintf('Unsupported subscription status for subscription "%s".', $event->subscriptionId->toBase58()));
         }
     }
 }

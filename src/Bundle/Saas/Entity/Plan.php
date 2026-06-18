@@ -71,6 +71,9 @@ class Plan implements Stringable
     ])]
     private bool $active = true;
 
+    /**
+     * @var Collection<int, Subscription>
+     */
     #[ORM\OneToMany(targetEntity: Subscription::class, mappedBy: 'plan', orphanRemoval: true)]
     private Collection $subscriptions;
 
