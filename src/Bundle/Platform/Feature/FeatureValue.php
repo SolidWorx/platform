@@ -13,9 +13,11 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Feature;
 
+use Stringable;
 use function is_array;
 use function is_bool;
 use function is_int;
+use function is_scalar;
 
 final readonly class FeatureValue
 {
@@ -75,7 +77,16 @@ final readonly class FeatureValue
     public function asString(): string
     {
         if (is_array($this->value)) {
-            return implode(',', $this->value);
+            $parts = [];
+            foreach ($this->value as $item) {
+                if (is_scalar($item)) {
+                    $parts[] = (string) $item;
+                } elseif ($item instanceof Stringable) {
+                    $parts[] = (string) $item;
+                }
+            }
+
+            return implode(',', $parts);
         }
 
         if (is_bool($this->value)) {

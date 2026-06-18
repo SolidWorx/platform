@@ -19,6 +19,6 @@ final class TrialStartedEvent extends SubscriptionEvent
 {
     public function getTrialEndDate(): ?DateTimeInterface
     {
-        return $this->subscription->attributes->trialEndsAt;
+        return $this->subscription?->attributes->trialEndsAt;
     }
 }

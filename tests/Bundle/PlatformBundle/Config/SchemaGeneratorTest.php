@@ -54,8 +54,8 @@ final class SchemaGeneratorTest extends TestCase
         $generator = new SchemaGenerator([]);
         $schema = $generator->generate();
 
-        self::assertArrayHasKey('platform', $schema['properties']);
-        self::assertSame('object', $schema['properties']['platform']['type']);
+        self::assertArrayHasKey('platform', self::section($schema, 'properties'));
+        self::assertSame('object', self::section($schema, 'properties', 'platform')['type']);
     }
 
     public function testGenerateAllowsAdditionalTopLevelProperties(): void
@@ -71,7 +71,7 @@ final class SchemaGeneratorTest extends TestCase
         $generator = new SchemaGenerator([]);
         $schema = $generator->generate();
 
-        self::assertFalse($schema['properties']['platform']['additionalProperties']);
+        self::assertFalse(self::section($schema, 'properties', 'platform')['additionalProperties']);
     }
 
     public function testEmptyConfigurationsProducesEmptyPlatformProperties(): void
@@ -79,7 +79,7 @@ final class SchemaGeneratorTest extends TestCase
         $generator = new SchemaGenerator([]);
         $schema = $generator->generate();
 
-        self::assertSame([], $schema['properties']['platform']['properties']);
+        self::assertSame([], self::section($schema, 'properties', 'platform')['properties']);
     }
 
     public function testRootSectionKeyMergesChildrenIntoPlatformProperties(): void
@@ -94,7 +94,7 @@ final class SchemaGeneratorTest extends TestCase
         $generator = new SchemaGenerator([$config]);
         $schema = $generator->generate();
 
-        $properties = $schema['properties']['platform']['properties'];
+        $properties = self::section($schema, 'properties', 'platform', 'properties');
         self::assertArrayHasKey('app_name', $properties);
         self::assertArrayHasKey('debug', $properties);
         self::assertArrayNotHasKey('root', $properties);
@@ -111,9 +111,9 @@ final class SchemaGeneratorTest extends TestCase
         $generator = new SchemaGenerator([$config]);
         $schema = $generator->generate();
 
-        self::assertArrayHasKey('mymodule', $schema['properties']);
-        self::assertArrayNotHasKey('mymodule', $schema['properties']['platform']['properties']);
-        self::assertSame('object', $schema['properties']['mymodule']['type']);
+        self::assertArrayHasKey('mymodule', self::section($schema, 'properties'));
+        self::assertArrayNotHasKey('mymodule', self::section($schema, 'properties', 'platform', 'properties'));
+        self::assertSame('object', self::section($schema, 'properties', 'mymodule')['type']);
     }
 
     public function testScalarNodeGeneratesStringType(): void
@@ -125,7 +125,7 @@ final class SchemaGeneratorTest extends TestCase
         });
 
         $schema = (new SchemaGenerator([$config]))->generate();
-        $prop = $schema['properties']['platform']['properties']['title'];
+        $prop = self::section($schema, 'properties', 'platform', 'properties', 'title');
 
         self::assertSame('string', $prop['type']);
     }
@@ -139,7 +139,7 @@ final class SchemaGeneratorTest extends TestCase
         });
 
         $schema = (new SchemaGenerator([$config]))->generate();
-        $prop = $schema['properties']['platform']['properties']['template'];
+        $prop = self::section($schema, 'properties', 'platform', 'properties', 'template');
 
         self::assertSame(['string', 'null'], $prop['type']);
     }
@@ -153,7 +153,7 @@ final class SchemaGeneratorTest extends TestCase
         });
 
         $schema = (new SchemaGenerator([$config]))->generate();
-        $prop = $schema['properties']['platform']['properties']['enabled'];
+        $prop = self::section($schema, 'properties', 'platform', 'properties', 'enabled');
 
         self::assertSame('boolean', $prop['type']);
     }
@@ -167,7 +167,7 @@ final class SchemaGeneratorTest extends TestCase
         });
 
         $schema = (new SchemaGenerator([$config]))->generate();
-        $prop = $schema['properties']['platform']['properties']['count'];
+        $prop = self::section($schema, 'properties', 'platform', 'properties', 'count');
 
         self::assertSame('integer', $prop['type']);
     }
@@ -181,7 +181,7 @@ final class SchemaGeneratorTest extends TestCase
         });
 
         $schema = (new SchemaGenerator([$config]))->generate();
-        $prop = $schema['properties']['platform']['properties']['ratio'];
+        $prop = self::section($schema, 'properties', 'platform', 'properties', 'ratio');
 
         self::assertSame('number', $prop['type']);
     }
@@ -195,7 +195,7 @@ final class SchemaGeneratorTest extends TestCase
         });
 
         $schema = (new SchemaGenerator([$config]))->generate();
-        $prop = $schema['properties']['platform']['properties']['color'];
+        $prop = self::section($schema, 'properties', 'platform', 'properties', 'color');
 
         self::assertSame('string', $prop['type']);
         self::assertSame(['red', 'green', 'blue'], $prop['enum']);
@@ -210,7 +210,7 @@ final class SchemaGeneratorTest extends TestCase
         });
 
         $schema = (new SchemaGenerator([$config]))->generate();
-        $prop = $schema['properties']['platform']['properties']['anything'];
+        $prop = self::section($schema, 'properties', 'platform', 'properties', 'anything');
 
         self::assertArrayNotHasKey('type', $prop);
     }
@@ -229,11 +229,11 @@ final class SchemaGeneratorTest extends TestCase
         });
 
         $schema = (new SchemaGenerator([$config]))->generate();
-        $nested = $schema['properties']['platform']['properties']['nested'];
+        $nested = self::section($schema, 'properties', 'platform', 'properties', 'nested');
 
         self::assertSame('object', $nested['type']);
         self::assertArrayHasKey('properties', $nested);
-        self::assertArrayHasKey('key', $nested['properties']);
+        self::assertArrayHasKey('key', self::section($nested, 'properties'));
     }
 
     public function testArrayNodeSetsAdditionalPropertiesToFalse(): void
@@ -250,7 +250,7 @@ final class SchemaGeneratorTest extends TestCase
         });
 
         $schema = (new SchemaGenerator([$config]))->generate();
-        $options = $schema['properties']['platform']['properties']['options'];
+        $options = self::section($schema, 'properties', 'platform', 'properties', 'options');
 
         self::assertFalse($options['additionalProperties']);
     }
@@ -269,11 +269,11 @@ final class SchemaGeneratorTest extends TestCase
         });
 
         $schema = (new SchemaGenerator([$config]))->generate();
-        $db = $schema['properties']['platform']['properties']['db'];
+        $db = self::section($schema, 'properties', 'platform', 'properties', 'db');
 
         self::assertArrayHasKey('required', $db);
-        self::assertContains('host', $db['required']);
-        self::assertNotContains('port', $db['required']);
+        self::assertContains('host', self::section($db, 'required'));
+        self::assertNotContains('port', self::section($db, 'required'));
     }
 
     public function testPrototypedArrayNodeWithKeyAttributeGeneratesAdditionalProperties(): void
@@ -292,7 +292,7 @@ final class SchemaGeneratorTest extends TestCase
         });
 
         $schema = (new SchemaGenerator([$config]))->generate();
-        $items = $schema['properties']['platform']['properties']['items'];
+        $items = self::section($schema, 'properties', 'platform', 'properties', 'items');
 
         self::assertSame('object', $items['type']);
         self::assertArrayHasKey('additionalProperties', $items);
@@ -310,7 +310,7 @@ final class SchemaGeneratorTest extends TestCase
         });
 
         $schema = (new SchemaGenerator([$config]))->generate();
-        $tags = $schema['properties']['platform']['properties']['tags'];
+        $tags = self::section($schema, 'properties', 'platform', 'properties', 'tags');
 
         self::assertSame('array', $tags['type']);
         self::assertArrayHasKey('items', $tags);
@@ -329,7 +329,7 @@ final class SchemaGeneratorTest extends TestCase
         });
 
         $schema = (new SchemaGenerator([$config]))->generate();
-        $prop = $schema['properties']['platform']['properties']['name'];
+        $prop = self::section($schema, 'properties', 'platform', 'properties', 'name');
 
         self::assertSame('The application name.', $prop['description']);
     }
@@ -343,7 +343,7 @@ final class SchemaGeneratorTest extends TestCase
         });
 
         $schema = (new SchemaGenerator([$config]))->generate();
-        $prop = $schema['properties']['platform']['properties']['name'];
+        $prop = self::section($schema, 'properties', 'platform', 'properties', 'name');
 
         self::assertArrayNotHasKey('description', $prop);
     }
@@ -357,7 +357,7 @@ final class SchemaGeneratorTest extends TestCase
         });
 
         $schema = (new SchemaGenerator([$config]))->generate();
-        $prop = $schema['properties']['platform']['properties']['driver'];
+        $prop = self::section($schema, 'properties', 'platform', 'properties', 'driver');
 
         self::assertSame('pdo_mysql', $prop['default']);
     }
@@ -371,7 +371,7 @@ final class SchemaGeneratorTest extends TestCase
         });
 
         $schema = (new SchemaGenerator([$config]))->generate();
-        $prop = $schema['properties']['platform']['properties']['active'];
+        $prop = self::section($schema, 'properties', 'platform', 'properties', 'active');
 
         self::assertArrayHasKey('default', $prop);
         self::assertFalse($prop['default']);
@@ -386,7 +386,7 @@ final class SchemaGeneratorTest extends TestCase
         });
 
         $schema = (new SchemaGenerator([$config]))->generate();
-        $prop = $schema['properties']['platform']['properties']['required_field'];
+        $prop = self::section($schema, 'properties', 'platform', 'properties', 'required_field');
 
         self::assertArrayNotHasKey('default', $prop);
     }
@@ -408,17 +408,17 @@ final class SchemaGeneratorTest extends TestCase
         $schema = (new SchemaGenerator([$config1, $config2]))->generate();
 
         // Root section children go under platform:
-        self::assertArrayHasKey('name', $schema['properties']['platform']['properties']);
+        self::assertArrayHasKey('name', self::section($schema, 'properties', 'platform', 'properties'));
         // Non-empty section keys are root-level siblings of platform:
-        self::assertArrayHasKey('module', $schema['properties']);
-        self::assertArrayNotHasKey('module', $schema['properties']['platform']['properties']);
+        self::assertArrayHasKey('module', self::section($schema, 'properties'));
+        self::assertArrayNotHasKey('module', self::section($schema, 'properties', 'platform', 'properties'));
     }
 
     public function testWithRealPlatformConfiguration(): void
     {
         $generator = new SchemaGenerator([new PlatformConfiguration()]);
         $schema = $generator->generate();
-        $props = $schema['properties']['platform']['properties'];
+        $props = self::section($schema, 'properties', 'platform', 'properties');
 
         self::assertArrayHasKey('name', $props);
         self::assertArrayHasKey('version', $props);
@@ -426,23 +426,23 @@ final class SchemaGeneratorTest extends TestCase
         self::assertArrayHasKey('doctrine', $props);
         self::assertArrayHasKey('models', $props);
 
-        self::assertSame('string', $props['name']['type']);
-        self::assertSame('SolidWorx Platform', $props['name']['default']);
-        self::assertSame('boolean', $props['security']['properties']['two_factor']['properties']['enabled']['type']);
-        self::assertSame(User::class, $props['models']['properties']['user']['default']);
+        self::assertSame('string', self::section($props, 'name')['type']);
+        self::assertSame('SolidWorx Platform', self::section($props, 'name')['default']);
+        self::assertSame('boolean', self::section($props, 'security', 'properties', 'two_factor', 'properties', 'enabled')['type']);
+        self::assertSame(User::class, self::section($props, 'models', 'properties', 'user')['default']);
     }
 
     public function testWithRealUiConfiguration(): void
     {
         $generator = new SchemaGenerator([new UiConfiguration()]);
         $schema = $generator->generate();
-        $ui = $schema['properties']['ui'];
+        $ui = self::section($schema, 'properties', 'ui');
 
         self::assertSame('object', $ui['type']);
         self::assertSame('UI / presentation configuration', $ui['description']);
-        self::assertArrayHasKey('icon_pack', $ui['properties']);
-        self::assertSame('tabler', $ui['properties']['icon_pack']['default']);
-        self::assertArrayHasKey('templates', $ui['properties']);
+        self::assertArrayHasKey('icon_pack', self::section($ui, 'properties'));
+        self::assertSame('tabler', self::section($ui, 'properties', 'icon_pack')['default']);
+        self::assertArrayHasKey('templates', self::section($ui, 'properties'));
     }
 
     public function testWithRealPlatformAndUiConfigurations(): void
@@ -452,7 +452,7 @@ final class SchemaGeneratorTest extends TestCase
             new UiConfiguration(),
         ]);
         $schema = $generator->generate();
-        $platformProps = $schema['properties']['platform']['properties'];
+        $platformProps = self::section($schema, 'properties', 'platform', 'properties');
 
         // Root section keys (from PlatformConfiguration, key='')
         self::assertArrayHasKey('name', $platformProps);
@@ -460,7 +460,26 @@ final class SchemaGeneratorTest extends TestCase
 
         // Non-empty section keys are root-level siblings
         self::assertArrayNotHasKey('ui', $platformProps);
-        self::assertArrayHasKey('ui', $schema['properties']);
+        self::assertArrayHasKey('ui', self::section($schema, 'properties'));
+    }
+
+    /**
+     * Walk a nested key path, asserting each step is an array, and return the sub-array.
+     *
+     * @param array<array-key, mixed> $schema
+     * @return array<array-key, mixed>
+     */
+    private static function section(array $schema, string ...$keys): array
+    {
+        $current = $schema;
+        foreach ($keys as $key) {
+            self::assertArrayHasKey($key, $current);
+            $value = $current[$key];
+            self::assertIsArray($value);
+            $current = $value;
+        }
+
+        return $current;
     }
 
     /**

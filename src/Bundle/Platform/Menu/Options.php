@@ -20,6 +20,7 @@ class Options
      *     route?: string,
      *     routeParameters?: array<string, scalar>,
      *     routeAbsolute?: bool,
+     *     extras?: array{role?: string, icon?: string},
      * }
      */
     private array $options = [];
@@ -33,7 +34,7 @@ class Options
         return new self();
     }
 
-    /***
+    /**
      * @param array<string, scalar> $parameters
      */
     public function route(string $route, array $parameters = [], bool $absolute = false): self
@@ -63,6 +64,7 @@ class Options
      *     route?: string,
      *     routeParameters?: array<string, scalar>,
      *     routeAbsolute?: bool,
+     *     extras?: array{role?: string, icon?: string},
      * }
      */
     public function build(): array

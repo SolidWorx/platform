@@ -16,7 +16,7 @@ namespace SolidWorx\Platform\SaasBundle\Console\Command;
 use Carbon\CarbonImmutable;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Collections\Order;
-use Doctrine\Common\Util\ClassUtils;
+use Doctrine\ORM\Proxy\DefaultProxyClassNameResolver;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Console\Command;
 use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
@@ -27,6 +27,8 @@ use Stringable;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 use function array_map;
+use function is_scalar;
+use function is_string;
 
 //
 #[AsCommand(name: 'saas:subscription:list', description: 'List all subscriptions')]
@@ -56,7 +58,8 @@ final class SubscriptionListCommand extends Command
         $criteria = new Criteria();
         $expr = Criteria::expr();
 
-        if ($status = $this->io->getOption('status')) {
+        $status = $this->io->getOption('status');
+        if (is_string($status) && $status !== '') {
             $criteria->andWhere($expr->eq('status', SubscriptionStatus::from($status)));
         }
 
@@ -116,14 +119,20 @@ final class SubscriptionListCommand extends Command
 
     private function getSubscriberString(SubscribableInterface $subscriber): string
     {
-        if ($subscriber instanceof Stringable || method_exists($subscriber, '__toString')) {
+        if ($subscriber instanceof Stringable) {
             return (string) $subscriber;
         }
 
+        $class = DefaultProxyClassNameResolver::getClass($subscriber);
+
         if (method_exists($subscriber, 'getId')) {
-            return $subscriber->getId() . '@' . ClassUtils::getClass($subscriber);
+            $id = $subscriber->getId();
+
+            if (is_scalar($id) || $id instanceof Stringable) {
+                return $id . '@' . $class;
+            }
         }
 
-        return spl_object_hash($subscriber) . '@' . ClassUtils::getClass($subscriber);
+        return spl_object_hash($subscriber) . '@' . $class;
     }
 }

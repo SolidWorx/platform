@@ -28,7 +28,7 @@ final class TwoFactorExtension
     /**
      * @param array{name: string, base_template: string} $config
      */
-    public static function enable(ContainerBuilder $container, array $config = []): void
+    public static function enable(ContainerBuilder $container, array $config): void
     {
         $container
             ->setDefinition(

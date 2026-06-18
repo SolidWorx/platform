@@ -25,8 +25,8 @@ final class UiConfigBuilderTest extends TestCase
         $result = UiConfigBuilder::create()->build();
 
         self::assertSame('tabler', $result['icon_pack']);
-        self::assertSame('@Ui/Layout/base.html.twig', $result['templates']['base']);
-        self::assertSame('@Ui/Security/login.html.twig', $result['templates']['login']);
+        self::assertSame('@Ui/Layout/base.html.twig', self::section($result, 'templates')['base']);
+        self::assertSame('@Ui/Security/login.html.twig', self::section($result, 'templates')['login']);
     }
 
     public function testIconPackCanBeOverridden(): void
@@ -40,14 +40,14 @@ final class UiConfigBuilderTest extends TestCase
     {
         $result = UiConfigBuilder::create()->baseTemplate('@App/layout/base.html.twig')->build();
 
-        self::assertSame('@App/layout/base.html.twig', $result['templates']['base']);
+        self::assertSame('@App/layout/base.html.twig', self::section($result, 'templates')['base']);
     }
 
     public function testLoginTemplateCanBeOverridden(): void
     {
         $result = UiConfigBuilder::create()->loginTemplate('@App/security/login.html.twig')->build();
 
-        self::assertSame('@App/security/login.html.twig', $result['templates']['login']);
+        self::assertSame('@App/security/login.html.twig', self::section($result, 'templates')['login']);
     }
 
     public function testTemplatesAreNestedCorrectly(): void
@@ -58,7 +58,26 @@ final class UiConfigBuilderTest extends TestCase
             ->build();
 
         self::assertArrayHasKey('templates', $result);
-        self::assertArrayHasKey('base', $result['templates']);
-        self::assertArrayHasKey('login', $result['templates']);
+        self::assertArrayHasKey('base', self::section($result, 'templates'));
+        self::assertArrayHasKey('login', self::section($result, 'templates'));
+    }
+
+    /**
+     * Walk a nested key path, asserting each step is an array, and return the sub-array.
+     *
+     * @param array<array-key, mixed> $result
+     * @return array<array-key, mixed>
+     */
+    private static function section(array $result, string ...$keys): array
+    {
+        $current = $result;
+        foreach ($keys as $key) {
+            self::assertArrayHasKey($key, $current);
+            $value = $current[$key];
+            self::assertIsArray($value);
+            $current = $value;
+        }
+
+        return $current;
     }
 }

@@ -24,6 +24,7 @@ use SolidWorx\Platform\SaasBundle\Entity\Trial;
 use SolidWorx\Platform\SaasBundle\Trial\TrialUserInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use function in_array;
+use function is_string;
 use function is_subclass_of;
 use function sprintf;
 
@@ -58,7 +59,7 @@ final class SaasConfiguration implements PlatformConfigurationInterface
                                     ->cannotBeEmpty()
                                     ->info(sprintf('The class name of the subscription entity. Must implement %s', SubscribableInterface::class))
                                     ->validate()
-                                        ->ifTrue(fn ($v): bool => ! is_subclass_of($v, SubscribableInterface::class))
+                                        ->ifTrue(static fn (mixed $v): bool => ! is_string($v) || ! is_subclass_of($v, SubscribableInterface::class))
                                         ->thenInvalid(sprintf('The subscription entity must implement %s', SubscribableInterface::class))
                                     ->end()
                                 ->end()
@@ -71,7 +72,7 @@ final class SaasConfiguration implements PlatformConfigurationInterface
                                     ->defaultNull()
                                     ->info(sprintf('The class name of the user entity for trial tracking. Must implement %s', TrialUserInterface::class))
                                     ->validate()
-                                        ->ifTrue(fn ($v): bool => $v !== null && ! is_subclass_of($v, TrialUserInterface::class))
+                                        ->ifTrue(static fn (mixed $v): bool => $v !== null && (! is_string($v) || ! is_subclass_of($v, TrialUserInterface::class)))
                                         ->thenInvalid(sprintf('The trial user entity must implement %s', TrialUserInterface::class))
                                     ->end()
                                 ->end()
@@ -87,7 +88,7 @@ final class SaasConfiguration implements PlatformConfigurationInterface
                                             ->defaultValue(Plan::TABLE_NAME)
                                             ->info('The table name for the Plan entity')
                                             ->validate()
-                                                ->ifTrue(fn ($value): bool => in_array(preg_match('/^(?!\d)[A-Za-z_][A-Za-z0-9_$#]{0,64}$/u', (string) $value), [0, false], true))
+                                                ->ifTrue(static fn (mixed $value): bool => ! is_string($value) || in_array(preg_match('/^(?!\d)[A-Za-z_][A-Za-z0-9_$#]{0,64}$/u', $value), [0, false], true))
                                                 ->thenInvalid('The table name is not valid')
                                             ->end()
                                         ->end()
@@ -95,7 +96,7 @@ final class SaasConfiguration implements PlatformConfigurationInterface
                                             ->defaultValue(Subscription::TABLE_NAME)
                                             ->info('The table name for the Subscription entity')
                                             ->validate()
-                                                ->ifTrue(fn ($value): bool => in_array(preg_match('/^(?!\d)[A-Za-z_][A-Za-z0-9_$#]{0,64}$/u', (string) $value), [0, false], true))
+                                                ->ifTrue(static fn (mixed $value): bool => ! is_string($value) || in_array(preg_match('/^(?!\d)[A-Za-z_][A-Za-z0-9_$#]{0,64}$/u', $value), [0, false], true))
                                                 ->thenInvalid('The table name is not valid')
                                             ->end()
                                         ->end()
@@ -103,7 +104,7 @@ final class SaasConfiguration implements PlatformConfigurationInterface
                                             ->defaultValue(SubscriptionLog::TABLE_NAME)
                                             ->info('The table name for the Subscription logs entity')
                                             ->validate()
-                                                ->ifTrue(fn ($value): bool => in_array(preg_match('/^(?!\d)[A-Za-z_][A-Za-z0-9_$#]{0,64}$/u', (string) $value), [0, false], true))
+                                                ->ifTrue(static fn (mixed $value): bool => ! is_string($value) || in_array(preg_match('/^(?!\d)[A-Za-z_][A-Za-z0-9_$#]{0,64}$/u', $value), [0, false], true))
                                                 ->thenInvalid('The table name is not valid')
                                             ->end()
                                         ->end()
@@ -111,7 +112,7 @@ final class SaasConfiguration implements PlatformConfigurationInterface
                                             ->defaultValue(PlanFeature::TABLE_NAME)
                                             ->info('The table name for the Plan Feature entity')
                                             ->validate()
-                                                ->ifTrue(fn ($value): bool => in_array(preg_match('/^(?!\d)[A-Za-z_][A-Za-z0-9_$#]{0,64}$/u', (string) $value), [0, false], true))
+                                                ->ifTrue(static fn (mixed $value): bool => ! is_string($value) || in_array(preg_match('/^(?!\d)[A-Za-z_][A-Za-z0-9_$#]{0,64}$/u', $value), [0, false], true))
                                                 ->thenInvalid('The table name is not valid')
                                             ->end()
                                         ->end()
@@ -119,7 +120,7 @@ final class SaasConfiguration implements PlatformConfigurationInterface
                                             ->defaultValue(Trial::TABLE_NAME)
                                             ->info('The table name for the Trial entity')
                                             ->validate()
-                                                ->ifTrue(fn ($value): bool => in_array(preg_match('/^(?!\d)[A-Za-z_][A-Za-z0-9_$#]{0,64}$/u', (string) $value), [0, false], true))
+                                                ->ifTrue(static fn (mixed $value): bool => ! is_string($value) || in_array(preg_match('/^(?!\d)[A-Za-z_][A-Za-z0-9_$#]{0,64}$/u', $value), [0, false], true))
                                                 ->thenInvalid('The table name is not valid')
                                             ->end()
                                         ->end()

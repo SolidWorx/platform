@@ -29,7 +29,7 @@ final readonly class PlanIdSubscriber
     public function prePersist(Plan $plan): void
     {
         if ($plan->getPlanId() === '') {
-            $plan->setPlanId(strtolower($this->slugger->slug($plan->getName())));
+            $plan->setPlanId($this->slugger->slug($plan->getName())->lower()->toString());
         }
     }
 }

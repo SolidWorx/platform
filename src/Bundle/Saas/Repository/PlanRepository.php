@@ -19,6 +19,11 @@ use Override;
 use SolidWorx\Platform\PlatformBundle\Repository\EntityRepository;
 use SolidWorx\Platform\SaasBundle\Entity\Plan;
 use Symfony\Component\Uid\Ulid;
+use function array_filter;
+use function array_values;
+use function is_array;
+use function is_iterable;
+use function iterator_to_array;
 
 /**
  * @template-extends EntityRepository<Plan>
@@ -66,7 +71,7 @@ class PlanRepository extends EntityRepository implements PlanRepositoryInterface
             return $default;
         }
 
-        return $this->createQueryBuilder('p')
+        $fallback = $this->createQueryBuilder('p')
             ->where('p.active = :active')
             ->setParameter('active', true)
             ->orderBy('p.price', 'ASC')
@@ -74,6 +79,8 @@ class PlanRepository extends EntityRepository implements PlanRepositoryInterface
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
+
+        return $fallback instanceof Plan ? $fallback : null;
     }
 
     /**
@@ -81,12 +88,21 @@ class PlanRepository extends EntityRepository implements PlanRepositoryInterface
      */
     public function findAllOrdered(): array
     {
-        return $this->createQueryBuilder('p')
+        $result = $this->createQueryBuilder('p')
             ->where('p.active = :active')
             ->setParameter('active', true)
             ->orderBy('p.price', 'ASC')
             ->addOrderBy('p.name', 'ASC')
             ->getQuery()
             ->getResult();
+
+        if (! is_iterable($result)) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            is_array($result) ? $result : iterator_to_array($result),
+            static fn (mixed $plan): bool => $plan instanceof Plan,
+        ));
     }
 }
