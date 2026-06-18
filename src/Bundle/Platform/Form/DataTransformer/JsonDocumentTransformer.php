@@ -20,15 +20,10 @@ use JsonException;
 use Override;
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
-
 use function in_array;
 use function is_array;
 use function is_string;
 use function sprintf;
-
-use const JSON_THROW_ON_ERROR;
-use const JSON_UNESCAPED_SLASHES;
-use const JSON_UNESCAPED_UNICODE;
 
 /**
  * Validates and sanitizes a Tiptap (ProseMirror) JSON document.
