@@ -25,7 +25,7 @@ use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Bundle\BundleInterface;
+use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
@@ -71,6 +71,17 @@ abstract class Kernel extends BaseKernel
         parent::boot();
     }
 
+    #[Override]
+    public function handle(Request $request, int $type = HttpKernelInterface::MAIN_REQUEST, bool $catch = true): Response
+    {
+        $this->processPlatformConfig();
+
+        return parent::handle($request, $type, $catch);
+    }
+
+    /**
+     * @return iterable<Bundle>
+     */
     #[Override]
     public function registerBundles(): iterable
     {
@@ -217,7 +228,8 @@ abstract class Kernel extends BaseKernel
         $configFiles = [];
 
         if (defined('GLOB_BRACE')) {
-            $configFiles = glob($glob, GLOB_BRACE) ?: [];
+            $globResult = glob($glob, GLOB_BRACE);
+            $configFiles = $globResult !== false ? $globResult : [];
         } else {
             foreach (['yml', 'yaml', 'json', 'php'] as $ext) {
                 $candidate = $this->getProjectDir() . '/platform.' . $ext;

@@ -108,11 +108,12 @@ final class AddGenericMethodPhpDocRector extends AbstractRector
         return [ClassMethod::class];
     }
 
-    /**
-     * @param ClassMethod $node
-     */
     public function refactor(Node $node): ?Node
     {
+        if (! $node instanceof ClassMethod) {
+            return null;
+        }
+
         $hasChanged = false;
 
         if ($this->processReturnType($node)) {
@@ -279,7 +280,7 @@ final class AddGenericMethodPhpDocRector extends AbstractRector
     private function rawCommentsContainGenericReturn(ClassMethod $node): bool
     {
         foreach ($node->getComments() as $comment) {
-            if (preg_match('/@return\s+[^<]*</', $comment->getText())) {
+            if (preg_match('/@return\s+[^<]*</', $comment->getText()) === 1) {
                 return true;
             }
         }
@@ -294,7 +295,7 @@ final class AddGenericMethodPhpDocRector extends AbstractRector
             return false;
         }
 
-        $fileContent = $this->file->getFileContent();
+        $fileContent = $this->getFile()->getFileContent();
         $lines = explode("\n", $fileContent);
         $searchStart = max(0, $startLine - 5);
         $searchEnd = min(\count($lines), $startLine + 3);
@@ -327,7 +328,7 @@ final class AddGenericMethodPhpDocRector extends AbstractRector
     {
         $escapedName = preg_quote($paramName, '/');
         foreach ($node->getComments() as $comment) {
-            if (preg_match('/@param\s+[^<]*<[^>]+>\s+' . $escapedName . '/', $comment->getText())) {
+            if (preg_match('/@param\s+[^<]*<[^>]+>\s+' . $escapedName . '/', $comment->getText()) === 1) {
                 return true;
             }
         }
