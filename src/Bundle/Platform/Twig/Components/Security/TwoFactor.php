@@ -202,10 +202,10 @@ final class TwoFactor extends AbstractController
         $this->trustedDeviceTokenStorage->clearTrustedToken($user->getUserIdentifier(), 'main');
     }
 
-    #[Override]
     /**
-     * @return \Symfony\Component\Form\FormInterface<array{code: string|null, secret: string|null}>
+     * @return \Symfony\Component\Form\FormInterface<mixed>
      */
+    #[Override]
     protected function instantiateForm(): FormInterface
     {
         return $this->createForm(TwoFactorVerifyType::class, [

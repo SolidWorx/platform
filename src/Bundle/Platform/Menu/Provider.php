@@ -19,6 +19,7 @@ use Knp\Menu\Provider\MenuProviderInterface;
 use Override;
 use SplPriorityQueue;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use function is_string;
 
 final class Provider implements MenuProviderInterface
 {
@@ -96,7 +97,7 @@ final class Provider implements MenuProviderInterface
     {
         foreach ($item->getChildren() as $child) {
             $role = $child->getExtra('role');
-            if ($role && ! $this->authorizationChecker->isGranted($role)) {
+            if (is_string($role) && $role !== '' && ! $this->authorizationChecker->isGranted($role)) {
                 $item->removeChild($child);
             } else {
                 $this->removeItems($child);

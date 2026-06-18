@@ -17,14 +17,16 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Enum\Flash;
 use SolidWorx\Platform\PlatformBundle\Response\RedirectResponse;
-use Symfony\Component\HttpFoundation\RedirectResponse as BaseRedirectResponse;
 
 #[CoversClass(RedirectResponse::class)]
 final class RedirectResponseTest extends TestCase
 {
-    public function testExtendsBaseRedirectResponse(): void
+    public function testBehavesAsABaseRedirectResponse(): void
     {
-        self::assertInstanceOf(BaseRedirectResponse::class, new RedirectResponse('/some-url'));
+        $response = new RedirectResponse('/some-url');
+
+        self::assertSame('/some-url', $response->getTargetUrl());
+        self::assertSame(302, $response->getStatusCode());
     }
 
     public function testStartsWithNoFlashes(): void
