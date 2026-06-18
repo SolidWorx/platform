@@ -97,11 +97,12 @@ final class EnforcePlatformEntityRepositoryRector extends AbstractRector
         return [Class_::class];
     }
 
-    /**
-     * @param Class_ $node
-     */
     public function refactor(Node $node): ?Node
     {
+        if (! $node instanceof Class_) {
+            return null;
+        }
+
         if ($node->extends === null) {
             return null;
         }
@@ -185,7 +186,8 @@ final class EnforcePlatformEntityRepositoryRector extends AbstractRector
 
         $reflection = new ReflectionClass($classFqn);
 
-        while ($reflection = $reflection->getParentClass()) {
+        while (($parent = $reflection->getParentClass()) !== false) {
+            $reflection = $parent;
             if ($reflection->getName() === PlatformEntityRepository::class) {
                 return true;
             }

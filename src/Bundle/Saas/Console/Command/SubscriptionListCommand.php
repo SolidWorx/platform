@@ -69,19 +69,22 @@ final class SubscriptionListCommand extends Command
             return self::FAILURE;
         }
 
-        if ($this->io->getOption('latest') && $this->io->getOption('ending-soon')) {
+        $latest = $this->io->getOption('latest') === true;
+        $endingSoon = $this->io->getOption('ending-soon') === true;
+
+        if ($latest && $endingSoon) {
             $this->io->error('You cannot use both --latest and --ending-soon options together.');
             return self::FAILURE;
         }
 
-        if ($this->io->getOption('latest')) {
+        if ($latest) {
             $criteria->andWhere($expr->gte('startDate', CarbonImmutable::now()->subDays(30)->startOfDay()));
             $criteria->orderBy([
                 'startDate' => Order::Descending,
             ]);
         }
 
-        if ($this->io->getOption('ending-soon')) {
+        if ($endingSoon) {
             $criteria->andWhere($expr->lte('endDate', CarbonImmutable::now()->addDays(7)->endOfDay()));
             $criteria->orderBy([
                 'endDate' => Order::Ascending,

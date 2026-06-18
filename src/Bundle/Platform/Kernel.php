@@ -24,7 +24,7 @@ use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigState;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Bundle\BundleInterface;
+use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
@@ -73,11 +73,14 @@ abstract class Kernel extends BaseKernel
         return parent::handle($request, $type, $catch);
     }
 
+    /**
+     * @return iterable<Bundle>
+     */
     #[Override]
     public function registerBundles(): iterable
     {
         foreach ($this->registerBundlesTrait() as $bundle) {
-            if ($bundle instanceof BundleInterface) {
+            if ($bundle instanceof Bundle) {
                 yield $bundle;
             }
         }
@@ -220,7 +223,8 @@ abstract class Kernel extends BaseKernel
         $configFiles = [];
 
         if (defined('GLOB_BRACE')) {
-            $configFiles = glob($glob, GLOB_BRACE) ?: [];
+            $globResult = glob($glob, GLOB_BRACE);
+            $configFiles = $globResult !== false ? $globResult : [];
         } else {
             foreach (['yml', 'yaml', 'json', 'php'] as $ext) {
                 $candidate = $this->getProjectDir() . '/platform.' . $ext;

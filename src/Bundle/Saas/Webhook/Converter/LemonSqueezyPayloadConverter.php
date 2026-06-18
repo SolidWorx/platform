@@ -45,13 +45,14 @@ final readonly class LemonSqueezyPayloadConverter implements PayloadConverterInt
     }
 
     /**
-     * @param array<string, mixed> $payload
+     * @param array<array-key, mixed> $payload
      *
      * @throws ExceptionInterface
      */
     #[Override]
     public function convert(array $payload): RemoteEvent
     {
+        $payload = $this->stringKeyed($payload);
         $data = $this->arrayValue($payload, 'data');
         $meta = $this->arrayValue($payload, 'meta');
 
@@ -94,6 +95,24 @@ final readonly class LemonSqueezyPayloadConverter implements PayloadConverterInt
         }
 
         throw new ParseException(sprintf('Unsupported type: %s', $type));
+    }
+
+    /**
+     * Normalise an arbitrary array into a string-keyed map.
+     *
+     * @param array<array-key, mixed> $payload
+     *
+     * @return array<string, mixed>
+     */
+    private function stringKeyed(array $payload): array
+    {
+        $result = [];
+
+        foreach ($payload as $key => $value) {
+            $result[(string) $key] = $value;
+        }
+
+        return $result;
     }
 
     /**

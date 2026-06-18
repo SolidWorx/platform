@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Form\Type\Security;
 
+use InvalidArgumentException;
 use Override;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -21,17 +22,25 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use function is_string;
 
+/**
+ * @extends AbstractType<mixed>
+ */
 final class LoginType extends AbstractType
 {
-    /**
-     * @param array{username_parameter: string, password_parameter: string} $options
-     */
     #[Override]
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $usernameParameter = $options['username_parameter'];
+        $passwordParameter = $options['password_parameter'];
+
+        if (! is_string($usernameParameter) || ! is_string($passwordParameter)) {
+            throw new InvalidArgumentException('The "username_parameter" and "password_parameter" options must be strings.');
+        }
+
         $builder
-            ->add($options['username_parameter'], EmailType::class, [
+            ->add($usernameParameter, EmailType::class, [
                 'label' => 'Email address',
                 'placeholder' => 'your@email.com',
                 'required' => true,
@@ -47,7 +56,7 @@ final class LoginType extends AbstractType
                 ],
             ]);
 
-        $builder->add($options['password_parameter'], PasswordType::class, [
+        $builder->add($passwordParameter, PasswordType::class, [
             'label' => 'Password',
             'required' => true,
             'attr' => [

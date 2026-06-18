@@ -16,7 +16,6 @@ namespace SolidWorx\Platform\Tests\Bundle\Saas\Config\Builder;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\SaasBundle\Config\Builder\SaasConfigBuilder;
-use SolidWorx\Platform\SaasBundle\Config\Builder\SaasPaymentConfigBuilder;
 
 #[CoversClass(SaasConfigBuilder::class)]
 final class SaasConfigBuilderTest extends TestCase
@@ -101,7 +100,6 @@ final class SaasConfigBuilderTest extends TestCase
         $builder = SaasConfigBuilder::create();
         $paymentBuilder = $builder->payment();
 
-        self::assertInstanceOf(SaasPaymentConfigBuilder::class, $paymentBuilder);
         self::assertSame($builder, $paymentBuilder->end());
     }
 

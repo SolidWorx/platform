@@ -16,7 +16,6 @@ namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Config\Builder;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Config\Builder\PlatformConfigBuilder;
-use SolidWorx\Platform\PlatformBundle\Config\Builder\SecurityConfigBuilder;
 
 #[CoversClass(PlatformConfigBuilder::class)]
 final class PlatformConfigBuilderTest extends TestCase
@@ -118,7 +117,6 @@ final class PlatformConfigBuilderTest extends TestCase
         $builder = PlatformConfigBuilder::create();
         $securityBuilder = $builder->security();
 
-        self::assertInstanceOf(SecurityConfigBuilder::class, $securityBuilder);
         self::assertSame($builder, $securityBuilder->end());
     }
 

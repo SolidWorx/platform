@@ -109,7 +109,7 @@ trait UserTwoFactor
             return true;
         }
 
-        return (bool) $this->isEmailAuthEnabled();
+        return $this->isEmailAuthEnabled();
     }
 
     public function getTrustedTokenVersion(): int
@@ -145,7 +145,7 @@ trait UserTwoFactor
     /**
      * @return list<string>
      */
-    public function getBackUpCodes(): array
+    public function getBackupCodes(): array
     {
         return $this->backupCodes ?? [];
     }

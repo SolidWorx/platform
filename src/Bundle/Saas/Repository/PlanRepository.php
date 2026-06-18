@@ -18,7 +18,6 @@ use Doctrine\Persistence\ManagerRegistry;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Repository\EntityRepository;
 use SolidWorx\Platform\SaasBundle\Entity\Plan;
-use Symfony\Component\Uid\Ulid;
 use function array_filter;
 use function array_values;
 use function is_array;
@@ -35,19 +34,20 @@ class PlanRepository extends EntityRepository implements PlanRepositoryInterface
         parent::__construct($registry, Plan::class);
     }
 
-    /**
-     * @param string|Plan|Ulid $id
-     */
     #[Override]
     public function find(mixed $id, LockMode|int|null $lockMode = null, int|null $lockVersion = null): ?Plan
     {
-        return match (get_debug_type($id)) {
-            Plan::class => $id,
-            'string' => $this->findOneBy([
+        if ($id instanceof Plan) {
+            return $id;
+        }
+
+        if (is_string($id)) {
+            return $this->findOneBy([
                 'planId' => $id,
-            ]),
-            default => parent::find($id, $lockMode, $lockVersion),
-        };
+            ]);
+        }
+
+        return parent::find($id, $lockMode, $lockVersion);
     }
 
     /**

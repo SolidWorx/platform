@@ -172,11 +172,12 @@ final class AddGenericTemplateExtendsRector extends AbstractRector
         return [Class_::class];
     }
 
-    /**
-     * @param Class_ $node
-     */
     public function refactor(Node $node): ?Node
     {
+        if (! $node instanceof Class_) {
+            return null;
+        }
+
         if ($node->extends === null) {
             return null;
         }
