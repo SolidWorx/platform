@@ -10,5 +10,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6.0.3
+      - uses: shivammathur/setup-php@v2
+        with:
+          coverage: "none"
+          php-version-file: ".php-version"
       - uses: "ramsey/composer-install@v4"
       - uses: symfonycorp/security-checker-action@v5
