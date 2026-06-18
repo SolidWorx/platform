@@ -7,7 +7,7 @@
 ### Core Technologies
 - **Backend:** PHP 8.3+, Symfony 7.2+
 - **Database:** Doctrine ORM
-- **Frontend:** TypeScript, SCSS, Webpack Encore
+- **Frontend:** JavaScript, SCSS, Webpack Encore
 - **UI Framework:** Tabler (based on Bootstrap 5)
 - **Interactivity:** Hotwired Stimulus
 - **Testing:** PHPUnit 12
@@ -81,9 +81,10 @@ The frontend is decoupled from the backend logic but integrated via Webpack Enco
 -   **Build:** Run `bun run build` in the `assets/` directory.
 
 ### Creating a New Stimulus Controller
-1.  Create file in `assets/controllers/my_feature_controller.ts` (Prefer TypeScript controllers as much as possible). 
+1.  Create file in `assets/controllers/my_feature_controller.js` (**must be `.js`, not `.ts`** — controllers are distributed via npm and consumed by 3rd-party apps that do not process TypeScript from `node_modules`).
 2.  Extend `Controller` from `@hotwired/stimulus`.
-3.  Register is automatic if using Symfony UX, otherwise ensure it's picked up by `assets/controllers.json` or `package.json`.
+3.  Use native ES2022 private fields (`#field`) instead of TypeScript `private`.
+4.  Register is automatic if using Symfony UX, otherwise ensure it's picked up by `assets/controllers.json` or `package.json`.
 
 ## 5. Workflow for Agents
 

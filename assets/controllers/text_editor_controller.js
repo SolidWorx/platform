@@ -4,11 +4,6 @@ import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 
-interface CommandDefinition {
-    run: (editor: Editor) => void;
-    active: (editor: Editor) => boolean;
-}
-
 /**
  * Behaviour for the platform TextEditorType.
  *
@@ -17,7 +12,7 @@ interface CommandDefinition {
  * re-sanitized server-side, so this controller only handles presentation and convenience.
  */
 /* stimulusFetch: 'lazy' */
-export default class extends Controller<HTMLElement> {
+export default class extends Controller {
     static targets = ['input', 'editor', 'toolbar'];
 
     static values = {
@@ -26,17 +21,9 @@ export default class extends Controller<HTMLElement> {
         height: { type: String, default: '' },
     };
 
-    declare readonly inputTarget: HTMLTextAreaElement;
-    declare readonly editorTarget: HTMLElement;
-    declare readonly hasToolbarTarget: boolean;
-    declare readonly toolbarTarget: HTMLElement;
-    declare readonly outputFormatValue: string;
-    declare readonly placeholderValue: string;
-    declare readonly heightValue: string;
+    #editor = null;
 
-    private editor: Editor | null = null;
-
-    private readonly commands: Record<string, CommandDefinition> = {
+    #commands = {
         bold: { run: (e) => e.chain().focus().toggleBold().run(), active: (e) => e.isActive('bold') },
         italic: { run: (e) => e.chain().focus().toggleItalic().run(), active: (e) => e.isActive('italic') },
         strike: { run: (e) => e.chain().focus().toggleStrike().run(), active: (e) => e.isActive('strike') },
@@ -49,57 +36,55 @@ export default class extends Controller<HTMLElement> {
         code: { run: (e) => e.chain().focus().toggleCode().run(), active: (e) => e.isActive('code') },
         codeBlock: { run: (e) => e.chain().focus().toggleCodeBlock().run(), active: (e) => e.isActive('codeBlock') },
         horizontalRule: { run: (e) => e.chain().focus().setHorizontalRule().run(), active: () => false },
-        link: { run: (e) => this.toggleLink(e), active: (e) => e.isActive('link') },
+        link: { run: (e) => this.#toggleLink(e), active: (e) => e.isActive('link') },
         undo: { run: (e) => e.chain().focus().undo().run(), active: () => false },
         redo: { run: (e) => e.chain().focus().redo().run(), active: () => false },
     };
 
-    connect(): void {
+    connect() {
         const isJson = this.outputFormatValue === 'json';
 
-        this.editor = new Editor({
+        this.#editor = new Editor({
             element: this.editorTarget,
             extensions: [
-                // StarterKit (v2) bundles formatting, lists, blockquote, code, history, etc. but not Link.
                 StarterKit,
                 Link.configure({ openOnClick: false, autolink: true }),
                 Placeholder.configure({ placeholder: this.placeholderValue }),
             ],
-            content: this.initialContent(isJson),
-            onUpdate: () => this.sync(),
-            onTransaction: () => this.refreshToolbar(),
+            content: this.#initialContent(isJson),
+            onUpdate: () => this.#sync(),
+            onTransaction: () => this.#refreshToolbar(),
         });
 
-        if (this.heightValue !== '' && this.editor !== null) {
-            this.editor.view.dom.style.minHeight = this.heightValue;
+        if (this.heightValue !== '' && this.#editor !== null) {
+            this.#editor.view.dom.style.minHeight = this.heightValue;
         }
 
-        // The textarea is now driven by the editor; hide it and let the server enforce "required".
         this.inputTarget.classList.add('d-none');
         this.inputTarget.required = false;
         this.inputTarget.setAttribute('aria-hidden', 'true');
         this.inputTarget.tabIndex = -1;
 
-        this.refreshToolbar();
+        this.#refreshToolbar();
     }
 
-    disconnect(): void {
-        this.editor?.destroy();
-        this.editor = null;
+    disconnect() {
+        this.#editor?.destroy();
+        this.#editor = null;
     }
 
-    run(event: Event): void {
-        const button = (event.currentTarget as HTMLElement).closest<HTMLElement>('[data-editor-command]');
+    run(event) {
+        const button = event.currentTarget.closest('[data-editor-command]');
         const command = button?.dataset.editorCommand;
 
-        if (this.editor === null || command === undefined || this.commands[command] === undefined) {
+        if (this.#editor === null || command === undefined || this.#commands[command] === undefined) {
             return;
         }
 
-        this.commands[command].run(this.editor);
+        this.#commands[command].run(this.#editor);
     }
 
-    private initialContent(isJson: boolean): string | Record<string, unknown> {
+    #initialContent(isJson) {
         const raw = this.inputTarget.value.trim();
 
         if (raw === '') {
@@ -111,44 +96,44 @@ export default class extends Controller<HTMLElement> {
         }
 
         try {
-            return JSON.parse(raw) as Record<string, unknown>;
+            return JSON.parse(raw);
         } catch {
             return '';
         }
     }
 
-    private sync(): void {
-        if (this.editor === null) {
+    #sync() {
+        if (this.#editor === null) {
             return;
         }
 
         if (this.outputFormatValue === 'json') {
-            this.inputTarget.value = this.editor.isEmpty ? '' : JSON.stringify(this.editor.getJSON());
+            this.inputTarget.value = this.#editor.isEmpty ? '' : JSON.stringify(this.#editor.getJSON());
         } else {
-            this.inputTarget.value = this.editor.isEmpty ? '' : this.editor.getHTML();
+            this.inputTarget.value = this.#editor.isEmpty ? '' : this.#editor.getHTML();
         }
 
         this.inputTarget.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
-    private refreshToolbar(): void {
-        if (this.editor === null || !this.hasToolbarTarget) {
+    #refreshToolbar() {
+        if (this.#editor === null || !this.hasToolbarTarget) {
             return;
         }
 
-        const editor = this.editor;
+        const editor = this.#editor;
 
-        this.toolbarTarget.querySelectorAll<HTMLElement>('[data-editor-command]').forEach((button) => {
+        this.toolbarTarget.querySelectorAll('[data-editor-command]').forEach((button) => {
             const command = button.dataset.editorCommand;
 
-            if (command !== undefined && this.commands[command] !== undefined) {
-                button.classList.toggle('active', this.commands[command].active(editor));
+            if (command !== undefined && this.#commands[command] !== undefined) {
+                button.classList.toggle('active', this.#commands[command].active(editor));
             }
         });
     }
 
-    private toggleLink(editor: Editor): void {
-        const previous = (editor.getAttributes('link').href as string | undefined) ?? '';
+    #toggleLink(editor) {
+        const previous = editor.getAttributes('link').href ?? '';
         const url = window.prompt('Enter a URL (leave empty to remove the link)', previous);
 
         if (url === null) {

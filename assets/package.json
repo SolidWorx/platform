@@ -29,7 +29,7 @@
         "enabled": true
       },
       "text-editor": {
-        "main": "controllers/text_editor_controller.ts",
+        "main": "controllers/text_editor_controller.js",
         "webpackMode": "lazy",
         "fetch": "lazy",
         "enabled": true
