@@ -5,7 +5,7 @@
 **SolidWorx Platform** is a modular, enterprise-grade application platform built on Symfony. It provides the foundational building blocks for SaaS applications, including Authentication, Multi-Factor Authentication (2FA), User Management, Subscription Management (SaaS), and a unified UI system.
 
 ### Core Technologies
-- **Backend:** PHP 8.3+, Symfony 7.2+
+- **Backend:** PHP 8.4+, Symfony 8.1+
 - **Database:** Doctrine ORM
 - **Frontend:** JavaScript, SCSS, Webpack Encore
 - **UI Framework:** Tabler (based on Bootstrap 5)
@@ -51,7 +51,7 @@ The project is organized as a Monorepo of Symfony Bundles located in `src/Bundle
 ### PHP Standards
 1.  **Strict Types:** Every PHP file **MUST** start with `declare(strict_types=1);`.
 2.  **Header Comment:** Every PHP file **MUST** include the standard file header (see `ecs.php` for the template).
-3.  **Modern PHP:** Use PHP 8.3+ features (Constructor Property Promotion, Readonly properties, Enums, Attributes).
+3.  **Modern PHP:** Use PHP 8.4+ features (Constructor Property Promotion, Readonly properties, Enums, Attributes).
 4.  **Attributes:** Prefer PHP Attributes over Annotations or YAML/XML configuration (e.g., `#[Route]`, `#[Entity]`, `#[MenuBuilder]`).
 5.  **Return Types:** All methods and functions **MUST** have declared return types (use `void` if nothing is returned).
 6.  **Type Hinting:** Use strict type hinting for all arguments.
