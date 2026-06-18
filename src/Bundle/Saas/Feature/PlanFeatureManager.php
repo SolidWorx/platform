@@ -15,14 +15,14 @@ namespace SolidWorx\Platform\SaasBundle\Feature;
 
 use InvalidArgumentException;
 use Override;
+use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
+use SolidWorx\Platform\PlatformBundle\Feature\FeatureValue;
+use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use SolidWorx\Platform\SaasBundle\Entity\Plan;
 use SolidWorx\Platform\SaasBundle\Entity\PlanFeature;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
-use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
-use SolidWorx\Platform\PlatformBundle\Feature\FeatureValue;
 use SolidWorx\Platform\SaasBundle\Exception\UndefinedFeatureException;
 use SolidWorx\Platform\SaasBundle\Repository\PlanFeatureRepositoryInterface;
-use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use SolidWorx\Platform\SaasBundle\Subscription\SubscriptionProviderInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Service\ResetInterface;

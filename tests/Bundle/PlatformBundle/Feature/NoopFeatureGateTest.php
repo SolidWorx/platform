@@ -71,6 +71,6 @@ final class NoopFeatureGateTest extends TestCase
 
     private function subscriber(): SubscribableInterface
     {
-        return new class implements SubscribableInterface {};
+        return new class() implements SubscribableInterface {};
     }
 }

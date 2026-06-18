@@ -56,8 +56,6 @@ return ECSConfig::configure()
         spaces: true,
         namespaces: true,
         controlStructures: true,
-        phpunit: true,
-        strict: true,
         cleanCode: true,
     )
     ->withRules([

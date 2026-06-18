@@ -13,36 +13,15 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\Tools\Rector\Rules;
 
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\SearchType;
-use Symfony\Component\Form\Extension\Core\Type\UrlType;
-use Symfony\Component\Form\Extension\Core\Type\TelType;
-use Symfony\Component\Form\Extension\Core\Type\ColorType;
-use Symfony\Component\Form\Extension\Core\Type\MoneyType;
-use Symfony\Component\Form\Extension\Core\Type\RangeType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
-use Symfony\Component\Form\Extension\Core\Type\PercentType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\EnumType;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use PhpParser\Node\Expr\ConstFetch;
-use PhpParser\Node\Expr;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
-use ReflectionException;
-use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use PhpParser\Node;
 use PhpParser\Node\Arg;
+use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Expr\ArrayItem;
 use PhpParser\Node\Expr\ClassConstFetch;
+use PhpParser\Node\Expr\ConstFetch;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Identifier;
@@ -55,17 +34,36 @@ use PHPStan\PhpDocParser\Ast\PhpDoc\ExtendsTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagNode;
 use PHPStan\PhpDocParser\Ast\Type\ArrayShapeItemNode;
 use PHPStan\PhpDocParser\Ast\Type\ArrayShapeNode;
-use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
-use PHPStan\PhpDocParser\Ast\Type\NullableTypeNode as PhpDocNullableTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
-use ReflectionClass;
 use Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfo;
 use Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfoFactory;
 use Rector\Comments\NodeDocBlock\DocBlockUpdater;
 use Rector\Rector\AbstractRector;
+use ReflectionClass;
+use ReflectionException;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\ColorType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\MoneyType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\PercentType;
+use Symfony\Component\Form\Extension\Core\Type\RangeType;
+use Symfony\Component\Form\Extension\Core\Type\SearchType;
+use Symfony\Component\Form\Extension\Core\Type\TelType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
+use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 
@@ -145,7 +143,8 @@ final class AddGenericTemplateExtendsRector extends AbstractRector
                             parent::__construct($registry, Plan::class);
                         }
                     }
-                    CODE_SAMPLE,
+                    CODE_SAMPLE
+                ,
                 <<<'CODE_SAMPLE'
                     use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
                     use Doctrine\Persistence\ManagerRegistry;
@@ -160,7 +159,8 @@ final class AddGenericTemplateExtendsRector extends AbstractRector
                             parent::__construct($registry, Plan::class);
                         }
                     }
-                    CODE_SAMPLE,
+                    CODE_SAMPLE
+                ,
             )],
         );
     }
@@ -369,7 +369,7 @@ final class AddGenericTemplateExtendsRector extends AbstractRector
             return null;
         }
 
-        $parentConstructCall = $this->nodeFinder->findFirst((array) $constructor->stmts, static fn(Node $sub): bool => $sub instanceof StaticCall
+        $parentConstructCall = $this->nodeFinder->findFirst((array) $constructor->stmts, static fn (Node $sub): bool => $sub instanceof StaticCall
             && $sub->class instanceof Name
             && $sub->class->isSpecialClassName()
             && $sub->class->toLowerString() === 'parent'
@@ -447,7 +447,7 @@ final class AddGenericTemplateExtendsRector extends AbstractRector
                 return null;
             }
 
-            if (!$item instanceof ArrayShapeItemNode) {
+            if (! $item instanceof ArrayShapeItemNode) {
                 continue;
             }
 
@@ -678,7 +678,7 @@ final class AddGenericTemplateExtendsRector extends AbstractRector
                 continue;
             }
 
-            if (!$item->key instanceof Expr) {
+            if (! $item->key instanceof Expr) {
                 continue;
             }
 
