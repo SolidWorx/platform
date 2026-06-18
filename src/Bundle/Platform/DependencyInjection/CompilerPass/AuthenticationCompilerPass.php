@@ -18,6 +18,9 @@ use SolidWorx\Platform\PlatformBundle\Routing\LoginPageRouteLoader;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use function is_array;
+use function is_iterable;
+use function is_string;
 
 final class AuthenticationCompilerPass implements CompilerPassInterface
 {
@@ -39,15 +42,28 @@ final class AuthenticationCompilerPass implements CompilerPassInterface
         $routeLoader = $container->getDefinition(LoginPageRouteLoader::class);
         $firewalls = $container->getParameter('security.firewalls');
 
+        if (! is_iterable($firewalls)) {
+            return;
+        }
+
         $authenticators = [];
 
         foreach ($firewalls as $firewall) {
+            if (! is_string($firewall)) {
+                continue;
+            }
+
             if (! $container->hasDefinition('security.authenticator.form_login.' . $firewall)) {
                 continue;
             }
 
             $authenticator = $container->getDefinition('security.authenticator.form_login.' . $firewall);
-            $authenticators[$firewall] = $authenticator->getArgument(4) + [
+            $options = $authenticator->getArgument(4);
+            if (! is_array($options)) {
+                continue;
+            }
+
+            $authenticators[$firewall] = $options + [
                 'remember_me_parameter' => null,
                 'always_remember_me' => false,
             ];
@@ -55,8 +71,10 @@ final class AuthenticationCompilerPass implements CompilerPassInterface
             if ($container->hasDefinition('security.authenticator.remember_me_handler.' . $firewall)) {
                 $rememberMeArguments = $container->getDefinition('security.authenticator.remember_me_handler.' . $firewall)->getArgument(3);
 
-                $authenticators[$firewall]['remember_me_parameter'] = $rememberMeArguments['remember_me_parameter'];
-                $authenticators[$firewall]['always_remember_me'] = $rememberMeArguments['always_remember_me'];
+                if (is_array($rememberMeArguments)) {
+                    $authenticators[$firewall]['remember_me_parameter'] = $rememberMeArguments['remember_me_parameter'] ?? null;
+                    $authenticators[$firewall]['always_remember_me'] = $rememberMeArguments['always_remember_me'] ?? false;
+                }
             }
         }
 

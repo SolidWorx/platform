@@ -26,6 +26,19 @@ use Symfony\Component\Routing\RouteCollection;
 ])]
 class LoginPageRouteLoader extends Loader
 {
+    /**
+     * @param iterable<string, array{
+     *     check_path: string,
+     *     login_path: string,
+     *     username_parameter: string,
+     *     password_parameter: string,
+     *     csrf_parameter: string,
+     *     csrf_token_id: string,
+     *     enable_csrf: bool,
+     *     remember_me_parameter: string|null,
+     *     always_remember_me: bool,
+     * }> $authenticators
+     */
     public function __construct(
         private readonly iterable $authenticators,
         ?string $env = null,
@@ -39,7 +52,7 @@ class LoginPageRouteLoader extends Loader
         $collection = new RouteCollection();
 
         foreach ($this->authenticators as $id => $authenticator) {
-            if (str_starts_with((string) $authenticator['check_path'], '/')) {
+            if (str_starts_with($authenticator['check_path'], '/')) {
                 $collection->add(
                     $checkPath = '_login_' . $id . '_check_path',
                     new Route(

@@ -13,11 +13,17 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\Repository;
 
+use Doctrine\DBAL\LockMode;
 use Doctrine\Persistence\ManagerRegistry;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Repository\EntityRepository;
 use SolidWorx\Platform\SaasBundle\Entity\Plan;
 use Symfony\Component\Uid\Ulid;
+use function array_filter;
+use function array_values;
+use function is_array;
+use function is_iterable;
+use function iterator_to_array;
 
 /**
  * @template-extends EntityRepository<Plan>
@@ -33,7 +39,7 @@ class PlanRepository extends EntityRepository implements PlanRepositoryInterface
      * @param string|Plan|Ulid $id
      */
     #[Override]
-    public function find(mixed $id, $lockMode = null, $lockVersion = null): ?Plan
+    public function find(mixed $id, LockMode|int|null $lockMode = null, int|null $lockVersion = null): ?Plan
     {
         return match (get_debug_type($id)) {
             Plan::class => $id,
@@ -65,7 +71,7 @@ class PlanRepository extends EntityRepository implements PlanRepositoryInterface
             return $default;
         }
 
-        return $this->createQueryBuilder('p')
+        $fallback = $this->createQueryBuilder('p')
             ->where('p.active = :active')
             ->setParameter('active', true)
             ->orderBy('p.price', 'ASC')
@@ -73,6 +79,8 @@ class PlanRepository extends EntityRepository implements PlanRepositoryInterface
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
+
+        return $fallback instanceof Plan ? $fallback : null;
     }
 
     /**
@@ -80,12 +88,21 @@ class PlanRepository extends EntityRepository implements PlanRepositoryInterface
      */
     public function findAllOrdered(): array
     {
-        return $this->createQueryBuilder('p')
+        $result = $this->createQueryBuilder('p')
             ->where('p.active = :active')
             ->setParameter('active', true)
             ->orderBy('p.price', 'ASC')
             ->addOrderBy('p.name', 'ASC')
             ->getQuery()
             ->getResult();
+
+        if (! is_iterable($result)) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            is_array($result) ? $result : iterator_to_array($result),
+            static fn (mixed $plan): bool => $plan instanceof Plan,
+        ));
     }
 }

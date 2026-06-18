@@ -21,6 +21,7 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
+use function is_array;
 
 final class MenuCompilerPass implements CompilerPassInterface
 {
@@ -37,6 +38,9 @@ final class MenuCompilerPass implements CompilerPassInterface
 
         foreach ($taggedServices as $id => $tagAttributes) {
             foreach ($tagAttributes as $attributes) {
+                if (! is_array($attributes)) {
+                    continue;
+                }
 
                 $wrapperDefinition = (new Definition(Closure::class))
                     ->addArgument([new Reference($id), $attributes['method']])

@@ -43,7 +43,6 @@ use Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfoFactory;
 use Rector\Comments\NodeDocBlock\DocBlockUpdater;
 use Rector\Rector\AbstractRector;
 use ReflectionClass;
-use ReflectionException;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -238,11 +237,11 @@ final class AddGenericTemplateExtendsRector extends AbstractRector
      */
     private function resolveGenericParentTemplateCount(string $parentFqn): ?int
     {
-        try {
-            $reflection = new ReflectionClass($parentFqn);
-        } catch (ReflectionException) {
+        if (! class_exists($parentFqn) && ! \interface_exists($parentFqn)) {
             return null;
         }
+
+        $reflection = new ReflectionClass($parentFqn);
 
         $templateCount = $this->countOwnTemplateTags($reflection);
         if ($templateCount > 0) {
@@ -252,6 +251,9 @@ final class AddGenericTemplateExtendsRector extends AbstractRector
         return self::GENERIC_PARENT_TEMPLATE_COUNT[$parentFqn] ?? null;
     }
 
+    /**
+     * @param ReflectionClass<object> $reflection
+     */
     private function countOwnTemplateTags(ReflectionClass $reflection): int
     {
         $docComment = $reflection->getDocComment();
@@ -259,16 +261,21 @@ final class AddGenericTemplateExtendsRector extends AbstractRector
             return 0;
         }
 
-        return preg_match_all('/^\s*\*\s*@template(?:-covariant|-contravariant)?\s+[A-Za-z_]\w*/m', $docComment);
+        $count = preg_match_all('/^\s*\*\s*@template(?:-covariant|-contravariant)?\s+[A-Za-z_]\w*/m', $docComment);
+        if ($count === false) {
+            return 0;
+        }
+
+        return $count;
     }
 
     private function findRootGenericAncestor(string $parentFqn): ?string
     {
-        try {
-            $reflection = new ReflectionClass($parentFqn);
-        } catch (ReflectionException) {
+        if (! class_exists($parentFqn) && ! \interface_exists($parentFqn)) {
             return null;
         }
+
+        $reflection = new ReflectionClass($parentFqn);
 
         while ($reflection !== false) {
             if (isset(self::GENERIC_PARENT_TEMPLATE_COUNT[$reflection->getName()])) {
@@ -501,7 +508,14 @@ final class AddGenericTemplateExtendsRector extends AbstractRector
         $fieldName = $nameArg->value->value;
 
         $typeArg = $call->args[1] ?? null;
+        if (! $typeArg instanceof Arg) {
+            $typeArg = null;
+        }
+
         $optionsArg = $call->args[2] ?? null;
+        if (! $optionsArg instanceof Arg) {
+            $optionsArg = null;
+        }
 
         if ($this->isFieldUnmapped($optionsArg)) {
             return null;

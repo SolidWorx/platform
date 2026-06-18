@@ -116,16 +116,28 @@ final class SaasConfigBuilder
     {
         $config = [];
 
+        $doctrine = [];
+
         if ($this->subscriptionEntity !== null) {
-            $config['doctrine']['subscriptions']['entity'] = $this->subscriptionEntity;
+            $doctrine['subscriptions'] = [
+                'entity' => $this->subscriptionEntity,
+            ];
         }
 
         if ($this->trialUserEntity !== null) {
-            $config['doctrine']['trial']['user_entity'] = $this->trialUserEntity;
+            $doctrine['trial'] = [
+                'user_entity' => $this->trialUserEntity,
+            ];
         }
 
         if ($this->tableNames !== []) {
-            $config['doctrine']['db_schema']['table_names'] = $this->tableNames;
+            $doctrine['db_schema'] = [
+                'table_names' => $this->tableNames,
+            ];
+        }
+
+        if ($doctrine !== []) {
+            $config['doctrine'] = $doctrine;
         }
 
         if ($this->payment instanceof SaasPaymentConfigBuilder) {
@@ -133,11 +145,13 @@ final class SaasConfigBuilder
         }
 
         if ($this->lemonSqueezyEnabled) {
-            $config['integration']['lemon_squeezy'] = [
-                'enabled' => true,
-                'api_key' => $this->lemonSqueezyApiKey,
-                'webhook_secret' => $this->lemonSqueezyWebhookSecret,
-                'store_id' => $this->lemonSqueezyStoreId,
+            $config['integration'] = [
+                'lemon_squeezy' => [
+                    'enabled' => true,
+                    'api_key' => $this->lemonSqueezyApiKey,
+                    'webhook_secret' => $this->lemonSqueezyWebhookSecret,
+                    'store_id' => $this->lemonSqueezyStoreId,
+                ],
             ];
         }
 

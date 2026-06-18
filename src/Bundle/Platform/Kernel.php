@@ -24,6 +24,7 @@ use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigState;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
@@ -34,7 +35,9 @@ use function defined;
 use function file_exists;
 use function glob;
 use function implode;
+use function is_array;
 use function is_file;
+use function is_string;
 use function pathinfo;
 use function sprintf;
 
@@ -73,11 +76,13 @@ abstract class Kernel extends BaseKernel
     #[Override]
     public function registerBundles(): iterable
     {
-        yield from $this->registerBundlesTrait();
+        foreach ($this->registerBundlesTrait() as $bundle) {
+            if ($bundle instanceof BundleInterface) {
+                yield $bundle;
+            }
+        }
 
-        $platformConfig = $this->rawConfig['platform'] ?? [];
-
-        if (($platformConfig['security']['two_factor']['enabled'] ?? false) === true) {
+        if ($this->isTwoFactorEnabled()) {
             yield new SchebTwoFactorBundle();
         }
 
@@ -106,7 +111,7 @@ abstract class Kernel extends BaseKernel
                 $section = $key !== ''
                     ? ($this->rawConfig[$key] ?? [])
                     : ($this->rawConfig['platform'] ?? []);
-                $bundle->setPlatformRawConfig($section);
+                $bundle->setPlatformRawConfig(self::toConfigArray($section));
             }
 
             $this->bundles[$name] = $bundle;
@@ -118,6 +123,26 @@ abstract class Kernel extends BaseKernel
         $this->configureRoutesTrait($routes);
 
         $routes->import('.', '_solidworx_platform_auth_routes');
+    }
+
+    private function isTwoFactorEnabled(): bool
+    {
+        $platformConfig = $this->rawConfig['platform'] ?? [];
+        if (! is_array($platformConfig)) {
+            return false;
+        }
+
+        $security = $platformConfig['security'] ?? [];
+        if (! is_array($security)) {
+            return false;
+        }
+
+        $twoFactor = $security['two_factor'] ?? [];
+        if (! is_array($twoFactor)) {
+            return false;
+        }
+
+        return ($twoFactor['enabled'] ?? false) === true;
     }
 
     private function processPlatformConfig(): void
@@ -139,19 +164,36 @@ abstract class Kernel extends BaseKernel
         $ext = pathinfo($configFile, PATHINFO_EXTENSION);
 
         $this->rawConfig = match ($ext) {
-            'yaml', 'yml' => Yaml::parseFile($configFile) ?? [],
-            'json' => (static function (string $path): array {
-                $decoded = json_decode((string) file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
-                return is_array($decoded) ? $decoded : [];
-            })($configFile),
-            'php' => (static function (string $path): array {
-                $result = require $path;
-                return is_array($result) ? $result : [];
-            })($configFile),
+            'yaml', 'yml' => self::toConfigArray(Yaml::parseFile($configFile)),
+            'json' => self::toConfigArray(json_decode((string) file_get_contents($configFile), true, 512, JSON_THROW_ON_ERROR)),
+            'php' => self::toConfigArray(require $configFile),
             default => throw new RuntimeException(sprintf('Unsupported platform configuration file format: .%s', $ext)),
         };
 
         $this->publishPlatformConfigState();
+    }
+
+    /**
+     * Normalises a decoded configuration value into a string-keyed map.
+     *
+     * The root of a configuration file is always an associative map, so any non-array
+     * value is treated as empty and the keys are normalised to strings.
+     *
+     * @return array<string, mixed>
+     */
+    private static function toConfigArray(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        $config = [];
+
+        foreach ($value as $key => $item) {
+            $config[(string) $key] = $item;
+        }
+
+        return $config;
     }
 
     /**
@@ -169,8 +211,8 @@ abstract class Kernel extends BaseKernel
     {
         // Allow an explicit path override via environment variable
         $envOverride = $_ENV['PLATFORM_CONFIG_FILE'] ?? $_SERVER['PLATFORM_CONFIG_FILE'] ?? null;
-        if ($envOverride !== null && is_file((string) $envOverride)) {
-            return (string) $envOverride;
+        if (is_string($envOverride) && is_file($envOverride)) {
+            return $envOverride;
         }
 
         $glob = $this->getProjectDir() . '/' . self::DEFAULT_CONFIG_GLOB;

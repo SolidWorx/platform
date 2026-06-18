@@ -16,6 +16,7 @@ namespace SolidWorx\Platform\PlatformBundle\DependencyInjection;
 use Knp\Menu\Provider\MenuProviderInterface;
 use Override;
 use ReflectionMethod;
+use Reflector;
 use SolidWorx\Platform\PlatformBundle\Attributes\Menu\MenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfiguration;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendTwoFactorCode;
@@ -68,10 +69,14 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         $container->registerForAutoconfiguration(MenuProviderInterface::class)
             ->addTag('knp_menu.provider');
 
-        $container->registerAttributeForAutoconfiguration(MenuBuilder::class, static function (ChildDefinition $definition, MenuBuilder $attribute, ReflectionMethod $reflectionMethod): void {
+        $container->registerAttributeForAutoconfiguration(MenuBuilder::class, static function (ChildDefinition $definition, MenuBuilder $attribute, Reflector $reflector): void {
+            if (! $reflector instanceof ReflectionMethod) {
+                return;
+            }
+
             $definition->addTag(Util::tag('menu.builder'), [
                 'alias' => $attribute->name,
-                'method' => $reflectionMethod->getName(),
+                'method' => $reflector->getName(),
                 'priority' => $attribute->priority,
                 'role' => $attribute->role,
             ]);

@@ -48,43 +48,72 @@ final readonly class LemonSqueezyWebhookConsumer implements ConsumerInterface
     #[Override]
     public function consume(RemoteEvent $event): void
     {
-        if (! $event instanceof SubscriptionRemoteEvent && ! $event instanceof SubscriptionPaymentRemoteEvent) {
+        if ($event instanceof SubscriptionRemoteEvent) {
+            $domainEvent = $this->createSubscriptionEvent($event);
+        } elseif ($event instanceof SubscriptionPaymentRemoteEvent) {
+            $domainEvent = $this->createPaymentEvent($event);
+        } else {
             return;
         }
 
-        /** @var SubscriptionRemoteEvent|SubscriptionPaymentRemoteEvent $event */
-
-        [$eventClass, $object] = match ($event->event) {
-            Event::SUBSCRIPTION_CREATED => [SubscriptionCreatedEvent::class, $event->subscription],
-            Event::SUBSCRIPTION_UPDATED => [SubscriptionUpdatedEvent::class, $event->subscription],
-            Event::SUBSCRIPTION_CANCELLED => [SubscriptionCancelledEvent::class, $event->subscription],
-            Event::SUBSCRIPTION_RESUMED => [SubscriptionResumedEvent::class, $event->subscription],
-            Event::SUBSCRIPTION_EXPIRED => [SubscriptionExpiredEvent::class, $event->subscription],
-            Event::SUBSCRIPTION_PAUSED => [SubscriptionPausedEvent::class, $event->subscription],
-            Event::SUBSCRIPTION_UNPAUSED => [SubscriptionUnpausedEvent::class, $event->subscription],
-            Event::SUBSCRIPTION_PAYMENT_SUCCESS => [SubscriptionPaymentPaidEvent::class, $event->subscriptionInvoice],
-            Event::SUBSCRIPTION_PAYMENT_FAILED => [SubscriptionPaymentFailedEvent::class, $event->subscriptionInvoice],
-            Event::SUBSCRIPTION_PAYMENT_RECOVERED => [SubscriptionPaymentRecoveredEvent::class, $event->subscriptionInvoice],
-            Event::SUBSCRIPTION_PAYMENT_REFUNDED => [SubscriptionPaymentRefundedEvent::class, $event->subscriptionInvoice],
-            default => throw new RejectWebhookException(message: sprintf('Unsupported event type: %s', $event->event->value)),
-        };
-
-        $this->eventDispatcher->dispatch(new $eventClass(
-            $event->subscriptionId,
-            $object->id,
-            match (true) {
-                is_a($eventClass, SubscriptionEvent::class, true) => $event->subscription,
-                is_a($eventClass, PaymentEvent::class, true) => $event->subscriptionInvoice,
-                default => null,
-            }
-        ));
+        $this->eventDispatcher->dispatch($domainEvent);
 
         $log = $this->requestStack->getCurrentRequest()?->attributes->get('_webhook_event_log');
 
         if ($log instanceof WebhookEventLog) {
             $log->setEventType($event->getName());
-            $log->setGatewayEventId($event->getPayload()['meta']['id'] ?? null);
+            $log->setGatewayEventId($this->extractGatewayEventId($event));
             $log->setExternalSubscriptionId($event->subscriptionId->toBase58());
         }
+    }
+
+    private function createSubscriptionEvent(SubscriptionRemoteEvent $event): SubscriptionEvent
+    {
+        $eventClass = match ($event->event) {
+            Event::SUBSCRIPTION_CREATED => SubscriptionCreatedEvent::class,
+            Event::SUBSCRIPTION_UPDATED => SubscriptionUpdatedEvent::class,
+            Event::SUBSCRIPTION_CANCELLED => SubscriptionCancelledEvent::class,
+            Event::SUBSCRIPTION_RESUMED => SubscriptionResumedEvent::class,
+            Event::SUBSCRIPTION_EXPIRED => SubscriptionExpiredEvent::class,
+            Event::SUBSCRIPTION_PAUSED => SubscriptionPausedEvent::class,
+            Event::SUBSCRIPTION_UNPAUSED => SubscriptionUnpausedEvent::class,
+            default => throw new RejectWebhookException(message: sprintf('Unsupported event type: %s', $event->event->value)),
+        };
+
+        return new $eventClass(
+            $event->subscriptionId,
+            $event->subscription->id,
+            $event->subscription,
+        );
+    }
+
+    private function createPaymentEvent(SubscriptionPaymentRemoteEvent $event): PaymentEvent
+    {
+        $eventClass = match ($event->event) {
+            Event::SUBSCRIPTION_PAYMENT_SUCCESS => SubscriptionPaymentPaidEvent::class,
+            Event::SUBSCRIPTION_PAYMENT_FAILED => SubscriptionPaymentFailedEvent::class,
+            Event::SUBSCRIPTION_PAYMENT_RECOVERED => SubscriptionPaymentRecoveredEvent::class,
+            Event::SUBSCRIPTION_PAYMENT_REFUNDED => SubscriptionPaymentRefundedEvent::class,
+            default => throw new RejectWebhookException(message: sprintf('Unsupported event type: %s', $event->event->value)),
+        };
+
+        return new $eventClass(
+            $event->subscriptionId,
+            $event->subscriptionInvoice->id,
+            $event->subscriptionInvoice,
+        );
+    }
+
+    private function extractGatewayEventId(RemoteEvent $event): ?string
+    {
+        $meta = $event->getPayload()['meta'] ?? null;
+
+        if (! is_array($meta)) {
+            return null;
+        }
+
+        $id = $meta['id'] ?? null;
+
+        return is_string($id) ? $id : null;
     }
 }

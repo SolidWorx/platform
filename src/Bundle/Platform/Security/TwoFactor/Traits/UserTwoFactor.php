@@ -19,6 +19,7 @@ use LogicException;
 use Scheb\TwoFactorBundle\Model\Totp\TotpConfiguration;
 use Scheb\TwoFactorBundle\Model\Totp\TotpConfigurationInterface;
 use function array_search;
+use function array_values;
 use function in_array;
 
 trait UserTwoFactor
@@ -37,6 +38,9 @@ trait UserTwoFactor
     ])]
     private int $trustedVersion = 0;
 
+    /**
+     * @var list<string>|null
+     */
     #[ORM\Column(name: 'backup_codes', type: 'json', nullable: true)]
     private ?array $backupCodes = [];
 
@@ -55,6 +59,10 @@ trait UserTwoFactor
     public function getTotpAuthenticationUsername(): string
     {
         // @TODO: email property should not be hard-coded
+        if ($this->email === null) {
+            throw new LogicException('Cannot resolve the TOTP authentication username because the email is not set.');
+        }
+
         return $this->email;
     }
 
@@ -74,6 +82,10 @@ trait UserTwoFactor
     public function getEmailAuthRecipient(): string
     {
         // @TODO: email property should not be hard-coded
+        if ($this->email === null) {
+            throw new LogicException('Cannot resolve the email authentication recipient because the email is not set.');
+        }
+
         return $this->email;
     }
 
@@ -107,14 +119,16 @@ trait UserTwoFactor
 
     public function isBackupCode(string $code): bool
     {
-        return in_array($code, (array) $this->backupCodes, true);
+        return in_array($code, $this->backupCodes ?? [], true);
     }
 
     public function invalidateBackupCode(string $code): void
     {
-        $key = array_search($code, (array) $this->backupCodes, true);
+        $codes = $this->backupCodes ?? [];
+        $key = array_search($code, $codes, true);
         if ($key !== false) {
-            unset($this->backupCodes[$key]);
+            unset($codes[$key]);
+            $this->backupCodes = array_values($codes);
         }
     }
 

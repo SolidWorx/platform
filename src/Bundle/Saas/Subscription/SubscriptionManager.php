@@ -31,7 +31,6 @@ use SolidWorx\Platform\SaasBundle\Integration\PaymentIntegrationInterface;
 use SolidWorx\Platform\SaasBundle\Repository\PlanRepositoryInterface;
 use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepositoryInterface;
 use Symfony\Component\Uid\Ulid;
-use function get_debug_type;
 
 final readonly class SubscriptionManager implements SubscriptionProviderInterface
 {
@@ -57,11 +56,10 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
         $plan = $this->planRepository->find($planId);
 
         if (! $plan instanceof Plan) {
-            $planIdString = match (get_debug_type($planId)) {
-                'string' => $planId,
-                Ulid::class => $planId->toBase58(),
-                Plan::class => $planId->getPlanId(),
-                default => (string) $planId,
+            $planIdString = match (true) {
+                $planId instanceof Ulid => $planId->toBase58(),
+                $planId instanceof Plan => $planId->getPlanId(),
+                default => $planId,
             };
 
             throw new InvalidPlanException($planIdString);

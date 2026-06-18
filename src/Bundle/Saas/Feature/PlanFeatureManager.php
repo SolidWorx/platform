@@ -24,6 +24,7 @@ use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Exception\UndefinedFeatureException;
 use SolidWorx\Platform\SaasBundle\Repository\PlanFeatureRepositoryInterface;
 use SolidWorx\Platform\SaasBundle\Subscription\SubscriptionProviderInterface;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Service\ResetInterface;
 use function get_debug_type;
@@ -39,7 +40,7 @@ readonly class PlanFeatureManager implements ResetInterface
         private FeatureConfigRegistry $configRegistry,
         private PlanFeatureRepositoryInterface $planFeatureRepository,
         private SubscriptionProviderInterface $subscriptionProvider,
-        private CacheInterface $cache,
+        private CacheInterface&AdapterInterface $cache,
     ) {
     }
 
@@ -220,7 +221,7 @@ readonly class PlanFeatureManager implements ResetInterface
     /**
      * Find all plans that have a specific feature enabled.
      *
-     * @return array<Plan>
+     * @return list<Plan>
      */
     public function findPlansWithFeature(string $featureKey, ?Plan $excludePlan = null): array
     {

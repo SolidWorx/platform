@@ -32,8 +32,8 @@ final class PlatformConfigBuilderTest extends TestCase
     {
         $result = PlatformConfigBuilder::create()->build();
 
-        self::assertSame('SolidWorx Platform', $result['platform']['name']);
-        self::assertSame('1.0.0', $result['platform']['version']);
+        self::assertSame('SolidWorx Platform', self::section($result, 'platform')['name']);
+        self::assertSame('1.0.0', self::section($result, 'platform')['version']);
     }
 
     public function testNameAndVersionCanBeOverridden(): void
@@ -43,8 +43,8 @@ final class PlatformConfigBuilderTest extends TestCase
             ->version('2.5.0')
             ->build();
 
-        self::assertSame('My App', $result['platform']['name']);
-        self::assertSame('2.5.0', $result['platform']['version']);
+        self::assertSame('My App', self::section($result, 'platform')['name']);
+        self::assertSame('2.5.0', self::section($result, 'platform')['version']);
     }
 
     public function testUserModelAppearsInBuild(): void
@@ -53,13 +53,13 @@ final class PlatformConfigBuilderTest extends TestCase
             ->userModel('App\Entity\User')
             ->build();
 
-        self::assertSame('App\Entity\User', $result['platform']['models']['user']);
+        self::assertSame('App\Entity\User', self::section($result, 'platform', 'models')['user']);
     }
 
     public function testModelsAbsentWhenNotSet(): void
     {
         $result = PlatformConfigBuilder::create()->build();
-        self::assertArrayNotHasKey('models', $result['platform']);
+        self::assertArrayNotHasKey('models', self::section($result, 'platform'));
     }
 
     public function testEnableUtcDateAppearsInBuild(): void
@@ -68,13 +68,13 @@ final class PlatformConfigBuilderTest extends TestCase
             ->enableUtcDate(true)
             ->build();
 
-        self::assertTrue($result['platform']['doctrine']['types']['enable_utc_date']);
+        self::assertTrue(self::section($result, 'platform', 'doctrine', 'types')['enable_utc_date']);
     }
 
     public function testDoctrineAbsentWhenUtcDateNotSet(): void
     {
         $result = PlatformConfigBuilder::create()->build();
-        self::assertArrayNotHasKey('doctrine', $result['platform']);
+        self::assertArrayNotHasKey('doctrine', self::section($result, 'platform'));
     }
 
     public function testWithSaasConfigInjectsUnderSaasKey(): void
@@ -88,13 +88,13 @@ final class PlatformConfigBuilderTest extends TestCase
         ];
         $result = PlatformConfigBuilder::create()->withSaasConfig($saas)->build();
 
-        self::assertSame($saas, $result['platform']['saas']);
+        self::assertSame($saas, self::section($result, 'platform')['saas']);
     }
 
     public function testSaasAbsentWhenNotSet(): void
     {
         $result = PlatformConfigBuilder::create()->build();
-        self::assertArrayNotHasKey('saas', $result['platform']);
+        self::assertArrayNotHasKey('saas', self::section($result, 'platform'));
     }
 
     public function testWithUiConfigInjectsUnderUiKey(): void
@@ -104,13 +104,13 @@ final class PlatformConfigBuilderTest extends TestCase
         ];
         $result = PlatformConfigBuilder::create()->withUiConfig($ui)->build();
 
-        self::assertSame($ui, $result['platform']['ui']);
+        self::assertSame($ui, self::section($result, 'platform')['ui']);
     }
 
     public function testUiAbsentWhenNotSet(): void
     {
         $result = PlatformConfigBuilder::create()->build();
-        self::assertArrayNotHasKey('ui', $result['platform']);
+        self::assertArrayNotHasKey('ui', self::section($result, 'platform'));
     }
 
     public function testSecurityBuilderChainReturnsParent(): void
@@ -120,5 +120,24 @@ final class PlatformConfigBuilderTest extends TestCase
 
         self::assertInstanceOf(SecurityConfigBuilder::class, $securityBuilder);
         self::assertSame($builder, $securityBuilder->end());
+    }
+
+    /**
+     * Walk a nested key path, asserting each step is an array, and return the sub-array.
+     *
+     * @param array<array-key, mixed> $result
+     * @return array<array-key, mixed>
+     */
+    private static function section(array $result, string ...$keys): array
+    {
+        $current = $result;
+        foreach ($keys as $key) {
+            self::assertArrayHasKey($key, $current);
+            $value = $current[$key];
+            self::assertIsArray($value);
+            $current = $value;
+        }
+
+        return $current;
     }
 }

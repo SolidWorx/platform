@@ -39,6 +39,8 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Symfony\UX\TwigComponent\Attribute\ExposeInTemplate;
 use Symfony\UX\TwigComponent\Attribute\PreMount;
 use function assert;
+use function is_array;
+use function is_string;
 
 #[AsLiveComponent(name: 'Platform:Security:TwoFactor', template: '@SolidWorxPlatform/Components/Security/two_factor.html.twig')]
 final class TwoFactor extends AbstractController
@@ -138,7 +140,9 @@ final class TwoFactor extends AbstractController
 
         $data = $this->getForm()->getData();
 
-        $secret = $data['secret'] ?? $this->totpSecret;
+        $secret = is_array($data) && isset($data['secret']) && is_string($data['secret'])
+            ? $data['secret']
+            : $this->totpSecret;
 
         $user = $this->getUser();
         assert($user instanceof UserTwoFactorInterface);

@@ -18,14 +18,13 @@ use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Enum\Flash;
 use SolidWorx\Platform\PlatformBundle\Response\RedirectResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse as BaseRedirectResponse;
-use function is_a;
 
 #[CoversClass(RedirectResponse::class)]
 final class RedirectResponseTest extends TestCase
 {
     public function testExtendsBaseRedirectResponse(): void
     {
-        self::assertTrue(is_a(RedirectResponse::class, BaseRedirectResponse::class, true));
+        self::assertInstanceOf(BaseRedirectResponse::class, new RedirectResponse('/some-url'));
     }
 
     public function testStartsWithNoFlashes(): void

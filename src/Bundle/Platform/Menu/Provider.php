@@ -23,7 +23,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 final class Provider implements MenuProviderInterface
 {
     /**
-     * @var array<string, SplPriorityQueue<int, callable>>
+     * @var array<string, SplPriorityQueue<array{int, int}, callable>>
      */
     private array $list = [];
 
