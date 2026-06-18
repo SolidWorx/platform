@@ -17,7 +17,6 @@ use Override;
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
-
 use function is_string;
 
 /**

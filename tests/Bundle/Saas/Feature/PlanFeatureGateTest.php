@@ -30,7 +30,9 @@ use Symfony\Component\Uid\Ulid;
 #[CoversClass(PlanFeatureGate::class)]
 final class PlanFeatureGateTest extends TestCase
 {
-    /** @var PlanFeatureManager&MockObject */
+    /**
+     * @var PlanFeatureManager&MockObject
+     */
     private PlanFeatureManager $manager;
 
     protected function setUp(): void
@@ -147,6 +149,6 @@ final class PlanFeatureGateTest extends TestCase
 
     private function subscriber(): SubscribableInterface
     {
-        return new class implements SubscribableInterface {};
+        return new class() implements SubscribableInterface {};
     }
 }

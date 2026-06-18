@@ -25,7 +25,6 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-
 use function is_array;
 use function is_string;
 
@@ -104,11 +103,6 @@ final class TextEditorType extends AbstractType
         $resolver->setAllowedTypes('editor_height', ['null', 'string']);
     }
 
-    private function resolvePreset(mixed $toolbar): ToolbarPreset
-    {
-        return ToolbarPreset::from(is_string($toolbar) ? $toolbar : ToolbarPreset::Default->value);
-    }
-
     #[Override]
     public function getParent(): string
     {
@@ -119,5 +113,10 @@ final class TextEditorType extends AbstractType
     public function getBlockPrefix(): string
     {
         return 'text_editor';
+    }
+
+    private function resolvePreset(mixed $toolbar): ToolbarPreset
+    {
+        return ToolbarPreset::from(is_string($toolbar) ? $toolbar : ToolbarPreset::Default->value);
     }
 }

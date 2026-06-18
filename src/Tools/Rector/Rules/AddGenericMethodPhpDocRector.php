@@ -13,13 +13,10 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\Tools\Rector\Rules;
 
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormTypeInterface;
-use Symfony\Component\Form\FormTypeExtensionInterface;
-use Doctrine\ORM\Query;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use PhpParser\Node\Expr\Variable;
+use Doctrine\ORM\Query;
 use PhpParser\Node;
+use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Name;
 use PhpParser\Node\NullableType;
@@ -37,6 +34,9 @@ use Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfo;
 use Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfoFactory;
 use Rector\Comments\NodeDocBlock\DocBlockUpdater;
 use Rector\Rector\AbstractRector;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormTypeExtensionInterface;
+use Symfony\Component\Form\FormTypeInterface;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 
@@ -80,7 +80,8 @@ final class AddGenericMethodPhpDocRector extends AbstractRector
                         {
                         }
                     }
-                    CODE_SAMPLE,
+                    CODE_SAMPLE
+                ,
                 <<<'CODE_SAMPLE'
                     use Symfony\Component\Form\FormInterface;
 
@@ -93,7 +94,8 @@ final class AddGenericMethodPhpDocRector extends AbstractRector
                         {
                         }
                     }
-                    CODE_SAMPLE,
+                    CODE_SAMPLE
+                ,
             )],
         );
     }
@@ -127,7 +129,7 @@ final class AddGenericMethodPhpDocRector extends AbstractRector
     private function processReturnType(ClassMethod $node): bool
     {
         $returnType = $node->returnType;
-        if (!$returnType instanceof Node) {
+        if (! $returnType instanceof Node) {
             return false;
         }
 
@@ -175,7 +177,7 @@ final class AddGenericMethodPhpDocRector extends AbstractRector
 
     private function processParam(ClassMethod $node, Param $param): bool
     {
-        if (!$param->type instanceof Node) {
+        if (! $param->type instanceof Node) {
             return false;
         }
 

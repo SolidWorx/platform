@@ -34,16 +34,6 @@ use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 #[AllowMockObjectsWithoutExpectations]
 final class TextEditorTypeTest extends TypeTestCase
 {
-    #[Override]
-    protected function getExtensions(): array
-    {
-        return [
-            new PreloadedExtension([
-                new TextEditorType(new HtmlSanitizerFactory()),
-            ], []),
-        ];
-    }
-
     public function testItIsBuiltOnTopOfATextarea(): void
     {
         $view = $this->factory->create(TextEditorType::class)->createView();
@@ -116,7 +106,9 @@ final class TextEditorTypeTest extends TypeTestCase
     {
         $document = $this->paragraph('Hello world');
 
-        $form = $this->factory->create(TextEditorType::class, null, ['output_format' => 'json']);
+        $form = $this->factory->create(TextEditorType::class, null, [
+            'output_format' => 'json',
+        ]);
         $form->submit((string) json_encode($document));
 
         self::assertTrue($form->isSynchronized());
@@ -140,10 +132,14 @@ final class TextEditorTypeTest extends TypeTestCase
 
     public function testJsonRejectsDisallowedNodeTypes(): void
     {
-        $form = $this->factory->create(TextEditorType::class, null, ['output_format' => 'json']);
+        $form = $this->factory->create(TextEditorType::class, null, [
+            'output_format' => 'json',
+        ]);
         $form->submit((string) json_encode([
             'type' => 'doc',
-            'content' => [['type' => 'evilNode']],
+            'content' => [[
+                'type' => 'evilNode',
+            ]],
         ]));
 
         self::assertFalse($form->isSynchronized());
@@ -151,7 +147,9 @@ final class TextEditorTypeTest extends TypeTestCase
 
     public function testJsonRejectsMalformedDocuments(): void
     {
-        $form = $this->factory->create(TextEditorType::class, null, ['output_format' => 'json']);
+        $form = $this->factory->create(TextEditorType::class, null, [
+            'output_format' => 'json',
+        ]);
         $form->submit('{not valid json');
 
         self::assertFalse($form->isSynchronized());
@@ -161,19 +159,33 @@ final class TextEditorTypeTest extends TypeTestCase
     {
         $this->expectException(InvalidOptionsException::class);
 
-        $this->factory->create(TextEditorType::class, null, ['output_format' => 'pdf']);
+        $this->factory->create(TextEditorType::class, null, [
+            'output_format' => 'pdf',
+        ]);
     }
 
     public function testInvalidToolbarPresetIsRejected(): void
     {
         $this->expectException(InvalidOptionsException::class);
 
-        $this->factory->create(TextEditorType::class, null, ['toolbar' => 'fancy']);
+        $this->factory->create(TextEditorType::class, null, [
+            'toolbar' => 'fancy',
+        ]);
     }
 
     public function testParentIsTextarea(): void
     {
         self::assertSame(TextareaType::class, (new TextEditorType(new HtmlSanitizerFactory()))->getParent());
+    }
+
+    #[Override]
+    protected function getExtensions(): array
+    {
+        return [
+            new PreloadedExtension([
+                new TextEditorType(new HtmlSanitizerFactory()),
+            ], []),
+        ];
     }
 
     /**
@@ -187,7 +199,10 @@ final class TextEditorTypeTest extends TypeTestCase
                 [
                     'type' => 'paragraph',
                     'content' => [
-                        ['type' => 'text', 'text' => $text],
+                        [
+                            'type' => 'text',
+                            'text' => $text,
+                        ],
                     ],
                 ],
             ],

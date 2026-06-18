@@ -21,11 +21,11 @@ use PhpParser\Node\Stmt\Class_;
 use PHPStan\PhpDocParser\Ast\PhpDoc\ExtendsTagValueNode;
 use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
-use ReflectionClass;
-use ReflectionException;
 use Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfoFactory;
 use Rector\Comments\NodeDocBlock\DocBlockUpdater;
 use Rector\Rector\AbstractRector;
+use ReflectionClass;
+use ReflectionException;
 use SolidWorx\Platform\PlatformBundle\Repository\EntityRepository as PlatformEntityRepository;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
@@ -71,7 +71,8 @@ final class EnforcePlatformEntityRepositoryRector extends AbstractRector
                             parent::__construct($registry, Invoice::class);
                         }
                     }
-                    CODE_SAMPLE,
+                    CODE_SAMPLE
+                ,
                 <<<'CODE_SAMPLE'
                     use Doctrine\Persistence\ManagerRegistry;
                     use SolidWorx\Platform\PlatformBundle\Repository\EntityRepository;
@@ -83,7 +84,8 @@ final class EnforcePlatformEntityRepositoryRector extends AbstractRector
                             parent::__construct($registry, Invoice::class);
                         }
                     }
-                    CODE_SAMPLE,
+                    CODE_SAMPLE
+                ,
             )],
         );
     }

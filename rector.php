@@ -50,4 +50,3 @@ return RectorConfig::configure()
         PHPUnitSetList::ANNOTATIONS_TO_ATTRIBUTES,
         PHPUnitSetList::PHPUNIT_CODE_QUALITY,
     ]);
-

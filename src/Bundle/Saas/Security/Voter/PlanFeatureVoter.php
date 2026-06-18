@@ -14,8 +14,8 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\SaasBundle\Security\Voter;
 
 use Override;
-use SolidWorx\Platform\SaasBundle\Feature\PlanFeatureManager;
 use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
+use SolidWorx\Platform\SaasBundle\Feature\PlanFeatureManager;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
