@@ -1417,12 +1417,6 @@ parameters:
 			path: tests/Bundle/Saas/Config/Builder/SaasConfigBuilderTest.php
 
 		-
-			rawMessage: 'Call to deprecated method setAccessible() of class ReflectionProperty.'
-			identifier: method.deprecated
-			count: 2
-			path: tests/Bundle/Saas/Feature/PlanFeatureGateTest.php
-
-		-
 			rawMessage: 'Method SolidWorx\Platform\SaasBundle\Repository\PlanFeatureRepositoryInterface@anonymous/tests/Bundle/Saas/Feature/PlanFeatureManagerTest.php:219::findByPlans() should return array<int, SolidWorx\Platform\SaasBundle\Entity\PlanFeature> but returns array<SolidWorx\Platform\SaasBundle\Entity\PlanFeature>.'
 			identifier: return.type
 			count: 1
