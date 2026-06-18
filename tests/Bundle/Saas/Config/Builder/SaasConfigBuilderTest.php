@@ -16,7 +16,6 @@ namespace SolidWorx\Platform\Tests\Bundle\Saas\Config\Builder;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\SaasBundle\Config\Builder\SaasConfigBuilder;
-use SolidWorx\Platform\SaasBundle\Config\Builder\SaasPaymentConfigBuilder;
 
 #[CoversClass(SaasConfigBuilder::class)]
 final class SaasConfigBuilderTest extends TestCase
@@ -32,7 +31,7 @@ final class SaasConfigBuilderTest extends TestCase
             ->subscriptionEntity('App\Entity\Subscription')
             ->build();
 
-        self::assertSame('App\Entity\Subscription', $result['doctrine']['subscriptions']['entity']);
+        self::assertSame('App\Entity\Subscription', $this->arrayAt($result, 'doctrine', 'subscriptions')['entity']);
     }
 
     public function testTrialUserEntityAppearsInBuild(): void
@@ -41,7 +40,7 @@ final class SaasConfigBuilderTest extends TestCase
             ->trialUserEntity('App\Entity\User')
             ->build();
 
-        self::assertSame('App\Entity\User', $result['doctrine']['trial']['user_entity']);
+        self::assertSame('App\Entity\User', $this->arrayAt($result, 'doctrine', 'trial')['user_entity']);
     }
 
     public function testTableNameAppearsInBuild(): void
@@ -51,14 +50,17 @@ final class SaasConfigBuilderTest extends TestCase
             ->tableName('trial', 'my_trials')
             ->build();
 
-        self::assertSame('my_plans', $result['doctrine']['db_schema']['table_names']['plan']);
-        self::assertSame('my_trials', $result['doctrine']['db_schema']['table_names']['trial']);
+        $tableNames = $this->arrayAt($result, 'doctrine', 'db_schema', 'table_names');
+        self::assertSame('my_plans', $tableNames['plan']);
+        self::assertSame('my_trials', $tableNames['trial']);
     }
 
     public function testTableNamesAbsentWhenNoneSet(): void
     {
         $result = SaasConfigBuilder::create()->build();
-        self::assertArrayNotHasKey('db_schema', $result['doctrine'] ?? []);
+        $doctrine = $result['doctrine'] ?? [];
+        self::assertIsArray($doctrine);
+        self::assertArrayNotHasKey('db_schema', $doctrine);
     }
 
     public function testLemonSqueezyAppearsWhenSet(): void
@@ -67,10 +69,11 @@ final class SaasConfigBuilderTest extends TestCase
             ->lemonSqueezy('key_123', 'secret_abc', 'store_xyz')
             ->build();
 
-        self::assertTrue($result['integration']['lemon_squeezy']['enabled']);
-        self::assertSame('key_123', $result['integration']['lemon_squeezy']['api_key']);
-        self::assertSame('secret_abc', $result['integration']['lemon_squeezy']['webhook_secret']);
-        self::assertSame('store_xyz', $result['integration']['lemon_squeezy']['store_id']);
+        $lemonSqueezy = $this->arrayAt($result, 'integration', 'lemon_squeezy');
+        self::assertTrue($lemonSqueezy['enabled']);
+        self::assertSame('key_123', $lemonSqueezy['api_key']);
+        self::assertSame('secret_abc', $lemonSqueezy['webhook_secret']);
+        self::assertSame('store_xyz', $lemonSqueezy['store_id']);
     }
 
     public function testFeaturesAccumulateAcrossCalls(): void
@@ -86,9 +89,10 @@ final class SaasConfigBuilderTest extends TestCase
             ])
             ->build();
 
-        self::assertCount(2, $result['features']);
-        self::assertArrayHasKey('api_calls', $result['features']);
-        self::assertArrayHasKey('uploads', $result['features']);
+        $features = $this->arrayAt($result, 'features');
+        self::assertCount(2, $features);
+        self::assertArrayHasKey('api_calls', $features);
+        self::assertArrayHasKey('uploads', $features);
     }
 
     public function testPaymentBuilderChainReturnsParent(): void
@@ -96,7 +100,6 @@ final class SaasConfigBuilderTest extends TestCase
         $builder = SaasConfigBuilder::create();
         $paymentBuilder = $builder->payment();
 
-        self::assertInstanceOf(SaasPaymentConfigBuilder::class, $paymentBuilder);
         self::assertSame($builder, $paymentBuilder->end());
     }
 
@@ -108,6 +111,26 @@ final class SaasConfigBuilderTest extends TestCase
             ->end()
             ->build();
 
-        self::assertSame('app_payment_success', $result['payment']['return_route']);
+        self::assertSame('app_payment_success', $this->arrayAt($result, 'payment')['return_route']);
+    }
+
+    /**
+     * Navigate a nested config array, asserting each intermediate step is an array.
+     *
+     * @param array<array-key, mixed> $config
+     * @return array<array-key, mixed>
+     */
+    private function arrayAt(array $config, string ...$keys): array
+    {
+        $current = $config;
+
+        foreach ($keys as $key) {
+            self::assertArrayHasKey($key, $current);
+            $value = $current[$key];
+            self::assertIsArray($value);
+            $current = $value;
+        }
+
+        return $current;
     }
 }

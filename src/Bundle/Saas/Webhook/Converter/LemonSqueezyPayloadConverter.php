@@ -45,42 +45,110 @@ final readonly class LemonSqueezyPayloadConverter implements PayloadConverterInt
     }
 
     /**
+     * @param array<array-key, mixed> $payload
+     *
      * @throws ExceptionInterface
      */
     #[Override]
     public function convert(array $payload): RemoteEvent
     {
-        $type = $this->getMappingClass((string) ($payload['data']['type'] ?? ''));
+        $payload = $this->stringKeyed($payload);
+        $data = $this->arrayValue($payload, 'data');
+        $meta = $this->arrayValue($payload, 'meta');
+
+        $type = $this->getMappingClass($this->stringValue($data, 'type'));
 
         if ($type === null) {
             return new RemoteEvent(
-                $payload['meta']['event_name'],
-                $payload['meta']['id'],
-                $payload['data']
+                $this->stringValue($meta, 'event_name'),
+                $this->stringValue($meta, 'id'),
+                $data,
             );
         }
 
-        if (! isset($payload['meta']['custom_data']['subscription_id'])) {
+        $customData = $this->arrayValue($meta, 'custom_data');
+        $subscriptionId = $customData['subscription_id'] ?? null;
+
+        if (! is_string($subscriptionId)) {
             throw new ParseException('Payload does not contain required custom_data.subscription_id field.');
         }
 
-        $data = $this->serializer->denormalize($payload['data'], $type, 'json');
+        $denormalized = $this->serializer->denormalize($data, $type, 'json');
+        $eventName = $this->stringValue($meta, 'event_name');
 
-        return match ($type) {
-            Subscription::class => new SubscriptionRemoteEvent(
-                Ulid::fromString($payload['meta']['custom_data']['subscription_id']),
-                $data,
-                Event::from($payload['meta']['event_name']),
+        if ($denormalized instanceof Subscription) {
+            return new SubscriptionRemoteEvent(
+                Ulid::fromString($subscriptionId),
+                $denormalized,
+                Event::from($eventName),
                 $payload,
-            ),
-            SubscriptionInvoice::class => new SubscriptionPaymentRemoteEvent(
-                Ulid::fromString($payload['meta']['custom_data']['subscription_id']),
-                $data,
-                Event::from($payload['meta']['event_name']),
+            );
+        }
+
+        if ($denormalized instanceof SubscriptionInvoice) {
+            return new SubscriptionPaymentRemoteEvent(
+                Ulid::fromString($subscriptionId),
+                $denormalized,
+                Event::from($eventName),
                 $payload,
-            ),
-            default => throw new ParseException(sprintf('Unsupported type: %s', $type)),
-        };
+            );
+        }
+
+        throw new ParseException(sprintf('Unsupported type: %s', $type));
+    }
+
+    /**
+     * Normalise an arbitrary array into a string-keyed map.
+     *
+     * @param array<array-key, mixed> $payload
+     *
+     * @return array<string, mixed>
+     */
+    private function stringKeyed(array $payload): array
+    {
+        $result = [];
+
+        foreach ($payload as $key => $value) {
+            $result[(string) $key] = $value;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     *
+     * @return array<string, mixed>
+     */
+    private function arrayValue(array $data, string $key): array
+    {
+        $value = $data[$key] ?? null;
+
+        if (! is_array($value)) {
+            throw new ParseException(sprintf('Expected array at key "%s".', $key));
+        }
+
+        $result = [];
+
+        foreach ($value as $childKey => $childValue) {
+            $result[(string) $childKey] = $childValue;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function stringValue(array $data, string $key): string
+    {
+        $value = $data[$key] ?? null;
+
+        if (! is_string($value)) {
+            throw new ParseException(sprintf('Expected string at key "%s".', $key));
+        }
+
+        return $value;
     }
 
     /**

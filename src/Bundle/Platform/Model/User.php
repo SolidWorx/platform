@@ -17,6 +17,7 @@ use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use EmailChecker\Constraints as EmailCheckerAssert;
+use LogicException;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Contracts\Security\TwoFactor\UserTwoFactorInterface;
 use SolidWorx\Platform\PlatformBundle\Security\TwoFactor\Traits\UserTwoFactor;
@@ -135,6 +136,10 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Override]
     public function getUserIdentifier(): string
     {
+        if ($this->email === null || $this->email === '') {
+            throw new LogicException('Cannot resolve the user identifier because the email is not set.');
+        }
+
         return $this->email;
     }
 

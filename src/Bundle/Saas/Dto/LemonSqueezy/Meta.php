@@ -27,6 +27,9 @@ class Meta
     #[SerializedName('webhook_id')]
     public string $webhookId;
 
+    /**
+     * @var array<string, mixed>
+     */
     #[SerializedName('custom_data')]
     public array $customData;
 }

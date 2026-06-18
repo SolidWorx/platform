@@ -19,6 +19,9 @@ class Options
 
     public const string EMAIL = 'email';
 
+    /**
+     * @var array<string, mixed>
+     */
     protected array $options = [];
 
     private function __construct()
@@ -58,6 +61,9 @@ class Options
         return $this->options[$option] ?? null;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return $this->options;

@@ -16,7 +16,7 @@ namespace SolidWorx\Platform\SaasBundle\Console\Command;
 use Carbon\CarbonImmutable;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Collections\Order;
-use Doctrine\Common\Util\ClassUtils;
+use Doctrine\ORM\Proxy\DefaultProxyClassNameResolver;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Console\Command;
 use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
@@ -25,8 +25,9 @@ use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepository;
 use Stringable;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Uid\Ulid;
 use function array_map;
+use function is_scalar;
+use function is_string;
 
 //
 #[AsCommand(name: 'saas:subscription:list', description: 'List all subscriptions')]
@@ -56,7 +57,8 @@ final class SubscriptionListCommand extends Command
         $criteria = new Criteria();
         $expr = Criteria::expr();
 
-        if ($status = $this->io->getOption('status')) {
+        $status = $this->io->getOption('status');
+        if (is_string($status) && $status !== '') {
             $criteria->andWhere($expr->eq('status', SubscriptionStatus::from($status)));
         }
 
@@ -67,19 +69,22 @@ final class SubscriptionListCommand extends Command
             return self::FAILURE;
         }
 
-        if ($this->io->getOption('latest') && $this->io->getOption('ending-soon')) {
+        $latest = $this->io->getOption('latest') === true;
+        $endingSoon = $this->io->getOption('ending-soon') === true;
+
+        if ($latest && $endingSoon) {
             $this->io->error('You cannot use both --latest and --ending-soon options together.');
             return self::FAILURE;
         }
 
-        if ($this->io->getOption('latest')) {
+        if ($latest) {
             $criteria->andWhere($expr->gte('startDate', CarbonImmutable::now()->subDays(30)->startOfDay()));
             $criteria->orderBy([
                 'startDate' => Order::Descending,
             ]);
         }
 
-        if ($this->io->getOption('ending-soon')) {
+        if ($endingSoon) {
             $criteria->andWhere($expr->lte('endDate', CarbonImmutable::now()->addDays(7)->endOfDay()));
             $criteria->orderBy([
                 'endDate' => Order::Ascending,
@@ -114,16 +119,22 @@ final class SubscriptionListCommand extends Command
         return self::SUCCESS;
     }
 
-    private function getSubscriberString(SubscribableInterface $subscriber): string|int|Ulid
+    private function getSubscriberString(SubscribableInterface $subscriber): string
     {
-        if ($subscriber instanceof Stringable || method_exists($subscriber, '__toString')) {
+        if ($subscriber instanceof Stringable) {
             return (string) $subscriber;
         }
 
+        $class = DefaultProxyClassNameResolver::getClass($subscriber);
+
         if (method_exists($subscriber, 'getId')) {
-            return $subscriber->getId() . '@' . ClassUtils::getClass($subscriber);
+            $id = $subscriber->getId();
+
+            if (is_scalar($id) || $id instanceof Stringable) {
+                return $id . '@' . $class;
+            }
         }
 
-        return spl_object_hash($subscriber) . '@' . ClassUtils::getClass($subscriber);
+        return spl_object_hash($subscriber) . '@' . $class;
     }
 }

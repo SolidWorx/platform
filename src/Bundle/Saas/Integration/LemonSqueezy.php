@@ -71,11 +71,21 @@ class LemonSqueezy implements PaymentIntegrationInterface
         );
 
         $data = $response->toArray();
+        $products = $data['data'] ?? null;
 
-        foreach ($data['data'] as $product) {
-            $attributes = $product['attributes'];
+        if (! is_array($products)) {
+            return;
+        }
 
-            $relatedData = $product['relationships']['variants']['links']['related'] ?? null;
+        foreach ($products as $product) {
+            if (! is_array($product)) {
+                continue;
+            }
+
+            $attributes = $this->arrayValue($product, 'attributes');
+
+            $relationships = $this->optionalArrayValue($product, 'relationships');
+            $relatedData = $this->relatedLink($relationships, 'variants');
 
             if ($relatedData === null) {
                 continue;
@@ -87,9 +97,19 @@ class LemonSqueezy implements PaymentIntegrationInterface
             );
 
             $variantsData = $variants->toArray();
+            $variantItems = $variantsData['data'] ?? null;
 
-            foreach ($variantsData['data'] as $variant) {
-                $priceModel = $variant['relationships']['price-model']['links']['related'] ?? null;
+            if (! is_array($variantItems)) {
+                continue;
+            }
+
+            foreach ($variantItems as $variant) {
+                if (! is_array($variant)) {
+                    continue;
+                }
+
+                $variantRelationships = $this->optionalArrayValue($variant, 'relationships');
+                $priceModel = $this->relatedLink($variantRelationships, 'price-model');
 
                 if ($priceModel === null) {
                     continue;
@@ -101,20 +121,24 @@ class LemonSqueezy implements PaymentIntegrationInterface
                 );
 
                 $priceModelData = $priceModelResponse->toArray();
+                $priceModelAttributes = $this->arrayValue(
+                    $this->arrayValue($priceModelData, 'data'),
+                    'attributes',
+                );
 
                 $interval = CarbonInterval::fromString(
                     sprintf(
                         '%s %s',
-                        $priceModelData['data']['attributes']['renewal_interval_quantity'],
-                        $priceModelData['data']['attributes']['renewal_interval_unit'],
+                        $this->intValue($priceModelAttributes, 'renewal_interval_quantity'),
+                        $this->stringValue($priceModelAttributes, 'renewal_interval_unit'),
                     )
                 );
 
                 yield new IntegrationProduct(
-                    id: $variant['id'],
-                    name: $attributes['name'],
-                    description: $attributes['description'],
-                    price: $priceModelData['data']['attributes']['unit_price'],
+                    id: $this->stringValue($variant, 'id'),
+                    name: $this->stringValue($attributes, 'name'),
+                    description: $this->stringValue($attributes, 'description'),
+                    price: $this->intValue($priceModelAttributes, 'unit_price'),
                     interval: $interval,
                 );
             }
@@ -172,8 +196,9 @@ class LemonSqueezy implements PaymentIntegrationInterface
         );
 
         $data = $response->toArray();
+        $attributes = $this->arrayValue($this->arrayValue($data, 'data'), 'attributes');
 
-        return $data['data']['attributes']['url'];
+        return $this->stringValue($attributes, 'url');
     }
 
     #[Override]
@@ -191,8 +216,12 @@ class LemonSqueezy implements PaymentIntegrationInterface
         );
 
         $data = $response->toArray();
+        $urls = $this->arrayValue(
+            $this->arrayValue($this->arrayValue($data, 'data'), 'attributes'),
+            'urls',
+        );
 
-        return $data['data']['attributes']['urls']['customer_portal'];
+        return $this->stringValue($urls, 'customer_portal');
     }
 
     #[Override]
@@ -236,7 +265,9 @@ class LemonSqueezy implements PaymentIntegrationInterface
         $this->assertOk($response->getStatusCode(), 'cancel', $subscriptionId);
 
         $data = $response->toArray();
-        $endsAt = $data['data']['attributes']['ends_at'] ?? null;
+        $dataNode = $data['data'] ?? null;
+        $attributes = is_array($dataNode) ? ($dataNode['attributes'] ?? null) : null;
+        $endsAt = is_array($attributes) ? ($attributes['ends_at'] ?? null) : null;
 
         if (! is_string($endsAt) || $endsAt === '') {
             throw new PaymentIntegrationException(sprintf(
@@ -303,12 +334,91 @@ class LemonSqueezy implements PaymentIntegrationInterface
     }
 
     /**
-     * @param array<string, mixed> $payload
+     * @param array<array-key, mixed> $data
+     *
+     * @return array<array-key, mixed>
+     */
+    private function arrayValue(array $data, string $key): array
+    {
+        $value = $data[$key] ?? null;
+
+        if (! is_array($value)) {
+            throw new PaymentIntegrationException(sprintf('Lemon Squeezy response is missing array key "%s".', $key));
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param array<array-key, mixed> $data
+     *
+     * @return array<array-key, mixed>
+     */
+    private function optionalArrayValue(array $data, string $key): array
+    {
+        $value = $data[$key] ?? null;
+
+        return is_array($value) ? $value : [];
+    }
+
+    /**
+     * @param array<array-key, mixed> $data
+     */
+    private function stringValue(array $data, string $key): string
+    {
+        $value = $data[$key] ?? null;
+
+        if (! is_string($value)) {
+            throw new PaymentIntegrationException(sprintf('Lemon Squeezy response is missing string key "%s".', $key));
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param array<array-key, mixed> $data
+     */
+    private function intValue(array $data, string $key): int
+    {
+        $value = $data[$key] ?? null;
+
+        if (! is_int($value)) {
+            throw new PaymentIntegrationException(sprintf('Lemon Squeezy response is missing integer key "%s".', $key));
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param array<array-key, mixed> $relationships
+     */
+    private function relatedLink(array $relationships, string $relationship): ?string
+    {
+        $node = $relationships[$relationship] ?? null;
+
+        if (! is_array($node)) {
+            return null;
+        }
+
+        $links = $node['links'] ?? null;
+
+        if (! is_array($links)) {
+            return null;
+        }
+
+        $related = $links['related'] ?? null;
+
+        return is_string($related) ? $related : null;
+    }
+
+    /**
+     * @param array<array-key, mixed> $payload
      */
     private function extractRenewDate(array $payload, string $subscriptionId): DateTimeImmutable
     {
-        $attributes = $payload['data']['attributes'] ?? [];
-        $renewsAt = $attributes['renews_at'] ?? $attributes['ends_at'] ?? null;
+        $data = $payload['data'] ?? null;
+        $attributes = is_array($data) ? ($data['attributes'] ?? null) : null;
+        $renewsAt = is_array($attributes) ? ($attributes['renews_at'] ?? $attributes['ends_at'] ?? null) : null;
 
         if (! is_string($renewsAt) || $renewsAt === '') {
             throw new PaymentIntegrationException(sprintf(

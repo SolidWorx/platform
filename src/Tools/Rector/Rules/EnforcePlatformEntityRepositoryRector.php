@@ -25,7 +25,6 @@ use Rector\BetterPhpDocParser\PhpDocInfo\PhpDocInfoFactory;
 use Rector\Comments\NodeDocBlock\DocBlockUpdater;
 use Rector\Rector\AbstractRector;
 use ReflectionClass;
-use ReflectionException;
 use SolidWorx\Platform\PlatformBundle\Repository\EntityRepository as PlatformEntityRepository;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
@@ -98,11 +97,12 @@ final class EnforcePlatformEntityRepositoryRector extends AbstractRector
         return [Class_::class];
     }
 
-    /**
-     * @param Class_ $node
-     */
     public function refactor(Node $node): ?Node
     {
+        if (! $node instanceof Class_) {
+            return null;
+        }
+
         if ($node->extends === null) {
             return null;
         }
@@ -144,10 +144,6 @@ final class EnforcePlatformEntityRepositoryRector extends AbstractRector
                     continue;
                 }
 
-                if (! $value->type instanceof GenericTypeNode) {
-                    continue;
-                }
-
                 $typeName = $value->type->type->name;
                 if (! \in_array($typeName, self::DOCTRINE_SHORT_NAMES, true)) {
                     continue;
@@ -184,13 +180,14 @@ final class EnforcePlatformEntityRepositoryRector extends AbstractRector
             return true;
         }
 
-        try {
-            $reflection = new ReflectionClass($classFqn);
-        } catch (ReflectionException) {
+        if (! class_exists($classFqn) && ! \interface_exists($classFqn)) {
             return false;
         }
 
-        while ($reflection = $reflection->getParentClass()) {
+        $reflection = new ReflectionClass($classFqn);
+
+        while (($parent = $reflection->getParentClass()) !== false) {
+            $reflection = $parent;
             if ($reflection->getName() === PlatformEntityRepository::class) {
                 return true;
             }

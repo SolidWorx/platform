@@ -47,7 +47,7 @@ final class SolidWorxPlatformUiBundle extends Bundle implements PlatformConfigSe
     }
 
     #[Override]
-    protected function createContainerExtension(): ?ExtensionInterface
+    protected function createContainerExtension(): ExtensionInterface
     {
         return new SolidWorxPlatformUiExtension($this->rawConfig);
     }

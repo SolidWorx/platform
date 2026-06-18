@@ -60,7 +60,7 @@ final class SolidWorxPlatformSaasBundle extends Bundle implements PlatformConfig
     }
 
     #[Override]
-    protected function createContainerExtension(): ?ExtensionInterface
+    protected function createContainerExtension(): ExtensionInterface
     {
         return new SolidWorxPlatformSaasExtension($this->rawConfig);
     }

@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle;
 
 use Doctrine\DBAL\Exception;
+use LogicException;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigSectionInterface;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\AuthenticationCompilerPass;
@@ -24,6 +25,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
+use function sprintf;
 
 final class SolidWorxPlatformBundle extends Bundle implements PlatformConfigSectionInterface
 {
@@ -84,8 +86,14 @@ final class SolidWorxPlatformBundle extends Bundle implements PlatformConfigSect
     }
 
     #[Override]
-    protected function createContainerExtension(): ?ExtensionInterface
+    protected function createContainerExtension(): ExtensionInterface
     {
-        return new ($this->getContainerExtensionClass())($this->rawConfig);
+        $extension = new ($this->getContainerExtensionClass())($this->rawConfig);
+
+        if (! $extension instanceof ExtensionInterface) {
+            throw new LogicException(sprintf('Extension "%s" must implement "%s".', $extension::class, ExtensionInterface::class));
+        }
+
+        return $extension;
     }
 }

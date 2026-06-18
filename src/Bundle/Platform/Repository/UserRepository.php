@@ -28,14 +28,13 @@ use function is_subclass_of;
 use function sprintf;
 
 /**
- * @template T
- * @extends EntityRepository<T>
+ * @template-extends EntityRepository<User>
  */
 class UserRepository extends EntityRepository implements UserRepositoryInterface, UserLoaderInterface
 {
-    public function __construct(ManagerRegistry $registry, ?string $className = User::class)
+    public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, $className);
+        parent::__construct($registry, User::class);
     }
 
     public function refreshUser(UserInterface $user): UserInterface
@@ -47,7 +46,12 @@ class UserRepository extends EntityRepository implements UserRepositoryInterface
 
         assert($user instanceof User);
 
-        return $this->loadUserByIdentifier($user->getEmail());
+        $email = $user->getEmail();
+        if ($email === null) {
+            throw new UnsupportedUserException('Cannot refresh a user without an email address.');
+        }
+
+        return $this->loadUserByIdentifier($email);
     }
 
     public function supportsClass(string $class): bool
@@ -73,9 +77,15 @@ class UserRepository extends EntityRepository implements UserRepositoryInterface
 
         try {
             // The Query::getSingleResult() method throws an exception if there is no record matching the criteria.
-            return $q->getSingleResult();
+            $user = $q->getSingleResult();
         } catch (NoResultException|NonUniqueResultException $e) {
             throw new UserNotFoundException(sprintf('User "%s" does not exist.', $identifier), 0, $e);
         }
+
+        if (! $user instanceof UserInterface) {
+            throw new UserNotFoundException(sprintf('User "%s" does not exist.', $identifier));
+        }
+
+        return $user;
     }
 }
