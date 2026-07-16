@@ -13,10 +13,12 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\Repository;
 
+use DateTimeImmutable;
 use Doctrine\Persistence\ManagerRegistry;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Repository\EntityRepository;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
+use SolidWorx\Platform\SaasBundle\Enum\SubscriptionStatus;
 
 /**
  * @template-extends EntityRepository<Subscription>
@@ -39,5 +41,23 @@ final class SubscriptionRepository extends EntityRepository implements Subscript
         assert($result === null || $result instanceof Subscription);
 
         return $result;
+    }
+
+    /**
+     * @return list<Subscription>
+     */
+    public function findExpiredTrials(DateTimeImmutable $now): array
+    {
+        /** @var list<Subscription> $subscriptions */
+        $subscriptions = $this->createQueryBuilder('s')
+            ->where('s.status = :status')
+            ->andWhere('s.endDate <= :now')
+            ->setParameter('status', SubscriptionStatus::TRIAL)
+            ->setParameter('now', $now)
+            ->orderBy('s.endDate', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return $subscriptions;
     }
 }
