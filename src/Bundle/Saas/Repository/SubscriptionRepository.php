@@ -46,6 +46,13 @@ final class SubscriptionRepository extends EntityRepository implements Subscript
     }
 
     /**
+     * Returns expired trial subscriptions that are not externally billed.
+     *
+     * Externally-billed trials (those with a non-null/non-empty
+     * `subscriptionId`, see {@see Subscription::isExternallyBilled()}) are
+     * excluded: they are governed by the payment provider's own lifecycle
+     * and must never be auto-downgraded here.
+     *
      * @return list<Subscription>
      */
     public function findExpiredTrials(DateTimeImmutable $now): array
@@ -54,6 +61,7 @@ final class SubscriptionRepository extends EntityRepository implements Subscript
         $subscriptions = $this->createQueryBuilder('s')
             ->where('s.status = :status')
             ->andWhere('s.endDate <= :now')
+            ->andWhere("(s.subscriptionId IS NULL OR s.subscriptionId = '')")
             ->setParameter('status', SubscriptionStatus::TRIAL)
             ->setParameter('now', $now)
             ->orderBy('s.endDate', 'ASC')
