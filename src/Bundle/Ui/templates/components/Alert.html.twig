@@ -33,7 +33,7 @@
 {% set isLink = link is not empty %}
 {% set tag = isLink ? 'a' : 'div' %}
 
-<{{ tag }} {{ attributes }}
+<{{ tag }} {{ attributes.without('class') }}
     class="{{ alert.apply({type, dismissible, important, link: isLink}, attributes.render('class')) }}"
     role="alert"
     {% if isLink %}href="{{ link }}"{% endif %}
@@ -51,9 +51,9 @@
                 <h4 class="alert-title">{{ title }}</h4>
             {% endif %}
 
-            <div {{ html_classes({
+            <div class="{{ html_classes({
                 'text-body-secondary': not important,
-            }) }}>
+            }) }}">
                 {% block content %}{% endblock %}
             </div>
         </div>
