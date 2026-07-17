@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\Entity;
 
+use Carbon\CarbonInterval;
 use DateInterval;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -144,7 +145,7 @@ class Plan implements Stringable
 
     public function getTrialDuration(): ?DateInterval
     {
-        return $this->trialDuration;
+        return $this->trialDuration ? CarbonInterval::instance($this->trialDuration) : null;
     }
 
     public function setTrialDuration(?DateInterval $trialDuration): static
