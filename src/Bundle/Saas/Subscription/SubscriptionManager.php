@@ -25,6 +25,7 @@ use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Enum\SubscriptionStatus;
 use SolidWorx\Platform\SaasBundle\Exception\ActiveSubscriptionPlanChangeException;
 use SolidWorx\Platform\SaasBundle\Exception\InvalidPlanException;
+use SolidWorx\Platform\SaasBundle\Exception\NoFreePlanConfiguredException;
 use SolidWorx\Platform\SaasBundle\Exception\TrialConfigurationException;
 use SolidWorx\Platform\SaasBundle\Integration\Options;
 use SolidWorx\Platform\SaasBundle\Integration\PaymentIntegrationInterface;
@@ -188,6 +189,29 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
         $subscription->setEndDate($endDate ?? CarbonImmutable::now('UTC')->addYears(100));
 
         $this->subscriptionRepository->save($subscription);
+    }
+
+    /**
+     * Auto-downgrade a subscription onto the free plan. Resolves the free
+     * plan itself, swaps it in (unless already free), and activates. This is
+     * the single semantic operation behind both the manual "choose free"
+     * flow and the expired-trial scheduler.
+     *
+     * @throws NoFreePlanConfiguredException
+     */
+    public function downgradeToFree(Subscription $subscription): void
+    {
+        $freePlan = $this->planRepository->findFree();
+
+        if (! $freePlan instanceof Plan) {
+            throw new NoFreePlanConfiguredException($subscription);
+        }
+
+        if ($subscription->getPlan()->getPlanId() !== $freePlan->getPlanId()) {
+            $this->changePlan($subscription, $freePlan);
+        }
+
+        $this->activate($subscription);
     }
 
     /**

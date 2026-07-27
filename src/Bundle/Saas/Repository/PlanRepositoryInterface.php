@@ -31,6 +31,13 @@ interface PlanRepositoryInterface
     public function findDefault(): ?Plan;
 
     /**
+     * Returns the active free plan (price 0, planId "0"), or null when no
+     * free plan is configured. Identifies the plan by its free-tier shape
+     * rather than the "default" flag.
+     */
+    public function findFree(): ?Plan;
+
+    /**
      * @return list<Plan>
      */
     public function findAllOrdered(): array;

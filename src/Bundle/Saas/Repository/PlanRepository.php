@@ -75,6 +75,22 @@ class PlanRepository extends EntityRepository implements PlanRepositoryInterface
             ->getOneOrNullResult();
     }
 
+    public function findFree(): ?Plan
+    {
+        $result = $this->createQueryBuilder('p')
+            ->where('p.price = :price')
+            ->andWhere('p.planId = :planId')
+            ->andWhere('p.active = :active')
+            ->setParameter('price', 0)
+            ->setParameter('planId', '0')
+            ->setParameter('active', true)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $result instanceof Plan ? $result : null;
+    }
+
     /**
      * @return list<Plan>
      */
