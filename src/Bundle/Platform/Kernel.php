@@ -15,21 +15,17 @@ namespace SolidWorx\Platform\PlatformBundle;
 
 use const GLOB_BRACE;
 use const PATHINFO_EXTENSION;
-use Knp\Bundle\MenuBundle\KnpMenuBundle;
 use Override;
 use RuntimeException;
 use Scheb\TwoFactorBundle\SchebTwoFactorBundle;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigSectionInterface;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigState;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\Config\ConfigCache;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Yaml\Yaml;
-use Symfony\UX\Icons\UXIconsBundle;
-use Twig\Extra\TwigExtraBundle\TwigExtraBundle;
 use function defined;
 use function file_exists;
 use function glob;
@@ -62,14 +58,6 @@ abstract class Kernel extends BaseKernel
     }
 
     #[Override]
-    public function handle(Request $request, int $type = HttpKernelInterface::MAIN_REQUEST, bool $catch = true): Response
-    {
-        $this->processPlatformConfig();
-
-        return parent::handle($request, $type, $catch);
-    }
-
-    #[Override]
     public function registerBundles(): iterable
     {
         yield from parent::registerBundles();
@@ -81,11 +69,6 @@ abstract class Kernel extends BaseKernel
         }
 
         yield new SolidWorxPlatformBundle();
-
-        yield new TwigExtraBundle();
-        yield new KnpMenuBundle();
-        yield new UXIconsBundle();
-        // yield new SymfonyCastsResetPasswordBundle();
     }
 
     #[Override]
@@ -104,6 +87,14 @@ abstract class Kernel extends BaseKernel
         }
     }
 
+    #[Override]
+    protected function prepareContainer(ContainerBuilder $container): void
+    {
+        parent::prepareContainer($container);
+
+        $container->fileExists($this->resolveConfigFile());
+    }
+
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
         $this->configureRoutesTrait($routes);
@@ -117,31 +108,39 @@ abstract class Kernel extends BaseKernel
             return;
         }
 
-        $this->rawConfig = [];
+        $cache = new ConfigCache($this->getCacheDir() . '/' . $this->getContainerClass() . '_platform_config.php', $this->debug);
 
-        $configFile = $this->resolveConfigFile();
-
-        if ($configFile === null) {
+        if ($cache->isFresh()) {
+            $this->rawConfig = require $cache->getPath();
             $this->publishPlatformConfigState();
 
             return;
         }
 
-        $ext = pathinfo($configFile, PATHINFO_EXTENSION);
+        $this->rawConfig = [];
 
-        $this->rawConfig = match ($ext) {
-            'yaml', 'yml' => Yaml::parseFile($configFile) ?? [],
-            'json' => (static function (string $path): array {
-                $decoded = json_decode((string) file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
-                return is_array($decoded) ? $decoded : [];
-            })($configFile),
-            'php' => (static function (string $path): array {
-                $result = require $path;
-                return is_array($result) ? $result : [];
-            })($configFile),
-            default => throw new RuntimeException(sprintf('Unsupported platform configuration file format: .%s', $ext)),
-        };
+        $configFile = $this->resolveConfigFile();
 
+        if ($configFile !== null) {
+            $ext = pathinfo($configFile, PATHINFO_EXTENSION);
+
+            $this->rawConfig = match ($ext) {
+                'yaml', 'yml' => Yaml::parseFile($configFile, Yaml::PARSE_CONSTANT) ?? [],
+                'json' => (static function (string $path): array {
+                    $decoded = json_decode((string) file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+                    return is_array($decoded) ? $decoded : [];
+                })($configFile),
+                'php' => (static function (string $path): array {
+                    $result = require $path;
+                    return is_array($result) ? $result : [];
+                })($configFile),
+                default => throw new RuntimeException(sprintf('Unsupported platform configuration file format: .%s', $ext)),
+            };
+        }
+
+        $content = "<?php\n\n return " . var_export($this->rawConfig, true) . ";\n";
+
+        $cache->write($content);
         $this->publishPlatformConfigState();
     }
 

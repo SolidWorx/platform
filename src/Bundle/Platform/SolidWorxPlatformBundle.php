@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle;
 
 use Doctrine\DBAL\Exception;
+use Knp\Bundle\MenuBundle\KnpMenuBundle;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigSectionInterface;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\AuthenticationCompilerPass;
@@ -25,8 +26,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Kernel\RequiredBundle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
+use Symfony\UX\Icons\UXIconsBundle;
+use Twig\Extra\TwigExtraBundle\TwigExtraBundle;
 
 #[RequiredBundle(SolidWorxPlatformBundle::class)]
+#[RequiredBundle(TwigExtraBundle::class)]
+#[RequiredBundle(KnpMenuBundle::class)]
+#[RequiredBundle(UXIconsBundle::class)]
 final class SolidWorxPlatformBundle extends Bundle implements PlatformConfigSectionInterface
 {
     public const string NAMESPACE = __NAMESPACE__;
