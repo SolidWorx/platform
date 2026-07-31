@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\EventSubscriber;
 
-use DateTimeImmutable;
+use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Override;
 use SolidWorx\Platform\SaasBundle\Entity\WebhookEventLog;
@@ -105,7 +105,7 @@ final readonly class WebhookRequestLogSubscriber implements EventSubscriberInter
         }
 
         $log->setStatus(WebhookEventStatus::PROCESSED);
-        $log->setProcessedAt(new DateTimeImmutable());
+        $log->setProcessedAt(CarbonImmutable::now());
 
         $this->entityManager->flush();
     }
@@ -126,7 +126,7 @@ final readonly class WebhookRequestLogSubscriber implements EventSubscriberInter
 
         $log->setStatus(WebhookEventStatus::FAILED);
         $log->setErrorMessage($this->extractErrorMessage($throwable));
-        $log->setProcessedAt(new DateTimeImmutable());
+        $log->setProcessedAt(CarbonImmutable::now());
 
         $this->entityManager->flush();
     }

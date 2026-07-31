@@ -66,7 +66,7 @@ trait UsesFixturesTrait
             }
 
             $topLevelDir = dirname($topLevelDir);
-            $counter--;
+            --$counter;
         } while ($counter > 0);
 
         $dirs = array_slice($parts, 0, $counter + 3);

@@ -15,14 +15,17 @@ namespace SolidWorx\Platform\SaasBundle;
 
 use Override;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigSectionInterface;
+use SolidWorx\Platform\PlatformBundle\SolidWorxPlatformBundle;
 use SolidWorx\Platform\SaasBundle\DependencyInjection\CompilerPass\FeatureGateAliasPass;
 use SolidWorx\Platform\SaasBundle\DependencyInjection\CompilerPass\ResolveTargetEntityPass;
 use SolidWorx\Platform\SaasBundle\DependencyInjection\CompilerPass\WebhookCompilerPass;
 use SolidWorx\Platform\SaasBundle\DependencyInjection\SolidWorxPlatformSaasExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
+use Symfony\Component\DependencyInjection\Kernel\RequiredBundle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
+#[RequiredBundle(SolidWorxPlatformBundle::class)]
 final class SolidWorxPlatformSaasBundle extends Bundle implements PlatformConfigSectionInterface
 {
     public const string NAMESPACE = __NAMESPACE__;
@@ -60,7 +63,7 @@ final class SolidWorxPlatformSaasBundle extends Bundle implements PlatformConfig
     }
 
     #[Override]
-    protected function createContainerExtension(): ?ExtensionInterface
+    protected function createContainerExtension(): ExtensionInterface
     {
         return new SolidWorxPlatformSaasExtension($this->rawConfig);
     }

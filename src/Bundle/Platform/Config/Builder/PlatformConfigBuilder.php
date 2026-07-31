@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Config\Builder;
 
+use Webmozart\Assert\Assert;
+
 /**
  * PHP fluent builder for `platform.yaml` configuration.
  *
@@ -99,6 +101,7 @@ final class PlatformConfigBuilder
      */
     public function withSaasConfig(array $saasConfig): self
     {
+        Assert::allString(array_keys($saasConfig));
         $this->saas = $saasConfig;
         return $this;
     }
@@ -110,6 +113,7 @@ final class PlatformConfigBuilder
      */
     public function withUiConfig(array $uiConfig): self
     {
+        Assert::allString(array_keys($uiConfig));
         $this->ui = $uiConfig;
         return $this;
     }

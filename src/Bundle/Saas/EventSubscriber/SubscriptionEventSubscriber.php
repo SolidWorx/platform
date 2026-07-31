@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\EventSubscriber;
 
+use DateTimeInterface;
 use LogicException;
 use Override;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
@@ -87,7 +88,7 @@ readonly class SubscriptionEventSubscriber implements EventSubscriberInterface
 
     protected function handleSubscriptionStatus(SubscriptionCreatedEvent | SubscriptionUpdatedEvent $event, Subscription $subscription): void
     {
-        if ($event->subscription === null) {
+        if (! $event->subscription instanceof \SolidWorx\Platform\SaasBundle\Dto\LemonSqueezy\Subscription) {
             throw new LogicException(sprintf(
                 'Cannot handle subscription status for subscription "%s": no subscription DTO was provided with the event.',
                 $event->subscriptionId->toBase58(),
@@ -99,7 +100,7 @@ readonly class SubscriptionEventSubscriber implements EventSubscriberInterface
         switch ($attrs->status) {
             case SubscriptionStatus::ACTIVE:
                 $renewDate = $attrs->renewsAt ?? $attrs->endsAt;
-                if ($renewDate === null) {
+                if (! $renewDate instanceof DateTimeInterface) {
                     throw new UnexpectedValueException(sprintf(
                         'Cannot renew subscription "%s": both renewsAt and endsAt are null in the webhook payload.',
                         $event->subscriptionId->toBase58(),
@@ -115,7 +116,7 @@ readonly class SubscriptionEventSubscriber implements EventSubscriberInterface
 
             case SubscriptionStatus::CANCELLED:
                 $endsAt = $attrs->endsAt;
-                if ($endsAt === null) {
+                if (! $endsAt instanceof DateTimeInterface) {
                     throw new UnexpectedValueException(sprintf(
                         'Cannot cancel subscription "%s": endsAt is null in the webhook payload.',
                         $event->subscriptionId->toBase58(),

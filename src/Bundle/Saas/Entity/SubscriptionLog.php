@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\Entity;
 
+use Carbon\CarbonImmutable;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -26,7 +27,7 @@ use Symfony\Component\Uid\Ulid;
 #[ORM\Entity(repositoryClass: SubscriptionLogRepository::class)]
 #[ORM\Table(name: SubscriptionLog::TABLE_NAME)]
 #[ORM\Index(columns: ['type'])]
-#[ORM\Index(columns: ['subscription_id', 'created_at'], name: 'idx_subscription_log_subscription_created')]
+#[ORM\Index(name: 'idx_subscription_log_subscription_created', columns: ['subscription_id', 'created_at'])]
 class SubscriptionLog
 {
     public const string TABLE_NAME = 'saas_subscription_log';
@@ -63,7 +64,7 @@ class SubscriptionLog
     public function __construct()
     {
         $this->id = new NilUlid();
-        $this->createdAt = new DateTimeImmutable();
+        $this->createdAt = CarbonImmutable::now();
     }
 
     public function getId(): Ulid

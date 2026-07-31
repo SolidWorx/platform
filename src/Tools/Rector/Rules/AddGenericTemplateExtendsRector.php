@@ -526,9 +526,11 @@ final class AddGenericTemplateExtendsRector extends AbstractRector
             if (! $item instanceof ArrayItem) {
                 continue;
             }
+
             if (! $item->key instanceof String_) {
                 continue;
             }
+
             if ($item->key->value === 'mapped' && $this->isFalseValue($item->value)) {
                 return true;
             }
@@ -584,9 +586,11 @@ final class AddGenericTemplateExtendsRector extends AbstractRector
                 if (! $item instanceof ArrayItem) {
                     continue;
                 }
+
                 if (! $item->key instanceof String_) {
                     continue;
                 }
+
                 if ($item->key->value === 'multiple' && $this->isTrueValue($item->value)) {
                     return new GenericTypeNode(
                         new IdentifierTypeNode('list'),

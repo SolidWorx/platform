@@ -145,7 +145,7 @@ class Plan implements Stringable
 
     public function getTrialDuration(): ?DateInterval
     {
-        return $this->trialDuration ? CarbonInterval::instance($this->trialDuration) : null;
+        return $this->trialDuration instanceof DateInterval ? CarbonInterval::instance($this->trialDuration) : null;
     }
 
     public function setTrialDuration(?DateInterval $trialDuration): static

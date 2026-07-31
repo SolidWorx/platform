@@ -41,7 +41,6 @@ use function sprintf;
 abstract class Kernel extends BaseKernel
 {
     use MicroKernelTrait {
-        registerBundles as registerBundlesTrait;
         configureRoutes as private configureRoutesTrait;
     }
 
@@ -73,7 +72,7 @@ abstract class Kernel extends BaseKernel
     #[Override]
     public function registerBundles(): iterable
     {
-        yield from $this->registerBundlesTrait();
+        yield from parent::registerBundles();
 
         $platformConfig = $this->rawConfig['platform'] ?? [];
 
@@ -92,15 +91,9 @@ abstract class Kernel extends BaseKernel
     #[Override]
     protected function initializeBundles(): void
     {
-        $this->bundles = [];
+        parent::initializeBundles();
 
-        foreach ($this->registerBundles() as $bundle) {
-            $name = $bundle->getName();
-            if (isset($this->bundles[$name])) {
-                // Bundle is already registered, skip it
-                continue;
-            }
-
+        foreach ($this->bundles as $bundle) {
             if ($bundle instanceof PlatformConfigSectionInterface) {
                 $key = $bundle->getConfigSectionKey();
                 $section = $key !== ''
@@ -108,8 +101,6 @@ abstract class Kernel extends BaseKernel
                     : ($this->rawConfig['platform'] ?? []);
                 $bundle->setPlatformRawConfig($section);
             }
-
-            $this->bundles[$name] = $bundle;
         }
     }
 

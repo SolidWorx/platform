@@ -20,12 +20,12 @@ use Doctrine\Common\Util\ClassUtils;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Console\Command;
 use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
+use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Enum\SubscriptionStatus;
 use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepository;
 use Stringable;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Uid\Ulid;
 use function array_map;
 
 //
@@ -43,7 +43,7 @@ final class SubscriptionListCommand extends Command
     {
         $this
             ->setHelp('This command allows you to list all subscriptions in the system.')
-            ->addOption('status', 's', InputOption::VALUE_REQUIRED, 'Filter subscriptions by status', null)
+            ->addOption('status', 's', InputOption::VALUE_REQUIRED, 'Filter subscriptions by status')
             ->addOption('limit', 'l', InputOption::VALUE_REQUIRED, 'Limit number of subscriptions to show', 25)
             ->addOption('latest', 't', InputOption::VALUE_NONE, 'Show only the latest subscriptions')
             ->addOption('ending-soon', 'p', InputOption::VALUE_NONE, 'Show subscriptions ending soon')
@@ -99,7 +99,7 @@ final class SubscriptionListCommand extends Command
         $this->io->table(
             ['Subscription ID', 'Subscriber', 'Plan', 'Status', 'Start Date', 'End Date'],
             array_map(
-                fn ($subscription): array => [
+                fn (Subscription $subscription): array => [
                     $subscription->getSubscriptionId() ?? 'N/A',
                     $this->getSubscriberString($subscription->getSubscriber()),
                     $subscription->getPlan()->getName(),
@@ -114,7 +114,7 @@ final class SubscriptionListCommand extends Command
         return self::SUCCESS;
     }
 
-    private function getSubscriberString(SubscribableInterface $subscriber): string|int|Ulid
+    private function getSubscriberString(SubscribableInterface $subscriber): string
     {
         if ($subscriber instanceof Stringable || method_exists($subscriber, '__toString')) {
             return (string) $subscriber;

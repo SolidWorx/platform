@@ -67,7 +67,7 @@ readonly class PlanFeatureManager implements ResetInterface
                 return $this->configRegistry->get($featureKey)->toFeatureValue();
             });
         } catch (\Psr\Cache\InvalidArgumentException $invalidArgumentException) {
-            throw new UndefinedFeatureException($featureKey, previous: $invalidArgumentException);
+            throw new UndefinedFeatureException($featureKey, $invalidArgumentException->getCode(), previous: $invalidArgumentException);
         }
     }
 
@@ -207,14 +207,7 @@ readonly class PlanFeatureManager implements ResetInterface
         }
 
         $planFeatures = $this->planFeatureRepository->findByFeatureKey($featureKey);
-
-        foreach ($planFeatures as $planFeature) {
-            if ($planFeature->toFeatureValue()->isEnabled()) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($planFeatures, fn ($planFeature) => $planFeature->toFeatureValue()->isEnabled());
     }
 
     /**

@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\Subscription;
 
+use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use DateInterval;
-use DateTime;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Override;
@@ -70,8 +70,8 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
         $subscription = new Subscription();
         $subscription->setSubscriber($subscribable);
         $subscription->setStatus(SubscriptionStatus::PENDING);
-        $subscription->setStartDate(new DateTime('NOW'));
-        $subscription->setEndDate((new DateTime('NOW')));
+        $subscription->setStartDate(Carbon::parse('NOW'));
+        $subscription->setEndDate((Carbon::parse('NOW')));
         $subscription->setPlan($plan);
 
         $this->subscriptionRepository->save($subscription);

@@ -34,6 +34,7 @@ use function is_string;
  * The field always renders a real `<textarea>` (so it degrades gracefully without JavaScript) and stores
  * either sanitized HTML (default) or a validated Tiptap JSON document. All output is filtered server-side,
  * which is the security boundary regardless of what the browser submits.
+ * @extends AbstractType<mixed>
  */
 final class TextEditorType extends AbstractType
 {
@@ -70,6 +71,9 @@ final class TextEditorType extends AbstractType
         $builder->addModelTransformer(new SanitizeHtmlTransformer($sanitizer));
     }
 
+    /**
+     * @param FormInterface<mixed> $form
+     */
     #[Override]
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {

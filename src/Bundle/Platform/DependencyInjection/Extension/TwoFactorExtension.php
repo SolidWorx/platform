@@ -33,7 +33,7 @@ final class TwoFactorExtension
         $container
             ->setDefinition(
                 'solidworx_platform.security.two_factor.form_renderer.email',
-                (new Definition(TwoFactorFormRenderer::class))
+                new Definition(TwoFactorFormRenderer::class)
                     ->addArgument(new Reference('twig'))
                     ->addArgument(new Parameter('scheb_two_factor.email.template'))
                     ->addArgument($config),
@@ -41,7 +41,7 @@ final class TwoFactorExtension
         $container
             ->setDefinition(
                 'solidworx_platform.security.two_factor.form_renderer.totp',
-                (new Definition(TwoFactorFormRenderer::class))
+                new Definition(TwoFactorFormRenderer::class)
                     ->addArgument(new Reference('twig'))
                     ->addArgument(new Parameter('scheb_two_factor.totp.template'))
                     ->addArgument($config),

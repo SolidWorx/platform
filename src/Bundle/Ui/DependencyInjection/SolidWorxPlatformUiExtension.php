@@ -22,6 +22,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+use Webmozart\Assert\Assert;
 use function dirname;
 
 final class SolidWorxPlatformUiExtension extends Extension implements PrependExtensionInterface
@@ -40,6 +41,7 @@ final class SolidWorxPlatformUiExtension extends Extension implements PrependExt
     public function __construct(
         private readonly array $rawSection
     ) {
+        Assert::allString(array_keys($rawSection));
     }
 
     #[Override]
@@ -104,7 +106,7 @@ final class SolidWorxPlatformUiExtension extends Extension implements PrependExt
      */
     private function processRawSection(): array
     {
-        $treeBuilder = (new UiConfiguration())->getTreeBuilder();
+        $treeBuilder = new UiConfiguration()->getTreeBuilder();
 
         $processor = new Processor();
 

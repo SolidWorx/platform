@@ -89,8 +89,8 @@ final readonly class JsonDocumentTransformer implements DataTransformerInterface
         try {
             /** @var mixed $decoded */
             $decoded = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            throw new TransformationFailedException('Invalid JSON document.', 0, $exception);
+        } catch (JsonException $jsonException) {
+            throw new TransformationFailedException('Invalid JSON document.', 0, $jsonException);
         }
 
         if (! is_array($decoded)) {
@@ -105,8 +105,8 @@ final readonly class JsonDocumentTransformer implements DataTransformerInterface
 
         try {
             return json_encode($clean, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        } catch (JsonException $exception) {
-            throw new TransformationFailedException('Unable to encode the document.', 0, $exception);
+        } catch (JsonException $jsonException) {
+            throw new TransformationFailedException('Unable to encode the document.', 0, $jsonException);
         }
     }
 
@@ -188,8 +188,12 @@ final readonly class JsonDocumentTransformer implements DataTransformerInterface
                 }
 
                 $href = $attrs['href'] ?? null;
+                if (! is_string($href)) {
+                    // Drop the unsafe link but keep the text content intact.
+                    continue;
+                }
 
-                if (! is_string($href) || ! $this->isSafeUrl($href)) {
+                if (! $this->isSafeUrl($href)) {
                     // Drop the unsafe link but keep the text content intact.
                     continue;
                 }

@@ -15,10 +15,13 @@ namespace SolidWorx\Platform\UiBundle;
 
 use Override;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigSectionInterface;
+use SolidWorx\Platform\PlatformBundle\SolidWorxPlatformBundle;
 use SolidWorx\Platform\UiBundle\DependencyInjection\SolidWorxPlatformUiExtension;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
+use Symfony\Component\DependencyInjection\Kernel\RequiredBundle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
+#[RequiredBundle(SolidWorxPlatformBundle::class)]
 final class SolidWorxPlatformUiBundle extends Bundle implements PlatformConfigSectionInterface
 {
     public const string NAMESPACE = __NAMESPACE__;
@@ -47,7 +50,7 @@ final class SolidWorxPlatformUiBundle extends Bundle implements PlatformConfigSe
     }
 
     #[Override]
-    protected function createContainerExtension(): ?ExtensionInterface
+    protected function createContainerExtension(): ExtensionInterface
     {
         return new SolidWorxPlatformUiExtension($this->rawConfig);
     }

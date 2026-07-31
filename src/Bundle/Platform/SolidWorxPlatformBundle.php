@@ -23,8 +23,10 @@ use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
+use Symfony\Component\DependencyInjection\Kernel\RequiredBundle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
+#[RequiredBundle(SolidWorxPlatformBundle::class)]
 final class SolidWorxPlatformBundle extends Bundle implements PlatformConfigSectionInterface
 {
     public const string NAMESPACE = __NAMESPACE__;
@@ -84,7 +86,7 @@ final class SolidWorxPlatformBundle extends Bundle implements PlatformConfigSect
     }
 
     #[Override]
-    protected function createContainerExtension(): ?ExtensionInterface
+    protected function createContainerExtension(): ExtensionInterface
     {
         return new ($this->getContainerExtensionClass())($this->rawConfig);
     }

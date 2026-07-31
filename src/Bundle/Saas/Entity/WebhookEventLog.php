@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\Entity;
 
+use Carbon\CarbonImmutable;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -22,15 +23,16 @@ use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
 use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\Uid\NilUlid;
 use Symfony\Component\Uid\Ulid;
+use Webmozart\Assert\Assert;
 
 #[ORM\Entity(repositoryClass: WebhookEventLogRepository::class)]
 #[ORM\Table(name: WebhookEventLog::TABLE_NAME)]
-#[ORM\Index(columns: ['gateway'], name: 'idx_webhook_event_log_gateway')]
-#[ORM\Index(columns: ['gateway', 'event_type'], name: 'idx_webhook_event_log_gateway_event_type')]
-#[ORM\Index(columns: ['status'], name: 'idx_webhook_event_log_status')]
-#[ORM\Index(columns: ['gateway_event_id'], name: 'idx_webhook_event_log_gateway_event_id')]
-#[ORM\Index(columns: ['external_subscription_id'], name: 'idx_webhook_event_log_external_subscription_id')]
-#[ORM\Index(columns: ['received_at'], name: 'idx_webhook_event_log_received_at')]
+#[ORM\Index(name: 'idx_webhook_event_log_gateway', columns: ['gateway'])]
+#[ORM\Index(name: 'idx_webhook_event_log_gateway_event_type', columns: ['gateway', 'event_type'])]
+#[ORM\Index(name: 'idx_webhook_event_log_status', columns: ['status'])]
+#[ORM\Index(name: 'idx_webhook_event_log_gateway_event_id', columns: ['gateway_event_id'])]
+#[ORM\Index(name: 'idx_webhook_event_log_external_subscription_id', columns: ['external_subscription_id'])]
+#[ORM\Index(name: 'idx_webhook_event_log_received_at', columns: ['received_at'])]
 class WebhookEventLog
 {
     public const string TABLE_NAME = 'webhook_event_log';
@@ -80,7 +82,7 @@ class WebhookEventLog
     public function __construct()
     {
         $this->id = new NilUlid();
-        $this->receivedAt = new DateTimeImmutable();
+        $this->receivedAt = CarbonImmutable::now();
     }
 
     public function getId(): Ulid
@@ -137,6 +139,7 @@ class WebhookEventLog
      */
     public function setPayload(array $payload): static
     {
+        Assert::allString(array_keys($payload));
         $this->payload = $payload;
 
         return $this;
@@ -155,6 +158,8 @@ class WebhookEventLog
      */
     public function setRequestHeaders(array $requestHeaders): static
     {
+        Assert::allString($requestHeaders);
+        Assert::allString(array_keys($requestHeaders));
         $this->requestHeaders = $requestHeaders;
 
         return $this;

@@ -17,6 +17,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Repository\EntityRepository;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
+use Webmozart\Assert\Assert;
 
 /**
  * @template-extends EntityRepository<Subscription>
@@ -35,6 +36,7 @@ final class SubscriptionRepository extends EntityRepository implements Subscript
     #[Override]
     public function findOneBy(array $criteria, array|null $orderBy = null): ?Subscription
     {
+        Assert::allString(array_keys($criteria));
         $result = parent::findOneBy($criteria, $orderBy);
         assert($result === null || $result instanceof Subscription);
 

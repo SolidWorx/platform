@@ -30,7 +30,7 @@ final class HtmlSanitizerFactory
      */
     public function create(array $allowedElements): HtmlSanitizer
     {
-        $config = (new HtmlSanitizerConfig())
+        $config = new HtmlSanitizerConfig()
             ->allowLinkSchemes(['https', 'http', 'mailto'])
             ->forceAttribute('a', 'rel', 'noopener noreferrer');
 

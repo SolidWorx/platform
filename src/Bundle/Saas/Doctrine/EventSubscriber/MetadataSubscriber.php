@@ -15,6 +15,7 @@ namespace SolidWorx\Platform\SaasBundle\Doctrine\EventSubscriber;
 
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Webmozart\Assert\Assert;
 use function array_key_exists;
 
 final readonly class MetadataSubscriber
@@ -26,6 +27,8 @@ final readonly class MetadataSubscriber
         #[Autowire(param: 'solidworx_platform.saas.doctrine.db_schema.table_names')]
         private array $dbNames
     ) {
+        Assert::allString($dbNames);
+        Assert::allString(array_keys($dbNames));
     }
 
     public function loadClassMetadata(LoadClassMetadataEventArgs $event): void

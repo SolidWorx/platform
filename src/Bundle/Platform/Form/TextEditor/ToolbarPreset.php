@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Form\TextEditor;
 
+use Webmozart\Assert\Assert;
+
 /**
  * Opinionated toolbar presets for the {@see \SolidWorx\Platform\PlatformBundle\Form\Type\TextEditorType}.
  *
@@ -160,6 +162,7 @@ enum ToolbarPreset: string
      */
     private function collect(array $map, array $base): array
     {
+        Assert::allString(array_keys($map));
         $values = $base;
 
         foreach ($this->features() as $feature) {

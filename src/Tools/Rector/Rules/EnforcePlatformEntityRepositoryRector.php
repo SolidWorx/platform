@@ -169,13 +169,7 @@ final class EnforcePlatformEntityRepositoryRector extends AbstractRector
             return false;
         }
 
-        foreach (self::DOCTRINE_REPOSITORY_CLASSES as $doctrineClass) {
-            if ($classFqn === $doctrineClass || is_subclass_of($classFqn, $doctrineClass)) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any(self::DOCTRINE_REPOSITORY_CLASSES, fn ($doctrineClass): bool => $classFqn === $doctrineClass || is_subclass_of($classFqn, $doctrineClass));
     }
 
     private function hasPlatformRepositoryInChain(string $classFqn): bool

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\Entity;
 
+use Carbon\CarbonImmutable;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
@@ -44,13 +45,13 @@ class Trial
     private TrialUserInterface $user;
 
     #[ORM\OneToOne(targetEntity: Subscription::class)]
-    #[ORM\JoinColumn(onDelete: 'CASCADE', nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private Subscription $subscription;
 
     public function __construct()
     {
         $this->id = new NilUlid();
-        $this->createdAt = new DateTimeImmutable();
+        $this->createdAt = CarbonImmutable::now();
     }
 
     /**

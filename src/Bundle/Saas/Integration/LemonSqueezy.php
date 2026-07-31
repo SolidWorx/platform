@@ -31,6 +31,7 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Webmozart\Assert\Assert;
 
 class LemonSqueezy implements PaymentIntegrationInterface
 {
@@ -307,6 +308,7 @@ class LemonSqueezy implements PaymentIntegrationInterface
      */
     private function extractRenewDate(array $payload, string $subscriptionId): DateTimeImmutable
     {
+        Assert::allString(array_keys($payload));
         $attributes = $payload['data']['attributes'] ?? [];
         $renewsAt = $attributes['renews_at'] ?? $attributes['ends_at'] ?? null;
 

@@ -230,6 +230,7 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function setRoles(array $roles): static
     {
+        \Webmozart\Assert\Assert::allString($roles);
         $this->roles = [];
 
         foreach ($roles as $role) {

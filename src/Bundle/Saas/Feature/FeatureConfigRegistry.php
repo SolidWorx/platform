@@ -15,6 +15,7 @@ namespace SolidWorx\Platform\SaasBundle\Feature;
 
 use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
 use SolidWorx\Platform\SaasBundle\Exception\UndefinedFeatureException;
+use Webmozart\Assert\Assert;
 
 final class FeatureConfigRegistry
 {
@@ -28,6 +29,7 @@ final class FeatureConfigRegistry
      */
     public function __construct(array $featureConfigs = [])
     {
+        Assert::allString(array_keys($featureConfigs));
         foreach ($featureConfigs as $key => $config) {
             $this->features[$key] = new FeatureConfig(
                 $key,

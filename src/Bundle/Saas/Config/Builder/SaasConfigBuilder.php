@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\Config\Builder;
 
+use Webmozart\Assert\Assert;
+
 /**
  * PHP fluent builder for the `platform.saas:` configuration section.
  *
@@ -103,6 +105,7 @@ final class SaasConfigBuilder
      */
     public function feature(string $name, array $definition): self
     {
+        Assert::allString(array_keys($definition));
         $this->features[$name] = $definition;
         return $this;
     }

@@ -21,6 +21,7 @@ use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
+use Webmozart\Assert\Assert;
 use function array_merge;
 
 final readonly class TwoFactorFormRenderer implements TwoFactorFormRendererInterface
@@ -31,8 +32,9 @@ final readonly class TwoFactorFormRenderer implements TwoFactorFormRendererInter
     public function __construct(
         private Environment $twigEnvironment,
         private string $template,
-        private array $templateVars = [],
+        private array $templateVars = []
     ) {
+        Assert::allString(array_keys($templateVars));
     }
 
     /**
@@ -43,6 +45,7 @@ final readonly class TwoFactorFormRenderer implements TwoFactorFormRendererInter
     #[Override]
     public function renderForm(Request $request, array $templateVars): Response
     {
+        Assert::allString(array_keys($templateVars));
         $content = $this->twigEnvironment->render($this->template, array_merge($this->templateVars, $templateVars));
         $response = new Response();
         $response->setContent($content);

@@ -38,7 +38,7 @@ final class MenuCompilerPass implements CompilerPassInterface
         foreach ($taggedServices as $id => $tagAttributes) {
             foreach ($tagAttributes as $attributes) {
 
-                $wrapperDefinition = (new Definition(Closure::class))
+                $wrapperDefinition = new Definition(Closure::class)
                     ->addArgument([new Reference($id), $attributes['method']])
                     ->setFactory([Closure::class, 'fromCallable']);
 
