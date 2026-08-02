@@ -23,6 +23,9 @@ use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigState;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Yaml\Yaml;
@@ -46,6 +49,14 @@ abstract class Kernel extends BaseKernel
      * @var array<string, mixed>|null
      */
     private ?array $rawConfig = null;
+
+    #[Override]
+    public function handle(Request $request, int $type = HttpKernelInterface::MAIN_REQUEST, bool $catch = true): Response
+    {
+        $this->processPlatformConfig();
+
+        return parent::handle($request, $type, $catch);
+    }
 
     #[Override]
     public function boot(): void
