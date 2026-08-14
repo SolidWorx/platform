@@ -39,14 +39,14 @@ return RectorConfig::configure()
         SetList::TYPE_DECLARATION_DOCBLOCKS,
         SetList::CARBON,
         SetList::PRIVATIZATION,
-        SetList::ASSERT,
 
         // PHP
         LevelSetList::UP_TO_PHP_84,
 
         // PHPUnit
-        PHPUnitSetList::PHPUNIT_90,
-        PHPUnitSetList::PHPUNIT_100,
         PHPUnitSetList::ANNOTATIONS_TO_ATTRIBUTES,
         PHPUnitSetList::PHPUNIT_CODE_QUALITY,
+        PHPUnitSetList::PHPUNIT_MOCK_TO_STUB,
+        PHPUnitSetList::PHPUNIT_NARROW_ASSERTS,
+        PHPUnitSetList::COMPOSER_BASED,
     ]);
