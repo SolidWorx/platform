@@ -40,7 +40,7 @@ final readonly class PlanFeatureToggle implements FeatureToggleInterface
      * @return int|bool|string|array<mixed>
      */
     #[Override]
-    public function getValue(string $featureKey, SubscribableInterface $subscriber): int|bool|string|array
+    public function getValue(string $featureKey, SubscribableInterface $subscriber): int | bool | string | array
     {
         try {
             return $this->planFeatureManager->getFeatureForSubscriber($subscriber, $featureKey)->value;

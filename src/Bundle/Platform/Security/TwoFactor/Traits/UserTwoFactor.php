@@ -157,7 +157,7 @@ trait UserTwoFactor
         return $this;
     }
 
-    public function getPreferredTwoFactorProvider(): string|null
+    public function getPreferredTwoFactorProvider(): string | null
     {
         return 'totp';
     }

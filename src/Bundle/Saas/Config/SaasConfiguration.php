@@ -44,7 +44,7 @@ final class SaasConfiguration implements PlatformConfigurationInterface
         $treeBuilder = new TreeBuilder(self::SECTION_KEY);
         $root = $treeBuilder->getRootNode();
 
-        //@formatter:off
+        // @formatter:off
         $root
             ->info('SaaS / subscription configuration')
             ->children()
@@ -185,7 +185,7 @@ final class SaasConfiguration implements PlatformConfigurationInterface
                     ->end()
                 ->end()
             ->end();
-        //@formatter:on
+        // @formatter:on
 
         return $treeBuilder;
     }

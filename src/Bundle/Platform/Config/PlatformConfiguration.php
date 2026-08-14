@@ -31,7 +31,7 @@ final class PlatformConfiguration implements PlatformConfigurationInterface
         $treeBuilder = new TreeBuilder('platform');
         $root = $treeBuilder->getRootNode();
 
-        //@formatter:off
+        // @formatter:off
         $root
             ->addDefaultsIfNotSet()
             ->children()
@@ -85,7 +85,7 @@ final class PlatformConfiguration implements PlatformConfigurationInterface
                     ->end()
                 ->end()
             ->end();
-        //@formatter:on
+        // @formatter:on
 
         return $treeBuilder;
     }

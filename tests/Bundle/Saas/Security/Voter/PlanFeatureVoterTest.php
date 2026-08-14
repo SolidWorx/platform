@@ -27,7 +27,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 #[CoversClass(PlanFeatureVoter::class)]
 final class PlanFeatureVoterTest extends TestCase
 {
-    private PlanFeatureManager&MockObject $planFeatureManager;
+    private PlanFeatureManager & MockObject $planFeatureManager;
 
     private PlanFeatureVoter $voter;
 

@@ -51,7 +51,7 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
 
     public function createSubscription(
         SubscribableInterface $subscribable,
-        Plan|Ulid|string $planId,
+        Plan | Ulid | string $planId,
     ): Subscription {
         $plan = $this->planRepository->find($planId);
 

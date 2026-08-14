@@ -89,9 +89,8 @@ class Subscription
     ])]
     private Collection $logs;
 
-    /*
+    /**
      * @TODO: The following fields can be added to extend the Subscription model:
-     *
      * - `trial_start_date`: DateTimeInterface
      * - `trial_end_date`: DateTimeInterface
      * - `cancellation_date`: DateTimeInterface
@@ -99,7 +98,6 @@ class Subscription
      * - `discount_percent`: string (Used when adding a discount to the subscription, will always deduct x amount from the plan price)
      * - `special_price`: int (Used when adding a special price to the subscription, overrides the default price on the plan)
      */
-
     public function __construct()
     {
         $this->id = new NilUlid();

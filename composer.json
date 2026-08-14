@@ -1,9 +1,7 @@
 {
-    "type": "symfony-bundle",
     "name": "solidworx/platform",
     "license": "MIT",
-    "minimum-stability": "stable",
-    "prefer-stable": true,
+    "type": "symfony-bundle",
     "keywords": [
         "symfony-ux"
     ],
@@ -40,29 +38,8 @@
         "symfony/webpack-encore-bundle": "^2.3",
         "twig/extra-bundle": "^3.21",
         "twig/html-extra": "^3.24",
-        "twig/twig": "^3.12"
-    },
-    "config": {
-        "sort-packages": true,
-        "allow-plugins": {
-            "ergebnis/composer-normalize": true,
-            "phpstan/extension-installer": true
-        }
-    },
-    "autoload": {
-        "psr-4": {
-            "SolidWorx\\Platform\\Component\\": "src/Component",
-            "SolidWorx\\Platform\\UiBundle\\": "src/Bundle/Ui",
-            "SolidWorx\\Platform\\PlatformBundle\\": "src/Bundle/Platform",
-            "SolidWorx\\Platform\\SaasBundle\\": "src/Bundle/Saas",
-            "SolidWorx\\Platform\\Test\\": "src/Test",
-            "SolidWorx\\Platform\\Tools\\": "src/Tools/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "SolidWorx\\Platform\\Tests\\": "tests/"
-        }
+        "twig/twig": "^3.12",
+        "webmozart/assert": "^2.4"
     },
     "require-dev": {
         "ergebnis/composer-normalize": "^2.52",
@@ -79,5 +56,29 @@
         "roave/security-advisories": "dev-latest",
         "spatie/phpunit-snapshot-assertions": "^5.4",
         "symplify/easy-coding-standard": "^13.2"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "SolidWorx\\Platform\\Component\\": "src/Component",
+            "SolidWorx\\Platform\\PlatformBundle\\": "src/Bundle/Platform",
+            "SolidWorx\\Platform\\SaasBundle\\": "src/Bundle/Saas",
+            "SolidWorx\\Platform\\Test\\": "src/Test",
+            "SolidWorx\\Platform\\Tools\\": "src/Tools/",
+            "SolidWorx\\Platform\\UiBundle\\": "src/Bundle/Ui"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SolidWorx\\Platform\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "ergebnis/composer-normalize": true,
+            "phpstan/extension-installer": true
+        },
+        "sort-packages": true
     }
 }

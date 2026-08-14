@@ -21,7 +21,7 @@ interface SubscriptionRepositoryInterface
      * @param array<string, mixed> $criteria
      * @param array<string, string>|null $orderBy
      */
-    public function findOneBy(array $criteria, array|null $orderBy = null): ?Subscription;
+    public function findOneBy(array $criteria, array | null $orderBy = null): ?Subscription;
 
     public function save(object $entity, bool $flush = true): void;
 }

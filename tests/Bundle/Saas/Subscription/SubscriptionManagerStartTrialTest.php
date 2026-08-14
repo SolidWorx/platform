@@ -31,7 +31,7 @@ use Symfony\Component\Uid\Ulid;
 #[CoversClass(SubscriptionManager::class)]
 final class SubscriptionManagerStartTrialTest extends TestCase
 {
-    private SubscriptionRepositoryInterface&MockObject $subscriptionRepository;
+    private SubscriptionRepositoryInterface & MockObject $subscriptionRepository;
 
     private SubscriptionManager $manager;
 
