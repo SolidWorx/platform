@@ -52,7 +52,7 @@ class PlanFeature
      * @var int|bool|string|array<mixed>
      */
     #[ORM\Column(type: Types::JSON)]
-    private int|bool|string|array $value;
+    private int | bool | string | array $value;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
@@ -106,7 +106,7 @@ class PlanFeature
     /**
      * @return int|bool|string|array<mixed>
      */
-    public function getValue(): int|bool|string|array
+    public function getValue(): int | bool | string | array
     {
         return $this->value;
     }
@@ -114,7 +114,7 @@ class PlanFeature
     /**
      * @param int|bool|string|array<mixed> $value
      */
-    public function setValue(int|bool|string|array $value): static
+    public function setValue(int | bool | string | array $value): static
     {
         $this->value = $value;
 

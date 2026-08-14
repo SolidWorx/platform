@@ -33,7 +33,7 @@ interface FeatureToggleInterface
      *
      * @return int|bool|string|array<mixed>
      */
-    public function getValue(string $featureKey, SubscribableInterface $subscriber): int|bool|string|array;
+    public function getValue(string $featureKey, SubscribableInterface $subscriber): int | bool | string | array;
 
     /**
      * Check if a feature is defined.

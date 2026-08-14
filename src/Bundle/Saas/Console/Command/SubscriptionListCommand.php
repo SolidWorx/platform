@@ -30,7 +30,6 @@ use function array_map;
 use function is_scalar;
 use function is_string;
 
-//
 #[AsCommand(name: 'saas:subscription:list', description: 'List all subscriptions')]
 final class SubscriptionListCommand extends Command
 {

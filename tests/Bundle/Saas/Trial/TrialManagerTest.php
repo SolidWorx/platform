@@ -28,9 +28,9 @@ use Symfony\Component\Uid\Ulid;
 #[CoversClass(TrialManager::class)]
 final class TrialManagerTest extends TestCase
 {
-    private TrialRepositoryInterface&MockObject $trialRepository;
+    private TrialRepositoryInterface & MockObject $trialRepository;
 
-    private EntityManagerInterface&MockObject $entityManager;
+    private EntityManagerInterface & MockObject $entityManager;
 
     private TrialManager $manager;
 
@@ -116,7 +116,7 @@ final class TrialManagerTest extends TestCase
         $this->manager->createTrial($user, $subscription);
     }
 
-    private function mockUser(): TrialUserInterface&MockObject
+    private function mockUser(): TrialUserInterface & MockObject
     {
         $user = $this->createMock(TrialUserInterface::class);
         $user->method('getId')->willReturn(new Ulid());

@@ -31,7 +31,7 @@ final class UiConfiguration implements PlatformConfigurationInterface
         $treeBuilder = new TreeBuilder('ui');
         $root = $treeBuilder->getRootNode();
 
-        //@formatter:off
+        // @formatter:off
         $root
             ->info('UI / presentation configuration')
             ->addDefaultsIfNotSet()
@@ -54,7 +54,7 @@ final class UiConfiguration implements PlatformConfigurationInterface
                     ->end()
                 ->end()
             ->end();
-        //@formatter:on
+        // @formatter:on
 
         return $treeBuilder;
     }

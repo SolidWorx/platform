@@ -29,7 +29,7 @@ final readonly class FeatureValue
     public function __construct(
         public string $key,
         public FeatureType $type,
-        public int|bool|string|array $value,
+        public int | bool | string | array $value,
     ) {
     }
 

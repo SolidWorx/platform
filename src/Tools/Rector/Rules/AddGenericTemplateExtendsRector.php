@@ -495,7 +495,7 @@ final class AddGenericTemplateExtendsRector extends AbstractRector
     /**
      * @return ArrayShapeItemNode|null|false null = skip (unmapped), false = can't resolve (bail out)
      */
-    private function extractArrayShapeItemFromAddCall(MethodCall $call): ArrayShapeItemNode|null|false
+    private function extractArrayShapeItemFromAddCall(MethodCall $call): ArrayShapeItemNode | null | false
     {
         $nameArg = $call->args[0] ?? null;
         if (! $nameArg instanceof Arg) {

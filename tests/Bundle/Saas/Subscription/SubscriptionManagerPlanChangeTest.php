@@ -29,9 +29,9 @@ use SolidWorx\Platform\SaasBundle\Subscription\SubscriptionManager;
 #[CoversClass(SubscriptionManager::class)]
 final class SubscriptionManagerPlanChangeTest extends TestCase
 {
-    private SubscriptionRepositoryInterface&MockObject $subscriptionRepository;
+    private SubscriptionRepositoryInterface & MockObject $subscriptionRepository;
 
-    private PaymentIntegrationInterface&MockObject $paymentIntegration;
+    private PaymentIntegrationInterface & MockObject $paymentIntegration;
 
     private SubscriptionManager $manager;
 

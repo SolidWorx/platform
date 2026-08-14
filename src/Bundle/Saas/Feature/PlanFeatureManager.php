@@ -40,7 +40,7 @@ readonly class PlanFeatureManager implements ResetInterface
         private FeatureConfigRegistry $configRegistry,
         private PlanFeatureRepositoryInterface $planFeatureRepository,
         private SubscriptionProviderInterface $subscriptionProvider,
-        private CacheInterface&AdapterInterface $cache,
+        private CacheInterface & AdapterInterface $cache,
     ) {
     }
 
@@ -157,7 +157,7 @@ readonly class PlanFeatureManager implements ResetInterface
      *
      * @param int|bool|string|array<mixed> $value
      */
-    public function setFeature(Plan $plan, string $featureKey, int|bool|string|array $value): void
+    public function setFeature(Plan $plan, string $featureKey, int | bool | string | array $value): void
     {
         $config = $this->configRegistry->get($featureKey);
 

@@ -110,7 +110,7 @@ final class FeatureValueTest extends TestCase
     }
 
     #[DataProvider('typeConversionProvider')]
-    public function testTypeConversions(FeatureType $type, int|bool|string $value, int $expectedInt, bool $expectedBool, string $expectedString): void
+    public function testTypeConversions(FeatureType $type, int | bool | string $value, int $expectedInt, bool $expectedBool, string $expectedString): void
     {
         $feature = new FeatureValue('test', $type, $value);
 

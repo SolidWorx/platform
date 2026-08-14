@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\SaasBundle\Enum\LemonSqueezy;
 
 /**
- * @link https://docs.lemonsqueezy.com/api/subscription-invoices/the-subscription-invoice-object#status
+ * @see https://docs.lemonsqueezy.com/api/subscription-invoices/the-subscription-invoice-object#status
  */
 enum SubscriptionInvoiceStatus: string
 {

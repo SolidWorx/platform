@@ -14,8 +14,8 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle;
 
 use Doctrine\DBAL\Exception;
-use LogicException;
 use Knp\Bundle\MenuBundle\KnpMenuBundle;
+use LogicException;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigSectionInterface;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\AuthenticationCompilerPass;
@@ -27,9 +27,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Kernel\RequiredBundle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
-use function sprintf;
 use Symfony\UX\Icons\UXIconsBundle;
 use Twig\Extra\TwigExtraBundle\TwigExtraBundle;
+use function sprintf;
 
 #[RequiredBundle(SolidWorxPlatformBundle::class)]
 #[RequiredBundle(TwigExtraBundle::class)]

@@ -24,7 +24,7 @@ final readonly class FeatureConfig
     public function __construct(
         public string $key,
         public FeatureType $type,
-        public int|bool|string|array $defaultValue,
+        public int | bool | string | array $defaultValue,
         public string $description = '',
     ) {
     }

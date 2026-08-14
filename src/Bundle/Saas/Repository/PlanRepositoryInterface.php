@@ -22,7 +22,7 @@ interface PlanRepositoryInterface
     /**
      * @param string|Plan|Ulid $id
      */
-    public function find(mixed $id, LockMode|int|null $lockMode = null, int|null $lockVersion = null): ?Plan;
+    public function find(mixed $id, LockMode | int | null $lockMode = null, int | null $lockVersion = null): ?Plan;
 
     /**
      * Returns the default active plan, falling back to the cheapest active

@@ -34,7 +34,7 @@ final class SubscriptionRepository extends EntityRepository implements Subscript
      * @param array<string, string>|null $orderBy
      */
     #[Override]
-    public function findOneBy(array $criteria, array|null $orderBy = null): ?Subscription
+    public function findOneBy(array $criteria, array | null $orderBy = null): ?Subscription
     {
         Assert::allString(array_keys($criteria));
         $result = parent::findOneBy($criteria, $orderBy);

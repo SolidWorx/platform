@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\SaasBundle\Enum\LemonSqueezy;
 
 /**
- * @link https://docs.lemonsqueezy.com/help/webhooks/event-types
+ * @see https://docs.lemonsqueezy.com/help/webhooks/event-types
  */
 enum Event: string
 {

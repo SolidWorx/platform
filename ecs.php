@@ -28,6 +28,7 @@ use PhpCsFixer\Fixer\PhpUnit\PhpUnitMethodCasingFixer;
 use PhpCsFixer\Fixer\StringNotation\ExplicitStringVariableFixer;
 use PhpCsFixer\Fixer\StringNotation\SingleQuoteFixer;
 use PhpCsFixer\Fixer\Whitespace\MethodChainingIndentationFixer;
+use PhpCsFixer\Fixer\Whitespace\TypesSpacesFixer;
 use Symplify\CodingStandard\Fixer\LineLength\LineLengthFixer;
 use Symplify\CodingStandard\Fixer\Spacing\MethodChainingNewlineFixer;
 use Symplify\EasyCodingStandard\Config\ECSConfig;
@@ -49,13 +50,7 @@ return ECSConfig::configure()
     ->withRootFiles()
     ->withPreparedSets(
         psr12: true,
-        symplify: true,
-        arrays: true,
-        comments: true,
-        docblocks: true,
-        spaces: true,
-        namespaces: true,
-        controlStructures: true,
+        common: true,
         cleanCode: true,
     )
     ->withRules([
@@ -88,6 +83,10 @@ return ECSConfig::configure()
     ])
     ->withConfiguredRule(GeneralPhpdocAnnotationRemoveFixer::class, [
         'annotations' => ['author', 'package', 'group', 'covers', 'category'],
+    ])
+    ->withConfiguredRule(TypesSpacesFixer::class, [
+        'space' => 'single',
+        'space_multiple_catch' => 'single',
     ])
     ->withSkip(
         [
