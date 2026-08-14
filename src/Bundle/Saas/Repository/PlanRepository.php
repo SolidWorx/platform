@@ -35,7 +35,7 @@ class PlanRepository extends EntityRepository implements PlanRepositoryInterface
     }
 
     #[Override]
-    public function find(mixed $id, LockMode|int|null $lockMode = null, int| null $lockVersion = null): ?Plan
+    public function find(mixed $id, LockMode | int | null $lockMode = null, int | null $lockVersion = null): ?Plan
     {
         if ($id instanceof Plan) {
             return $id;
