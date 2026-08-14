@@ -208,7 +208,7 @@ readonly class PlanFeatureManager implements ResetInterface
         }
 
         $planFeatures = $this->planFeatureRepository->findByFeatureKey($featureKey);
-        return array_any($planFeatures, fn ($planFeature) => $planFeature->toFeatureValue()->isEnabled());
+        return array_any($planFeatures, fn (PlanFeature $planFeature): bool => $planFeature->toFeatureValue()->isEnabled());
     }
 
     /**

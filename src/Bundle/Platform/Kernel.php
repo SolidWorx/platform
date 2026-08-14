@@ -105,7 +105,7 @@ abstract class Kernel extends BaseKernel
                 $section = $key !== ''
                     ? ($this->rawConfig[$key] ?? [])
                     : ($this->rawConfig['platform'] ?? []);
-                $bundle->setPlatformRawConfig(self::toConfigArray($section));
+                $bundle->setPlatformRawConfig($this->toConfigArray($section));
             }
         }
     }
@@ -168,9 +168,9 @@ abstract class Kernel extends BaseKernel
             $ext = pathinfo($configFile, PATHINFO_EXTENSION);
 
             $this->rawConfig = match ($ext) {
-                'yaml', 'yml' => self::toConfigArray(Yaml::parseFile($configFile, Yaml::PARSE_CONSTANT)),
-                'json' => self::toConfigArray(json_decode((string) file_get_contents($configFile), true, 512, JSON_THROW_ON_ERROR)),
-                'php' => self::toConfigArray(require $configFile),
+                'yaml', 'yml' => $this->toConfigArray(Yaml::parseFile($configFile, Yaml::PARSE_CONSTANT)),
+                'json' => $this->toConfigArray(json_decode((string) file_get_contents($configFile), true, 512, JSON_THROW_ON_ERROR)),
+                'php' => $this->toConfigArray(require $configFile),
                 default => throw new RuntimeException(sprintf('Unsupported platform configuration file format: .%s', $ext)),
             };
         }
@@ -189,7 +189,7 @@ abstract class Kernel extends BaseKernel
      *
      * @return array<string, mixed>
      */
-    private static function toConfigArray(mixed $value): array
+    private function toConfigArray(mixed $value): array
     {
         if (! is_array($value)) {
             return [];

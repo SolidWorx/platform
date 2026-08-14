@@ -203,7 +203,7 @@ final class TwoFactor extends AbstractController
     }
 
     /**
-     * @return \Symfony\Component\Form\FormInterface<mixed>
+     * @return FormInterface<mixed>
      */
     #[Override]
     protected function instantiateForm(): FormInterface

@@ -97,12 +97,11 @@ final class EnforcePlatformEntityRepositoryRector extends AbstractRector
         return [Class_::class];
     }
 
+    /**
+     * @param Class_ $node
+     */
     public function refactor(Node $node): ?Node
     {
-        if (! $node instanceof Class_) {
-            return null;
-        }
-
         if ($node->extends === null) {
             return null;
         }
@@ -165,7 +164,7 @@ final class EnforcePlatformEntityRepositoryRector extends AbstractRector
             return false;
         }
 
-        return array_any(self::DOCTRINE_REPOSITORY_CLASSES, fn ($doctrineClass): bool => $classFqn === $doctrineClass || is_subclass_of($classFqn, $doctrineClass));
+        return array_any(self::DOCTRINE_REPOSITORY_CLASSES, fn (string $doctrineClass): bool => $classFqn === $doctrineClass || is_subclass_of($classFqn, $doctrineClass));
     }
 
     private function hasPlatformRepositoryInChain(string $classFqn): bool

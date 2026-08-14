@@ -30,7 +30,9 @@ use function array_map;
 use function is_scalar;
 use function is_string;
 
-#[AsCommand(name: 'saas:subscription:list', description: 'List all subscriptions')]
+#[AsCommand(name: 'saas:subscription:list', description: 'List all subscriptions', help: <<<'TXT'
+This command allows you to list all subscriptions in the system.
+TXT)]
 final class SubscriptionListCommand extends Command
 {
     public function __construct(
@@ -43,7 +45,6 @@ final class SubscriptionListCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setHelp('This command allows you to list all subscriptions in the system.')
             ->addOption('status', 's', InputOption::VALUE_REQUIRED, 'Filter subscriptions by status')
             ->addOption('limit', 'l', InputOption::VALUE_REQUIRED, 'Limit number of subscriptions to show', 25)
             ->addOption('latest', 't', InputOption::VALUE_NONE, 'Show only the latest subscriptions')
