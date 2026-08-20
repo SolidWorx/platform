@@ -97,11 +97,9 @@ final class EnforcePlatformEntityRepositoryRector extends AbstractRector
         return [Class_::class];
     }
 
-    /**
-     * @param Class_ $node
-     */
     public function refactor(Node $node): ?Node
     {
+        /** @var Class_ $node */
         if ($node->extends === null) {
             return null;
         }

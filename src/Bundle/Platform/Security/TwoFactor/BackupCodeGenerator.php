@@ -26,9 +26,6 @@ final class BackupCodeGenerator implements BackupCodeGeneratorInterface
         return strtoupper(bin2hex(random_bytes(3)) . '-' . bin2hex(random_bytes(3)));
     }
 
-    /**
-     * @return string[]
-     */
     #[Override]
     public function generateBackupCodes(int $limit = self::LIMIT): array
     {
