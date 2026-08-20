@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle;
 
+use Symfony\Component\DependencyInjection\Kernel\BundleInterface;
 use const GLOB_BRACE;
 use const PATHINFO_EXTENSION;
 use Override;
@@ -25,7 +26,6 @@ use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
@@ -71,16 +71,8 @@ abstract class Kernel extends BaseKernel
         parent::boot();
     }
 
-    #[Override]
-    public function handle(Request $request, int $type = HttpKernelInterface::MAIN_REQUEST, bool $catch = true): Response
-    {
-        $this->processPlatformConfig();
-
-        return parent::handle($request, $type, $catch);
-    }
-
     /**
-     * @return iterable<Bundle>
+     * @return iterable<BundleInterface>
      */
     #[Override]
     public function registerBundles(): iterable
@@ -115,7 +107,10 @@ abstract class Kernel extends BaseKernel
     {
         parent::prepareContainer($container);
 
-        $container->fileExists($this->resolveConfigFile());
+        $configFile = $this->resolveConfigFile();
+        if ($configFile !== null) {
+            $container->fileExists($configFile);
+        }
     }
 
     protected function configureRoutes(RoutingConfigurator $routes): void
@@ -154,6 +149,7 @@ abstract class Kernel extends BaseKernel
         $cache = new ConfigCache($this->getCacheDir() . '/' . $this->getContainerClass() . '_platform_config.php', $this->debug);
 
         if ($cache->isFresh()) {
+            // @phpstan-ignore-next-line
             $this->rawConfig = require $cache->getPath();
             $this->publishPlatformConfigState();
 

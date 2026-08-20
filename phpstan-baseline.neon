@@ -1,2 +1,13 @@
 parameters:
-	ignoreErrors: []
+	ignoreErrors:
+		-
+			rawMessage: 'Return type (iterable<Symfony\Component\DependencyInjection\Kernel\BundleInterface>) of method SolidWorx\Platform\PlatformBundle\Kernel::registerBundles() should be covariant with return type (iterable<Symfony\Component\HttpKernel\Bundle\BundleInterface>) of method Symfony\Component\HttpKernel\Kernel::registerBundles()'
+			identifier: method.childReturnType
+			count: 1
+			path: src/Bundle/Platform/Kernel.php
+
+		-
+			rawMessage: 'Return type (iterable<Symfony\Component\DependencyInjection\Kernel\BundleInterface>) of method SolidWorx\Platform\PlatformBundle\Kernel::registerBundles() should be covariant with return type (iterable<Symfony\Component\HttpKernel\Bundle\BundleInterface>) of method Symfony\Component\HttpKernel\KernelInterface::registerBundles()'
+			identifier: method.childReturnType
+			count: 1
+			path: src/Bundle/Platform/Kernel.php

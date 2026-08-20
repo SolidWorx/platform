@@ -79,7 +79,7 @@ final class FeatureConfigRegistryTest extends TestCase
         $registry = new FeatureConfigRegistry([]);
 
         $this->expectException(UndefinedFeatureException::class);
-        $this->expectExceptionMessage('Feature "unknown_feature" is not defined');
+        $this->expectExceptionMessageIsOrContains('Feature "unknown_feature" is not defined');
 
         $registry->get('unknown_feature');
     }
