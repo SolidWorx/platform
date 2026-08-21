@@ -100,7 +100,8 @@ final class EnforcePlatformEntityRepositoryRector extends AbstractRector
     public function refactor(Node $node): ?Node
     {
         /** @var Class_ $node */
-        if ($node->extends === null) {
+
+        if (! $node->extends instanceof Name) {
             return null;
         }
 

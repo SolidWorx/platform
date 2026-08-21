@@ -176,7 +176,7 @@ final class AddGenericTemplateExtendsRector extends AbstractRector
     {
         /** @var Class_ $node */
 
-        if ($node->extends === null) {
+        if (! $node->extends instanceof Name) {
             return null;
         }
 
