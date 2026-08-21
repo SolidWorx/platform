@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle;
 
+use const GLOB_BRACE;
+use const PATHINFO_EXTENSION;
 use Override;
 use RuntimeException;
 use Scheb\TwoFactorBundle\SchebTwoFactorBundle;
@@ -37,8 +39,6 @@ use function is_file;
 use function is_string;
 use function pathinfo;
 use function sprintf;
-use const GLOB_BRACE;
-use const PATHINFO_EXTENSION;
 
 abstract class Kernel extends BaseKernel
 {
@@ -64,7 +64,7 @@ abstract class Kernel extends BaseKernel
     #[Override]
     public function boot(): void
     {
-        if (!$this->booted) {
+        if (! $this->booted) {
             $this->processPlatformConfig();
         }
 
@@ -123,17 +123,17 @@ abstract class Kernel extends BaseKernel
     private function isTwoFactorEnabled(): bool
     {
         $platformConfig = $this->rawConfig['platform'] ?? [];
-        if (!is_array($platformConfig)) {
+        if (! is_array($platformConfig)) {
             return false;
         }
 
         $security = $platformConfig['security'] ?? [];
-        if (!is_array($security)) {
+        if (! is_array($security)) {
             return false;
         }
 
         $twoFactor = $security['two_factor'] ?? [];
-        if (!is_array($twoFactor)) {
+        if (! is_array($twoFactor)) {
             return false;
         }
 
@@ -189,7 +189,6 @@ abstract class Kernel extends BaseKernel
         PlatformConfigState::set(is_array($platformConfig) ? $platformConfig : []);
     }
 
-
     /**
      * Normalises a decoded configuration value into a string-keyed map.
      *
@@ -200,7 +199,7 @@ abstract class Kernel extends BaseKernel
      */
     private function toConfigArray(mixed $value): array
     {
-        if (!is_array($value)) {
+        if (! is_array($value)) {
             return [];
         }
 
