@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures;
 
-use const PHP_VERSION_ID;
 use Doctrine\Common\EventManager;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Types\Type;
@@ -41,7 +40,7 @@ abstract class TenantOrmTestCase extends TestCase
         }
 
         $config = ORMSetup::createAttributeMetadataConfiguration([__DIR__ . '/Entity'], true);
-        $config->enableNativeLazyObjects(PHP_VERSION_ID >= 80400);
+        $config->enableNativeLazyObjects(true);
         $config->addFilter(TenantFilter::NAME, TenantFilter::class);
 
         $connection = DriverManager::getConnection([
