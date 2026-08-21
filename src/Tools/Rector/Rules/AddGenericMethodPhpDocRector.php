@@ -110,9 +110,7 @@ final class AddGenericMethodPhpDocRector extends AbstractRector
 
     public function refactor(Node $node): ?Node
     {
-        if (! $node instanceof ClassMethod) {
-            return null;
-        }
+        /** @var ClassMethod $node */
 
         $hasChanged = false;
 

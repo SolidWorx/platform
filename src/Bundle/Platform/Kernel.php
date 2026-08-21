@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle;
 
+use Symfony\Component\DependencyInjection\Kernel\BundleInterface;
 use const GLOB_BRACE;
 use const PATHINFO_EXTENSION;
 use Override;
@@ -23,7 +24,6 @@ use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigState;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Kernel\BundleInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -160,33 +160,21 @@ abstract class Kernel extends BaseKernel
 
         $configFile = $this->resolveConfigFile();
 
-        if ($configFile === null) {
-            $this->publishPlatformConfigState();
+        if ($configFile !== null) {
+            $ext = pathinfo($configFile, PATHINFO_EXTENSION);
 
-            return;
+            $this->rawConfig = match ($ext) {
+                'yaml', 'yml' => $this->toConfigArray(Yaml::parseFile($configFile, Yaml::PARSE_CONSTANT)),
+                'json' => $this->toConfigArray(json_decode((string) file_get_contents($configFile), true, 512, JSON_THROW_ON_ERROR)),
+                'php' => $this->toConfigArray(require $configFile),
+                default => throw new RuntimeException(sprintf('Unsupported platform configuration file format: .%s', $ext)),
+            };
         }
 
-        $ext = pathinfo($configFile, PATHINFO_EXTENSION);
+        $content = "<?php\n\n return " . var_export($this->rawConfig, true) . ";\n";
 
-        $this->rawConfig = match ($ext) {
-            'yaml', 'yml' => $this->toConfigArray(Yaml::parseFile($configFile, Yaml::PARSE_CONSTANT)),
-            'json' => $this->toConfigArray(json_decode((string) file_get_contents($configFile), true, 512, JSON_THROW_ON_ERROR)),
-            'php' => $this->toConfigArray(require $configFile),
-            default => throw new RuntimeException(sprintf('Unsupported platform configuration file format: .%s', $ext)),
-        };
-
+        $cache->write($content);
         $this->publishPlatformConfigState();
-    }
-
-    /**
-     * Publishes the parsed `platform:` section so compile-time helpers (e.g. the security
-     * config helpers) can read it while the container is being built.
-     */
-    private function publishPlatformConfigState(): void
-    {
-        $platformConfig = $this->rawConfig['platform'] ?? [];
-
-        PlatformConfigState::set(is_array($platformConfig) ? $platformConfig : []);
     }
 
     /**
@@ -210,6 +198,17 @@ abstract class Kernel extends BaseKernel
         }
 
         return $config;
+    }
+
+    /**
+     * Publishes the parsed `platform:` section so compile-time helpers (e.g. the security
+     * config helpers) can read it while the container is being built.
+     */
+    private function publishPlatformConfigState(): void
+    {
+        $platformConfig = $this->rawConfig['platform'] ?? [];
+
+        PlatformConfigState::set(is_array($platformConfig) ? $platformConfig : []);
     }
 
     private function resolveConfigFile(): ?string
