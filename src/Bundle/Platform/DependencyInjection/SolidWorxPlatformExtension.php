@@ -58,21 +58,23 @@ use function dirname;
 use function interface_exists;
 
 /**
+ * @phpstan-type MultiTenancyConfig array{
+ *   enabled: bool,
+ *   session_key: string,
+ *   route_param: string,
+ *   validate_user_access: bool,
+ *   models: array{tenant: class-string, user_tenant: class-string},
+ *   resolvers: array{domain: bool, session: bool, route: bool},
+ *   write_guard: array{check_user_access: bool}
+ * }
+ *
  * @phpstan-type PlatformConfig array{
  *   name: string,
  *   version: string,
  *   security: array{two_factor: array{enabled: bool, base_template: string|null}},
  *   doctrine: array{types: array{enable_utc_date: bool}},
  *   models: array{user: string},
- *   multi_tenancy: array{
- *     enabled: bool,
- *     session_key: string,
- *     route_param: string,
- *     validate_user_access: bool,
- *     models: array{tenant: class-string, user_tenant: class-string},
- *     resolvers: array{domain: bool, session: bool, route: bool},
- *     write_guard: array{check_user_access: bool}
- *   }
+ *   multi_tenancy: MultiTenancyConfig
  * }
  */
 final class SolidWorxPlatformExtension extends Extension implements PrependExtensionInterface
@@ -155,15 +157,7 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
     }
 
     /**
-     * @param array{
-     *   enabled: bool,
-     *   session_key: string,
-     *   route_param: string,
-     *   validate_user_access: bool,
-     *   models: array{tenant: class-string, user_tenant: class-string},
-     *   resolvers: array{domain: bool, session: bool, route: bool},
-     *   write_guard: array{check_user_access: bool}
-     * } $config
+     * @param MultiTenancyConfig $config
      */
     private function loadMultiTenancy(ContainerBuilder $container, array $config): void
     {

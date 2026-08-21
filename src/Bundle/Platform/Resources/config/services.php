@@ -18,6 +18,7 @@ use EmailChecker\Constraints\NotThrowawayEmailValidator;
 use EmailChecker\EmailChecker;
 use SolidWorx\Platform\PlatformBundle\Command\UpdateDisposableDomainsCommand;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\Login;
+use SolidWorx\Platform\PlatformBundle\Controller\Tenant\SelectTenant;
 use SolidWorx\Platform\PlatformBundle\Feature\FeatureGate;
 use SolidWorx\Platform\PlatformBundle\Feature\NoopFeatureGate;
 use SolidWorx\Platform\PlatformBundle\Feature\NullSubscriberResolver;
@@ -41,6 +42,9 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         ->exclude(dirname(__DIR__, 2) . '/{DependencyInjection,Entity,Resources,Tests,Tenant/Event,Doctrine/Filter,Messenger}');
 
     $services->set(Login::class)
+        ->tag('controller.service_arguments');
+
+    $services->set(SelectTenant::class)
         ->tag('controller.service_arguments');
 
     $services->alias(FeatureGate::class, NoopFeatureGate::class);
