@@ -40,15 +40,7 @@ use function strtoupper;
 #[ORM\Index(fields: ['googleId'])]
 abstract class User implements UserInterface, PasswordAuthenticatedUserInterface, Stringable, UserTwoFactorInterface
 {
-    // public const string TABLE_NAME = 'users';
-
     use UserTwoFactor;
-
-    #[ORM\Column(type: UlidType::NAME, unique: true)]
-    #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[ORM\CustomIdGenerator(class: UlidGenerator::class)]
-    protected ?Ulid $id = null;
 
     #[ORM\Column(name: 'first_name', type: Types::STRING, length: 45, nullable: true)]
     #[Assert\NotBlank()]
@@ -85,16 +77,11 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var string[]
      */
-    #[ORM\Column(name: 'roles', type: 'array')]
+    #[ORM\Column(name: 'roles', type: 'json')]
     protected array $roles = [];
 
     #[ORM\Column(name: 'google_id', type: Types::STRING, length: 45, nullable: true)]
     protected ?string $googleId = null;
-
-    public function __construct()
-    {
-        $this->id = new NilUlid();
-    }
 
     #[Override]
     public function __toString(): string
@@ -126,11 +113,6 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this;
-    }
-
-    public function getId(): ?Ulid
-    {
-        return $this->id;
     }
 
     #[Override]
