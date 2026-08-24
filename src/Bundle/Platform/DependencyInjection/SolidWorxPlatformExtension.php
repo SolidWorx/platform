@@ -21,6 +21,7 @@ use SolidWorx\Platform\PlatformBundle\Attributes\Menu\MenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfiguration;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendTwoFactorCode;
 use SolidWorx\Platform\PlatformBundle\Controller\Tenant\SelectTenant;
+use SolidWorx\Platform\PlatformBundle\DataCollector\TenantDataCollector;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\Extension\TwoFactorExtension;
 use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantAwareListener;
 use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantMetadataListener;
@@ -28,6 +29,7 @@ use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantModelMappingL
 use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantWriteGuardListener;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Filter\TenantFilter;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Type\URLType;
+use SolidWorx\Platform\PlatformBundle\Logger\Processor\TenantLoggingProcessor;
 use SolidWorx\Platform\PlatformBundle\Messenger\TenantMiddleware;
 use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
 use SolidWorx\Platform\PlatformBundle\Model\User;
@@ -101,6 +103,8 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         TenantRepository::class,
         UserTenantRepository::class,
         SelectTenant::class,
+        TenantDataCollector::class,
+        TenantLoggingProcessor::class,
     ];
 
     /**
