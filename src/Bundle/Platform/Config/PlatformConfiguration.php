@@ -15,9 +15,9 @@ namespace SolidWorx\Platform\PlatformBundle\Config;
 
 use Override;
 use SolidWorx\Platform\PlatformBundle\Entity\Tenant;
+use SolidWorx\Platform\PlatformBundle\Entity\User;
 use SolidWorx\Platform\PlatformBundle\Entity\UserTenant;
 use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
-use SolidWorx\Platform\PlatformBundle\Model\User;
 use SolidWorx\Platform\PlatformBundle\Model\UserTenantInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use function is_string;
