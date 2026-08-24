@@ -87,7 +87,7 @@ final readonly class TenantWriteGuardListener
 
         $user = $this->security->getUser();
 
-        if (! $user instanceof User || !method_exists($user, 'getId')) {
+        if (! $user instanceof User || ! method_exists($user, 'getId')) {
             return;
         }
 

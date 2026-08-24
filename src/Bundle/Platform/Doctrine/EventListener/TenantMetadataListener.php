@@ -13,10 +13,12 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Doctrine\EventListener;
 
+use const PHP_EOL;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\MappingException;
+use LogicException;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantAwareInterface;
 use function array_filter;
 use function array_map;
@@ -28,7 +30,6 @@ use function implode;
 use function in_array;
 use function sprintf;
 use function strtoupper;
-use const PHP_EOL;
 
 /**
  * Enforces tenant indexing conventions on every {@see TenantAwareInterface} entity:
@@ -69,7 +70,7 @@ final class TenantMetadataListener
 
             if ($field->unique === true) {
                 if (! ($field->options['forceUnique'] ?? false)) {
-                    throw new \LogicException(sprintf(
+                    throw new LogicException(sprintf(
                         'The "%s" entity has a unique constraint on the "%s" field but it is a tenant-scoped entity. ' . PHP_EOL
                         . 'This will cause the field to be globally unique instead of unique per tenant. ' . PHP_EOL . PHP_EOL
                         . 'If this is the intended behaviour, set the "forceUnique" option to true on the field mapping ' . PHP_EOL . '(E.G `#[ORM\Column(unique: true, options: [\'forceUnique\' => true])]`). ' . PHP_EOL . PHP_EOL
@@ -105,9 +106,7 @@ final class TenantMetadataListener
         }
 
         if (! $this->hasStandaloneIndex($indexes, $column)) {
-            $hash = implode('', array_map(static function ($column): string {
-                return dechex(crc32($column));
-            }, [$metadata->getTableName(), $column]));
+            $hash = implode('', array_map(static fn (string $column): string => dechex(crc32($column)), [$metadata->getTableName(), $column]));
 
             $indexName = sprintf('idx_%s', $hash);
             $indexes[strtoupper($indexName)] = [

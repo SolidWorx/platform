@@ -18,18 +18,6 @@ use Override;
 use SolidWorx\Platform\PlatformBundle\Model\User;
 use SolidWorx\Platform\PlatformBundle\Response\RedirectResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
-use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\WebLink\HttpHeaderSerializer;
-use Twig\Environment;
 use function array_first;
 
 abstract class BaseController extends AbstractController
