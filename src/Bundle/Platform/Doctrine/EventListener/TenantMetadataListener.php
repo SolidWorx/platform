@@ -67,7 +67,7 @@ final class TenantMetadataListener
                 continue;
             }
 
-            if ($field->unique) {
+            if ($field->unique === true) {
                 if (! ($field->options['forceUnique'] ?? false)) {
                     throw new \LogicException(sprintf(
                         'The "%s" entity has a unique constraint on the "%s" field but it is a tenant-scoped entity. ' . PHP_EOL
@@ -128,8 +128,13 @@ final class TenantMetadataListener
      */
     private function lead(array $columns, string $column): array
     {
-        if ($columns === [] || in_array($column, $columns, true) || $columns[0] === $column) {
+        if ($columns === [] || $columns[0] === $column) {
             return $columns;
+        }
+
+        if (in_array($column, $columns, true)) {
+            // Index already contains the column, but not as the leading column. Remove it so we can re-add it to the front.
+            $columns = array_filter($columns, static fn (string $c): bool => $c !== $column);
         }
 
         return array_merge([$column], array_values(array_filter($columns, static fn (string $c): bool => $c !== $column)));

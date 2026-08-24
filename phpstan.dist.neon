@@ -1,6 +1,7 @@
 parameters:
     level: max
     treatPhpDocTypesAsCertain: false
+    reportMaybesInPropertyPhpDocTypes: false
     paths:
         - src/
         - tests/

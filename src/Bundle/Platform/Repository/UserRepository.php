@@ -33,10 +33,13 @@ use function sprintf;
  */
 class UserRepository extends EntityRepository implements UserRepositoryInterface, UserLoaderInterface
 {
+    /**
+     * @param class-string<User> $userClass
+     */
     public function __construct(
         ManagerRegistry $registry,
         #[Autowire(param: 'solidworx_platform.models.user')]
-        string $userClass
+        string $userClass = \SolidWorx\Platform\PlatformBundle\Entity\User::class,
     ) {
         parent::__construct($registry, $userClass);
     }

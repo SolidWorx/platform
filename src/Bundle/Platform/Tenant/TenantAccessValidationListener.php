@@ -21,6 +21,7 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\Uid\Ulid;
+use function method_exists;
 use function sprintf;
 
 /**
@@ -59,7 +60,7 @@ final readonly class TenantAccessValidationListener
 
         $user = $this->security->getUser();
 
-        if (! $user instanceof User) {
+        if (! $user instanceof User || ! method_exists($user, 'getId')) {
             return;
         }
 

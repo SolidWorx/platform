@@ -20,7 +20,7 @@ use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfiguration;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigurationInterface;
 use SolidWorx\Platform\PlatformBundle\Config\SchemaGenerator;
-use SolidWorx\Platform\PlatformBundle\Model\User;
+use SolidWorx\Platform\PlatformBundle\Entity\User;
 use SolidWorx\Platform\UiBundle\Config\UiConfiguration;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
