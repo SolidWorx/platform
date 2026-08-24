@@ -16,7 +16,9 @@ namespace SolidWorx\Platform\PlatformBundle\DependencyInjection\Extension;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigState;
 use SolidWorx\Platform\PlatformBundle\Model\User;
 use SolidWorx\Platform\PlatformBundle\Util\Time;
+use Symfony\Component\RateLimiter\RateLimit;
 use function array_is_list;
+use function class_exists;
 use function is_array;
 
 final class LoginExtension
@@ -97,11 +99,14 @@ final class LoginExtension
                 'invalidate_session' => true,
                 'enable_csrf' => true,
             ],
-            'login_throttling' => [
+        ];
+
+        if (class_exists(RateLimit::class)) {
+            $main['login_throttling'] = [
                 'max_attempts' => 5,
                 'interval' => '15 minutes',
-            ],
-        ];
+            ];
+        }
 
         $accessControl = [];
 
