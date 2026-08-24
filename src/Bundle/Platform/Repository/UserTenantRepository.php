@@ -60,8 +60,8 @@ class UserTenantRepository extends EntityRepository
     {
         /** @var list<TenantInterface> */
         return $this->createQueryBuilder('ut')
-            ->select('t')
-            ->join('ut.tenant', 't')
+            ->select('t.id', 't.name')
+            ->innerJoin('ut.tenant', 't')
             ->where('ut.userId = :userId')
             ->setParameter('userId', $userId, UlidType::NAME)
             ->orderBy('t.name', 'ASC')
