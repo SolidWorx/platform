@@ -49,6 +49,6 @@ final readonly class TenantFilterSynchronizer
         }
 
         $filters->enable(TenantFilter::NAME)
-            ->setParameter(TenantFilter::PARAMETER, $tenantId, UlidType::NAME);
+            ->setParameter(TenantFilter::PARAMETER, $tenantId->toBinary(), UlidType::NAME);
     }
 }

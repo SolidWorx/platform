@@ -61,7 +61,7 @@ final class TenantManagerTest extends TenantOrmTestCase
     {
         $this->entityManager->getFilters()
             ->enable(TenantFilter::NAME)
-            ->setParameter(TenantFilter::PARAMETER, $this->ulid(), UlidType::NAME);
+            ->setParameter(TenantFilter::PARAMETER, $this->ulid()->toBinary(), UlidType::NAME);
 
         $insideEnabled = true;
 

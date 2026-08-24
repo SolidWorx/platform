@@ -28,7 +28,7 @@ final class TenantFilterAwareTraitTest extends TenantOrmTestCase
         $entityManager = $this->createTenantEntityManager();
         $entityManager->getFilters()
             ->enable(TenantFilter::NAME)
-            ->setParameter(TenantFilter::PARAMETER, $this->ulid(), UlidType::NAME);
+            ->setParameter(TenantFilter::PARAMETER, $this->ulid()->toBinary(), UlidType::NAME);
 
         $repository = new readonly class($entityManager) {
             use TenantFilterAwareTrait;
