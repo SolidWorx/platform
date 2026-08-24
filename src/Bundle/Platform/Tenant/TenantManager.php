@@ -58,7 +58,7 @@ final readonly class TenantManager
 
         $this->entityManager->getFilters()
             ->enable(TenantFilter::NAME)
-            ->setParameter(TenantFilter::PARAMETER, $tenantId, UlidType::NAME);
+            ->setParameter(TenantFilter::PARAMETER, $tenantId->toBinary(), UlidType::NAME);
     }
 
     public function disableFilter(): void
