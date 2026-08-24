@@ -1,0 +1,104 @@
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar %}
+    {% set icon %}
+        {{ ux_icon('tabler:building') }}
+        <span class="sf-toolbar-value">
+            {{ collector.tenant|default('- No tenant') }}
+        </span>
+    {% endset %}
+
+    {% set text %}
+        {% if collector.tenant is not empty %}
+            <div class="sf-toolbar-info-group">
+                <div class="sf-toolbar-info-piece">
+                    <b>
+                        Tenant ID
+                    </b>
+                    <span>
+                            {{ collector.tenant.id.toBase58 }}
+                        </span>
+                </div>
+                <div class="sf-toolbar-info-piece">
+                    <b>
+                        Tenant Name
+                    </b>
+                    <span>
+                        {{ collector.tenant }}
+                    </span>
+                </div>
+                {% if collector.tenant.domain is not empty %}
+                    <div class="sf-toolbar-info-piece">
+                        <b>
+                            Tenant Domain
+                        </b>
+                        <span>
+                                {{ collector.tenant.domain }}
+                            </span>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+        <div class="sf-toolbar-info-group">
+            <div class="sf-toolbar-info-piece">
+                <b>
+                    Additional Tenants
+                </b>
+            </div>
+            {% for tenant in collector.userTenants|filter(v => not v.id.equals(collector.tenant.id)) %}
+                <div class="sf-toolbar-info-piece">
+                    <b>
+                        {{ tenant.name }}
+                    </b>
+                    <span>
+
+                        <form method="post" action="{{ path('solidworx_platform_tenant_select') }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('tenant_select') }}" />
+                            <input type="hidden" name="tenant" value="{{ tenant.id.toBase58 }}" />
+                            <button type="submit" class="list-group-item list-group-item-action d-flex align-items-center">
+                                <span class="flex-fill">{{ tenant.id.toBase58 }}</span>
+                            </button>
+                        </form>
+
+                    </span>
+                </div>
+            {% endfor %}
+        </div>
+    {% endset %}
+
+    {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', {link: true}) }}
+{% endblock %}
+
+{% block menu %}
+    <span class="label">
+        <span class="icon">{{ ux_icon('tabler:building', {width: 64}) }}</span>
+        <strong>Tenant</strong>
+    </span>
+{% endblock %}
+
+{% block panel %}
+    <h2>Tenant Info</h2>
+    <table>
+        {% if collector.tenantData is not empty %}
+            <tr>
+                <th>Current Tenant</th>
+                <td>
+                    <b>{{ collector.tenant.name }} ({{ collector.tenant.id.toBase58 }})</b>
+                    <br />
+                    <br />
+                    {{ profiler_dump(collector.tenantData) }}
+                </td>
+            </tr>
+        {% endif %}
+        <tr>
+            <th>
+                Additional tenants for user
+            </th>
+            <td>
+                {% for tenant in collector.userTenants|filter(v => not v.id.equals(collector.tenant.id)) %}
+                    {{ tenant.name }} ({{ tenant.id.toBase58 }})<br />
+                {% endfor %}
+            </td>
+        </tr>
+    </table>
+{% endblock %}
