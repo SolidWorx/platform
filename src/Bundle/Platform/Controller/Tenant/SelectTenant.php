@@ -15,11 +15,9 @@ namespace SolidWorx\Platform\PlatformBundle\Controller\Tenant;
 
 use InvalidArgumentException;
 use SolidWorx\Platform\PlatformBundle\Controller\BaseController;
-use SolidWorx\Platform\PlatformBundle\Model\User;
 use SolidWorx\Platform\PlatformBundle\Repository\TenantRepository;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
 use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantVoter;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RedirectResponse;

@@ -1,5 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of SolidWorx Platform project.
+ *
+ * (c) Pierre du Plessis <open-source@solidworx.co>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace SolidWorx\Platform\PlatformBundle\DataCollector;
 
 use SolidWorx\Platform\PlatformBundle\Model\Tenant;
@@ -14,6 +25,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Uid\Ulid;
 use Symfony\Component\VarDumper\Cloner\Data;
+use Throwable;
 use function method_exists;
 
 #[AutoconfigureTag(
@@ -26,16 +38,18 @@ use function method_exists;
 final class TenantDataCollector extends AbstractDataCollector
 {
     private const string COLLECTOR_ID = 'tenant';
+
     private const string COLLECTOR_TEMPLATE = '@Platform/DataCollector/tenant.html.twig';
 
     public function __construct(
-        private readonly TenantContext    $tenantContext,
+        private readonly TenantContext $tenantContext,
         private readonly TenantRepository $tenantRepository,
         private readonly UserTenantRepository $userTenantRepository,
         private readonly Security $security,
-    ) {}
+    ) {
+    }
 
-    public function collect(Request $request, Response $response, ?\Throwable $exception = null): void
+    public function collect(Request $request, Response $response, ?Throwable $exception = null): void
     {
         $tenantId = $this->tenantContext->getTenantId();
         $user = $this->security->getUser();
@@ -47,7 +61,7 @@ final class TenantDataCollector extends AbstractDataCollector
         }
 
         $this->data = [
-            'tenant' => $tenantId !== null ? $this->tenantRepository->find($tenantId) : null,
+            'tenant' => $tenantId instanceof Ulid ? $this->tenantRepository->find($tenantId) : null,
             'user_tenants' => $userTenants,
         ];
     }

@@ -48,7 +48,7 @@ final class TenantVoter extends Voter
     {
         $user = $token->getUser();
 
-        if (! $user instanceof User || !method_exists($user, 'getId')) {
+        if (! $user instanceof User || ! method_exists($user, 'getId')) {
             return false;
         }
 
