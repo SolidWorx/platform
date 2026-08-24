@@ -152,7 +152,7 @@ final class PlatformConfiguration implements PlatformConfigurationInterface
                             ->addDefaultsIfNotSet()
                             ->children()
                                 ->booleanNode('check_user_access')
-                                    ->defaultFalse()
+                                    ->defaultTrue()
                                     ->info('Also verify the current user is a member of the tenant on write.')
                                 ->end()
                             ->end()
