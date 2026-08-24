@@ -15,8 +15,8 @@ namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Tenant;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use SolidWorx\Platform\PlatformBundle\Entity\User;
 use SolidWorx\Platform\PlatformBundle\Exception\TenantAccessDeniedException;
-use SolidWorx\Platform\PlatformBundle\Model\User;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
 use SolidWorx\Platform\PlatformBundle\Tenant\Event\TenantSwitchedEvent;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantAccessValidationListener;

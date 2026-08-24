@@ -34,7 +34,7 @@ class User extends UserModel
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: UlidGenerator::class)]
-    protected ?Ulid $id = null;
+    protected Ulid $id;
 
     public function __construct()
     {

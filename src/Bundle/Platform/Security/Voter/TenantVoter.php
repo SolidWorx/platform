@@ -21,6 +21,7 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Uid\Ulid;
+use function method_exists;
 
 /**
  * Grants access to a {@see Tenant} when the authenticated user is a member of it.
@@ -47,12 +48,11 @@ final class TenantVoter extends Voter
     {
         $user = $token->getUser();
 
-        if (! $user instanceof User) {
+        if (! $user instanceof User || !method_exists($user, 'getId')) {
             return false;
         }
 
         $userId = $user->getId();
-
         if (! $userId instanceof Ulid) {
             return false;
         }

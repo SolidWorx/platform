@@ -16,7 +16,7 @@ namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Security\Voter;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Entity\Tenant;
-use SolidWorx\Platform\PlatformBundle\Model\User;
+use SolidWorx\Platform\PlatformBundle\Entity\User;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
 use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantVoter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -63,8 +63,6 @@ final class TenantVoterTest extends TestCase
         $token = self::createStub(TokenInterface::class);
         $token->method('getUser')->willReturn($user);
 
-        $voter = new TenantVoter($repository);
-
-        return $voter->vote($token, new Tenant('Acme'), [TenantVoter::TENANT_ACCESS]);
+        return new TenantVoter($repository)->vote($token, new Tenant('Acme'), [TenantVoter::TENANT_ACCESS]);
     }
 }

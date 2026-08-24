@@ -26,6 +26,7 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Uid\Ulid;
 use function array_merge;
+use function method_exists;
 use function sprintf;
 
 /**
@@ -86,7 +87,7 @@ final readonly class TenantWriteGuardListener
 
         $user = $this->security->getUser();
 
-        if (! $user instanceof User) {
+        if (! $user instanceof User || !method_exists($user, 'getId')) {
             return;
         }
 

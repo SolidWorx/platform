@@ -56,14 +56,14 @@ class UserTenantRepository extends EntityRepository
     /**
      * @return list<TenantInterface>
      */
-    public function findTenantsForUser(Ulid $userId): array
+    public function findTenantsForUser(mixed $userId): array
     {
         /** @var list<TenantInterface> */
         return $this->createQueryBuilder('ut')
             ->select('t.id', 't.name')
             ->innerJoin('ut.tenant', 't')
             ->where('ut.userId = :userId')
-            ->setParameter('userId', $userId, UlidType::NAME)
+            ->setParameter('userId', $userId, $this->getClassMetadata()->getTypeOfField('userId'))
             ->orderBy('t.name', 'ASC')
             ->getQuery()
             ->getResult();

@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle\Controller\Tenant;
 
 use InvalidArgumentException;
+use SolidWorx\Platform\PlatformBundle\Controller\BaseController;
 use SolidWorx\Platform\PlatformBundle\Model\User;
 use SolidWorx\Platform\PlatformBundle\Repository\TenantRepository;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
@@ -37,7 +38,7 @@ use function is_string;
  */
 #[AsTaggedItem('controller.service_arguments')]
 #[IsGranted('IS_AUTHENTICATED_FULLY')]
-final class SelectTenant extends AbstractController
+final class SelectTenant extends BaseController
 {
     private const string CSRF_TOKEN_ID = 'tenant_select';
 
@@ -53,10 +54,9 @@ final class SelectTenant extends AbstractController
     #[Route(path: '/tenant/select', name: 'solidworx_platform_tenant_select', methods: ['GET', 'POST'])]
     public function __invoke(Request $request): Response
     {
-        $user = $this->getUser();
-        $userId = $user instanceof User ? $user->getId() : null;
+        $userId = $this->getUserId();
 
-        if (! $userId instanceof Ulid) {
+        if ($userId === null) {
             throw $this->createAccessDeniedException();
         }
 
