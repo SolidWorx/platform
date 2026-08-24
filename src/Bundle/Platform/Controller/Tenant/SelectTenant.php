@@ -25,6 +25,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Uid\Ulid;
 use function is_string;
@@ -42,6 +44,7 @@ final class SelectTenant extends AbstractController
     public function __construct(
         private readonly UserTenantRepository $userTenantRepository,
         private readonly TenantRepository $tenantRepository,
+        private readonly CsrfTokenManagerInterface $csrfTokenManager,
         #[Autowire(param: 'solidworx_platform.multi_tenancy.session_key')]
         private readonly string $sessionKey,
     ) {
@@ -68,34 +71,38 @@ final class SelectTenant extends AbstractController
 
     private function select(Request $request): RedirectResponse
     {
-        $token = $request->request->get('_token');
-
-        if (! is_string($token) || ! $this->isCsrfTokenValid(self::CSRF_TOKEN_ID, $token)) {
-            throw $this->createAccessDeniedException('Invalid CSRF token.');
-        }
-
-        $submitted = $request->request->get('tenant');
-
-        if (! is_string($submitted)) {
-            throw $this->createNotFoundException();
-        }
-
         try {
-            $tenantId = Ulid::fromString($submitted);
-        } catch (InvalidArgumentException) {
-            throw $this->createNotFoundException();
+            $token = $request->request->get('_token');
+
+            if (! is_string($token) || ! $this->csrfTokenManager->isTokenValid(new CsrfToken(self::CSRF_TOKEN_ID, $token))) {
+                throw $this->createAccessDeniedException('Invalid CSRF token.');
+            }
+
+            $submitted = $request->request->get('tenant');
+
+            if (! is_string($submitted)) {
+                throw $this->createNotFoundException();
+            }
+
+            try {
+                $tenantId = Ulid::fromString($submitted);
+            } catch (InvalidArgumentException) {
+                throw $this->createNotFoundException();
+            }
+
+            $tenant = $this->tenantRepository->find($tenantId);
+
+            if ($tenant === null) {
+                throw $this->createNotFoundException();
+            }
+
+            $this->denyAccessUnlessGranted(TenantVoter::TENANT_ACCESS, $tenant);
+
+            $request->getSession()->set($this->sessionKey, $tenant->getId()->toRfc4122());
+
+            return $this->redirectToRoute('solidworx_platform_tenant_select');
+        } finally {
+            $this->csrfTokenManager->removeToken(self::CSRF_TOKEN_ID);
         }
-
-        $tenant = $this->tenantRepository->find($tenantId);
-
-        if ($tenant === null) {
-            throw $this->createNotFoundException();
-        }
-
-        $this->denyAccessUnlessGranted(TenantVoter::TENANT_ACCESS, $tenant);
-
-        $request->getSession()->set($this->sessionKey, $tenant->getId()->toRfc4122());
-
-        return $this->redirectToRoute('solidworx_platform_tenant_select');
     }
 }
