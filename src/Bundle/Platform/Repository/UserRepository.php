@@ -20,6 +20,7 @@ use Override;
 use SolidWorx\Platform\PlatformBundle\Contracts\Doctrine\Repository\UserRepository as UserRepositoryInterface;
 use SolidWorx\Platform\PlatformBundle\Model\User;
 use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -32,9 +33,12 @@ use function sprintf;
  */
 class UserRepository extends EntityRepository implements UserRepositoryInterface, UserLoaderInterface
 {
-    public function __construct(ManagerRegistry $registry)
-    {
-        parent::__construct($registry, User::class);
+    public function __construct(
+        ManagerRegistry $registry,
+        #[Autowire(param: 'solidworx_platform.models.user')]
+        string $userClass
+    ) {
+        parent::__construct($registry, $userClass);
     }
 
     public function refreshUser(UserInterface $user): UserInterface
