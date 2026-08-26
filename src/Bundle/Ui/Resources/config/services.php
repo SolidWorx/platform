@@ -26,5 +26,5 @@ return static function (ContainerConfigurator $containerConfigurator): void {
 
     $services
         ->load(SolidWorxPlatformUiBundle::NAMESPACE . '\\', dirname(__DIR__, 2))
-        ->exclude(dirname(__DIR__, 2) . '/{DependencyInjection,Entity,Resources,Tests}');
+        ->exclude(dirname(__DIR__, 2) . '/{DependencyInjection,Entity,Exception,Resources,Tests}');
 };

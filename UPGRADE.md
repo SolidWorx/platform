@@ -29,6 +29,35 @@ Nothing is required to upgrade, but a few things changed shape:
 - **New `menu_exists(name)` Twig function**, so a template can render a menu only when a builder
   registered it.
 
+### Layout options are validated, and `ui_layout()` is the preferred way to set them
+
+Layout options now go through `SolidWorx\Platform\UiBundle\Layout\LayoutOption`, the single source
+of truth behind the `platform.ui.layout` tree, the runtime defaults and the new Twig helpers.
+
+- **New `ui_layout()` Twig function.** It takes the options as named arguments, so an option that
+  does not exist is a compile-time error listing every valid name, and an IDE can resolve the whole
+  list from the PHP signature:
+
+  ```twig
+  {% set layout = ui_layout(navbar_theme: 'dark', navbar_sticky: true) %}
+  ```
+
+  The plain hash form keeps working — both go through the same validation.
+
+- **Unknown options and invalid values now throw** instead of being silently ignored. If you had a
+  typo such as `{navbar_stick: true}`, it will now fail with
+  `Unknown layout option "navbar_stick". Did you mean "navbar_sticky"?`.
+
+- **New `ui_layout_resolve()` Twig function**, which merges the defaults, the application
+  configuration and a template's own options. A custom base template should call it once:
+  `{% set layout = ui_layout_resolve(layout|default({})) %}`.
+
+- **The `ui_layout_defaults` Twig global has been removed.** It only existed so `base.html.twig`
+  could merge the configuration by hand; `ui_layout_resolve()` does that now. Nothing else used it.
+
+- **`twig/twig` now requires `^3.13`** (was `^3.12`) for the `{% types %}` tag the layouts use to
+  declare their variables.
+
 ### Monolog is an optional dependency
 
 `TenantLoggingProcessor` adds the current tenant to log records. It was registered unconditionally,

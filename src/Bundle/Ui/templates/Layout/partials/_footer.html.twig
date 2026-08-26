@@ -1,4 +1,4 @@
-{#
+{##
     Page footer blocks, shared by every layout.
 
     Pulled into the base layout with `{% use %}`. Override `footer_links` for a list of links on the
@@ -6,16 +6,26 @@
 
     Hide it for a single page with `{% set layout = {footer: false} %}`, or application-wide with
     `platform.ui.layout.footer: false`.
-#}
+##}
 
+{% types {
+    ## The resolved layout options, from `ui_layout_resolve()` in the base layout.
+    layout: 'map',
+    ## The Bootstrap container class the page body uses, e.g. `container-xl`.
+    container_class: 'string',
+} %}
+
+{## A list of `<li>` links shown on the right of the footer. Empty by default. ##}
 {% block footer_links %}{% endblock %}
 
+{## The `<li>` shown on the left of the footer. Defaults to the year and application name. ##}
 {% block footer_copyright %}
     <li class="list-inline-item">
         &copy; {{ 'now'|date('Y') }} {{ ui_app_name|default('') }}
     </li>
 {% endblock %}
 
+{## The whole `<footer>`. Skipped entirely when the `footer` layout option is false. ##}
 {% block footer %}
     {% if layout.footer %}
         <footer class="footer footer-transparent d-print-none">

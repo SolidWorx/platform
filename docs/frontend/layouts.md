@@ -53,19 +53,40 @@ a pre-title nor actions are defined, so a bare `content` block still renders a v
 
 ## Layout options
 
-Options are set with a plain `{% set %}` next to the `{% extends %}`:
+The recommended way to set them is `ui_layout()`:
 
 ```twig
 {% extends ui_layout_app %}
 
-{% set layout = {
-    navbar_theme: 'dark',
-    navbar_sticky: true,
-    fluid: true,
-} %}
+{% set layout = ui_layout(navbar_theme: 'dark', navbar_sticky: true, fluid: true) %}
 ```
 
-They are resolved once, in the base layout, from three sources in increasing order of precedence:
+`ui_layout()` is a Twig function backed by a real PHP method, so the option names are its parameter
+names. That buys three things a bare hash cannot:
+
+- **Your IDE can complete and check the argument list**, because it resolves the function to a PHP
+  signature. See [Editor support](#editor-support) for what each editor does with it.
+- **An option that does not exist is a compile-time error**, and Twig prints the whole valid list:
+
+  ```
+  Unknown argument "navbarstick" for function "ui_layout(theme, fluid, boxed, container, navbar,
+  navbar_theme, navbar_sticky, navbar_overlap, navbar_expand, sidebar, sidebar_theme,
+  sidebar_position, sidebar_transparent, sidebar_expand, page_header, footer, centered)"
+  ```
+
+- **A value outside the allowed set is rejected** — `navbar_expand: 'xxl'` fails with
+  `Expected "sm", "md", "lg", "xl"`.
+
+A plain hash still works and is validated identically, just without the IDE support:
+
+```twig
+{% set layout = {navbar_theme: 'dark', navbar_sticky: true, fluid: true} %}
+```
+
+Either way a typo is loud rather than silent — `{navbar_stick: true}` fails with
+`Unknown layout option "navbar_stick". Did you mean "navbar_sticky"?`.
+
+Options are resolved once, in the base layout, from three sources in increasing order of precedence:
 
 1. the built-in defaults
 2. `ui.layout.*` in `platform.yaml` — your application-wide house style
@@ -91,11 +112,20 @@ They are resolved once, in the base layout, from three sources in increasing ord
 | `footer` | bool | `true` | Renders the page footer |
 | `centered` | bool | `false` | Centres the content in a narrow column — `clean` layout only |
 
+That table is generated from
+[`LayoutOption`](../../src/Bundle/Ui/Layout/LayoutOption.php), which is the single source of truth:
+the `platform.ui.layout` configuration tree, the `ui_layout()` signature and the runtime defaults
+all come from it. Adding an option is one enum case.
+
+`container` and `centered` are the only two that are template-only — a global container override or
+a globally centred page is never what an application wants, so they are absent from
+`platform.ui.layout`.
+
 Two more variables follow the same convention:
 
 ```twig
-{% set body_class = 'dashboard' %}      {# extra classes on <body> #}
-{% set brand_url = path('app_home') %}  {# where the brand links to #}
+{% set body_class = 'dashboard' %}
+{% set brand_url = path('app_home') %}
 ```
 
 ### Reproducing the Tabler layout demos
@@ -211,6 +241,74 @@ Do this once in your own base template — set `ui.templates.base` to a template
 ```
 
 ---
+
+## Editor support
+
+**The short answer on autocomplete:** nothing completes keys inside a Twig hash literal. There is no
+mechanism in Twig, in `{% types %}` or in PhpStorm's Symfony plugin that can look at
+`{% set layout = { … } %}` and offer you the option names. That is exactly why `ui_layout()` exists —
+it turns the options into a PHP signature, which every tool already knows how to read.
+
+What you get, in order of how much your editor has to support:
+
+**Always, from Twig itself.** `ui_layout()` is validated when the template compiles. Pass an option
+that does not exist and Twig refuses to compile the template and prints every valid name; pass a bad
+value and the render fails with the accepted set. This needs no plugin, no LSP and no configuration
+— it works in CI too.
+
+**In PhpStorm, via the Symfony plugin.** Twig functions resolve to the PHP callable behind them, so
+<kbd>Ctrl</kbd>/<kbd>⌘</kbd>-click on `ui_layout` jumps straight to
+[`LayoutRuntime::layout()`](../../src/Bundle/Ui/Twig/Runtime/LayoutRuntime.php), where the whole
+option list is one signature with types and defaults. Whether the plugin also completes the named
+arguments as you type depends on its version — the jump-to-definition and the compile-time check
+work regardless.
+
+**In editors that understand `{% types %}`.** Every layout and partial declares the variables it
+works with:
+
+```twig
+{% types {
+    ## The resolved layout options, from `ui_layout_resolve()` in the base layout.
+    layout: 'map',
+    ## The Bootstrap container class the page body uses, e.g. `container-xl`.
+    container_class: 'string',
+} %}
+```
+
+Symfony Language Tools reads these and shows the declared type, whether the variable is required or
+optional, and the attached description on hover and completion. Note that Twig deliberately keeps
+type declarations local to the template they appear in — they are not propagated to templates that
+extend or include it — so these document the layout you are editing, not a page extending it.
+
+**Documentation comments.** Every block carries a `{## … ##}` comment explaining what it is for:
+
+```twig
+{## The navigation links, rendered from the KnpMenu menu named `navbar`. ##}
+{% block navbar_menu %}
+```
+
+[Twig 3.29](https://symfony.com/blog/new-in-twig-3-29-documentation-comments) attaches these to the
+parsed node so an IDE can show them while you pick a block to override. On older Twig they are
+parsed as ordinary comments, so the templates render identically either way.
+
+The `{% types %}` tag needs Twig 3.13, which the platform requires (`twig/twig ^3.13`). Documentation
+comments need 3.29 to become machine-readable, but degrade to plain comments before that, so there
+is no version floor for them.
+
+---
+
+## Writing your own layouts
+
+If you replace a layout or build your own, two conventions keep it as discoverable as the shipped
+ones:
+
+- **Declare what the template needs with `{% types %}`**, using `?` for optional variables, and put
+  an inline `##` comment above each declaration. Inline documentation comments consume the rest of
+  the line, so the variable they describe has to start on the next one.
+- **Put a `{## … ##}` comment above every block** you expect anyone to override, saying what it is
+  for rather than what it contains.
+
+Both are inert on Twig 3.28 and below, so adopting them costs nothing.
 
 ## Flash messages
 

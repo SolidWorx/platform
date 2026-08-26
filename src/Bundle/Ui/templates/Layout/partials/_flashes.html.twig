@@ -1,10 +1,12 @@
-{#
+{##
     Flash message blocks, shared by every layout.
 
     Pulled into the base layout with `{% use %}`. Every layout renders `flashes` just above its
     `content` block, so pages get flash messages without doing anything.
-#}
+##}
 
+{## Renders `app.flashes` as dismissible Tabler alerts. The flash label picks the styling:
+    `error`/`danger`, `warning`, `success`, and anything else falls back to `info`. ##}
 {% block flashes %}
     {% set flash_variants = {
         error: {type: 'danger', icon: 'tabler:alert-circle'},

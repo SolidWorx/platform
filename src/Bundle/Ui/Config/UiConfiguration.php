@@ -15,6 +15,8 @@ namespace SolidWorx\Platform\UiBundle\Config;
 
 use Override;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigurationInterface;
+use SolidWorx\Platform\UiBundle\Layout\LayoutOption;
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 
 /**
@@ -96,81 +98,50 @@ final class UiConfiguration implements PlatformConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
-                ->arrayNode('layout')
-                    ->info('Application-wide layout defaults; templates override them with {% set layout = {...} %}')
-                    ->addDefaultsIfNotSet()
-                    ->children()
-                        ->enumNode('theme')
-                            ->info('Forces the colour scheme instead of following the user preference')
-                            ->values([null, 'light', 'dark'])
-                            ->defaultNull()
-                        ->end()
-                        ->booleanNode('fluid')
-                            ->info('Use the full width of the viewport')
-                            ->defaultFalse()
-                        ->end()
-                        ->booleanNode('boxed')
-                            ->info('Constrain the page to a boxed width')
-                            ->defaultFalse()
-                        ->end()
-                        ->booleanNode('navbar')
-                            ->info('Render the top navigation bar')
-                            ->defaultTrue()
-                        ->end()
-                        ->enumNode('navbar_theme')
-                            ->info('Colour scheme of the top navigation bar')
-                            ->values([null, 'light', 'dark'])
-                            ->defaultNull()
-                        ->end()
-                        ->booleanNode('navbar_sticky')
-                            ->info('Keep the top navigation bar visible while scrolling')
-                            ->defaultFalse()
-                        ->end()
-                        ->booleanNode('navbar_overlap')
-                            ->info('Let the page body overlap the top navigation bar')
-                            ->defaultFalse()
-                        ->end()
-                        ->enumNode('navbar_expand')
-                            ->info('Breakpoint at which the top navigation bar expands')
-                            ->values(['sm', 'md', 'lg', 'xl'])
-                            ->defaultValue('md')
-                        ->end()
-                        ->booleanNode('sidebar')
-                            ->info('Render the sidebar')
-                            ->defaultTrue()
-                        ->end()
-                        ->enumNode('sidebar_theme')
-                            ->info('Colour scheme of the sidebar')
-                            ->values([null, 'light', 'dark'])
-                            ->defaultValue('dark')
-                        ->end()
-                        ->enumNode('sidebar_position')
-                            ->info('Side the sidebar sits on')
-                            ->values(['start', 'end'])
-                            ->defaultValue('start')
-                        ->end()
-                        ->booleanNode('sidebar_transparent')
-                            ->info('Remove the sidebar background')
-                            ->defaultFalse()
-                        ->end()
-                        ->enumNode('sidebar_expand')
-                            ->info('Breakpoint at which the sidebar expands')
-                            ->values(['sm', 'md', 'lg', 'xl'])
-                            ->defaultValue('lg')
-                        ->end()
-                        ->booleanNode('page_header')
-                            ->info('Render the page header')
-                            ->defaultTrue()
-                        ->end()
-                        ->booleanNode('footer')
-                            ->info('Render the page footer')
-                            ->defaultTrue()
-                        ->end()
-                    ->end()
-                ->end()
+                ->append($this->layoutNode())
             ->end();
         // @formatter:on
 
         return $treeBuilder;
+    }
+
+    /**
+     * Built from {@see LayoutOption} so the configuration tree, the runtime defaults and the
+     * `{% types %}` declarations in the layouts can never drift apart.
+     */
+    private function layoutNode(): ArrayNodeDefinition
+    {
+        $node = new ArrayNodeDefinition('layout');
+
+        $node
+            ->info('Application-wide layout defaults; templates override them with {% set layout = {...} %}')
+            ->addDefaultsIfNotSet();
+
+        $children = $node->children();
+
+        foreach (LayoutOption::configurable() as $option) {
+            $allowedValues = $option->allowedValues();
+
+            if ($allowedValues !== null) {
+                $children
+                    ->enumNode($option->value)
+                        ->info($option->description())
+                        ->values($allowedValues)
+                        ->defaultValue($option->default())
+                    ->end();
+
+                continue;
+            }
+
+            $children
+                ->booleanNode($option->value)
+                    ->info($option->description())
+                    ->defaultValue($option->default())
+                ->end();
+        }
+
+        $children->end();
+
+        return $node;
     }
 }

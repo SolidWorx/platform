@@ -1,4 +1,4 @@
-{#
+{##
     Vertical sidebar navigation, used by the `app` layout.
 
     Pulled into the base layout with `{% use %}`. Links come from the KnpMenu menu named `sidebar`:
@@ -11,16 +11,25 @@
 
     Appearance is controlled through the layout options — `sidebar_theme`, `sidebar_position`,
     `sidebar_transparent` and `sidebar_expand`.
-#}
+##}
 
+{% types {
+    ## The resolved layout options, from `ui_layout_resolve()` in the base layout.
+    layout: 'map',
+} %}
+
+{## The navigation links, rendered from the KnpMenu menu named `sidebar`. ##}
 {% block sidebar_menu %}
     {% if menu_exists('sidebar') %}
         {{ render_menu('sidebar') }}
     {% endif %}
 {% endblock %}
 
+{## Rendered below the menu, inside the collapsible area. Empty by default — a good place for
+    a plan badge, a storage meter or a support link. ##}
 {% block sidebar_footer %}{% endblock %}
 
+{## The whole `<aside>`. Override this to replace the sidebar outright. ##}
 {% block sidebar %}
     {%- set sidebar_classes = html_classes('navbar', 'navbar-vertical', 'navbar-expand-' ~ layout.sidebar_expand, {
         'navbar-end': layout.sidebar_position == 'end',
@@ -41,6 +50,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
 
+            {## The brand shown at the top of the sidebar. ##}
             {% block sidebar_brand %}
                 <div class="navbar-brand navbar-brand-autodark">
                     {{ block('brand') }}

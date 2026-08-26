@@ -274,8 +274,9 @@ ui:
       clean: '@Ui/Layout/clean.html.twig'
 
   # Application-wide layout defaults. Individual templates still win, because they set their
-  # own options with `{% set layout = {...} %}`.
-  # See docs/frontend/layouts.md for what each option does.
+  # own options with `ui_layout()` or a `layout` hash.
+  # The full list lives on SolidWorx\Platform\UiBundle\Layout\LayoutOption;
+  # see docs/frontend/layouts.md for what each option does.
   layout:
     navbar_theme: dark
     navbar_sticky: true

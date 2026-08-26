@@ -17,6 +17,8 @@ use Knp\Bundle\MenuBundle\KnpMenuBundle;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Twig\Extension\MenuExtension;
 use SolidWorx\Platform\PlatformBundle\Twig\Runtime\MenuRuntime;
+use SolidWorx\Platform\UiBundle\Layout\LayoutResolver;
+use SolidWorx\Platform\UiBundle\Twig\Runtime\LayoutRuntime;
 use SolidWorx\Platform\UiBundle\Twig\UiExtension;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
@@ -186,6 +188,14 @@ final class LayoutTestKernel extends Kernel
         $services->set(MenuExtension::class)
             ->tag('twig.extension');
 
+        // No application-wide defaults: the tests exercise LayoutOption's own defaults.
+        $services->set(LayoutResolver::class)
+            ->args([[]]);
+
+        $services->set(LayoutRuntime::class)
+            ->args([service(LayoutResolver::class)])
+            ->tag('twig.runtime');
+
         $services->set(UiExtension::class)
             ->args([
                 '@Ui/Layout/base.html.twig',
@@ -194,7 +204,6 @@ final class LayoutTestKernel extends Kernel
                     'condensed' => '@Ui/Layout/condensed.html.twig',
                     'clean' => '@Ui/Layout/clean.html.twig',
                 ],
-                self::layoutDefaults(),
                 'Acme Platform',
             ])
             ->tag('twig.extension');
@@ -203,31 +212,5 @@ final class LayoutTestKernel extends Kernel
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
         // The layouts only ever link to paths, so no routes are needed.
-    }
-
-    /**
-     * Mirrors the defaults declared by {@see \SolidWorx\Platform\UiBundle\Config\UiConfiguration}.
-     *
-     * @return array<string, bool|string|null>
-     */
-    private static function layoutDefaults(): array
-    {
-        return [
-            'theme' => null,
-            'fluid' => false,
-            'boxed' => false,
-            'navbar' => true,
-            'navbar_theme' => null,
-            'navbar_sticky' => false,
-            'navbar_overlap' => false,
-            'navbar_expand' => 'md',
-            'sidebar' => true,
-            'sidebar_theme' => 'dark',
-            'sidebar_position' => 'start',
-            'sidebar_transparent' => false,
-            'sidebar_expand' => 'lg',
-            'page_header' => true,
-            'footer' => true,
-        ];
     }
 }

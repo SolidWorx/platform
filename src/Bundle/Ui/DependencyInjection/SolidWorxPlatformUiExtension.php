@@ -15,6 +15,7 @@ namespace SolidWorx\Platform\UiBundle\DependencyInjection;
 
 use Override;
 use SolidWorx\Platform\UiBundle\Config\UiConfiguration;
+use SolidWorx\Platform\UiBundle\Layout\LayoutResolver;
 use SolidWorx\Platform\UiBundle\Twig\UiExtension;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
@@ -56,7 +57,11 @@ final class SolidWorxPlatformUiExtension extends Extension implements PrependExt
             ->getDefinition(UiExtension::class)
             ->setArgument(0, $config['templates']['base'])
             ->setArgument(1, $config['templates']['layouts'])
-            ->setArgument(2, $config['layout'])
+        ;
+
+        $container
+            ->getDefinition(LayoutResolver::class)
+            ->setArgument(0, $config['layout'])
         ;
 
         $container->setParameter('solidworx_platform_ui.template.login', $config['templates']['login']);
