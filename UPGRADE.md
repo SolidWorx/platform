@@ -2,6 +2,33 @@
 
 ## 0.2 → 0.3
 
+### Tabler page layouts
+
+The UI bundle now ships three layouts — `ui_layout_app` (sidebar + top navbar),
+`ui_layout_condensed` (top navbar only) and `ui_layout_clean` (no navigation) — all extending the
+existing `@Ui/Layout/base.html.twig`. See [the layouts guide](./docs/frontend/layouts.md).
+
+Nothing is required to upgrade, but a few things changed shape:
+
+- **`platform.yaml` gained `ui.templates.layouts` and `ui.layout`.** The first swaps a layout for
+  your own template, the second sets application-wide layout defaults. Both are optional.
+  Regenerate `platform-schema.json` with `php bin/console platform:generate-schema` to pick up the
+  new keys in your editor.
+- **`@Ui/Layout/security.html.twig` now extends `ui_layout_clean` in centred mode** and renders the
+  brand above the card. Pages extending it keep working — the `content` block is unchanged. Remove
+  the brand with `{% block clean_brand %}{% endblock %}`.
+- **The document title now reads `<page title> · <app name>`.** Override the `head_title` block to
+  restore the previous behaviour.
+- **Flash messages render as `Ui:Alert` components** rather than hand-written `div.alert` markup,
+  and every layout renders them — previously only the security layout did.
+- **Two-factor templates fall back to `ui_layout_clean`** when
+  `platform.security.two_factor.base_template` is not set, instead of failing to resolve a template.
+- **`@SolidWorxPlatform/Menu/menu.html.twig` accepts two new render options**, `root_class` and
+  `auto_close`, so the same menu renders in both the vertical sidebar and the horizontal navbar.
+  The defaults are unchanged.
+- **New `menu_exists(name)` Twig function**, so a template can render a menu only when a builder
+  registered it.
+
 ### Security config helpers migrated to Symfony 7.4 array-shape config (BC break)
 
 Symfony 7.4 [deprecated the fluent PHP config-builder format](https://github.com/symfony/symfony/blob/7.4/src/Symfony/Component/DependencyInjection/CHANGELOG.md)

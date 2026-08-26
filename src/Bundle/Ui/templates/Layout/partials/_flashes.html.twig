@@ -1,0 +1,30 @@
+{#
+    Flash message blocks, shared by every layout.
+
+    Pulled into the base layout with `{% use %}`. Every layout renders `flashes` just above its
+    `content` block, so pages get flash messages without doing anything.
+#}
+
+{% block flashes %}
+    {% set flash_variants = {
+        error: {type: 'danger', icon: 'tabler:alert-circle'},
+        danger: {type: 'danger', icon: 'tabler:alert-circle'},
+        warning: {type: 'warning', icon: 'tabler:alert-triangle'},
+        success: {type: 'success', icon: 'tabler:circle-check'},
+        notice: {type: 'info', icon: 'tabler:info-circle'},
+        info: {type: 'info', icon: 'tabler:info-circle'},
+    } %}
+
+    {% for label, messages in app.flashes %}
+        {% set variant = flash_variants[label]|default({type: 'info', icon: 'tabler:info-circle'}) %}
+
+        {% for message in messages %}
+            <twig:Ui:Alert
+                type="{{ variant.type }}"
+                icon="{{ variant.icon }}"
+                :dismissible="true"
+                class="no-print"
+            >{{ message|trans }}</twig:Ui:Alert>
+        {% endfor %}
+    {% endfor %}
+{% endblock flashes %}

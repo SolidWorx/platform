@@ -21,6 +21,9 @@ use Symfony\Component\Config\Definition\ArrayNode;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
 
+/**
+ * @phpstan-import-type UiConfig from UiConfiguration
+ */
 #[CoversClass(UiConfiguration::class)]
 final class UiConfigurationTest extends TestCase
 {
@@ -76,6 +79,102 @@ final class UiConfigurationTest extends TestCase
     {
         $result = $this->process([]);
         self::assertSame('@Ui/Security/login.html.twig', $result['templates']['login']);
+    }
+
+    public function testDefaultLayoutTemplatesAreTheShippedOnes(): void
+    {
+        $result = $this->process([]);
+
+        self::assertSame('@Ui/Layout/app.html.twig', $result['templates']['layouts']['app']);
+        self::assertSame('@Ui/Layout/condensed.html.twig', $result['templates']['layouts']['condensed']);
+        self::assertSame('@Ui/Layout/clean.html.twig', $result['templates']['layouts']['clean']);
+    }
+
+    public function testCustomLayoutTemplateIsApplied(): void
+    {
+        $result = $this->process([
+            'templates' => [
+                'layouts' => [
+                    'app' => '@App/layout/app.html.twig',
+                ],
+            ],
+        ]);
+
+        self::assertSame('@App/layout/app.html.twig', $result['templates']['layouts']['app']);
+        // Untouched layouts keep the shipped default.
+        self::assertSame('@Ui/Layout/clean.html.twig', $result['templates']['layouts']['clean']);
+    }
+
+    public function testUnknownLayoutTemplateKeysAreRejected(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->process([
+            'templates' => [
+                'layouts' => [
+                    'print' => '@App/layout/print.html.twig',
+                ],
+            ],
+        ]);
+    }
+
+    public function testLayoutDefaultsMatchTheTablerDefaults(): void
+    {
+        $result = $this->process([]);
+
+        self::assertSame([
+            'theme' => null,
+            'fluid' => false,
+            'boxed' => false,
+            'navbar' => true,
+            'navbar_theme' => null,
+            'navbar_sticky' => false,
+            'navbar_overlap' => false,
+            'navbar_expand' => 'md',
+            'sidebar' => true,
+            'sidebar_theme' => 'dark',
+            'sidebar_position' => 'start',
+            'sidebar_transparent' => false,
+            'sidebar_expand' => 'lg',
+            'page_header' => true,
+            'footer' => true,
+        ], $result['layout']);
+    }
+
+    public function testLayoutDefaultsCanBeOverridden(): void
+    {
+        $result = $this->process([
+            'layout' => [
+                'navbar_theme' => 'dark',
+                'navbar_sticky' => true,
+                'fluid' => true,
+            ],
+        ]);
+
+        self::assertSame('dark', $result['layout']['navbar_theme']);
+        self::assertTrue($result['layout']['navbar_sticky']);
+        self::assertTrue($result['layout']['fluid']);
+        // Options that were not set keep their default.
+        self::assertSame('dark', $result['layout']['sidebar_theme']);
+    }
+
+    public function testInvalidLayoutEnumValueIsRejected(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->process([
+            'layout' => [
+                'navbar_theme' => 'purple',
+            ],
+        ]);
+    }
+
+    public function testUnknownLayoutOptionsAreRejected(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->process([
+            'layout' => [
+                'rounded' => true,
+            ],
+        ]);
     }
 
     public function testCustomIconPackIsApplied(): void
@@ -142,11 +241,11 @@ final class UiConfigurationTest extends TestCase
     /**
      * @param array<string, mixed> $config
      *
-     * @return array{icon_pack: string, templates: array{base: string, login: string}}
+     * @return UiConfig
      */
     private function process(array $config): array
     {
-        /** @var array{icon_pack: string, templates: array{base: string, login: string}} */
+        /** @var UiConfig */
         return $this->processor->process($this->configuration->getTreeBuilder()->buildTree(), [$config]);
     }
 }

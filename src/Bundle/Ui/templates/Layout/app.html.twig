@@ -1,0 +1,59 @@
+{#
+    The standard application layout: a vertical sidebar plus a top navigation bar, following
+    Tabler's "combo" layout.
+
+    Use it for the signed-in part of an application — dashboards, admin screens, settings:
+
+        {% extends ui_layout_app %}
+
+        {% block page_title %}{{ 'Invoices'|trans }}{% endblock %}
+
+        {% block page_title_actions %}
+            <a href="{{ path('app_invoice_add') }}" class="btn btn-primary">{{ 'New invoice'|trans }}</a>
+        {% endblock %}
+
+        {% block content %}
+            <twig:Ui:Card>…</twig:Ui:Card>
+        {% endblock %}
+
+    Sidebar links come from the KnpMenu menu named `sidebar`, top navbar links from `navbar`.
+
+    Dropping the top navbar (`{% set layout = {navbar: false} %}`) together with `fluid: true`
+    gives Tabler's fluid vertical layout; dropping the sidebar instead turns the top navbar into a
+    standalone one, which is what the `condensed` layout does.
+
+    See `@Ui/Layout/base.html.twig` for the full list of layout options.
+#}
+
+{% extends ui_base_template %}
+
+{% use '@Ui/Layout/partials/_sidebar.html.twig' %}
+{% use '@Ui/Layout/partials/_navbar.html.twig' %}
+
+{% block body %}
+    {% set navbar_standalone = not layout.sidebar %}
+
+    <div class="page">
+        {% if layout.sidebar %}
+            {{ block('sidebar') }}
+        {% endif %}
+
+        {% if layout.navbar %}
+            {{ block('navbar') }}
+        {% endif %}
+
+        <div class="page-wrapper">
+            {{ block('page_header') }}
+
+            <div class="page-body">
+                <div class="{{ container_class }}">
+                    {{ block('flashes') }}
+
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+
+            {{ block('footer') }}
+        </div>
+    </div>
+{% endblock body %}

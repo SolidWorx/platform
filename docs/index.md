@@ -7,6 +7,7 @@ Welcome to the SolidWorx Platform documentation. This platform provides the foun
 - [Configuration](./configuration/index.md)
 - [Authentication & Security](./security/index.md) — default form login and two-factor authentication
 - [Frontend Assets](./frontend/index.md) — webpack config, Stimulus controllers, theming
+- [Layouts](./frontend/layouts.md) — the Tabler page layouts, their options and blocks
 - [Doctrine Types](./doctrine-types/index.md)
 - [Form Types](./form-types/index.md) — reusable form types, including the rich text editor
 - [Multi-Tenancy](./multi-tenancy/index.md)

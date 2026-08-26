@@ -27,6 +27,40 @@ final class UiConfigBuilderTest extends TestCase
         self::assertSame('tabler', $result['icon_pack']);
         self::assertSame('@Ui/Layout/base.html.twig', self::section($result, 'templates')['base']);
         self::assertSame('@Ui/Security/login.html.twig', self::section($result, 'templates')['login']);
+        self::assertSame('@Ui/Layout/app.html.twig', self::section($result, 'templates', 'layouts')['app']);
+        self::assertSame('@Ui/Layout/condensed.html.twig', self::section($result, 'templates', 'layouts')['condensed']);
+        self::assertSame('@Ui/Layout/clean.html.twig', self::section($result, 'templates', 'layouts')['clean']);
+        self::assertSame([], self::section($result, 'layout'));
+    }
+
+    public function testLayoutTemplatesCanBeOverridden(): void
+    {
+        $result = UiConfigBuilder::create()
+            ->appLayout('@App/layout/app.html.twig')
+            ->condensedLayout('@App/layout/condensed.html.twig')
+            ->cleanLayout('@App/layout/clean.html.twig')
+            ->build();
+
+        $layouts = self::section($result, 'templates', 'layouts');
+
+        self::assertSame('@App/layout/app.html.twig', $layouts['app']);
+        self::assertSame('@App/layout/condensed.html.twig', $layouts['condensed']);
+        self::assertSame('@App/layout/clean.html.twig', $layouts['clean']);
+    }
+
+    public function testLayoutDefaultsCanBeOverridden(): void
+    {
+        $result = UiConfigBuilder::create()
+            ->layoutDefaults([
+                'navbar_theme' => 'dark',
+                'fluid' => true,
+            ])
+            ->build();
+
+        self::assertSame([
+            'navbar_theme' => 'dark',
+            'fluid' => true,
+        ], self::section($result, 'layout'));
     }
 
     public function testIconPackCanBeOverridden(): void

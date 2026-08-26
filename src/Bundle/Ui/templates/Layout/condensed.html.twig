@@ -1,0 +1,47 @@
+{#
+    A layout with only the top navigation bar — no sidebar — following Tabler's "condensed" layout.
+
+    Use it for pages that should not expose the application navigation, but still need the top-level
+    links: onboarding, billing checkout, account setup, marketing-ish pages inside the app.
+
+        {% extends ui_layout_condensed %}
+
+        {% block page_title %}{{ 'Choose a plan'|trans }}{% endblock %}
+
+        {% block content %}
+            …
+        {% endblock %}
+
+    Links come from the KnpMenu menu named `navbar`. `{% set layout = {navbar: false} %}` leaves just
+    the page header and body — which is the `clean` layout, so prefer that one instead.
+
+    See `@Ui/Layout/base.html.twig` for the full list of layout options.
+#}
+
+{% extends ui_base_template %}
+
+{% use '@Ui/Layout/partials/_navbar.html.twig' %}
+
+{% block body %}
+    {% set navbar_standalone = true %}
+
+    <div class="page">
+        {% if layout.navbar %}
+            {{ block('navbar') }}
+        {% endif %}
+
+        <div class="page-wrapper">
+            {{ block('page_header') }}
+
+            <div class="page-body">
+                <div class="{{ container_class }}">
+                    {{ block('flashes') }}
+
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+
+            {{ block('footer') }}
+        </div>
+    </div>
+{% endblock body %}

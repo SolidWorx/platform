@@ -1,0 +1,70 @@
+{#
+    Top navigation bar, shared by the `app` and `condensed` layouts.
+
+    Pulled into the base layout with `{% use %}`, so any page can override a single piece of it:
+
+        {% block navbar_actions %}
+            <a href="{{ path('app_search') }}" class="nav-link px-0">{{ ux_icon('tabler:search') }}</a>
+        {% endblock %}
+
+    Links come from the KnpMenu menu named `navbar`; if no builder registers that menu, the menu
+    area is simply not rendered.
+
+    `navbar_standalone` tells the partial whether it is the only navigation on the page. The
+    `condensed` layout sets it to `true` (brand + burger menu are rendered here); the `app` layout
+    sets it to `false`, because the sidebar already owns the brand and the mobile navigation.
+#}
+
+{% block navbar_actions %}{% endblock %}
+
+{% block navbar_menu %}
+    {% if menu_exists('navbar') %}
+        {{ render_menu('navbar', {root_class: 'navbar-nav', auto_close: 'outside'}) }}
+    {% endif %}
+{% endblock %}
+
+{% block navbar %}
+    {% set navbar_standalone = navbar_standalone is defined ? navbar_standalone : true %}
+
+    {%- set navbar_classes = html_classes('navbar', 'navbar-expand-' ~ layout.navbar_expand, {
+        'sticky-top': layout.navbar_sticky,
+        'navbar-overlap': layout.navbar_overlap,
+        'd-none d-lg-flex': not navbar_standalone,
+    }, 'd-print-none') -%}
+
+    <header class="{{ navbar_classes }}"{% if layout.navbar_theme is not null %} data-bs-theme="{{ layout.navbar_theme }}"{% endif %}>
+        <div class="{{ container_class }}">
+            {% if navbar_standalone %}
+                <button
+                    class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbar-menu"
+                    aria-controls="navbar-menu"
+                    aria-expanded="false"
+                    aria-label="{{ 'Toggle navigation'|trans }}"
+                >
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                {% block navbar_brand %}
+                    <div class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
+                        {{ block('brand') }}
+                    </div>
+                {% endblock %}
+            {% endif %}
+
+            <div class="navbar-nav flex-row order-md-last">
+                {{ block('navbar_actions') }}
+                {{ block('user_menu') }}
+            </div>
+
+            {% set navbar_menu = block('navbar_menu')|trim %}
+            {% if navbar_menu is not empty %}
+                <div class="collapse navbar-collapse" id="navbar-menu">
+                    {{ navbar_menu|raw }}
+                </div>
+            {% endif %}
+        </div>
+    </header>
+{% endblock navbar %}

@@ -25,13 +25,13 @@ use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Webmozart\Assert\Assert;
 use function dirname;
 
+/**
+ * @phpstan-import-type UiConfig from UiConfiguration
+ */
 final class SolidWorxPlatformUiExtension extends Extension implements PrependExtensionInterface
 {
     /**
-     * @var array{
-     *   icon_pack: string,
-     *   templates: array{base: string, login: string}
-     * }|null
+     * @var UiConfig|null
      */
     private ?array $config = null;
 
@@ -55,6 +55,8 @@ final class SolidWorxPlatformUiExtension extends Extension implements PrependExt
         $container
             ->getDefinition(UiExtension::class)
             ->setArgument(0, $config['templates']['base'])
+            ->setArgument(1, $config['templates']['layouts'])
+            ->setArgument(2, $config['layout'])
         ;
 
         $container->setParameter('solidworx_platform_ui.template.login', $config['templates']['login']);
@@ -84,10 +86,7 @@ final class SolidWorxPlatformUiExtension extends Extension implements PrependExt
     }
 
     /**
-     * @return array{
-     *   icon_pack: string,
-     *   templates: array{base: string, login: string}
-     * }
+     * @return UiConfig
      */
     private function getConfig(): array
     {
@@ -99,10 +98,7 @@ final class SolidWorxPlatformUiExtension extends Extension implements PrependExt
     }
 
     /**
-     * @return array{
-     *   icon_pack: string,
-     *   templates: array{base: string, login: string}
-     * }
+     * @return UiConfig
      */
     private function processRawSection(): array
     {
@@ -110,7 +106,7 @@ final class SolidWorxPlatformUiExtension extends Extension implements PrependExt
 
         $processor = new Processor();
 
-        /** @var array{icon_pack: string, templates: array{base: string, login: string}} */
+        /** @var UiConfig */
         return $processor->process($treeBuilder->buildTree(), [$this->rawSection]);
     }
 }

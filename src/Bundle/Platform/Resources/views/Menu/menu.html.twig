@@ -10,10 +10,17 @@
 {% extends 'knp_menu.html.twig' %}
 {% import 'knp_menu.html.twig' as ui %}
 
+{#
+    `root_class` and `auto_close` let the same menu render in either navigation:
+    the vertical sidebar (defaults) or the horizontal top navbar, where the root list has no top
+    padding and dropdowns close when clicking outside.
+
+        {{ render_menu('navbar', {root_class: 'navbar-nav', auto_close: 'outside'}) }}
+#}
 {% block list %}
     {% if item.hasChildren and options.depth is not same as(0) and item.displayChildren %}
         {% if item.level == 0 %}
-            <ul{{ ui.attributes(listAttributes|merge({'class': 'navbar-nav pt-lg-3'})) }}>
+            <ul{{ ui.attributes(listAttributes|merge({'class': options.root_class|default('navbar-nav pt-lg-3')})) }}>
                 {{ block('children') }}
             </ul>
         {% else %}
@@ -89,7 +96,7 @@
 
 {% block spanElement %}
     {% if item.hasChildren and item.displayChildren %}
-        <a href="#" class="{{ item.parent.isRoot ? 'nav-link' : 'dropdown-item' }} dropdown-toggle{{ matcher.isCurrent(item) or matcher.isAncestor(item, options.matchingDepth) ? ' show' }}" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="{{ matcher.isCurrent(item) or matcher.isAncestor(item, options.matchingDepth) ? 'true' : 'false' }}">
+        <a href="#" class="{{ item.parent.isRoot ? 'nav-link' : 'dropdown-item' }} dropdown-toggle{{ matcher.isCurrent(item) or matcher.isAncestor(item, options.matchingDepth) ? ' show' }}" data-bs-toggle="dropdown" data-bs-auto-close="{{ options.auto_close|default('false') }}" role="button" aria-expanded="{{ matcher.isCurrent(item) or matcher.isAncestor(item, options.matchingDepth) ? 'true' : 'false' }}">
             {% if item.extras.icon is defined %}
                 <span class="nav-link-icon d-md-none d-lg-inline-block">
                     {{ ux_icon('tabler:' ~ item.extras.icon) }}

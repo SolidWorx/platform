@@ -1,0 +1,22 @@
+{#
+    Brand blocks, shared by every layout.
+
+    This template is pulled into the base layout with `{% use %}`, so the blocks below can be
+    overridden from any page template — the same way you would override `content`.
+
+    Swap the text brand for a logo:
+
+        {% block brand_content %}
+            <img src="{{ asset('images/logo.svg') }}" width="110" height="32" alt="" class="navbar-brand-image" />
+        {% endblock %}
+
+    Point the brand at your home page by setting `brand_url` when extending a layout:
+
+        {% set brand_url = path('app_dashboard') %}
+#}
+
+{% block brand %}
+    <a href="{{ brand_url|default('/') }}" aria-label="{{ ui_app_name|default('') }}">
+        {%- block brand_content %}{{ ui_app_name|default('') }}{% endblock -%}
+    </a>
+{% endblock brand %}

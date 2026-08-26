@@ -246,26 +246,40 @@ platform:
 
 ---
 
-### UI (`platform.ui`)
+### UI (`ui`)
 
-The `ui` section applies when `SolidWorxPlatformUiBundle` is registered.
+The `ui` section is a sibling of `platform:`, not a child of it. It applies when
+`SolidWorxPlatformUiBundle` is registered.
 
 ```yaml
-platform:
-  ui:
-    # The icon library to load.
-    # Default: 'tabler'
-    icon_pack: tabler
+ui:
+  # The icon library to load.
+  # Default: 'tabler'
+  icon_pack: tabler
 
-    templates:
-      # The Twig template used as the outer HTML shell for all pages.
-      # Your template must expose a `content` block.
-      # Default: '@Ui/Layout/base.html.twig'
-      base: '@App/layout/base.html.twig'
+  templates:
+    # The Twig template used as the outer HTML shell for all pages.
+    # Default: '@Ui/Layout/base.html.twig'
+    base: '@App/layout/base.html.twig'
 
-      # The Twig template rendered for the login page.
-      # Default: '@Ui/Security/login.html.twig'
-      login: '@App/security/login.html.twig'
+    # The Twig template rendered for the login page.
+    # Default: '@Ui/Security/login.html.twig'
+    login: '@App/security/login.html.twig'
+
+    # The layouts pages extend. Each one is exposed to Twig as `ui_layout_<name>`,
+    # so overriding it here swaps the layout everywhere without touching page templates.
+    layouts:
+      app: '@App/layout/app.html.twig'              # Default: '@Ui/Layout/app.html.twig'
+      condensed: '@Ui/Layout/condensed.html.twig'
+      clean: '@Ui/Layout/clean.html.twig'
+
+  # Application-wide layout defaults. Individual templates still win, because they set their
+  # own options with `{% set layout = {...} %}`.
+  # See docs/frontend/layouts.md for what each option does.
+  layout:
+    navbar_theme: dark
+    navbar_sticky: true
+    fluid: true
 ```
 
 ---
@@ -330,11 +344,13 @@ platform:
         default: 1
         description: 'Allowed team members'
 
-  ui:
-    icon_pack: tabler
-    templates:
-      base: '@App/layout/base.html.twig'
-      login: '@App/security/login.html.twig'
+ui:
+  icon_pack: tabler
+  templates:
+    base: '@App/layout/base.html.twig'
+    login: '@App/security/login.html.twig'
+  layout:
+    navbar_sticky: true
 ```
 
 ---
@@ -383,6 +399,8 @@ return PlatformConfigBuilder::create()
             ->iconPack('tabler')
             ->baseTemplate('@App/layout/base.html.twig')
             ->loginTemplate('@App/security/login.html.twig')
+            ->appLayout('@App/layout/app.html.twig')
+            ->layoutDefaults(['navbar_sticky' => true])
             ->build()
     )
     ->build();

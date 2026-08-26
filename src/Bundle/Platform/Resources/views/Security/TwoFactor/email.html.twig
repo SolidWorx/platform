@@ -1,4 +1,6 @@
-{% extends base_template %}
+{# Falls back to the UI bundle's navigation-free layout when the application has not set
+   `platform.security.two_factor.base_template`. #}
+{% extends base_template|default(ui_layout_clean) %}
 
 {% block content %}
     <div class="row justify-content-center">
