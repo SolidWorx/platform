@@ -80,13 +80,13 @@
                 },
                 "models": {
                     "default": {
-                        "user": "SolidWorx\\Platform\\PlatformBundle\\Model\\User"
+                        "user": "SolidWorx\\Platform\\PlatformBundle\\Entity\\User"
                     },
                     "type": "object",
                     "properties": {
                         "user": {
                             "description": "The User model class.",
-                            "default": "SolidWorx\\Platform\\PlatformBundle\\Model\\User",
+                            "default": "SolidWorx\\Platform\\PlatformBundle\\Entity\\User",
                             "type": "string"
                         }
                     },
@@ -108,7 +108,7 @@
                             "route": false
                         },
                         "write_guard": {
-                            "check_user_access": false
+                            "check_user_access": true
                         }
                     },
                     "type": "object",
@@ -181,13 +181,13 @@
                         },
                         "write_guard": {
                             "default": {
-                                "check_user_access": false
+                                "check_user_access": true
                             },
                             "type": "object",
                             "properties": {
                                 "check_user_access": {
                                     "description": "Also verify the current user is a member of the tenant on write.",
-                                    "default": false,
+                                    "default": true,
                                     "type": "boolean"
                                 }
                             },
@@ -395,7 +395,29 @@
                 "icon_pack": "tabler",
                 "templates": {
                     "base": "@Ui/Layout/base.html.twig",
-                    "login": "@Ui/Security/login.html.twig"
+                    "login": "@Ui/Security/login.html.twig",
+                    "layouts": {
+                        "app": "@Ui/Layout/app.html.twig",
+                        "condensed": "@Ui/Layout/condensed.html.twig",
+                        "clean": "@Ui/Layout/clean.html.twig"
+                    }
+                },
+                "layout": {
+                    "theme": null,
+                    "fluid": false,
+                    "boxed": false,
+                    "navbar": true,
+                    "navbar_theme": null,
+                    "navbar_sticky": false,
+                    "navbar_overlap": false,
+                    "navbar_expand": "md",
+                    "sidebar": true,
+                    "sidebar_theme": "dark",
+                    "sidebar_position": "start",
+                    "sidebar_transparent": false,
+                    "sidebar_expand": "lg",
+                    "page_header": true,
+                    "footer": true
                 }
             },
             "type": "object",
@@ -408,7 +430,12 @@
                 "templates": {
                     "default": {
                         "base": "@Ui/Layout/base.html.twig",
-                        "login": "@Ui/Security/login.html.twig"
+                        "login": "@Ui/Security/login.html.twig",
+                        "layouts": {
+                            "app": "@Ui/Layout/app.html.twig",
+                            "condensed": "@Ui/Layout/condensed.html.twig",
+                            "clean": "@Ui/Layout/clean.html.twig"
+                        }
                     },
                     "type": "object",
                     "properties": {
@@ -421,6 +448,172 @@
                             "description": "The standard login template",
                             "default": "@Ui/Security/login.html.twig",
                             "type": "string"
+                        },
+                        "layouts": {
+                            "description": "The layouts pages extend, available in Twig as ui_layout_<name>",
+                            "default": {
+                                "app": "@Ui/Layout/app.html.twig",
+                                "condensed": "@Ui/Layout/condensed.html.twig",
+                                "clean": "@Ui/Layout/clean.html.twig"
+                            },
+                            "type": "object",
+                            "properties": {
+                                "app": {
+                                    "description": "Sidebar + top navbar, for the signed-in application",
+                                    "default": "@Ui/Layout/app.html.twig",
+                                    "type": "string"
+                                },
+                                "condensed": {
+                                    "description": "Top navbar only, without a sidebar",
+                                    "default": "@Ui/Layout/condensed.html.twig",
+                                    "type": "string"
+                                },
+                                "clean": {
+                                    "description": "No navigation at all, for login / 2FA / error pages",
+                                    "default": "@Ui/Layout/clean.html.twig",
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "layout": {
+                    "description": "Application-wide layout defaults; templates override them with {% set layout = {...} %}",
+                    "default": {
+                        "theme": null,
+                        "fluid": false,
+                        "boxed": false,
+                        "navbar": true,
+                        "navbar_theme": null,
+                        "navbar_sticky": false,
+                        "navbar_overlap": false,
+                        "navbar_expand": "md",
+                        "sidebar": true,
+                        "sidebar_theme": "dark",
+                        "sidebar_position": "start",
+                        "sidebar_transparent": false,
+                        "sidebar_expand": "lg",
+                        "page_header": true,
+                        "footer": true
+                    },
+                    "type": "object",
+                    "properties": {
+                        "theme": {
+                            "description": "Forces the colour scheme instead of following the user preference",
+                            "default": null,
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "enum": [
+                                null,
+                                "light",
+                                "dark"
+                            ]
+                        },
+                        "fluid": {
+                            "description": "Use the full width of the viewport",
+                            "default": false,
+                            "type": "boolean"
+                        },
+                        "boxed": {
+                            "description": "Constrain the page to a boxed width",
+                            "default": false,
+                            "type": "boolean"
+                        },
+                        "navbar": {
+                            "description": "Render the top navigation bar",
+                            "default": true,
+                            "type": "boolean"
+                        },
+                        "navbar_theme": {
+                            "description": "Colour scheme of the top navigation bar",
+                            "default": null,
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "enum": [
+                                null,
+                                "light",
+                                "dark"
+                            ]
+                        },
+                        "navbar_sticky": {
+                            "description": "Keep the top navigation bar visible while scrolling",
+                            "default": false,
+                            "type": "boolean"
+                        },
+                        "navbar_overlap": {
+                            "description": "Let the page body overlap the top navigation bar",
+                            "default": false,
+                            "type": "boolean"
+                        },
+                        "navbar_expand": {
+                            "description": "Breakpoint at which the top navigation bar expands",
+                            "default": "md",
+                            "type": "string",
+                            "enum": [
+                                "sm",
+                                "md",
+                                "lg",
+                                "xl"
+                            ]
+                        },
+                        "sidebar": {
+                            "description": "Render the sidebar",
+                            "default": true,
+                            "type": "boolean"
+                        },
+                        "sidebar_theme": {
+                            "description": "Colour scheme of the sidebar",
+                            "default": "dark",
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "enum": [
+                                null,
+                                "light",
+                                "dark"
+                            ]
+                        },
+                        "sidebar_position": {
+                            "description": "Side the sidebar sits on",
+                            "default": "start",
+                            "type": "string",
+                            "enum": [
+                                "start",
+                                "end"
+                            ]
+                        },
+                        "sidebar_transparent": {
+                            "description": "Remove the sidebar background",
+                            "default": false,
+                            "type": "boolean"
+                        },
+                        "sidebar_expand": {
+                            "description": "Breakpoint at which the sidebar expands",
+                            "default": "lg",
+                            "type": "string",
+                            "enum": [
+                                "sm",
+                                "md",
+                                "lg",
+                                "xl"
+                            ]
+                        },
+                        "page_header": {
+                            "description": "Render the page header",
+                            "default": true,
+                            "type": "boolean"
+                        },
+                        "footer": {
+                            "description": "Render the page footer",
+                            "default": true,
+                            "type": "boolean"
                         }
                     },
                     "additionalProperties": false

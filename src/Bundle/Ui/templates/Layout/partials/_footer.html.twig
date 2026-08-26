@@ -1,0 +1,41 @@
+{#
+    Page footer blocks, shared by every layout.
+
+    Pulled into the base layout with `{% use %}`. Override `footer_links` for a list of links on the
+    right, `footer_copyright` for the text on the left, or `footer` to replace the whole thing.
+
+    Hide it for a single page with `{% set layout = {footer: false} %}`, or application-wide with
+    `platform.ui.layout.footer: false`.
+#}
+
+{% block footer_links %}{% endblock %}
+
+{% block footer_copyright %}
+    <li class="list-inline-item">
+        &copy; {{ 'now'|date('Y') }} {{ ui_app_name|default('') }}
+    </li>
+{% endblock %}
+
+{% block footer %}
+    {% if layout.footer %}
+        <footer class="footer footer-transparent d-print-none">
+            <div class="{{ container_class }}">
+                <div class="row text-center align-items-center flex-row-reverse">
+                    {% set footer_links = block('footer_links')|trim %}
+
+                    {% if footer_links is not empty %}
+                        <div class="col-lg-auto ms-lg-auto">
+                            <ul class="list-inline list-inline-dots mb-0">{{ footer_links|raw }}</ul>
+                        </div>
+                    {% endif %}
+
+                    <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+                        <ul class="list-inline list-inline-dots mb-0">
+                            {{ block('footer_copyright') }}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    {% endif %}
+{% endblock footer %}

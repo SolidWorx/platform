@@ -1,43 +1,133 @@
+{#
+    The base layout.
+
+    It owns the HTML document — head, meta, assets, body — and nothing else. Every layout shipped by
+    the platform (`app`, `condensed`, `clean`) extends it, and applications can replace it wholesale
+    through `platform.ui.templates.base`.
+
+    ------------------------------------------------------------------------------------------------
+    Layout options
+    ------------------------------------------------------------------------------------------------
+
+    Options are resolved here, once, so every layout shares the same contract. They are merged in
+    order of increasing precedence:
+
+        1. the defaults below
+        2. `platform.ui.layout.*` from the application's platform.yaml (`ui_layout_defaults`)
+        3. the `layout` variable a template sets when extending a layout
+
+    Setting them is a plain `{% set %}` next to the `{% extends %}`:
+
+        {% extends ui_layout_app %}
+        {% set layout = {navbar_theme: 'dark', navbar_sticky: true, fluid: true} %}
+
+    | Option                | Type              | Default   | Effect                                        |
+    |-----------------------|-------------------|-----------|-----------------------------------------------|
+    | `theme`               | light/dark/null   | `null`    | Forces the colour scheme on `<html>`           |
+    | `fluid`               | bool              | `false`   | Full-width page (`body.layout-fluid`)          |
+    | `boxed`               | bool              | `false`   | Boxed page (`body.layout-boxed`)               |
+    | `container`           | string/null       | `null`    | Overrides the container class outright         |
+    | `navbar`              | bool              | `true`    | Renders the top navbar                         |
+    | `navbar_theme`        | light/dark/null   | `null`    | Colour scheme of the top navbar                |
+    | `navbar_sticky`       | bool              | `false`   | Keeps the top navbar visible while scrolling   |
+    | `navbar_overlap`      | bool              | `false`   | Lets the page body overlap the top navbar      |
+    | `navbar_expand`       | sm/md/lg/xl       | `md`      | Breakpoint at which the navbar expands         |
+    | `sidebar`             | bool              | `true`    | Renders the sidebar                            |
+    | `sidebar_theme`       | light/dark/null   | `dark`    | Colour scheme of the sidebar                   |
+    | `sidebar_position`    | start/end         | `start`   | Side the sidebar sits on                       |
+    | `sidebar_transparent` | bool              | `false`   | Removes the sidebar background                 |
+    | `sidebar_expand`      | sm/md/lg/xl       | `lg`      | Breakpoint at which the sidebar expands        |
+    | `page_header`         | bool              | `true`    | Renders the page header                        |
+    | `footer`              | bool              | `true`    | Renders the page footer                        |
+    | `centered`            | bool              | `false`   | Centres the content (`clean` layout only)      |
+
+    Two more variables follow the same "set it when you extend" convention: `body_class` adds
+    classes to the `<body>` element, and `brand_url` points the brand at your home page.
+
+        {% set body_class = 'dashboard' %}
+        {% set brand_url = path('app_home') %}
+#}
+
+{%- use '@Ui/Layout/partials/_brand.html.twig' -%}
+{%- use '@Ui/Layout/partials/_user_menu.html.twig' -%}
+{%- use '@Ui/Layout/partials/_flashes.html.twig' -%}
+{%- use '@Ui/Layout/partials/_page_header.html.twig' -%}
+{%- use '@Ui/Layout/partials/_footer.html.twig' -%}
+
+{%- set layout = {
+    theme: null,
+    fluid: false,
+    boxed: false,
+    container: null,
+    navbar: true,
+    navbar_theme: null,
+    navbar_sticky: false,
+    navbar_overlap: false,
+    navbar_expand: 'md',
+    sidebar: true,
+    sidebar_theme: 'dark',
+    sidebar_position: 'start',
+    sidebar_transparent: false,
+    sidebar_expand: 'lg',
+    page_header: true,
+    footer: true,
+    centered: false,
+}|merge(ui_layout_defaults|default({}))|merge(layout|default({})) -%}
+
+{%- set container_class = layout.container ?? (layout.fluid ? 'container-fluid' : 'container-xl') -%}
+{%- set body_class = (html_classes({
+    'layout-fluid': layout.fluid,
+    'layout-boxed': layout.boxed,
+}) ~ ' ' ~ body_class|default(''))|trim -%}
 {%- set locale = app.request.locale|split('_')[0] -%}
+
 <!doctype html>
 
-<html lang="{{ locale }}">
+<html lang="{{ locale }}"{% if layout.theme is not null %} data-bs-theme="{{ layout.theme }}"{% endif %}{% block html_attributes %}{% endblock %}>
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    {% block head %}
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
 
-    <title>{{ block('page_title') is defined  ? block('page_title') : '' }}</title>
+        <title>{% block head_title %}{% set head_title = block('page_title')|striptags|trim %}{{ (head_title is not empty ? head_title ~ ' · ' : '')|raw }}{{ ui_app_name|default('') }}{% endblock %}</title>
 
-    {# TODO: Allow to define a custom theme color #}
-    <meta name="msapplication-TileColor" content="#066fd1" />
-    <meta name="theme-color" content="#066fd1" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="HandheldFriendly" content="True" />
-    <meta name="MobileOptimized" content="320" />
+        {% block head_meta %}
+            {# TODO: Allow to define a custom theme color #}
+            <meta name="msapplication-TileColor" content="#066fd1" />
+            <meta name="theme-color" content="#066fd1" />
+            <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+            <meta name="apple-mobile-web-app-capable" content="yes" />
+            <meta name="mobile-web-app-capable" content="yes" />
+            <meta name="HandheldFriendly" content="True" />
+            <meta name="MobileOptimized" content="320" />
 
-    {% if app.current_route is not empty -%}
-        <meta name="canonical" content="{{ url(app.current_route, app.current_route_parameters, false) }}" />
-    {%- endif %}
+            {% if app.current_route is not empty -%}
+                <meta name="canonical" content="{{ url(app.current_route, app.current_route_parameters, false) }}" />
+            {%- endif %}
 
-    {# TODO: Add description and keywords meta #}
-    {# <meta name="description" content=""> #}
+            {# TODO: Add description and keywords meta #}
+            {# <meta name="description" content=""> #}
+        {% endblock head_meta %}
 
-    <link rel="icon" href="{{ asset('/favicon.ico') }}" type="image/x-icon" />
-    <link rel="shortcut icon" href="{{ asset('/favicon.ico') }}" type="image/x-icon" />
+        {% block favicon %}
+            <link rel="icon" href="{{ asset('/favicon.ico') }}" type="image/x-icon" />
+            <link rel="shortcut icon" href="{{ asset('/favicon.ico') }}" type="image/x-icon" />
+        {% endblock favicon %}
 
-    {% block stylesheets %}
-        {{ encore_entry_link_tags('_platform_ui') }}
-    {% endblock stylesheets %}
+        {% block stylesheets %}
+            {{ encore_entry_link_tags('_platform_ui') }}
+        {% endblock stylesheets %}
+    {% endblock head %}
 </head>
-<body>
+
+<body{% if body_class is not empty %} class="{{ body_class }}"{% endif %}{% block body_attributes %}{% endblock %}>
 {% block body %}{% endblock %}
 
 {% block javascripts %}
     {{ encore_entry_script_tags('_platform_ui') }}
 {% endblock javascripts %}
 </body>
+
 </html>

@@ -40,3 +40,23 @@ platform:
 #   templates:
 #     base: '@Ui/Layout/base.html.twig'
 #     login: '@Ui/Security/login.html.twig'
+#     layouts:
+#       app: '@Ui/Layout/app.html.twig'
+#       condensed: '@Ui/Layout/condensed.html.twig'
+#       clean: '@Ui/Layout/clean.html.twig'
+#   layout:
+#     theme: null
+#     fluid: false
+#     boxed: false
+#     navbar: true
+#     navbar_theme: null
+#     navbar_sticky: false
+#     navbar_overlap: false
+#     navbar_expand: md
+#     sidebar: true
+#     sidebar_theme: dark
+#     sidebar_position: start
+#     sidebar_transparent: false
+#     sidebar_expand: lg
+#     page_header: true
+#     footer: true

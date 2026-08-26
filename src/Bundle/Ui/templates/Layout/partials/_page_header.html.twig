@@ -1,0 +1,54 @@
+{#
+    Page header blocks, shared by every layout.
+
+    Pulled into the base layout with `{% use %}`. A page only has to define `page_title` to get a
+    styled Tabler page header — and the same title is reused for the `<title>` element:
+
+        {% extends ui_layout_app %}
+
+        {% block page_pretitle %}{{ 'Billing'|trans }}{% endblock %}
+        {% block page_title %}{{ 'Invoices'|trans }}{% endblock %}
+
+        {% block page_title_actions %}
+            <a href="{{ path('app_invoice_add') }}" class="btn btn-primary">{{ 'New invoice'|trans }}</a>
+        {% endblock %}
+
+    The header is skipped entirely when none of those blocks produce output, or when the layout is
+    configured with `{% set layout = {page_header: false} %}`.
+#}
+
+{% block page_pretitle %}{% endblock %}
+
+{% block page_title %}{% endblock %}
+
+{% block page_title_actions %}{% endblock %}
+
+{% block page_header %}
+    {% set page_pretitle = block('page_pretitle')|trim %}
+    {% set page_title = block('page_title')|trim %}
+    {% set page_title_actions = block('page_title_actions')|trim %}
+
+    {% if layout.page_header and (page_pretitle is not empty or page_title is not empty or page_title_actions is not empty) %}
+        <div class="page-header d-print-none" aria-label="{{ 'Page header'|trans }}">
+            <div class="{{ container_class }}">
+                <div class="row g-2 align-items-center">
+                    <div class="col">
+                        {% if page_pretitle is not empty %}
+                            <div class="page-pretitle">{{ page_pretitle|raw }}</div>
+                        {% endif %}
+
+                        {% if page_title is not empty %}
+                            <h2 class="page-title">{{ page_title|raw }}</h2>
+                        {% endif %}
+                    </div>
+
+                    {% if page_title_actions is not empty %}
+                        <div class="col-auto ms-auto d-print-none">
+                            <div class="btn-list">{{ page_title_actions|raw }}</div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock page_header %}

@@ -1,0 +1,60 @@
+{#
+    A layout with no navigation at all.
+
+    Use it wherever navigating away is not the point: login, two-factor challenge, password reset,
+    workspace selection, error pages, print views.
+
+    Two shapes, switched with the `centered` layout option:
+
+      * `centered: true` — a narrow, vertically centred column with the brand above it. This is what
+        the authentication screens use.
+      * `centered: false` (default) — a normal full page with header, body and footer, just without
+        a navbar or sidebar.
+
+        {% extends ui_layout_clean %}
+        {% set layout = {centered: true} %}
+
+        {% block content %}
+            <twig:Ui:Card>…</twig:Ui:Card>
+        {% endblock %}
+
+    See `@Ui/Layout/base.html.twig` for the full list of layout options.
+#}
+
+{% extends ui_base_template %}
+
+{% block body %}
+    {% if layout.centered %}
+        <div class="page page-center">
+            <div class="container container-tight py-4">
+                {% block clean_brand %}
+                    <div class="text-center mb-4">
+                        <div class="navbar-brand navbar-brand-autodark">
+                            {{ block('brand') }}
+                        </div>
+                    </div>
+                {% endblock clean_brand %}
+
+                {{ block('flashes') }}
+
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    {% else %}
+        <div class="page">
+            <div class="page-wrapper">
+                {{ block('page_header') }}
+
+                <div class="page-body">
+                    <div class="{{ container_class }}">
+                        {{ block('flashes') }}
+
+                        {{ block('content') }}
+                    </div>
+                </div>
+
+                {{ block('footer') }}
+            </div>
+        </div>
+    {% endif %}
+{% endblock body %}

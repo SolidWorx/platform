@@ -199,9 +199,13 @@ final readonly class SchemaGenerator implements SchemaGeneratorInterface
      */
     private function enumNodeToSchema(EnumNode $node): array
     {
+        $values = array_values($node->getValues());
+
         return [
-            'type' => 'string',
-            'enum' => array_values($node->getValues()),
+            // A nullable enum (`->values([null, 'light', 'dark'])`) must advertise the null type as
+            // well, otherwise the schema contradicts its own enum list.
+            'type' => in_array(null, $values, true) ? ['string', 'null'] : 'string',
+            'enum' => $values,
         ];
     }
 

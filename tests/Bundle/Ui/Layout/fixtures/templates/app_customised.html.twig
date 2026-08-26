@@ -1,0 +1,24 @@
+{% extends ui_layout_app %}
+
+{% set layout = {
+    fluid: true,
+    navbar_theme: 'dark',
+    navbar_sticky: true,
+    sidebar_position: 'end',
+    sidebar_transparent: true,
+    footer: false,
+} %}
+
+{% set brand_url = '/dashboard' %}
+
+{% block brand_content %}<img src="/logo.svg" alt="" class="navbar-brand-image" />{% endblock %}
+
+{% block navbar_actions %}
+    <a href="/search" class="nav-link px-0" id="navbar-search">Search</a>
+{% endblock %}
+
+{% block page_title %}Customised{% endblock %}
+
+{% block content %}
+    <p id="app-content">Customised content</p>
+{% endblock %}

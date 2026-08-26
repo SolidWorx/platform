@@ -1,0 +1,61 @@
+{#
+    Vertical sidebar navigation, used by the `app` layout.
+
+    Pulled into the base layout with `{% use %}`. Links come from the KnpMenu menu named `sidebar`:
+
+        #[MenuBuilder(name: 'sidebar')]
+        public function build(ItemInterface $menu): void
+        {
+            $menu->addChild('Dashboard', Options::create()->route('app_dashboard')->icon('home')->build());
+        }
+
+    Appearance is controlled through the layout options — `sidebar_theme`, `sidebar_position`,
+    `sidebar_transparent` and `sidebar_expand`.
+#}
+
+{% block sidebar_menu %}
+    {% if menu_exists('sidebar') %}
+        {{ render_menu('sidebar') }}
+    {% endif %}
+{% endblock %}
+
+{% block sidebar_footer %}{% endblock %}
+
+{% block sidebar %}
+    {%- set sidebar_classes = html_classes('navbar', 'navbar-vertical', 'navbar-expand-' ~ layout.sidebar_expand, {
+        'navbar-end': layout.sidebar_position == 'end',
+        'navbar-transparent': layout.sidebar_transparent,
+    }) -%}
+
+    <aside class="{{ sidebar_classes }}"{% if layout.sidebar_theme is not null %} data-bs-theme="{{ layout.sidebar_theme }}"{% endif %}>
+        <div class="container-fluid">
+            <button
+                class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#sidebar-menu"
+                aria-controls="sidebar-menu"
+                aria-expanded="false"
+                aria-label="{{ 'Toggle navigation'|trans }}"
+            >
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            {% block sidebar_brand %}
+                <div class="navbar-brand navbar-brand-autodark">
+                    {{ block('brand') }}
+                </div>
+            {% endblock %}
+
+            {# The top navbar is hidden on small screens, so the user menu moves in here. #}
+            <div class="navbar-nav flex-row d-lg-none">
+                {{ block('user_menu') }}
+            </div>
+
+            <div class="collapse navbar-collapse" id="sidebar-menu">
+                {{ block('sidebar_menu') }}
+                {{ block('sidebar_footer') }}
+            </div>
+        </div>
+    </aside>
+{% endblock sidebar %}

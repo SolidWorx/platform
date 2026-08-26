@@ -15,6 +15,7 @@ namespace SolidWorx\Platform\PlatformBundle\Twig\Extension;
 
 use Knp\Menu\Twig\MenuRuntimeExtension;
 use Override;
+use SolidWorx\Platform\PlatformBundle\Twig\Runtime\MenuRuntime;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
@@ -30,6 +31,7 @@ final class MenuExtension extends AbstractExtension
             new TwigFunction('render_menu', [MenuRuntimeExtension::class, 'render'], [
                 'is_safe' => ['html'],
             ]),
+            new TwigFunction('menu_exists', [MenuRuntime::class, 'exists']),
         ];
     }
 }

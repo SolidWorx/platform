@@ -1,0 +1,50 @@
+{#
+    Authenticated user dropdown, shared by the sidebar and the top navbar.
+
+    Pulled into the base layout with `{% use %}`. It deliberately only knows about
+    `Symfony\Component\Security\Core\User\UserInterface`, so it works with any user class the
+    application configures under `platform.models.user`.
+
+    Add your own entries without rebuilding the dropdown:
+
+        {% block user_menu_items %}
+            <a href="{{ path('app_profile') }}" class="dropdown-item">{{ 'Profile'|trans }}</a>
+            <div class="dropdown-divider"></div>
+            {{ parent() }}
+        {% endblock %}
+#}
+
+{% block user_menu_avatar %}
+    <span class="avatar avatar-sm">{{ app.user.userIdentifier|slice(0, 2)|upper }}</span>
+{% endblock %}
+
+{% block user_menu_name %}{{ app.user.userIdentifier }}{% endblock %}
+
+{% block user_menu_role %}{% endblock %}
+
+{% block user_menu_items %}
+    <twig:Ui:Security:LogoutLink class="dropdown-item w-100 text-start" />
+{% endblock %}
+
+{% block user_menu %}
+    {% if app.user is not null %}
+        <div class="nav-item dropdown">
+            <a href="#" class="nav-link d-flex lh-1 p-0 px-2" data-bs-toggle="dropdown" aria-label="{{ 'Open user menu'|trans }}">
+                {{ block('user_menu_avatar') }}
+
+                <div class="d-none d-xl-block ps-2">
+                    <div>{{ block('user_menu_name') }}</div>
+
+                    {% set user_menu_role = block('user_menu_role')|trim %}
+                    {% if user_menu_role is not empty %}
+                        <div class="mt-1 small text-secondary">{{ user_menu_role|raw }}</div>
+                    {% endif %}
+                </div>
+            </a>
+
+            <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                {{ block('user_menu_items') }}
+            </div>
+        </div>
+    {% endif %}
+{% endblock user_menu %}

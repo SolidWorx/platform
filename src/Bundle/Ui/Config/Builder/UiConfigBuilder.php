@@ -26,6 +26,8 @@ namespace SolidWorx\Platform\UiBundle\Config\Builder;
  *             UiConfigBuilder::create()
  *                 ->iconPack('tabler')
  *                 ->baseTemplate('@App/layout/base.html.twig')
+ *                 ->appLayout('@App/layout/app.html.twig')
+ *                 ->layoutDefaults(['navbar_sticky' => true, 'fluid' => true])
  *                 ->build()
  *         )
  *         ->build();
@@ -37,6 +39,17 @@ final class UiConfigBuilder
     private string $baseTemplate = '@Ui/Layout/base.html.twig';
 
     private string $loginTemplate = '@Ui/Security/login.html.twig';
+
+    private string $appLayout = '@Ui/Layout/app.html.twig';
+
+    private string $condensedLayout = '@Ui/Layout/condensed.html.twig';
+
+    private string $cleanLayout = '@Ui/Layout/clean.html.twig';
+
+    /**
+     * @var array<string, scalar|null>
+     */
+    private array $layoutDefaults = [];
 
     private function __construct()
     {
@@ -65,6 +78,37 @@ final class UiConfigBuilder
         return $this;
     }
 
+    public function appLayout(string $template): self
+    {
+        $this->appLayout = $template;
+        return $this;
+    }
+
+    public function condensedLayout(string $template): self
+    {
+        $this->condensedLayout = $template;
+        return $this;
+    }
+
+    public function cleanLayout(string $template): self
+    {
+        $this->cleanLayout = $template;
+        return $this;
+    }
+
+    /**
+     * Application-wide layout option defaults, e.g. `['navbar_theme' => 'dark', 'fluid' => true]`.
+     *
+     * Individual templates still win — they set their own options with `{% set layout = {...} %}`.
+     *
+     * @param array<string, scalar|null> $defaults
+     */
+    public function layoutDefaults(array $defaults): self
+    {
+        $this->layoutDefaults = $defaults;
+        return $this;
+    }
+
     /**
      * Returns the raw ui config array — no validation at this stage.
      *
@@ -77,7 +121,13 @@ final class UiConfigBuilder
             'templates' => [
                 'base' => $this->baseTemplate,
                 'login' => $this->loginTemplate,
+                'layouts' => [
+                    'app' => $this->appLayout,
+                    'condensed' => $this->condensedLayout,
+                    'clean' => $this->cleanLayout,
+                ],
             ],
+            'layout' => $this->layoutDefaults,
         ];
     }
 }
