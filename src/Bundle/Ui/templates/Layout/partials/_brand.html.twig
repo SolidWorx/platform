@@ -1,4 +1,4 @@
-{#
+{##
     Brand blocks, shared by every layout.
 
     This template is pulled into the base layout with `{% use %}`, so the blocks below can be
@@ -13,10 +13,19 @@
     Point the brand at your home page by setting `brand_url` when extending a layout:
 
         {% set brand_url = path('app_dashboard') %}
-#}
+##}
 
+{% types {
+    ## Where the brand links to. Defaults to `/`.
+    brand_url?: 'string',
+} %}
+
+{## The brand link. The layouts wrap this in the Tabler `navbar-brand` element, so override
+    `brand_content` rather than this block unless you need to change the link itself. ##}
 {% block brand %}
     <a href="{{ brand_url|default('/') }}" aria-label="{{ ui_app_name|default('') }}">
+        {## What the brand link contains — the application name by default, an `<img>` if you
+            override it. ##}
         {%- block brand_content %}{{ ui_app_name|default('') }}{% endblock -%}
     </a>
 {% endblock brand %}

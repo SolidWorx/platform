@@ -15,28 +15,28 @@ namespace SolidWorx\Platform\UiBundle\Twig;
 
 use Override;
 use SolidWorx\Platform\UiBundle\Config\UiConfiguration;
+use SolidWorx\Platform\UiBundle\Twig\Runtime\LayoutRuntime;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
+use Twig\TwigFunction;
 
 /**
- * Exposes the configured layouts and their defaults to Twig, so templates extend
- * `ui_layout_app` rather than hard-coding `@Ui/Layout/app.html.twig` — which lets an application
- * swap any layout for its own through `platform.ui.templates.layouts`.
+ * Exposes the configured layouts and the layout option helpers to Twig.
  *
- * @phpstan-import-type UiLayoutOptions from UiConfiguration
+ * Templates extend `ui_layout_app` rather than hard-coding `@Ui/Layout/app.html.twig`, which lets an
+ * application swap any layout for its own through `platform.ui.templates.layouts`.
+ *
  * @phpstan-import-type UiLayoutTemplates from UiConfiguration
  */
 final class UiExtension extends AbstractExtension implements GlobalsInterface
 {
     /**
      * @param UiLayoutTemplates $layoutTemplates
-     * @param UiLayoutOptions   $layoutDefaults
      */
     public function __construct(
         private readonly string $baseTemplate,
         private readonly array $layoutTemplates,
-        private readonly array $layoutDefaults,
         #[Autowire(param: 'solidworx_platform.app.name')]
         private readonly string $appName,
     ) {
@@ -48,7 +48,6 @@ final class UiExtension extends AbstractExtension implements GlobalsInterface
         $globals = [
             'ui_base_template' => $this->baseTemplate,
             'ui_app_name' => $this->appName,
-            'ui_layout_defaults' => $this->layoutDefaults,
         ];
 
         foreach ($this->layoutTemplates as $name => $template) {
@@ -56,5 +55,17 @@ final class UiExtension extends AbstractExtension implements GlobalsInterface
         }
 
         return $globals;
+    }
+
+    /**
+     * @return TwigFunction[]
+     */
+    #[Override]
+    public function getFunctions(): array
+    {
+        return [
+            new TwigFunction('ui_layout', [LayoutRuntime::class, 'layout']),
+            new TwigFunction('ui_layout_resolve', [LayoutRuntime::class, 'resolve']),
+        ];
     }
 }

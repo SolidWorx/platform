@@ -1,4 +1,4 @@
-{#
+{##
     Authenticated user dropdown, shared by the sidebar and the top navbar.
 
     Pulled into the base layout with `{% use %}`. It deliberately only knows about
@@ -12,20 +12,26 @@
             <div class="dropdown-divider"></div>
             {{ parent() }}
         {% endblock %}
-#}
+##}
 
+{## The avatar shown in the dropdown toggle. Defaults to the first two letters of the user
+    identifier; override it to render a real avatar image. ##}
 {% block user_menu_avatar %}
     <span class="avatar avatar-sm">{{ app.user.userIdentifier|slice(0, 2)|upper }}</span>
 {% endblock %}
 
+{## The display name next to the avatar. ##}
 {% block user_menu_name %}{{ app.user.userIdentifier }}{% endblock %}
 
+{## An optional second line under the name — a role, a team or a plan. ##}
 {% block user_menu_role %}{% endblock %}
 
+{## The dropdown entries. Call `{{ parent() }}` to keep the logout link. ##}
 {% block user_menu_items %}
     <twig:Ui:Security:LogoutLink class="dropdown-item w-100 text-start" />
 {% endblock %}
 
+{## The whole dropdown. Renders nothing when nobody is signed in. ##}
 {% block user_menu %}
     {% if app.user is not null %}
         <div class="nav-item dropdown">

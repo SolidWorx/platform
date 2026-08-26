@@ -1,4 +1,4 @@
-{#
+{##
     Page header blocks, shared by every layout.
 
     Pulled into the base layout with `{% use %}`. A page only has to define `page_title` to get a
@@ -15,14 +15,27 @@
 
     The header is skipped entirely when none of those blocks produce output, or when the layout is
     configured with `{% set layout = {page_header: false} %}`.
-#}
+##}
 
+{% types {
+    ## The resolved layout options, from `ui_layout_resolve()` in the base layout.
+    layout: 'map',
+    ## The Bootstrap container class the page body uses, e.g. `container-xl`.
+    container_class: 'string',
+} %}
+
+{## Small muted line above the title — a section or breadcrumb, e.g. "Billing". ##}
 {% block page_pretitle %}{% endblock %}
 
+{## The page title. Used for both the `<h1>`-style page heading and the document `<title>`,
+    so keep it plain text. ##}
 {% block page_title %}{% endblock %}
 
+{## Buttons shown on the right of the page header, wrapped in a Tabler `btn-list`. ##}
 {% block page_title_actions %}{% endblock %}
 
+{## The whole page header. Skipped when the `page_header` layout option is false, or when none
+    of the three blocks above produce any output. ##}
 {% block page_header %}
     {% set page_pretitle = block('page_pretitle')|trim %}
     {% set page_title = block('page_title')|trim %}

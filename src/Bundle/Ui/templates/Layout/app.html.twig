@@ -1,4 +1,4 @@
-{#
+{##
     The standard application layout: a vertical sidebar plus a top navigation bar, following
     Tabler's "combo" layout.
 
@@ -23,9 +23,15 @@
     standalone one, which is what the `condensed` layout does.
 
     See `@Ui/Layout/base.html.twig` for the full list of layout options.
-#}
+##}
 
 {% extends ui_base_template %}
+
+{% types {
+    ## Layout options, best built with `ui_layout()`. Honours every option; `sidebar` and `navbar`
+    ## switch the two navigations on and off independently.
+    layout?: 'map',
+} %}
 
 {% use '@Ui/Layout/partials/_sidebar.html.twig' %}
 {% use '@Ui/Layout/partials/_navbar.html.twig' %}
@@ -49,7 +55,8 @@
                 <div class="{{ container_class }}">
                     {{ block('flashes') }}
 
-                    {% block content %}{% endblock %}
+                    {## The page body, inside the page container. ##}
+        {% block content %}{% endblock %}
                 </div>
             </div>
 

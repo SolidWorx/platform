@@ -25,6 +25,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\InMemoryUser;
 use Twig\Environment;
+use Twig\Error\RuntimeError;
 
 /**
  * Renders the layouts shipped by the UI bundle and asserts the Tabler structure they produce, which
@@ -124,6 +125,28 @@ final class LayoutRenderingTest extends KernelTestCase
         self::assertStringContainsString('navbar-end', $html);
         self::assertStringContainsString('navbar-transparent', $html);
         self::assertStringNotContainsString('<footer', $html);
+    }
+
+    /**
+     * `ui_layout()` is the recommended way to set options: Twig matches its named arguments
+     * against the PHP signature, so an IDE can complete them and a typo is a hard error.
+     */
+    public function testOptionsCanBeSetWithNamedArguments(): void
+    {
+        $html = $this->render('@LayoutTest/app_named_options.html.twig');
+
+        self::assertStringContainsString('class="layout-fluid"', $html);
+        self::assertStringContainsString('<div class="container-fluid">', $html);
+        self::assertStringContainsString('data-bs-theme="dark"', $html);
+        self::assertStringNotContainsString('<footer', $html);
+    }
+
+    public function testAnOptionThatDoesNotExistIsRejected(): void
+    {
+        $this->expectException(RuntimeError::class);
+        $this->expectExceptionMessageIsOrContains('Unknown layout option "navbar_stick". Did you mean "navbar_sticky"?');
+
+        $this->render('@LayoutTest/invalid_option.html.twig');
     }
 
     public function testBrandBlocksAreOverridableFromThePage(): void

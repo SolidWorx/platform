@@ -1,13 +1,17 @@
-{#
+{##
     The layout used by the platform's authentication screens (login, two-factor, workspace select).
 
     It is the `clean` layout in centred mode; it exists as its own template so that security pages
     keep a stable name to extend, and so an application can restyle just the auth screens by
     overriding this template.
-#}
+##}
 
 {% extends ui_layout_clean %}
 
-{% set layout = {
-    centered: true,
-}|merge(layout|default({})) %}
+{% types {
+    ## Layout options, best built with `ui_layout()`. `centered` is forced on unless the page
+    ## explicitly turns it off.
+    layout?: 'map',
+} %}
+
+{% set layout = ui_layout(centered: true)|merge(layout|default({})) %}

@@ -1,4 +1,4 @@
-{#
+{##
     A layout with no navigation at all.
 
     Use it wherever navigating away is not the point: login, two-factor challenge, password reset,
@@ -19,14 +19,21 @@
         {% endblock %}
 
     See `@Ui/Layout/base.html.twig` for the full list of layout options.
-#}
+##}
 
 {% extends ui_base_template %}
+
+{% types {
+    ## Layout options, best built with `ui_layout()`. The `navbar*` and `sidebar*` options are
+    ## ignored; `centered` picks between the two shapes this layout offers.
+    layout?: 'map',
+} %}
 
 {% block body %}
     {% if layout.centered %}
         <div class="page page-center">
             <div class="container container-tight py-4">
+                {## The brand above the centred card. Override with an empty block to drop it. ##}
                 {% block clean_brand %}
                     <div class="text-center mb-4">
                         <div class="navbar-brand navbar-brand-autodark">
@@ -37,6 +44,7 @@
 
                 {{ block('flashes') }}
 
+                {## The page body. ##}
                 {% block content %}{% endblock %}
             </div>
         </div>

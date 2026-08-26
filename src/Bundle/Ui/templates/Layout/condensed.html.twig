@@ -1,4 +1,4 @@
-{#
+{##
     A layout with only the top navigation bar — no sidebar — following Tabler's "condensed" layout.
 
     Use it for pages that should not expose the application navigation, but still need the top-level
@@ -16,9 +16,15 @@
     the page header and body — which is the `clean` layout, so prefer that one instead.
 
     See `@Ui/Layout/base.html.twig` for the full list of layout options.
-#}
+##}
 
 {% extends ui_base_template %}
+
+{% types {
+    ## Layout options, best built with `ui_layout()`. The `sidebar*` options are ignored — this
+    ## layout never renders one.
+    layout?: 'map',
+} %}
 
 {% use '@Ui/Layout/partials/_navbar.html.twig' %}
 
@@ -37,6 +43,7 @@
                 <div class="{{ container_class }}">
                     {{ block('flashes') }}
 
+                    {## The page body, inside the page container. ##}
                     {% block content %}{% endblock %}
                 </div>
             </div>

@@ -1,52 +1,28 @@
-{#
-    The base layout.
+{##
+    The base layout — it owns the HTML document (head, meta, assets, body) and nothing else.
 
-    It owns the HTML document — head, meta, assets, body — and nothing else. Every layout shipped by
-    the platform (`app`, `condensed`, `clean`) extends it, and applications can replace it wholesale
-    through `platform.ui.templates.base`.
+    Every layout shipped by the platform (`app`, `condensed`, `clean`) extends it, and applications
+    can replace it wholesale through `platform.ui.templates.base`.
 
-    ------------------------------------------------------------------------------------------------
-    Layout options
-    ------------------------------------------------------------------------------------------------
+    Layout options are resolved here, once, so every layout shares the same contract. They are
+    merged in order of increasing precedence:
 
-    Options are resolved here, once, so every layout shares the same contract. They are merged in
-    order of increasing precedence:
+        1. the defaults on SolidWorx\Platform\UiBundle\Layout\LayoutOption
+        2. `platform.ui.layout.*` from the application's platform.yaml
+        3. the `layout` variable the template sets when it extends a layout
 
-        1. the defaults below
-        2. `platform.ui.layout.*` from the application's platform.yaml (`ui_layout_defaults`)
-        3. the `layout` variable a template sets when extending a layout
-
-    Setting them is a plain `{% set %}` next to the `{% extends %}`:
+    The recommended way to set them is `ui_layout()`, because it has a real PHP signature — your
+    IDE can complete the argument names and an option that does not exist is an error rather than a
+    silent no-op:
 
         {% extends ui_layout_app %}
+        {% set layout = ui_layout(navbar_theme: 'dark', navbar_sticky: true, fluid: true) %}
+
+    A plain hash works too, and is validated just the same:
+
         {% set layout = {navbar_theme: 'dark', navbar_sticky: true, fluid: true} %}
+##}
 
-    | Option                | Type              | Default   | Effect                                        |
-    |-----------------------|-------------------|-----------|-----------------------------------------------|
-    | `theme`               | light/dark/null   | `null`    | Forces the colour scheme on `<html>`           |
-    | `fluid`               | bool              | `false`   | Full-width page (`body.layout-fluid`)          |
-    | `boxed`               | bool              | `false`   | Boxed page (`body.layout-boxed`)               |
-    | `container`           | string/null       | `null`    | Overrides the container class outright         |
-    | `navbar`              | bool              | `true`    | Renders the top navbar                         |
-    | `navbar_theme`        | light/dark/null   | `null`    | Colour scheme of the top navbar                |
-    | `navbar_sticky`       | bool              | `false`   | Keeps the top navbar visible while scrolling   |
-    | `navbar_overlap`      | bool              | `false`   | Lets the page body overlap the top navbar      |
-    | `navbar_expand`       | sm/md/lg/xl       | `md`      | Breakpoint at which the navbar expands         |
-    | `sidebar`             | bool              | `true`    | Renders the sidebar                            |
-    | `sidebar_theme`       | light/dark/null   | `dark`    | Colour scheme of the sidebar                   |
-    | `sidebar_position`    | start/end         | `start`   | Side the sidebar sits on                       |
-    | `sidebar_transparent` | bool              | `false`   | Removes the sidebar background                 |
-    | `sidebar_expand`      | sm/md/lg/xl       | `lg`      | Breakpoint at which the sidebar expands        |
-    | `page_header`         | bool              | `true`    | Renders the page header                        |
-    | `footer`              | bool              | `true`    | Renders the page footer                        |
-    | `centered`            | bool              | `false`   | Centres the content (`clean` layout only)      |
-
-    Two more variables follow the same "set it when you extend" convention: `body_class` adds
-    classes to the `<body>` element, and `brand_url` points the brand at your home page.
-
-        {% set body_class = 'dashboard' %}
-        {% set brand_url = path('app_home') %}
-#}
 
 {%- use '@Ui/Layout/partials/_brand.html.twig' -%}
 {%- use '@Ui/Layout/partials/_user_menu.html.twig' -%}
@@ -54,25 +30,21 @@
 {%- use '@Ui/Layout/partials/_page_header.html.twig' -%}
 {%- use '@Ui/Layout/partials/_footer.html.twig' -%}
 
-{%- set layout = {
-    theme: null,
-    fluid: false,
-    boxed: false,
-    container: null,
-    navbar: true,
-    navbar_theme: null,
-    navbar_sticky: false,
-    navbar_overlap: false,
-    navbar_expand: 'md',
-    sidebar: true,
-    sidebar_theme: 'dark',
-    sidebar_position: 'start',
-    sidebar_transparent: false,
-    sidebar_expand: 'lg',
-    page_header: true,
-    footer: true,
-    centered: false,
-}|merge(ui_layout_defaults|default({}))|merge(layout|default({})) -%}
+{% types {
+    ## Layout options, best built with `ui_layout()`. See LayoutOption for the full list.
+    layout?: 'map',
+    ## Extra classes to put on the `<body>` element.
+    body_class?: 'string',
+    ## Where the brand in the navbar and sidebar links to. Defaults to `/`.
+    brand_url?: 'string',
+} %}
+
+{##
+    Resolved options, available to every block and partial as `layout.<option>`.
+    Keys are guaranteed present, so `layout.navbar_sticky` never needs a `|default`.
+##}
+{%- set layout = ui_layout_resolve(layout|default({})) -%}
+
 
 {%- set container_class = layout.container ?? (layout.fluid ? 'container-fluid' : 'container-xl') -%}
 {%- set body_class = (html_classes({

@@ -1,4 +1,4 @@
-{#
+{##
     Top navigation bar, shared by the `app` and `condensed` layouts.
 
     Pulled into the base layout with `{% use %}`, so any page can override a single piece of it:
@@ -13,16 +13,29 @@
     `navbar_standalone` tells the partial whether it is the only navigation on the page. The
     `condensed` layout sets it to `true` (brand + burger menu are rendered here); the `app` layout
     sets it to `false`, because the sidebar already owns the brand and the mobile navigation.
-#}
+##}
 
+{% types {
+    ## The resolved layout options, from `ui_layout_resolve()` in the base layout.
+    layout: 'map',
+    ## The Bootstrap container class the page body uses, e.g. `container-xl`.
+    container_class: 'string',
+    ## Whether this navbar is the only navigation on the page. Defaults to true.
+    navbar_standalone?: 'boolean',
+} %}
+
+{## Right-hand side of the navbar, before the user menu. Empty by default — put search,
+    notifications or any other quick action here. ##}
 {% block navbar_actions %}{% endblock %}
 
+{## The navigation links, rendered from the KnpMenu menu named `navbar`. ##}
 {% block navbar_menu %}
     {% if menu_exists('navbar') %}
         {{ render_menu('navbar', {root_class: 'navbar-nav', auto_close: 'outside'}) }}
     {% endif %}
 {% endblock %}
 
+{## The whole `<header>`. Override this to replace the navbar outright. ##}
 {% block navbar %}
     {% set navbar_standalone = navbar_standalone is defined ? navbar_standalone : true %}
 
@@ -47,6 +60,8 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
+                {## The brand shown in the navbar. Only rendered when the navbar is standalone —
+                    otherwise the sidebar owns the brand. ##}
                 {% block navbar_brand %}
                     <div class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
                         {{ block('brand') }}
