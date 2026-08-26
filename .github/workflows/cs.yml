@@ -95,7 +95,6 @@ jobs:
         uses: github/super-linter@v7
         env:
           DEFAULT_BRANCH: main
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }
           VALIDATE_ALL_CODEBASE: false
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSS_FILE_NAME: .stylelintrc.json
