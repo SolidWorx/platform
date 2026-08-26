@@ -15,6 +15,7 @@ namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Command;
 
 use Override;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Command\GenerateSchemaCommand;
 use SolidWorx\Platform\PlatformBundle\Config\SchemaGeneratorInterface;
@@ -23,6 +24,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 
 #[CoversClass(GenerateSchemaCommand::class)]
+#[UsesClass(IO::class)]
 final class GenerateSchemaCommandTest extends TestCase
 {
     private string $tmpFile;
@@ -91,7 +93,7 @@ final class GenerateSchemaCommandTest extends TestCase
             'properties' => [],
         ];
 
-        $generator = $this->createMock(SchemaGeneratorInterface::class);
+        $generator = self::createStub(SchemaGeneratorInterface::class);
         $generator->method('generate')->willReturn($mockSchema);
 
         $this->runCommand($this->makeCommand($generator), [
@@ -111,7 +113,7 @@ final class GenerateSchemaCommandTest extends TestCase
             'type' => 'object',
         ];
 
-        $generator = $this->createMock(SchemaGeneratorInterface::class);
+        $generator = self::createStub(SchemaGeneratorInterface::class);
         $generator->method('generate')->willReturn($mockSchema);
 
         $this->runCommand($this->makeCommand($generator), [
@@ -135,7 +137,7 @@ final class GenerateSchemaCommandTest extends TestCase
             ],
         ];
 
-        $generator = $this->createMock(SchemaGeneratorInterface::class);
+        $generator = self::createStub(SchemaGeneratorInterface::class);
         $generator->method('generate')->willReturn($mockSchema);
 
         $this->runCommand($this->makeCommand($generator), [
@@ -150,7 +152,7 @@ final class GenerateSchemaCommandTest extends TestCase
 
     public function testSuccessOutputContainsOutputFilePath(): void
     {
-        $generator = $this->createMock(SchemaGeneratorInterface::class);
+        $generator = self::createStub(SchemaGeneratorInterface::class);
         $generator->method('generate')->willReturn([]);
 
         $output = $this->runCommand($this->makeCommand($generator), [
@@ -162,7 +164,7 @@ final class GenerateSchemaCommandTest extends TestCase
 
     public function testReturnsSuccessExitCode(): void
     {
-        $generator = $this->createMock(SchemaGeneratorInterface::class);
+        $generator = self::createStub(SchemaGeneratorInterface::class);
         $generator->method('generate')->willReturn([]);
 
         $command = $this->makeCommand($generator);
@@ -180,7 +182,7 @@ final class GenerateSchemaCommandTest extends TestCase
 
     public function testDefaultOutputFileNameIsPlatformSchemaJson(): void
     {
-        $generator = $this->createMock(SchemaGeneratorInterface::class);
+        $generator = self::createStub(SchemaGeneratorInterface::class);
         $generator->method('generate')->willReturn([]);
 
         $command = $this->makeCommand($generator);
@@ -191,7 +193,7 @@ final class GenerateSchemaCommandTest extends TestCase
 
     private function makeCommand(?SchemaGeneratorInterface $generator = null): GenerateSchemaCommand
     {
-        $generator ??= $this->createMock(SchemaGeneratorInterface::class);
+        $generator ??= self::createStub(SchemaGeneratorInterface::class);
         return new GenerateSchemaCommand($generator);
     }
 

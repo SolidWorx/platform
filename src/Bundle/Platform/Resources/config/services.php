@@ -16,6 +16,7 @@ use EmailChecker\Adapter\BuiltInAdapter;
 use EmailChecker\Adapter\FileAdapter;
 use EmailChecker\Constraints\NotThrowawayEmailValidator;
 use EmailChecker\EmailChecker;
+use Monolog\Processor\ProcessorInterface;
 use SolidWorx\Platform\PlatformBundle\Command\UpdateDisposableDomainsCommand;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\Login;
 use SolidWorx\Platform\PlatformBundle\Controller\Tenant\SelectTenant;
@@ -37,9 +38,18 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         ->private()
     ;
 
+    $exclude = [dirname(__DIR__, 2) . '/{DependencyInjection,Entity,Resources,Tests,Tenant/Event,Doctrine/Filter,Messenger}'];
+
+    if (! interface_exists(ProcessorInterface::class)) {
+        // Monolog is an optional integration. Without it the processor implements an interface that
+        // does not exist, which cannot even be reflected — so it has to be kept out of the container
+        // rather than registered and removed later.
+        $exclude[] = dirname(__DIR__, 2) . '/Logger';
+    }
+
     $services
         ->load(SolidWorxPlatformBundle::NAMESPACE . '\\', dirname(__DIR__, 2))
-        ->exclude(dirname(__DIR__, 2) . '/{DependencyInjection,Entity,Resources,Tests,Tenant/Event,Doctrine/Filter,Messenger}');
+        ->exclude($exclude);
 
     $services->set(Login::class)
         ->tag('controller.service_arguments');

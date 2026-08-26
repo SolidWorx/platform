@@ -14,13 +14,13 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Repository;
 
 use Doctrine\ORM\EntityManagerInterface;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Filter\TenantFilter;
 use SolidWorx\Platform\PlatformBundle\Repository\TenantFilterAwareTrait;
 use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\TenantOrmTestCase;
 use Symfony\Bridge\Doctrine\Types\UlidType;
 
-#[CoversClass(TenantFilterAwareTrait::class)]
+#[CoversTrait(TenantFilterAwareTrait::class)]
 final class TenantFilterAwareTraitTest extends TenantOrmTestCase
 {
     public function testWithoutTenantFilterSuspendsAndRestores(): void

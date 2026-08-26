@@ -13,10 +13,8 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\Tests\Bundle\Saas\Security\Voter;
 
-use Override;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use SolidWorx\Platform\SaasBundle\Feature\PlanFeatureManager;
@@ -27,23 +25,14 @@ use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 #[CoversClass(PlanFeatureVoter::class)]
 final class PlanFeatureVoterTest extends TestCase
 {
-    private PlanFeatureManager & MockObject $planFeatureManager;
-
-    private PlanFeatureVoter $voter;
-
-    #[Override]
-    protected function setUp(): void
-    {
-        $this->planFeatureManager = $this->createMock(PlanFeatureManager::class);
-        $this->voter = new PlanFeatureVoter($this->planFeatureManager);
-    }
-
     #[DataProvider('supportsProvider')]
     public function testSupports(string $attribute, mixed $subject, bool $expected): void
     {
-        $token = $this->createMock(TokenInterface::class);
+        $voter = new PlanFeatureVoter(self::createStub(PlanFeatureManager::class));
 
-        $result = $this->voter->vote($token, $subject, [$attribute]);
+        $token = self::createStub(TokenInterface::class);
+
+        $result = $voter->vote($token, $subject, [$attribute]);
 
         if ($expected) {
             $this->assertNotSame(VoterInterface::ACCESS_ABSTAIN, $result);
@@ -75,48 +64,57 @@ final class PlanFeatureVoterTest extends TestCase
 
     public function testVoteGrantsAccessWhenFeatureEnabled(): void
     {
-        $subscriber = $this->createMock(SubscribableInterface::class);
-        $token = $this->createMock(TokenInterface::class);
+        $planFeatureManager = $this->createMock(PlanFeatureManager::class);
+        $voter = new PlanFeatureVoter($planFeatureManager);
 
-        $this->planFeatureManager
+        $subscriber = self::createStub(SubscribableInterface::class);
+        $token = self::createStub(TokenInterface::class);
+
+        $planFeatureManager
             ->expects($this->once())
             ->method('hasFeatureForSubscriber')
             ->with($subscriber, 'api_access')
             ->willReturn(true);
 
-        $result = $this->voter->vote($token, $subscriber, ['FEATURE_API_ACCESS']);
+        $result = $voter->vote($token, $subscriber, ['FEATURE_API_ACCESS']);
 
         $this->assertSame(VoterInterface::ACCESS_GRANTED, $result);
     }
 
     public function testVoteDeniesAccessWhenFeatureDisabled(): void
     {
-        $subscriber = $this->createMock(SubscribableInterface::class);
-        $token = $this->createMock(TokenInterface::class);
+        $planFeatureManager = $this->createMock(PlanFeatureManager::class);
+        $voter = new PlanFeatureVoter($planFeatureManager);
 
-        $this->planFeatureManager
+        $subscriber = self::createStub(SubscribableInterface::class);
+        $token = self::createStub(TokenInterface::class);
+
+        $planFeatureManager
             ->expects($this->once())
             ->method('hasFeatureForSubscriber')
             ->with($subscriber, 'api_access')
             ->willReturn(false);
 
-        $result = $this->voter->vote($token, $subscriber, ['FEATURE_API_ACCESS']);
+        $result = $voter->vote($token, $subscriber, ['FEATURE_API_ACCESS']);
 
         $this->assertSame(VoterInterface::ACCESS_DENIED, $result);
     }
 
     public function testVoteGrantsAccessWithinUsageLimit(): void
     {
-        $subscriber = $this->createMock(SubscribableInterface::class);
-        $token = $this->createMock(TokenInterface::class);
+        $planFeatureManager = $this->createMock(PlanFeatureManager::class);
+        $voter = new PlanFeatureVoter($planFeatureManager);
 
-        $this->planFeatureManager
+        $subscriber = self::createStub(SubscribableInterface::class);
+        $token = self::createStub(TokenInterface::class);
+
+        $planFeatureManager
             ->expects($this->once())
             ->method('canUseForSubscriber')
             ->with($subscriber, 'max_users', 5)
             ->willReturn(true);
 
-        $result = $this->voter->vote($token, [
+        $result = $voter->vote($token, [
             'subscriber' => $subscriber,
             'usage' => 5,
         ], ['FEATURE_MAX_USERS']);
@@ -126,16 +124,19 @@ final class PlanFeatureVoterTest extends TestCase
 
     public function testVoteDeniesAccessWhenUsageLimitExceeded(): void
     {
-        $subscriber = $this->createMock(SubscribableInterface::class);
-        $token = $this->createMock(TokenInterface::class);
+        $planFeatureManager = $this->createMock(PlanFeatureManager::class);
+        $voter = new PlanFeatureVoter($planFeatureManager);
 
-        $this->planFeatureManager
+        $subscriber = self::createStub(SubscribableInterface::class);
+        $token = self::createStub(TokenInterface::class);
+
+        $planFeatureManager
             ->expects($this->once())
             ->method('canUseForSubscriber')
             ->with($subscriber, 'max_users', 15)
             ->willReturn(false);
 
-        $result = $this->voter->vote($token, [
+        $result = $voter->vote($token, [
             'subscriber' => $subscriber,
             'usage' => 15,
         ], ['FEATURE_MAX_USERS']);
@@ -145,16 +146,19 @@ final class PlanFeatureVoterTest extends TestCase
 
     public function testVoteWithArraySubjectDefaultsToZeroUsage(): void
     {
-        $subscriber = $this->createMock(SubscribableInterface::class);
-        $token = $this->createMock(TokenInterface::class);
+        $planFeatureManager = $this->createMock(PlanFeatureManager::class);
+        $voter = new PlanFeatureVoter($planFeatureManager);
 
-        $this->planFeatureManager
+        $subscriber = self::createStub(SubscribableInterface::class);
+        $token = self::createStub(TokenInterface::class);
+
+        $planFeatureManager
             ->expects($this->once())
             ->method('canUseForSubscriber')
             ->with($subscriber, 'max_users', 0)
             ->willReturn(true);
 
-        $result = $this->voter->vote($token, [
+        $result = $voter->vote($token, [
             'subscriber' => $subscriber,
         ], ['FEATURE_MAX_USERS']);
 
@@ -163,16 +167,19 @@ final class PlanFeatureVoterTest extends TestCase
 
     public function testFeatureKeyIsLowercased(): void
     {
-        $subscriber = $this->createMock(SubscribableInterface::class);
-        $token = $this->createMock(TokenInterface::class);
+        $planFeatureManager = $this->createMock(PlanFeatureManager::class);
+        $voter = new PlanFeatureVoter($planFeatureManager);
 
-        $this->planFeatureManager
+        $subscriber = self::createStub(SubscribableInterface::class);
+        $token = self::createStub(TokenInterface::class);
+
+        $planFeatureManager
             ->expects($this->once())
             ->method('hasFeatureForSubscriber')
             ->with($subscriber, 'api_access')
             ->willReturn(true);
 
-        $this->voter->vote($token, $subscriber, ['FEATURE_API_ACCESS']);
+        $voter->vote($token, $subscriber, ['FEATURE_API_ACCESS']);
     }
 
     private static function createMockSubscriber(): SubscribableInterface

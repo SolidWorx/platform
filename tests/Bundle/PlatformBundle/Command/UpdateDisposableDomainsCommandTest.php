@@ -15,6 +15,7 @@ namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Command;
 
 use Override;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Command\UpdateDisposableDomainsCommand;
 use SolidWorx\Platform\PlatformBundle\Console\IO;
@@ -29,6 +30,7 @@ use function tempnam;
 use function unlink;
 
 #[CoversClass(UpdateDisposableDomainsCommand::class)]
+#[UsesClass(IO::class)]
 final class UpdateDisposableDomainsCommandTest extends TestCase
 {
     private string $tmpFile;

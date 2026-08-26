@@ -14,8 +14,11 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Tenant;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
+use PHPUnit\Framework\Attributes\UsesTrait;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use SolidWorx\Platform\PlatformBundle\Model\Tenant;
 use SolidWorx\Platform\PlatformBundle\Tenant\Event\TenantSwitchedEvent;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
 use SolidWorx\Platform\Test\Traits\InteractsWithTenantsTrait;
@@ -24,6 +27,8 @@ use Symfony\Component\Uid\Ulid;
 
 #[CoversClass(TenantContext::class)]
 #[CoversClass(TenantSwitchedEvent::class)]
+#[UsesClass(Tenant::class)]
+#[UsesTrait(InteractsWithTenantsTrait::class)]
 final class TenantContextTest extends TestCase
 {
     use InteractsWithTenantsTrait;

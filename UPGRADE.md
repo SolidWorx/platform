@@ -29,6 +29,12 @@ Nothing is required to upgrade, but a few things changed shape:
 - **New `menu_exists(name)` Twig function**, so a template can render a menu only when a builder
   registered it.
 
+### Monolog is an optional dependency
+
+`TenantLoggingProcessor` adds the current tenant to log records. It was registered unconditionally,
+so applications without `monolog/monolog` installed failed to compile the container. It is now only
+registered when Monolog is present; nothing changes for applications that already have it.
+
 ### Security config helpers migrated to Symfony 7.4 array-shape config (BC break)
 
 Symfony 7.4 [deprecated the fluent PHP config-builder format](https://github.com/symfony/symfony/blob/7.4/src/Symfony/Component/DependencyInjection/CHANGELOG.md)

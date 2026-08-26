@@ -15,9 +15,13 @@ namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Messenger;
 
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
+use PHPUnit\Framework\Attributes\UsesTrait;
 use PHPUnit\Framework\TestCase;
+use SolidWorx\Platform\PlatformBundle\Messenger\TenantAwareMessageTrait;
 use SolidWorx\Platform\PlatformBundle\Messenger\TenantMiddleware;
 use SolidWorx\Platform\PlatformBundle\Messenger\TenantStamp;
+use SolidWorx\Platform\PlatformBundle\Tenant\Event\TenantSwitchedEvent;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantManager;
 use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\Message\TenantAwareMessage;
@@ -31,6 +35,10 @@ use Symfony\Component\Uid\Ulid;
 
 #[CoversClass(TenantMiddleware::class)]
 #[CoversClass(TenantStamp::class)]
+#[UsesTrait(TenantAwareMessageTrait::class)]
+#[UsesClass(TenantSwitchedEvent::class)]
+#[UsesClass(TenantContext::class)]
+#[UsesClass(TenantManager::class)]
 final class TenantMiddlewareTest extends TestCase
 {
     public function testStampsTenantOnSend(): void

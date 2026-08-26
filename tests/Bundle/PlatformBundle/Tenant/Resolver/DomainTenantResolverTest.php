@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Tenant\Resolver;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Entity\Tenant;
 use SolidWorx\Platform\PlatformBundle\Repository\TenantRepository;
@@ -22,6 +23,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Uid\Ulid;
 
 #[CoversClass(DomainTenantResolver::class)]
+#[UsesClass(\SolidWorx\Platform\PlatformBundle\Model\Tenant::class)]
 final class DomainTenantResolverTest extends TestCase
 {
     public function testResolvesTenantByHost(): void

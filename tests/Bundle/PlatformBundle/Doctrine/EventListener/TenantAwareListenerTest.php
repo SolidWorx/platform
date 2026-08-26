@@ -16,7 +16,11 @@ namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Doctrine\EventListener;
 use Doctrine\Common\EventManager;
 use Doctrine\ORM\Events;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
+use PHPUnit\Framework\Attributes\UsesTrait;
 use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantAwareListener;
+use SolidWorx\Platform\PlatformBundle\Tenant\Event\TenantSwitchedEvent;
+use SolidWorx\Platform\PlatformBundle\Tenant\TenantAwareTrait;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
 use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\Entity\TenantAwareItem;
 use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\TenantOrmTestCase;
@@ -24,6 +28,9 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Uid\Ulid;
 
 #[CoversClass(TenantAwareListener::class)]
+#[UsesClass(TenantSwitchedEvent::class)]
+#[UsesTrait(TenantAwareTrait::class)]
+#[UsesClass(TenantContext::class)]
 final class TenantAwareListenerTest extends TenantOrmTestCase
 {
     public function testAutoSetsTenantOnPersist(): void

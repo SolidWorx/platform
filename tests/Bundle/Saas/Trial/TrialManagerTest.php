@@ -15,7 +15,9 @@ namespace SolidWorx\Platform\Tests\Bundle\Saas\Trial;
 
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Entity\Trial;
@@ -26,23 +28,22 @@ use SolidWorx\Platform\SaasBundle\Trial\TrialUserInterface;
 use Symfony\Component\Uid\Ulid;
 
 #[CoversClass(TrialManager::class)]
+#[UsesClass(Trial::class)]
+#[UsesClass(TrialAlreadyExistsException::class)]
 final class TrialManagerTest extends TestCase
 {
     private TrialRepositoryInterface & MockObject $trialRepository;
 
-    private EntityManagerInterface & MockObject $entityManager;
-
-    private TrialManager $manager;
-
     protected function setUp(): void
     {
         $this->trialRepository = $this->createMock(TrialRepositoryInterface::class);
-        $this->entityManager = $this->createMock(EntityManagerInterface::class);
-        $this->manager = new TrialManager($this->trialRepository, $this->entityManager);
     }
 
     public function testUserHasTrialDelegatesToRepository(): void
     {
+        $entityManager = self::createStub(EntityManagerInterface::class);
+        $manager = new TrialManager($this->trialRepository, $entityManager);
+
         $user = $this->mockUser();
 
         $this->trialRepository
@@ -51,11 +52,14 @@ final class TrialManagerTest extends TestCase
             ->with($user)
             ->willReturn(true);
 
-        self::assertTrue($this->manager->userHasTrial($user));
+        self::assertTrue($manager->userHasTrial($user));
     }
 
     public function testUserHasTrialReturnsFalseWhenNoTrial(): void
     {
+        $entityManager = self::createStub(EntityManagerInterface::class);
+        $manager = new TrialManager($this->trialRepository, $entityManager);
+
         $user = $this->mockUser();
 
         $this->trialRepository
@@ -64,13 +68,16 @@ final class TrialManagerTest extends TestCase
             ->with($user)
             ->willReturn(false);
 
-        self::assertFalse($this->manager->userHasTrial($user));
+        self::assertFalse($manager->userHasTrial($user));
     }
 
     public function testCreateTrialDelegatesToRepositoryAndFlushes(): void
     {
+        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $manager = new TrialManager($this->trialRepository, $entityManager);
+
         $user = $this->mockUser();
-        $subscription = $this->createMock(Subscription::class);
+        $subscription = self::createStub(Subscription::class);
         $trial = Trial::create($user, $subscription);
 
         $this->trialRepository
@@ -85,17 +92,20 @@ final class TrialManagerTest extends TestCase
             ->with($user, $subscription)
             ->willReturn($trial);
 
-        $this->entityManager
+        $entityManager
             ->expects(self::once())
             ->method('flush');
 
-        self::assertSame($trial, $this->manager->createTrial($user, $subscription));
+        self::assertSame($trial, $manager->createTrial($user, $subscription));
     }
 
     public function testCreateTrialThrowsWhenUserAlreadyHasTrial(): void
     {
+        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $manager = new TrialManager($this->trialRepository, $entityManager);
+
         $user = $this->mockUser();
-        $subscription = $this->createMock(Subscription::class);
+        $subscription = self::createStub(Subscription::class);
 
         $this->trialRepository
             ->expects(self::once())
@@ -107,18 +117,18 @@ final class TrialManagerTest extends TestCase
             ->expects(self::never())
             ->method('createTrial');
 
-        $this->entityManager
+        $entityManager
             ->expects(self::never())
             ->method('flush');
 
         $this->expectException(TrialAlreadyExistsException::class);
 
-        $this->manager->createTrial($user, $subscription);
+        $manager->createTrial($user, $subscription);
     }
 
-    private function mockUser(): TrialUserInterface & MockObject
+    private function mockUser(): TrialUserInterface & Stub
     {
-        $user = $this->createMock(TrialUserInterface::class);
+        $user = self::createStub(TrialUserInterface::class);
         $user->method('getId')->willReturn(new Ulid());
 
         return $user;

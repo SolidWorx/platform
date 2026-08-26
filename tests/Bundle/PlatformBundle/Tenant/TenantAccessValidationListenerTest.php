@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Tenant;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Entity\User;
 use SolidWorx\Platform\PlatformBundle\Exception\TenantAccessDeniedException;
@@ -26,6 +27,7 @@ use Symfony\Component\Uid\Ulid;
 
 #[CoversClass(TenantAccessValidationListener::class)]
 #[CoversClass(TenantAccessDeniedException::class)]
+#[UsesClass(TenantSwitchedEvent::class)]
 final class TenantAccessValidationListenerTest extends TestCase
 {
     public function testDeniesNonMember(): void

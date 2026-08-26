@@ -15,6 +15,7 @@ namespace Bundle\Saas\RemoteEvent;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -45,6 +46,8 @@ use Symfony\Component\Uid\Ulid;
 use Symfony\Contracts\EventDispatcher\Event as SymfonyEvent;
 
 #[CoversClass(LemonSqueezyWebhookConsumer::class)]
+#[UsesClass(PaymentEvent::class)]
+#[UsesClass(SubscriptionEvent::class)]
 final class LemonSqueezyWebhookConsumerTest extends TestCase
 {
     /**

@@ -15,14 +15,17 @@ namespace SolidWorx\Platform\Tests\Bundle\Saas\Feature;
 
 use Override;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
+use SolidWorx\Platform\PlatformBundle\Feature\FeatureValue;
 use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use SolidWorx\Platform\SaasBundle\Entity\Plan;
 use SolidWorx\Platform\SaasBundle\Entity\PlanFeature;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Exception\UndefinedFeatureException;
+use SolidWorx\Platform\SaasBundle\Feature\FeatureConfig;
 use SolidWorx\Platform\SaasBundle\Feature\FeatureConfigRegistry;
 use SolidWorx\Platform\SaasBundle\Feature\PlanFeatureManager;
 use SolidWorx\Platform\SaasBundle\Repository\PlanFeatureRepositoryInterface;
@@ -31,6 +34,13 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Uid\Ulid;
 
 #[CoversClass(PlanFeatureManager::class)]
+#[UsesClass(FeatureValue::class)]
+#[UsesClass(Plan::class)]
+#[UsesClass(PlanFeature::class)]
+#[UsesClass(Subscription::class)]
+#[UsesClass(UndefinedFeatureException::class)]
+#[UsesClass(FeatureConfig::class)]
+#[UsesClass(FeatureConfigRegistry::class)]
 final class PlanFeatureManagerTest extends TestCase
 {
     private FeatureConfigRegistry $configRegistry;
@@ -159,7 +169,7 @@ final class PlanFeatureManagerTest extends TestCase
 
     public function testGetFeatureForSubscriber(): void
     {
-        $subscriber = $this->createMock(SubscribableInterface::class);
+        $subscriber = self::createStub(SubscribableInterface::class);
         $subscription = $this->createSubscription($this->plan);
 
         $manager = $this->createManager([], $subscription);
@@ -171,7 +181,7 @@ final class PlanFeatureManagerTest extends TestCase
 
     public function testGetFeatureForSubscriberWithoutSubscriptionReturnsDefault(): void
     {
-        $subscriber = $this->createMock(SubscribableInterface::class);
+        $subscriber = self::createStub(SubscribableInterface::class);
 
         $manager = $this->createManager([], null);
 

@@ -41,8 +41,8 @@ final class SubscriptionManagerStartTrialTest extends TestCase
 
         $this->manager = new SubscriptionManager(
             $this->subscriptionRepository,
-            $this->createMock(PlanRepositoryInterface::class),
-            $this->createMock(PaymentIntegrationInterface::class),
+            self::createStub(PlanRepositoryInterface::class),
+            self::createStub(PaymentIntegrationInterface::class),
         );
     }
 
@@ -92,11 +92,11 @@ final class SubscriptionManagerStartTrialTest extends TestCase
 
     private function buildSubscription(?DateInterval $trialDuration): Subscription
     {
-        $plan = $this->createMock(Plan::class);
+        $plan = self::createStub(Plan::class);
         $plan->method('getTrialDuration')->willReturn($trialDuration);
         $plan->method('getPlanId')->willReturn('plan_test');
 
-        $subscription = $this->createMock(Subscription::class);
+        $subscription = self::createStub(Subscription::class);
         $subscription->method('getPlan')->willReturn($plan);
         $subscription->method('getId')->willReturn(new Ulid());
 
