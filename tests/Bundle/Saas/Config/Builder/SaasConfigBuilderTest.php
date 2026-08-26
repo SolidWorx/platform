@@ -14,10 +14,13 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\Tests\Bundle\Saas\Config\Builder;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\SaasBundle\Config\Builder\SaasConfigBuilder;
+use SolidWorx\Platform\SaasBundle\Config\Builder\SaasPaymentConfigBuilder;
 
 #[CoversClass(SaasConfigBuilder::class)]
+#[UsesClass(SaasPaymentConfigBuilder::class)]
 final class SaasConfigBuilderTest extends TestCase
 {
     public function testBuildWithNoFieldsReturnsEmptyArray(): void

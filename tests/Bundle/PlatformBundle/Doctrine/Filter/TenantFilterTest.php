@@ -15,13 +15,16 @@ namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Doctrine\Filter;
 
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesTrait;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Filter\TenantFilter;
+use SolidWorx\Platform\PlatformBundle\Tenant\TenantAwareTrait;
 use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\Entity\TenantAwareItem;
 use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\TenantOrmTestCase;
 use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\Uid\Ulid;
 
 #[CoversClass(TenantFilter::class)]
+#[UsesTrait(TenantAwareTrait::class)]
 final class TenantFilterTest extends TenantOrmTestCase
 {
     private EntityManagerInterface $entityManager;

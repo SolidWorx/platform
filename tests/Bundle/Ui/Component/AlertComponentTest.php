@@ -154,7 +154,9 @@ final class AlertComponentTest extends KernelTestCase
      */
     private function rootOpeningTag(string $html): string
     {
-        self::assertSame(1, preg_match('/<(?:a|div)\b[^>]*>/', $html, $matches));
+        if (preg_match('/<(?:a|div)\b[^>]*>/', $html, $matches) !== 1) {
+            self::fail('The rendered component must have a single root <a> or <div> element.');
+        }
 
         return $matches[0];
     }

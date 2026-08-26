@@ -14,14 +14,18 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\Tests\Bundle\Saas\Feature;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
+use SolidWorx\Platform\PlatformBundle\Feature\FeatureValue;
 use SolidWorx\Platform\SaasBundle\Exception\UndefinedFeatureException;
 use SolidWorx\Platform\SaasBundle\Feature\FeatureConfig;
 use SolidWorx\Platform\SaasBundle\Feature\FeatureConfigRegistry;
 
 #[CoversClass(FeatureConfigRegistry::class)]
 #[CoversClass(FeatureConfig::class)]
+#[UsesClass(FeatureValue::class)]
+#[UsesClass(UndefinedFeatureException::class)]
 final class FeatureConfigRegistryTest extends TestCase
 {
     public function testEmptyRegistry(): void

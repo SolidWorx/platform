@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\EventSubscriber;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Enum\Flash;
 use SolidWorx\Platform\PlatformBundle\EventSubscriber\FlashResponseSubscriber;
@@ -27,6 +28,7 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 #[CoversClass(FlashResponseSubscriber::class)]
+#[UsesClass(RedirectResponse::class)]
 final class FlashResponseSubscriberTest extends TestCase
 {
     public function testSubscribesToResponseEvent(): void
@@ -39,7 +41,7 @@ final class FlashResponseSubscriberTest extends TestCase
 
     public function testIgnoresSubRequests(): void
     {
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = self::createStub(HttpKernelInterface::class);
         $request = Request::create('/');
         $session = new Session(new MockArraySessionStorage(), null, new FlashBag());
         $request->setSession($session);
@@ -57,7 +59,7 @@ final class FlashResponseSubscriberTest extends TestCase
 
     public function testIgnoresNonRedirectResponse(): void
     {
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = self::createStub(HttpKernelInterface::class);
         $request = Request::create('/');
         $session = new Session(new MockArraySessionStorage(), null, new FlashBag());
         $request->setSession($session);
@@ -72,7 +74,7 @@ final class FlashResponseSubscriberTest extends TestCase
 
     public function testTransfersFlashesToFlashBag(): void
     {
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = self::createStub(HttpKernelInterface::class);
         $request = Request::create('/');
         $session = new Session(new MockArraySessionStorage(), null, new FlashBag());
         $request->setSession($session);
@@ -92,7 +94,7 @@ final class FlashResponseSubscriberTest extends TestCase
 
     public function testNoOpWhenResponseHasNoFlashes(): void
     {
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = self::createStub(HttpKernelInterface::class);
         $request = Request::create('/');
         $session = new Session(new MockArraySessionStorage(), null, new FlashBag());
         $request->setSession($session);

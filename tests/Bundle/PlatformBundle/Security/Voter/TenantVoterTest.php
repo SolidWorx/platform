@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Security\Voter;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Entity\Tenant;
 use SolidWorx\Platform\PlatformBundle\Entity\User;
@@ -24,6 +25,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 use Symfony\Component\Uid\Ulid;
 
 #[CoversClass(TenantVoter::class)]
+#[UsesClass(\SolidWorx\Platform\PlatformBundle\Model\Tenant::class)]
 final class TenantVoterTest extends TestCase
 {
     public function testGrantsForMember(): void

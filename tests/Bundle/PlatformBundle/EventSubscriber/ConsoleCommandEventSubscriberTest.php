@@ -15,8 +15,10 @@ namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\EventSubscriber;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Console\Command;
+use SolidWorx\Platform\PlatformBundle\Console\IO;
 use SolidWorx\Platform\PlatformBundle\EventSubscriber\ConsoleCommandEventSubscriber;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
@@ -25,6 +27,7 @@ use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[CoversClass(ConsoleCommandEventSubscriber::class)]
+#[UsesClass(IO::class)]
 final class ConsoleCommandEventSubscriberTest extends TestCase
 {
     public function testHandlesCommandWithSymfonyStyle(): void

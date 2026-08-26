@@ -14,13 +14,17 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Feature;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Feature\FeatureType;
 use SolidWorx\Platform\PlatformBundle\Feature\FeatureValue;
 use SolidWorx\Platform\PlatformBundle\Feature\NoopFeatureGate;
 use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
+use SolidWorx\Platform\PlatformBundle\Feature\UpgradeOptions;
 
 #[CoversClass(NoopFeatureGate::class)]
+#[UsesClass(FeatureValue::class)]
+#[UsesClass(UpgradeOptions::class)]
 final class NoopFeatureGateTest extends TestCase
 {
     public function testResolveReturnsUnlimitedFeatureValue(): void

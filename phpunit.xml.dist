@@ -10,7 +10,7 @@
     beStrictAboutCoverageMetadata="true"
     beStrictAboutOutputDuringTests="true"
     beStrictAboutTestsThatDoNotTestAnything="true"
-    cacheResult="true"
+    recordTestRunHistory="true"
     columns="max"
     displayDetailsOnIncompleteTests="true"
     displayDetailsOnSkippedTests="true"

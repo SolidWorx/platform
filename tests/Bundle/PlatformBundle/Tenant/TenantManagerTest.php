@@ -15,7 +15,9 @@ namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Tenant;
 
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Filter\TenantFilter;
+use SolidWorx\Platform\PlatformBundle\Tenant\Event\TenantSwitchedEvent;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantManager;
 use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\TenantOrmTestCase;
@@ -24,6 +26,8 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Uid\Ulid;
 
 #[CoversClass(TenantManager::class)]
+#[UsesClass(TenantSwitchedEvent::class)]
+#[UsesClass(TenantContext::class)]
 final class TenantManagerTest extends TenantOrmTestCase
 {
     private EntityManagerInterface $entityManager;

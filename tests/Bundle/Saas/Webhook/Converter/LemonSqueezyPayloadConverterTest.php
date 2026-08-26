@@ -16,7 +16,14 @@ namespace Bundle\Saas\Webhook\Converter;
 use JsonException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
+use SolidWorx\Platform\SaasBundle\Dto\LemonSqueezy\RelationshipLinks;
+use SolidWorx\Platform\SaasBundle\Dto\LemonSqueezy\Subscription;
+use SolidWorx\Platform\SaasBundle\Dto\LemonSqueezy\SubscriptionAttributes;
+use SolidWorx\Platform\SaasBundle\Dto\LemonSqueezy\SubscriptionInvoice;
+use SolidWorx\Platform\SaasBundle\Dto\LemonSqueezy\SubscriptionInvoiceAttributes;
+use SolidWorx\Platform\SaasBundle\Dto\LemonSqueezy\SubscriptionRelationships;
 use SolidWorx\Platform\SaasBundle\RemoteEvent\SubscriptionPaymentRemoteEvent;
 use SolidWorx\Platform\SaasBundle\RemoteEvent\SubscriptionRemoteEvent;
 use SolidWorx\Platform\SaasBundle\Webhook\Converter\LemonSqueezyPayloadConverter;
@@ -24,6 +31,14 @@ use SolidWorx\Platform\Test\Traits\UsesFixturesTrait;
 use Spatie\Snapshots\MatchesSnapshots;
 
 #[CoversClass(LemonSqueezyPayloadConverter::class)]
+#[UsesClass(RelationshipLinks::class)]
+#[UsesClass(Subscription::class)]
+#[UsesClass(SubscriptionAttributes::class)]
+#[UsesClass(SubscriptionInvoice::class)]
+#[UsesClass(SubscriptionInvoiceAttributes::class)]
+#[UsesClass(SubscriptionRelationships::class)]
+#[UsesClass(SubscriptionPaymentRemoteEvent::class)]
+#[UsesClass(SubscriptionRemoteEvent::class)]
 final class LemonSqueezyPayloadConverterTest extends TestCase
 {
     use UsesFixturesTrait;

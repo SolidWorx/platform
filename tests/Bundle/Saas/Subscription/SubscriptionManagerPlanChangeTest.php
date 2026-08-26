@@ -15,6 +15,7 @@ namespace SolidWorx\Platform\Tests\Bundle\Saas\Subscription;
 
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\SaasBundle\Entity\Plan;
@@ -27,33 +28,28 @@ use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepositoryInterface;
 use SolidWorx\Platform\SaasBundle\Subscription\SubscriptionManager;
 
 #[CoversClass(SubscriptionManager::class)]
+#[UsesClass(Plan::class)]
+#[UsesClass(Subscription::class)]
+#[UsesClass(ActiveSubscriptionPlanChangeException::class)]
 final class SubscriptionManagerPlanChangeTest extends TestCase
 {
     private SubscriptionRepositoryInterface & MockObject $subscriptionRepository;
 
-    private PaymentIntegrationInterface & MockObject $paymentIntegration;
-
-    private SubscriptionManager $manager;
-
     protected function setUp(): void
     {
         $this->subscriptionRepository = $this->createMock(SubscriptionRepositoryInterface::class);
-        $this->paymentIntegration = $this->createMock(PaymentIntegrationInterface::class);
-
-        $this->manager = new SubscriptionManager(
-            $this->subscriptionRepository,
-            $this->createMock(PlanRepositoryInterface::class),
-            $this->paymentIntegration,
-        );
     }
 
     public function testChangeActivePlanDelegatesToIntegrationAndPersistsNewPlan(): void
     {
+        $paymentIntegration = $this->createMock(PaymentIntegrationInterface::class);
+        $manager = $this->manager($paymentIntegration);
+
         $newRenewDate = new DateTimeImmutable('+30 days');
-        $newPlan = $this->createMock(Plan::class);
+        $newPlan = self::createStub(Plan::class);
         $subscription = new Subscription();
 
-        $this->paymentIntegration
+        $paymentIntegration
             ->expects(self::once())
             ->method('changePlan')
             ->with($subscription, $newPlan)
@@ -64,7 +60,7 @@ final class SubscriptionManagerPlanChangeTest extends TestCase
             ->method('save')
             ->with($subscription);
 
-        $this->manager->changeActivePlan($subscription, $newPlan);
+        $manager->changeActivePlan($subscription, $newPlan);
 
         self::assertSame($newPlan, $subscription->getPlan());
         self::assertEquals($newRenewDate, $subscription->getEndDate());
@@ -75,11 +71,14 @@ final class SubscriptionManagerPlanChangeTest extends TestCase
 
     public function testScheduleDowngradeStoresPendingPlanAndPersists(): void
     {
+        $paymentIntegration = $this->createMock(PaymentIntegrationInterface::class);
+        $manager = $this->manager($paymentIntegration);
+
         $effectiveAt = new DateTimeImmutable('+15 days');
-        $newPlan = $this->createMock(Plan::class);
+        $newPlan = self::createStub(Plan::class);
         $subscription = new Subscription();
 
-        $this->paymentIntegration
+        $paymentIntegration
             ->expects(self::once())
             ->method('cancelAtPeriodEnd')
             ->with($subscription)
@@ -87,7 +86,7 @@ final class SubscriptionManagerPlanChangeTest extends TestCase
 
         $this->subscriptionRepository->expects(self::once())->method('save');
 
-        $result = $this->manager->scheduleDowngrade($subscription, $newPlan);
+        $result = $manager->scheduleDowngrade($subscription, $newPlan);
 
         self::assertSame($effectiveAt, $result);
         self::assertSame($newPlan, $subscription->getPendingPlan());
@@ -97,13 +96,16 @@ final class SubscriptionManagerPlanChangeTest extends TestCase
 
     public function testCancelScheduledDowngradeClearsPendingPlanAndResumes(): void
     {
+        $paymentIntegration = $this->createMock(PaymentIntegrationInterface::class);
+        $manager = $this->manager($paymentIntegration);
+
         $renewDate = new DateTimeImmutable('+30 days');
-        $existingPending = $this->createMock(Plan::class);
+        $existingPending = self::createStub(Plan::class);
         $subscription = new Subscription();
         $subscription->setPendingPlan($existingPending);
         $subscription->setPendingPlanChangeAt(new DateTimeImmutable('+10 days'));
 
-        $this->paymentIntegration
+        $paymentIntegration
             ->expects(self::once())
             ->method('resume')
             ->with($subscription)
@@ -111,7 +113,7 @@ final class SubscriptionManagerPlanChangeTest extends TestCase
 
         $this->subscriptionRepository->expects(self::once())->method('save');
 
-        $this->manager->cancelScheduledDowngrade($subscription);
+        $manager->cancelScheduledDowngrade($subscription);
 
         self::assertNull($subscription->getPendingPlan());
         self::assertNull($subscription->getPendingPlanChangeAt());
@@ -121,6 +123,9 @@ final class SubscriptionManagerPlanChangeTest extends TestCase
 
     public function testApplyScheduledPlanChangeSwitchesToFreePlan(): void
     {
+        $paymentIntegration = self::createStub(PaymentIntegrationInterface::class);
+        $manager = $this->manager($paymentIntegration);
+
         $freePlan = new Plan();
         $freePlan->setPlanId('0');
         $freePlan->setPrice(0);
@@ -132,7 +137,7 @@ final class SubscriptionManagerPlanChangeTest extends TestCase
 
         $this->subscriptionRepository->expects(self::once())->method('save');
 
-        $this->manager->applyScheduledPlanChange($subscription);
+        $manager->applyScheduledPlanChange($subscription);
 
         self::assertSame($freePlan, $subscription->getPlan());
         self::assertNull($subscription->getPendingPlan());
@@ -142,15 +147,21 @@ final class SubscriptionManagerPlanChangeTest extends TestCase
 
     public function testApplyScheduledPlanChangeNoOpWhenNoPendingPlan(): void
     {
+        $paymentIntegration = self::createStub(PaymentIntegrationInterface::class);
+        $manager = $this->manager($paymentIntegration);
+
         $subscription = new Subscription();
 
         $this->subscriptionRepository->expects(self::never())->method('save');
 
-        $this->manager->applyScheduledPlanChange($subscription);
+        $manager->applyScheduledPlanChange($subscription);
     }
 
     public function testApplyScheduledPlanChangeToFreeClearsExternalSubscriptionId(): void
     {
+        $paymentIntegration = self::createStub(PaymentIntegrationInterface::class);
+        $manager = $this->manager($paymentIntegration);
+
         $freePlan = new Plan();
         $freePlan->setPlanId('0');
         $freePlan->setPrice(0);
@@ -163,7 +174,7 @@ final class SubscriptionManagerPlanChangeTest extends TestCase
 
         $this->subscriptionRepository->expects(self::once())->method('save');
 
-        $this->manager->applyScheduledPlanChange($subscription);
+        $manager->applyScheduledPlanChange($subscription);
 
         self::assertNull($subscription->getSubscriptionId());
         self::assertFalse($subscription->isExternallyBilled());
@@ -171,12 +182,15 @@ final class SubscriptionManagerPlanChangeTest extends TestCase
 
     public function testChangePlanAllowsActiveFreeSubscriptionToSwap(): void
     {
+        $paymentIntegration = self::createStub(PaymentIntegrationInterface::class);
+        $manager = $this->manager($paymentIntegration);
+
         $freePlan = new Plan();
         $freePlan->setPlanId('0');
         $freePlan->setPrice(0);
         $freePlan->setName('Free');
 
-        $newPlan = $this->createMock(Plan::class);
+        $newPlan = self::createStub(Plan::class);
 
         $subscription = new Subscription();
         $subscription->setPlan($freePlan);
@@ -184,17 +198,20 @@ final class SubscriptionManagerPlanChangeTest extends TestCase
 
         $this->subscriptionRepository->expects(self::once())->method('save');
 
-        $this->manager->changePlan($subscription, $newPlan);
+        $manager->changePlan($subscription, $newPlan);
 
         self::assertSame($newPlan, $subscription->getPlan());
     }
 
     public function testChangePlanRejectsActiveExternallyBilledSubscription(): void
     {
-        $newPlan = $this->createMock(Plan::class);
+        $paymentIntegration = self::createStub(PaymentIntegrationInterface::class);
+        $manager = $this->manager($paymentIntegration);
+
+        $newPlan = self::createStub(Plan::class);
 
         $subscription = new Subscription();
-        $subscription->setPlan($this->createMock(Plan::class));
+        $subscription->setPlan(self::createStub(Plan::class));
         $subscription->setStatus(SubscriptionStatus::ACTIVE);
         $subscription->setSubscriptionId('ls_sub_99');
 
@@ -202,6 +219,15 @@ final class SubscriptionManagerPlanChangeTest extends TestCase
 
         $this->expectException(ActiveSubscriptionPlanChangeException::class);
 
-        $this->manager->changePlan($subscription, $newPlan);
+        $manager->changePlan($subscription, $newPlan);
+    }
+
+    private function manager(PaymentIntegrationInterface $paymentIntegration): SubscriptionManager
+    {
+        return new SubscriptionManager(
+            $this->subscriptionRepository,
+            self::createStub(PlanRepositoryInterface::class),
+            $paymentIntegration,
+        );
     }
 }

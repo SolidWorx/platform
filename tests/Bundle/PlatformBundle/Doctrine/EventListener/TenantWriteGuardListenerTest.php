@@ -17,11 +17,15 @@ use Doctrine\Common\EventManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Events;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
+use PHPUnit\Framework\Attributes\UsesTrait;
 use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantWriteGuardListener;
 use SolidWorx\Platform\PlatformBundle\Entity\User;
 use SolidWorx\Platform\PlatformBundle\Exception\CrossTenantOperationException;
 use SolidWorx\Platform\PlatformBundle\Exception\TenantAccessDeniedException;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
+use SolidWorx\Platform\PlatformBundle\Tenant\Event\TenantSwitchedEvent;
+use SolidWorx\Platform\PlatformBundle\Tenant\TenantAwareTrait;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
 use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\Entity\TenantAwareItem;
 use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\TenantOrmTestCase;
@@ -31,6 +35,9 @@ use Symfony\Component\Uid\Ulid;
 
 #[CoversClass(TenantWriteGuardListener::class)]
 #[CoversClass(CrossTenantOperationException::class)]
+#[UsesClass(TenantSwitchedEvent::class)]
+#[UsesTrait(TenantAwareTrait::class)]
+#[UsesClass(TenantContext::class)]
 final class TenantWriteGuardListenerTest extends TenantOrmTestCase
 {
     public function testThrowsOnCrossTenantWrite(): void

@@ -14,10 +14,13 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Config\Builder;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Config\Builder\PlatformConfigBuilder;
+use SolidWorx\Platform\PlatformBundle\Config\Builder\SecurityConfigBuilder;
 
 #[CoversClass(PlatformConfigBuilder::class)]
+#[UsesClass(SecurityConfigBuilder::class)]
 final class PlatformConfigBuilderTest extends TestCase
 {
     public function testBuildAlwaysWrapsUnderPlatformKey(): void

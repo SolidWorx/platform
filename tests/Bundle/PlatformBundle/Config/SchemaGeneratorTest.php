@@ -16,6 +16,7 @@ namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Config;
 use Closure;
 use Override;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfiguration;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigurationInterface;
@@ -26,6 +27,8 @@ use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 
 #[CoversClass(SchemaGenerator::class)]
+#[UsesClass(PlatformConfiguration::class)]
+#[UsesClass(UiConfiguration::class)]
 final class SchemaGeneratorTest extends TestCase
 {
     public function testGenerateReturnsTopLevelSchemaStructure(): void
