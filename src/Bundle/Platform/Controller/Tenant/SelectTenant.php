@@ -15,6 +15,7 @@ namespace SolidWorx\Platform\PlatformBundle\Controller\Tenant;
 
 use InvalidArgumentException;
 use SolidWorx\Platform\PlatformBundle\Controller\BaseController;
+use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\TenantRepository;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
 use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantVoter;
@@ -52,9 +53,9 @@ final class SelectTenant extends BaseController
     #[Route(path: '/tenant/select', name: 'solidworx_platform_tenant_select', methods: ['GET', 'POST'])]
     public function __invoke(Request $request): Response
     {
-        $userId = $this->getUserId();
+        $user = $this->getUser();
 
-        if ($userId === null) {
+        if (! $user instanceof UserInterface) {
             throw $this->createAccessDeniedException();
         }
 
@@ -63,7 +64,7 @@ final class SelectTenant extends BaseController
         }
 
         return $this->render('@Ui/Tenant/select.html.twig', [
-            'tenants' => $this->userTenantRepository->findTenantsForUser($userId),
+            'tenants' => $this->userTenantRepository->findTenantsForUser($user),
         ]);
     }
 

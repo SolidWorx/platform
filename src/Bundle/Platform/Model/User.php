@@ -19,12 +19,10 @@ use Doctrine\ORM\Mapping as ORM;
 use EmailChecker\Constraints as EmailCheckerAssert;
 use LogicException;
 use Override;
-use SolidWorx\Platform\PlatformBundle\Contracts\Security\TwoFactor\UserTwoFactorInterface;
 use SolidWorx\Platform\PlatformBundle\Security\TwoFactor\Traits\UserTwoFactor;
-use Stringable;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
+use Symfony\Bridge\Doctrine\Types\UlidType;
+use Symfony\Component\Uid\Ulid;
 use Symfony\Component\Validator\Constraints as Assert;
 use function array_search;
 use function array_unique;
@@ -32,11 +30,18 @@ use function array_values;
 use function in_array;
 use function strtoupper;
 
-#[UniqueEntity(fields: ['email'], message: 'This email is already in use. Do you want to log in instead?')]
-#[ORM\Index(fields: ['googleId'])]
-abstract class User implements UserInterface, PasswordAuthenticatedUserInterface, Stringable, UserTwoFactorInterface
+// #[UniqueEntity(fields: ['email'], message: 'This email is already in use. Do you want to log in instead?')]
+// #[ORM\Index(fields: ['googleId'])]
+#[ORM\MappedSuperclass()]
+abstract class User implements UserInterface
 {
     use UserTwoFactor;
+
+    #[ORM\Column(type: UlidType::NAME, unique: true)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
+    #[ORM\CustomIdGenerator(class: UlidGenerator::class)]
+    protected Ulid $id;
 
     #[ORM\Column(name: 'first_name', type: Types::STRING, length: 45, nullable: true)]
     #[Assert\NotBlank()]
@@ -56,7 +61,7 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
         mode: Assert\Email::VALIDATION_MODE_STRICT,
     )]
     #[EmailCheckerAssert\NotThrowawayEmail(message: 'Disposable or temporary email addresses are not allowed. Please use a permanent email address.')]
-    protected ?string $email = null;
+    protected string $email = '';
 
     #[ORM\Column(name: 'enabled', type: Types::BOOLEAN)]
     protected bool $enabled = false;
@@ -65,7 +70,7 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
     protected bool $verified = false;
 
     #[ORM\Column(name: 'password', type: Types::STRING)]
-    protected ?string $password = null;
+    protected string $password = '';
 
     #[ORM\Column(name: 'last_login', type: Types::DATETIME_MUTABLE, nullable: true)]
     protected ?DateTimeInterface $lastLogin = null;
@@ -79,10 +84,20 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'google_id', type: Types::STRING, length: 45, nullable: true)]
     protected ?string $googleId = null;
 
+    public function __construct()
+    {
+        $this->id = new Ulid();
+    }
+
+    public function getId(): Ulid
+    {
+        return $this->id;
+    }
+
     #[Override]
     public function __toString(): string
     {
-        return (string) $this->email;
+        return $this->email;
     }
 
     public function getMobile(): ?string
@@ -114,7 +129,7 @@ abstract class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Override]
     public function getUserIdentifier(): string
     {
-        if ($this->email === null || $this->email === '') {
+        if ($this->email === '') {
             throw new LogicException('Cannot resolve the user identifier because the email is not set.');
         }
 

@@ -16,9 +16,6 @@ namespace SolidWorx\Platform\PlatformBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use SolidWorx\Platform\PlatformBundle\Model\User as UserModel;
 use SolidWorx\Platform\PlatformBundle\Repository\UserRepository;
-use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
-use Symfony\Bridge\Doctrine\Types\UlidType;
-use Symfony\Component\Uid\Ulid;
 
 /**
  * Default concrete user entity. Replace it by extending {@see UserModel} and configuring
@@ -29,20 +26,4 @@ use Symfony\Component\Uid\Ulid;
 class User extends UserModel
 {
     final public const string TABLE_NAME = 'users';
-
-    #[ORM\Column(type: UlidType::NAME, unique: true)]
-    #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[ORM\CustomIdGenerator(class: UlidGenerator::class)]
-    protected Ulid $id;
-
-    public function __construct()
-    {
-        $this->id = new Ulid();
-    }
-
-    public function getId(): Ulid
-    {
-        return $this->id;
-    }
 }

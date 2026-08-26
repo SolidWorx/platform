@@ -43,8 +43,9 @@ abstract class UserTenant implements UserTenantInterface
     protected DateTimeImmutable $createdAt;
 
     public function __construct(
-        #[ORM\Column(name: 'user_id', type: UlidType::NAME)]
-        protected Ulid $userId,
+        #[ORM\ManyToOne(targetEntity: UserInterface::class)]
+        #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+        protected UserInterface $user,
         #[ORM\ManyToOne(targetEntity: TenantInterface::class)]
         #[ORM\JoinColumn(name: 'tenant_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
         protected TenantInterface $tenant
@@ -60,9 +61,9 @@ abstract class UserTenant implements UserTenantInterface
     }
 
     #[Override]
-    public function getUserId(): Ulid
+    public function getUser(): UserInterface
     {
-        return $this->userId;
+        return $this->user;
     }
 
     #[Override]

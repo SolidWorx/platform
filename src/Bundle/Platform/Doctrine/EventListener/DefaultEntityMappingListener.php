@@ -17,27 +17,30 @@ use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Events;
 use SolidWorx\Platform\PlatformBundle\Entity\Tenant;
+use SolidWorx\Platform\PlatformBundle\Entity\User;
 use SolidWorx\Platform\PlatformBundle\Entity\UserTenant;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
- * Disables a default platform tenant entity when the application has overridden it via configuration.
+ * Disables a default platform entity when the application has overridden it via configuration.
  *
- * The platform ships ready-to-use concrete entities ({@see Tenant}, {@see UserTenant}) that map by
- * default. When a consumer registers their own class (extending the mapped base) through
- * `platform.multi_tenancy.models.*`, the matching default would otherwise still create a duplicate
- * table. This listener marks the superseded default as a mapped superclass so it produces no table
- * and is not treated as an entity; the configured class (wired via `resolve_target_entities`) takes
- * over.
+ * The platform ships ready-to-use concrete entities ({@see Tenant}, {@see UserTenant}, {@see User})
+ * that map by default. When a consumer registers their own class (extending the mapped base) through
+ * `platform.multi_tenancy.models.*` or `platform.models.user`, the matching default would otherwise
+ * still create a duplicate table. This listener marks the superseded default as a mapped superclass
+ * so it produces no table and is not treated as an entity; the configured class (wired via
+ * `resolve_target_entities`) takes over.
  */
 #[AsDoctrineListener(event: Events::loadClassMetadata)]
-final readonly class TenantModelMappingListener
+final readonly class DefaultEntityMappingListener
 {
     public function __construct(
         #[Autowire(param: 'solidworx_platform.multi_tenancy.models.tenant')]
         private string $tenantClass,
         #[Autowire(param: 'solidworx_platform.multi_tenancy.models.user_tenant')]
         private string $userTenantClass,
+        #[Autowire(param: 'solidworx_platform.models.user')]
+        private string $userClass,
     ) {
     }
 
@@ -47,7 +50,8 @@ final readonly class TenantModelMappingListener
         $name = $metadata->getName();
 
         $isSupersededDefault = ($name === Tenant::class && $this->tenantClass !== Tenant::class)
-            || ($name === UserTenant::class && $this->userTenantClass !== UserTenant::class);
+            || ($name === UserTenant::class && $this->userTenantClass !== UserTenant::class)
+            || ($name === User::class && $this->userClass !== User::class);
 
         if (! $isSupersededDefault) {
             return;

@@ -16,6 +16,7 @@ namespace SolidWorx\Platform\PlatformBundle\Repository;
 use Doctrine\Persistence\ManagerRegistry;
 use SolidWorx\Platform\PlatformBundle\Entity\UserTenant;
 use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
+use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Model\UserTenantInterface;
 use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -37,15 +38,15 @@ class UserTenantRepository extends EntityRepository
         parent::__construct($registry, $className);
     }
 
-    public function hasAccess(Ulid $userId, TenantInterface | Ulid $tenant): bool
+    public function hasAccess(UserInterface $user, TenantInterface | Ulid $tenant): bool
     {
         $tenantId = $tenant instanceof TenantInterface ? $tenant->getId() : $tenant;
 
         $count = $this->createQueryBuilder('ut')
             ->select('COUNT(ut.id)')
-            ->where('ut.userId = :userId')
+            ->where('IDENTITY(ut.user) = :userId')
             ->andWhere('IDENTITY(ut.tenant) = :tenantId')
-            ->setParameter('userId', $userId, UlidType::NAME)
+            ->setParameter('userId', $user->getId(), UlidType::NAME)
             ->setParameter('tenantId', $tenantId, UlidType::NAME)
             ->getQuery()
             ->getSingleScalarResult();
@@ -56,14 +57,14 @@ class UserTenantRepository extends EntityRepository
     /**
      * @return list<TenantInterface>
      */
-    public function findTenantsForUser(mixed $userId): array
+    public function findTenantsForUser(UserInterface $user): array
     {
         /** @var list<TenantInterface> */
         return $this->createQueryBuilder('ut')
             ->select('t.id', 't.name')
             ->innerJoin('ut.tenant', 't')
-            ->where('ut.userId = :userId')
-            ->setParameter('userId', $userId, $this->getClassMetadata()->getTypeOfField('userId'))
+            ->where('IDENTITY(ut.user) = :userId')
+            ->setParameter('userId', $user->getId(), UlidType::NAME)
             ->orderBy('t.name', 'ASC')
             ->getQuery()
             ->getResult();

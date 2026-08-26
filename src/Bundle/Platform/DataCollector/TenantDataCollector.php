@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle\DataCollector;
 
 use SolidWorx\Platform\PlatformBundle\Model\Tenant;
-use SolidWorx\Platform\PlatformBundle\Model\User;
+use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\TenantRepository;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
@@ -26,7 +26,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Uid\Ulid;
 use Symfony\Component\VarDumper\Cloner\Data;
 use Throwable;
-use function method_exists;
 
 #[AutoconfigureTag(
     name: 'data_collector',
@@ -56,8 +55,8 @@ final class TenantDataCollector extends AbstractDataCollector
 
         $userTenants = [];
 
-        if ($user instanceof User && method_exists($user, 'getId')) {
-            $userTenants = $this->userTenantRepository->findTenantsForUser($user->getId());
+        if ($user instanceof UserInterface) {
+            $userTenants = $this->userTenantRepository->findTenantsForUser($user);
         }
 
         $this->data = [

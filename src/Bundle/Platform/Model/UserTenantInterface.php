@@ -26,7 +26,7 @@ interface UserTenantInterface
 {
     public function getId(): Ulid;
 
-    public function getUserId(): Ulid;
+    public function getUser(): UserInterface;
 
     public function getTenant(): TenantInterface;
 

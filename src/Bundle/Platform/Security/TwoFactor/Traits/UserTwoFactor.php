@@ -59,7 +59,7 @@ trait UserTwoFactor
     public function getTotpAuthenticationUsername(): string
     {
         // @TODO: email property should not be hard-coded
-        if ($this->email === null) {
+        if ($this->email === '') {
             throw new LogicException('Cannot resolve the TOTP authentication username because the email is not set.');
         }
 
@@ -82,7 +82,7 @@ trait UserTwoFactor
     public function getEmailAuthRecipient(): string
     {
         // @TODO: email property should not be hard-coded
-        if ($this->email === null) {
+        if ($this->email === '') {
             throw new LogicException('Cannot resolve the email authentication recipient because the email is not set.');
         }
 

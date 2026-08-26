@@ -18,30 +18,54 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Persistence\Mapping\RuntimeReflectionService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantModelMappingListener;
+use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\DefaultEntityMappingListener;
 use SolidWorx\Platform\PlatformBundle\Entity\Tenant;
+use SolidWorx\Platform\PlatformBundle\Entity\User;
 use stdClass;
 
-#[CoversClass(TenantModelMappingListener::class)]
-final class TenantModelMappingListenerTest extends TestCase
+#[CoversClass(DefaultEntityMappingListener::class)]
+final class DefaultEntityMappingListenerTest extends TestCase
 {
     public function testSuppressesDefaultEntityWhenOverridden(): void
     {
         $metadata = $this->metadataFor(Tenant::class);
 
         // A different configured tenant class -> the default should become a mapped superclass.
-        $this->listener(stdClass::class, stdClass::class)->loadClassMetadata(
+        $this->listener(stdClass::class, stdClass::class, stdClass::class)->loadClassMetadata(
             $this->event($metadata),
         );
 
         $this->assertTrue($metadata->isMappedSuperclass);
     }
 
+    public function testSuppressesDefaultUserEntityWhenOverridden(): void
+    {
+        $metadata = $this->metadataFor(User::class);
+
+        // A different configured user class -> the default should become a mapped superclass.
+        $this->listener(stdClass::class, stdClass::class, stdClass::class)->loadClassMetadata(
+            $this->event($metadata),
+        );
+
+        $this->assertTrue($metadata->isMappedSuperclass);
+    }
+
+    public function testKeepsDefaultUserEntityWhenNotOverridden(): void
+    {
+        $metadata = $this->metadataFor(User::class);
+
+        $this->listener(stdClass::class, stdClass::class, User::class)->loadClassMetadata(
+            $this->event($metadata),
+        );
+
+        $this->assertFalse($metadata->isMappedSuperclass);
+    }
+
     public function testKeepsDefaultEntityWhenNotOverridden(): void
     {
         $metadata = $this->metadataFor(Tenant::class);
 
-        $this->listener(Tenant::class, stdClass::class)->loadClassMetadata(
+        $this->listener(Tenant::class, stdClass::class, stdClass::class)->loadClassMetadata(
             $this->event($metadata),
         );
 
@@ -51,10 +75,11 @@ final class TenantModelMappingListenerTest extends TestCase
     /**
      * @param class-string $tenantClass
      * @param class-string $userTenantClass
+     * @param class-string $userClass
      */
-    private function listener(string $tenantClass, string $userTenantClass): TenantModelMappingListener
+    private function listener(string $tenantClass, string $userTenantClass, string $userClass): DefaultEntityMappingListener
     {
-        return new TenantModelMappingListener($tenantClass, $userTenantClass);
+        return new DefaultEntityMappingListener($tenantClass, $userTenantClass, $userClass);
     }
 
     /**

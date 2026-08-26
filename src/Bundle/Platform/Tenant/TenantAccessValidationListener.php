@@ -14,14 +14,13 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle\Tenant;
 
 use SolidWorx\Platform\PlatformBundle\Exception\TenantAccessDeniedException;
-use SolidWorx\Platform\PlatformBundle\Model\User;
+use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
 use SolidWorx\Platform\PlatformBundle\Tenant\Event\TenantSwitchedEvent;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\Uid\Ulid;
-use function method_exists;
 use function sprintf;
 
 /**
@@ -60,17 +59,11 @@ final readonly class TenantAccessValidationListener
 
         $user = $this->security->getUser();
 
-        if (! $user instanceof User || ! method_exists($user, 'getId')) {
+        if (! $user instanceof UserInterface) {
             return;
         }
 
-        $userId = $user->getId();
-
-        if (! $userId instanceof Ulid) {
-            return;
-        }
-
-        if (! $this->userTenantRepository->hasAccess($userId, $tenantId)) {
+        if (! $this->userTenantRepository->hasAccess($user, $tenantId)) {
             throw new TenantAccessDeniedException(sprintf(
                 'The current user is not a member of tenant "%s".',
                 $tenantId->toRfc4122(),

@@ -23,9 +23,9 @@ use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendTwoFactorCode;
 use SolidWorx\Platform\PlatformBundle\Controller\Tenant\SelectTenant;
 use SolidWorx\Platform\PlatformBundle\DataCollector\TenantDataCollector;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\Extension\TwoFactorExtension;
+use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\DefaultEntityMappingListener;
 use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantAwareListener;
 use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantMetadataListener;
-use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantModelMappingListener;
 use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantWriteGuardListener;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Filter\TenantFilter;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Type\URLType;
@@ -33,6 +33,7 @@ use SolidWorx\Platform\PlatformBundle\Logger\Processor\TenantLoggingProcessor;
 use SolidWorx\Platform\PlatformBundle\Messenger\TenantMiddleware;
 use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
 use SolidWorx\Platform\PlatformBundle\Model\User;
+use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Model\UserTenantInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\TenantRepository;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
@@ -93,7 +94,7 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         TenantAccessValidationListener::class,
         TenantRequestListener::class,
         TenantMetadataListener::class,
-        TenantModelMappingListener::class,
+        DefaultEntityMappingListener::class,
         TenantAwareListener::class,
         TenantWriteGuardListener::class,
         DomainTenantResolver::class,
@@ -205,6 +206,8 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
     #[Override]
     public function prepend(ContainerBuilder $container): void
     {
+        $config = $this->getConfig();
+
         if ($container->hasExtension('doctrine')) {
             $orm = [
                 'mappings' => [
@@ -218,10 +221,10 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
                 ],
             ];
 
-            if ($this->getConfig()['multi_tenancy']['enabled']) {
-                $multiTenancy = $this->getConfig()['multi_tenancy'];
+            if ($config['multi_tenancy']['enabled']) {
+                $multiTenancy = $config['multi_tenancy'];
 
-                $orm['mappings']['PlatformEntity'] = [
+                $orm['mappings']['SolidWorxPlatformBundle'] = [
                     'is_bundle' => false,
                     'type' => 'attribute',
                     'dir' => dirname(__DIR__) . '/Entity',
@@ -239,6 +242,8 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
                 $orm['resolve_target_entities'] = [
                     TenantInterface::class => $multiTenancy['models']['tenant'],
                     UserTenantInterface::class => $multiTenancy['models']['user_tenant'],
+                    UserInterface::class => $config['models']['user'],
+
                 ];
             }
 
@@ -267,8 +272,6 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
                 ]
             );
         }
-
-        $config = $this->getConfig();
 
         if ($config['security']['two_factor']['enabled']) {
             TwoFactorExtension::enable(
@@ -308,7 +311,7 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
                 'providers' => [
                     'platform_user' => [
                         'entity' => [
-                            'class' => User::class,
+                            'class' => UserInterface::class,
                         ],
                     ],
                 ],

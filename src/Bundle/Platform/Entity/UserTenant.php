@@ -23,7 +23,7 @@ use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
  */
 #[ORM\Entity(repositoryClass: UserTenantRepository::class)]
 #[ORM\Table(name: UserTenant::TABLE_NAME)]
-#[ORM\UniqueConstraint(name: 'uniq_user_tenant', fields: ['userId', 'tenant'])]
+#[ORM\UniqueConstraint(name: 'uniq_user_tenant', fields: ['user', 'tenant'])]
 class UserTenant extends UserTenantModel
 {
     final public const string TABLE_NAME = 'platform_user_tenant';

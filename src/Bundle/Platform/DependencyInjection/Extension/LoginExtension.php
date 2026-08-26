@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle\DependencyInjection\Extension;
 
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigState;
-use SolidWorx\Platform\PlatformBundle\Model\User;
+use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Util\Time;
 use Symfony\Component\RateLimiter\RateLimit;
 use function array_is_list;
@@ -118,7 +118,7 @@ final class LoginExtension
 
         $security = [
             'password_hashers' => [
-                User::class => [
+                UserInterface::class => [
                     'algorithm' => 'auto',
                 ],
             ],

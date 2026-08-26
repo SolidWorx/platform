@@ -17,7 +17,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigState;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\Extension\LoginExtension;
-use SolidWorx\Platform\PlatformBundle\Model\User;
+use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Util\Time;
 
 #[CoversClass(LoginExtension::class)]
@@ -40,7 +40,7 @@ final class LoginExtensionTest extends TestCase
         self::assertSame(
             [
                 'password_hashers' => [
-                    User::class => [
+                    UserInterface::class => [
                         'algorithm' => 'auto',
                     ],
                 ],
@@ -66,7 +66,7 @@ final class LoginExtensionTest extends TestCase
         self::assertSame(
             [
                 'password_hashers' => [
-                    User::class => [
+                    UserInterface::class => [
                         'algorithm' => 'auto',
                     ],
                 ],
@@ -100,7 +100,7 @@ final class LoginExtensionTest extends TestCase
         self::assertSame(
             [
                 'password_hashers' => [
-                    User::class => [
+                    UserInterface::class => [
                         'algorithm' => 'auto',
                     ],
                 ],
@@ -131,7 +131,7 @@ final class LoginExtensionTest extends TestCase
         self::assertSame(
             [
                 'password_hashers' => [
-                    User::class => [
+                    UserInterface::class => [
                         'algorithm' => 'auto',
                     ],
                 ],
@@ -161,7 +161,7 @@ final class LoginExtensionTest extends TestCase
         self::assertSame(
             [
                 'password_hashers' => [
-                    User::class => [
+                    UserInterface::class => [
                         'algorithm' => 'auto',
                     ],
                 ],
@@ -219,7 +219,7 @@ final class LoginExtensionTest extends TestCase
         self::assertSame(
             [
                 'password_hashers' => [
-                    User::class => [
+                    UserInterface::class => [
                         'algorithm' => 'auto',
                     ],
                 ],

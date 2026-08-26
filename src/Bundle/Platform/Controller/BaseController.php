@@ -13,12 +13,10 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Controller;
 
-use Doctrine\Persistence\ManagerRegistry;
 use Override;
-use SolidWorx\Platform\PlatformBundle\Model\User;
+use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Response\RedirectResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use function array_first;
 
 abstract class BaseController extends AbstractController
 {
@@ -29,40 +27,14 @@ abstract class BaseController extends AbstractController
     }
 
     #[Override]
-    protected function getUser(): ?User
+    protected function getUser(): ?UserInterface
     {
         $user = parent::getUser();
 
-        if ($user instanceof User) {
+        if ($user instanceof UserInterface) {
             return $user;
         }
 
         return null;
-    }
-
-    protected function getUserId(): mixed
-    {
-        $user = $this->getUser();
-
-        if ($user instanceof User) {
-            /** @var ManagerRegistry $registry */
-            $registry = $this->container->get('doctrine');
-
-            return array_first(
-                (array) $registry
-                ->getManagerForClass($user::class)
-                ?->getClassMetadata($user::class)
-                ->getIdentifierValues($user)
-            );
-        }
-
-        return null;
-    }
-
-    public static function getSubscribedServices(): array
-    {
-        return parent::getSubscribedServices() + [
-            'doctrine' => ManagerRegistry::class,
-        ];
     }
 }
