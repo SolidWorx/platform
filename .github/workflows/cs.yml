@@ -104,11 +104,12 @@ jobs:
           VALIDATE_MD: true
           VALIDATE_GITLEAKS: true
           VALIDATE_BASH: true
-          # PHP_BUILTIN runs `php -l` with the PHP bundled in the super-linter image, which is
-          # older than the 8.4 this project requires — it reports valid code such as
-          # `new PlatformConfiguration()->getTreeBuilder()` as a parse error. The ECS, Rector,
-          # PHPStan and PHPUnit jobs all parse every file with the real 8.4, so nothing is lost.
-          VALIDATE_PHP_BUILTIN: false
+          # PHP_BUILTIN is deliberately absent: it runs `php -l` with the PHP bundled in the
+          # super-linter image, which is older than the 8.4 this project requires, so it reports
+          # valid code such as `new PlatformConfiguration()->getTreeBuilder()` as a parse error.
+          # The ECS, Rector, PHPStan and PHPUnit jobs all parse every file with the real 8.4.
+          # It has to be left out rather than set to false — super-linter refuses a mix of
+          # VALIDATE_* true and false values.
           LINTER_RULES_PATH: .
           VALIDATE_JAVASCRIPT_ES: true
           VALIDATE_CSS: true
