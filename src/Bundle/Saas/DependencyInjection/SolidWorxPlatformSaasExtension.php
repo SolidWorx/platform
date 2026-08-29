@@ -182,9 +182,7 @@ final class SolidWorxPlatformSaasExtension extends Extension implements PrependE
      */
     private function getConfig(): array
     {
-        if ($this->config === null) {
-            $this->config = $this->processRawSection();
-        }
+        $this->config ??= $this->processRawSection();
 
         return $this->config;
     }
