@@ -21,7 +21,9 @@ use SolidWorx\Platform\PlatformBundle\Attributes\Menu\MenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfiguration;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendTwoFactorCode;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\TwoFactorConfiguration;
+use SolidWorx\Platform\PlatformBundle\Controller\Tenant\OnboardTenant;
 use SolidWorx\Platform\PlatformBundle\Controller\Tenant\SelectTenant;
+use SolidWorx\Platform\PlatformBundle\Controller\Tenant\TenantRedirector;
 use SolidWorx\Platform\PlatformBundle\DataCollector\TenantDataCollector;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\Extension\TwoFactorExtension;
 use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\DefaultEntityMappingListener;
@@ -30,6 +32,7 @@ use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantMetadataListe
 use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantWriteGuardListener;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Filter\TenantFilter;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Type\URLType;
+use SolidWorx\Platform\PlatformBundle\Form\Type\Tenant\TenantOnboardingType;
 use SolidWorx\Platform\PlatformBundle\Logger\Processor\TenantLoggingProcessor;
 use SolidWorx\Platform\PlatformBundle\Menu\TwoFactorMenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Messenger\TenantMiddleware;
@@ -39,16 +42,24 @@ use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Model\UserTenantInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\TenantRepository;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
+use SolidWorx\Platform\PlatformBundle\Security\EventListener\TenantDomainLoginListener;
 use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantVoter;
+use SolidWorx\Platform\PlatformBundle\Tenant\Onboarding\DefaultTenantOnboarder;
+use SolidWorx\Platform\PlatformBundle\Tenant\Onboarding\TenantOnboarder;
 use SolidWorx\Platform\PlatformBundle\Tenant\Resolver\DomainTenantResolver;
 use SolidWorx\Platform\PlatformBundle\Tenant\Resolver\RouteTenantResolver;
 use SolidWorx\Platform\PlatformBundle\Tenant\Resolver\SessionTenantResolver;
+use SolidWorx\Platform\PlatformBundle\Tenant\Scope\TenantScopeGuardListener;
+use SolidWorx\Platform\PlatformBundle\Tenant\Scope\TenantScopeResolver;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantAccessValidationListener;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantFilterSynchronizer;
+use SolidWorx\Platform\PlatformBundle\Tenant\TenantLock;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantManager;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantRequestListener;
+use SolidWorx\Platform\PlatformBundle\Tenant\TenantSessionStorage;
 use SolidWorx\Platform\PlatformBundle\Twig\Components\Security\TwoFactor;
+use SolidWorx\Platform\PlatformBundle\Twig\Components\Tenant\Switcher;
 use SolidWorx\Platform\PlatformBundle\Validator\Constraint\TwoFactorCodeValidator;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
@@ -68,6 +79,9 @@ use function interface_exists;
  *   session_key: string,
  *   route_param: string,
  *   validate_user_access: bool,
+ *   require_tenant: bool,
+ *   default_route: string|null,
+ *   onboarding: array{enabled: bool, form_type: class-string},
  *   models: array{tenant: class-string, user_tenant: class-string},
  *   resolvers: array{domain: bool, session: bool, route: bool},
  *   write_guard: array{check_user_access: bool}
@@ -106,8 +120,18 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         TenantRepository::class,
         UserTenantRepository::class,
         SelectTenant::class,
+        OnboardTenant::class,
+        TenantRedirector::class,
         TenantDataCollector::class,
         TenantLoggingProcessor::class,
+        TenantLock::class,
+        TenantSessionStorage::class,
+        TenantScopeResolver::class,
+        TenantScopeGuardListener::class,
+        TenantDomainLoginListener::class,
+        TenantOnboardingType::class,
+        DefaultTenantOnboarder::class,
+        Switcher::class,
     ];
 
     /**
@@ -179,6 +203,10 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         $container->setParameter('solidworx_platform.multi_tenancy.models.tenant', $config['models']['tenant']);
         $container->setParameter('solidworx_platform.multi_tenancy.models.user_tenant', $config['models']['user_tenant']);
         $container->setParameter('solidworx_platform.multi_tenancy.write_guard.check_user_access', $config['write_guard']['check_user_access']);
+        $container->setParameter('solidworx_platform.multi_tenancy.require_tenant', $config['require_tenant']);
+        $container->setParameter('solidworx_platform.multi_tenancy.default_route', $config['default_route']);
+        $container->setParameter('solidworx_platform.multi_tenancy.onboarding.enabled', $config['onboarding']['enabled']);
+        $container->setParameter('solidworx_platform.multi_tenancy.onboarding.form_type', $config['onboarding']['form_type']);
 
         if (! $config['enabled']) {
             foreach (self::MULTI_TENANCY_SERVICES as $serviceId) {
@@ -188,8 +216,27 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
             return;
         }
 
+        $container->setAlias(TenantOnboarder::class, DefaultTenantOnboarder::class);
+
+        // The onboarding services stay registered even when onboarding is disabled. Its route is
+        // discovered from the controller's #[Route] attribute regardless, so removing the service
+        // would turn a request to /tenant/onboarding into a service-resolution failure rather than
+        // the 404 the controller already produces.
+
+        if (! $config['require_tenant']) {
+            $container->removeDefinition(TenantScopeGuardListener::class);
+            $container->removeDefinition(TenantScopeResolver::class);
+        }
+
         if (! $config['resolvers']['domain']) {
             $container->removeDefinition(DomainTenantResolver::class);
+
+            // Without domain resolution there is no custom-domain login to verify.
+            $container->removeDefinition(TenantDomainLoginListener::class);
+        }
+
+        if (! $config['validate_user_access']) {
+            $container->removeDefinition(TenantDomainLoginListener::class);
         }
 
         if (! $config['resolvers']['session']) {
@@ -274,6 +321,11 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
                 [
                     'paths' => [
                         $path => 'Platform',
+                    ],
+                    'globals' => [
+                        // Lets shared layouts reference tenancy-only components without exploding
+                        // when multi-tenancy is switched off and those services are gone.
+                        'platform_multi_tenancy_enabled' => $config['multi_tenancy']['enabled'],
                     ],
                 ]
             );

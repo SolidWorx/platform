@@ -17,9 +17,11 @@ use Override;
 use SolidWorx\Platform\PlatformBundle\Entity\Tenant;
 use SolidWorx\Platform\PlatformBundle\Entity\User;
 use SolidWorx\Platform\PlatformBundle\Entity\UserTenant;
+use SolidWorx\Platform\PlatformBundle\Form\Type\Tenant\TenantOnboardingType;
 use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
 use SolidWorx\Platform\PlatformBundle\Model\UserTenantInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Form\FormTypeInterface;
 use function is_string;
 use function is_subclass_of;
 use function sprintf;
@@ -109,6 +111,31 @@ final class PlatformConfiguration implements PlatformConfigurationInterface
                         ->booleanNode('validate_user_access')
                             ->defaultTrue()
                             ->info('Deny entering a tenant the authenticated user is not a member of.')
+                        ->end()
+                        ->booleanNode('require_tenant')
+                            ->defaultTrue()
+                            ->info('Require an authenticated user to always have a tenant in scope, redirecting to selection or onboarding otherwise.')
+                        ->end()
+                        ->scalarNode('default_route')
+                            ->defaultNull()
+                            ->info('Route to land on after selecting or creating a tenant, when no page was interrupted. Defaults to "/".')
+                        ->end()
+                        ->arrayNode('onboarding')
+                            ->addDefaultsIfNotSet()
+                            ->children()
+                                ->booleanNode('enabled')
+                                    ->defaultTrue()
+                                    ->info('Let a user with no tenants create their first one. Disable for invite-only apps.')
+                                ->end()
+                                ->scalarNode('form_type')
+                                    ->defaultValue(TenantOnboardingType::class)
+                                    ->info(sprintf('The form type used on the onboarding page. Must implement %s', FormTypeInterface::class))
+                                    ->validate()
+                                        ->ifTrue(static fn ($v): bool => ! is_string($v) || ! is_subclass_of($v, FormTypeInterface::class))
+                                        ->thenInvalid(sprintf('The onboarding form type must implement %s', FormTypeInterface::class))
+                                    ->end()
+                                ->end()
+                            ->end()
                         ->end()
                         ->arrayNode('models')
                             ->addDefaultsIfNotSet()

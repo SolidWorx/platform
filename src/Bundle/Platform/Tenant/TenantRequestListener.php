@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Tenant;
 
+use SolidWorx\Platform\PlatformBundle\Tenant\Resolver\LockingTenantResolverInterface;
 use SolidWorx\Platform\PlatformBundle\Tenant\Resolver\TenantResolverInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -24,6 +25,9 @@ use Symfony\Component\HttpKernel\KernelEvents;
  *
  * Runs after the firewall (default priority) so an authenticated user is available to the
  * access-validation listener. Only the main request is resolved; sub-requests inherit the context.
+ *
+ * When the winning resolver is a {@see LockingTenantResolverInterface}, the tenant is additionally
+ * locked for the request and can no longer be switched.
  *
  * @see TenantResolverInterface
  */
@@ -37,6 +41,7 @@ final readonly class TenantRequestListener
         #[AutowireIterator('platform.tenant_resolver')]
         private iterable $resolvers,
         private TenantContext $tenantContext,
+        private TenantLock $tenantLock,
     ) {
     }
 
@@ -53,6 +58,12 @@ final readonly class TenantRequestListener
 
             if ($tenantId !== null) {
                 $this->tenantContext->setTenant($tenantId);
+
+                // Locked only after the context has committed: the access-validation listener may
+                // veto the switch by throwing, and a vetoed tenant must not leave a lock behind.
+                if ($resolver instanceof LockingTenantResolverInterface) {
+                    $this->tenantLock->lock($tenantId);
+                }
 
                 return;
             }
