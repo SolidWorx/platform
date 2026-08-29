@@ -1,0 +1,85 @@
+{#
+# This file is part of SolidWorx Platform project.
+#
+# (c) Pierre du Plessis <open-source@solidworx.co>
+#
+# This source file is subject to the MIT license that is bundled
+# with this source code in the file LICENSE.
+#}
+
+{#
+    Renders a menu as the contents of a Tabler dropdown, for the user menu in the top-right of
+    the navbar:
+
+        {{ render_menu('user_menu', {template: '@SolidWorxPlatform/Menu/user_menu.html.twig'}) }}
+
+    A dropdown body is a flat list of `<a class="dropdown-item">` rather than a `<ul>`, so both
+    `list` and `item` drop the wrapper elements the default template adds. Two extras are
+    understood on top of the usual `icon` and `role`:
+
+    - `divider` draws a separator above the item;
+    - an item with children becomes a `dropdown-header` followed by its children, which is how
+      Tabler groups entries — there are no nested dropdowns here.
+#}
+
+{% extends 'knp_menu.html.twig' %}
+{% import 'knp_menu.html.twig' as ui %}
+
+{% block list %}
+    {% if item.hasChildren and options.depth is not same as(0) and item.displayChildren %}
+        {{ block('children') }}
+    {% endif %}
+{% endblock %}
+
+{% block item %}
+    {% if item.displayed %}
+        {% if item.extras.divider is defined and item.extras.divider %}
+            <div class="dropdown-divider"></div>
+        {% endif %}
+
+        {% if item.hasChildren and item.displayChildren and options.depth is not same as(0) %}
+            <div class="dropdown-header">{{ block('label') }}</div>
+            {{ block('list') }}
+        {% elseif item.uri is not empty %}
+            {{ block('linkElement') }}
+        {% else %}
+            {{ block('spanElement') }}
+        {% endif %}
+    {% endif %}
+{% endblock %}
+
+{% block linkElement %}
+    {%- set classes = ['dropdown-item'] -%}
+    {%- if item.linkAttribute('class') is not empty -%}
+        {%- set classes = classes|merge([item.linkAttribute('class')]) -%}
+    {%- endif -%}
+    {%- if matcher.isCurrent(item) -%}
+        {%- set classes = classes|merge([options.currentClass, 'active']) -%}
+    {%- endif -%}
+
+    <a href="{{ item.uri }}"{{ ui.attributes(item.linkAttributes|merge({class: classes|join(' ')})) }}>
+        {{- block('itemIcon') -}}
+        {{- block('label') -}}
+    </a>
+{% endblock %}
+
+{% block spanElement %}
+    <span class="dropdown-item disabled">
+        {{- block('itemIcon') -}}
+        {{- block('label') -}}
+    </span>
+{% endblock %}
+
+{% block itemIcon %}
+    {%- if item.extras.icon is defined -%}
+        {{ ux_icon('tabler:' ~ item.extras.icon, {class: 'icon dropdown-item-icon'}) }}
+    {%- endif -%}
+{% endblock %}
+
+{% block label %}
+    {%- if options.allow_safe_labels and item.getExtra('safe_label', false) -%}
+        {{ item.label|trans|raw }}
+    {%- else -%}
+        {{ item.label|trans }}
+    {%- endif -%}
+{% endblock %}

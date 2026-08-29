@@ -5,7 +5,19 @@
     `Symfony\Component\Security\Core\User\UserInterface`, so it works with any user class the
     application configures under `platform.models.user`.
 
-    Add your own entries without rebuilding the dropdown:
+    The entries come from the KnpMenu menu named `user_menu`, which means the usual menu builder
+    is all you need to add your own:
+
+        #[MenuBuilder(name: UserMenu::NAME)]
+        public function build(ItemInterface $menu): void
+        {
+            $menu->addChild('Profile', Options::create()->route('app_profile')->icon('user')->build());
+        }
+
+    The platform registers the two-factor entry there when 2FA is enabled. Logout is not a menu
+    entry — it is a CSRF-protected form — so it is always rendered last, under a divider.
+
+    Everything is still a block, so a page can bypass the menu altogether:
 
         {% block user_menu_items %}
             <a href="{{ path('app_profile') }}" class="dropdown-item">{{ 'Profile'|trans }}</a>
@@ -15,9 +27,16 @@
 ##}
 
 {## The avatar shown in the dropdown toggle. Defaults to the first two letters of the user
-    identifier; override it to render a real avatar image. ##}
+    identifier, falling back to a generic profile icon; override it to render a real avatar
+    image. ##}
 {% block user_menu_avatar %}
-    <span class="avatar avatar-sm">{{ app.user.userIdentifier|slice(0, 2)|upper }}</span>
+    {%- set user_initials = app.user.userIdentifier|slice(0, 2)|upper -%}
+
+    {% if user_initials is not empty %}
+        <span class="avatar avatar-sm">{{ user_initials }}</span>
+    {% else %}
+        <span class="avatar avatar-sm">{{ ux_icon('tabler:user', {class: 'icon'}) }}</span>
+    {% endif %}
 {% endblock %}
 
 {## The display name next to the avatar. ##}
@@ -26,8 +45,23 @@
 {## An optional second line under the name — a role, a team or a plan. ##}
 {% block user_menu_role %}{% endblock %}
 
-{## The dropdown entries. Call `{{ parent() }}` to keep the logout link. ##}
+{## The dropdown entries coming from the `user_menu` KnpMenu. Renders nothing when no builder
+    has registered that menu. ##}
+{% block user_menu_links %}
+    {% if menu_exists('user_menu') %}
+        {{ render_menu('user_menu', {template: '@SolidWorxPlatform/Menu/user_menu.html.twig'}) }}
+    {% endif %}
+{% endblock %}
+
+{## The dropdown body. Call `{{ parent() }}` to keep the menu entries and the logout link. ##}
 {% block user_menu_items %}
+    {% set user_menu_links = block('user_menu_links')|trim %}
+    {% if user_menu_links is not empty %}
+        {{ user_menu_links|raw }}
+
+        <div class="dropdown-divider"></div>
+    {% endif %}
+
     <twig:Ui:Security:LogoutLink class="dropdown-item w-100 text-start" />
 {% endblock %}
 
