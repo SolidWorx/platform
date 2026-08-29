@@ -95,9 +95,7 @@ final class SolidWorxPlatformUiExtension extends Extension implements PrependExt
      */
     private function getConfig(): array
     {
-        if ($this->config === null) {
-            $this->config = $this->processRawSection();
-        }
+        $this->config ??= $this->processRawSection();
 
         return $this->config;
     }
