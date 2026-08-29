@@ -20,7 +20,7 @@ class Options
      *     route?: string,
      *     routeParameters?: array<string, scalar>,
      *     routeAbsolute?: bool,
-     *     extras?: array{role?: string, icon?: string},
+     *     extras?: array{role?: string, icon?: string, divider?: bool},
      * }
      */
     private array $options = [];
@@ -60,11 +60,23 @@ class Options
     }
 
     /**
+     * Draws a separator above this item.
+     *
+     * Only the user dropdown renders it; the sidebar and navbar ignore it.
+     */
+    public function divider(bool $divider = true): self
+    {
+        $this->options['extras'] ??= [];
+        $this->options['extras']['divider'] = $divider;
+        return $this;
+    }
+
+    /**
      * @return array{
      *     route?: string,
      *     routeParameters?: array<string, scalar>,
      *     routeAbsolute?: bool,
-     *     extras?: array{role?: string, icon?: string},
+     *     extras?: array{role?: string, icon?: string, divider?: bool},
      * }
      */
     public function build(): array

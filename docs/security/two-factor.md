@@ -115,9 +115,15 @@ When 2FA is enabled the platform registers these routes:
 | `2fa_login` | `/2fa` | The 2FA challenge form (TOTP / email / backup code). |
 | `2fa_login_check` | `/2fa_check` | Where the 2FA form posts to. |
 | `_solidworx_platform_security_two_factor_resend` | `/2fa/resend` | Re-send the email code, then return to the challenge. |
+| `solidworx_platform_security_two_factor_configure` | `/settings/two-factor` | Where a signed-in user turns their second factors on and off. |
 
 The challenge pages let users switch provider via
 `path('2fa_login', {preferProvider: '...'})`.
+
+The configuration page sits outside `/2fa` on purpose: that prefix is covered by the
+`IS_AUTHENTICATED_2FA_IN_PROGRESS` [access-control rules](#access-control), which match users
+half-way through the login challenge — the opposite of who the page is for. It requires
+`IS_AUTHENTICATED_FULLY` instead.
 
 ---
 
@@ -146,6 +152,25 @@ shadow it (rules are matched top-to-bottom, first match wins).
 
 ---
 
+## The configuration page
+
+`/settings/two-factor` renders the `Platform:Security:TwoFactor` live component, which lets a
+signed-in user enable or disable TOTP and email codes, regenerate backup codes and forget a
+trusted device.
+
+You do not have to link to it yourself: while 2FA is enabled the platform registers a
+**Two-factor authentication** entry in the `user_menu` dropdown — see
+[the user menu](../frontend/layouts.md#the-user-menu). Turn 2FA off and the controller, the menu
+entry and the component are all removed from the container.
+
+To place the same controls on a page of your own, mount the component directly:
+
+```twig
+<twig:Platform:Security:TwoFactor />
+```
+
+---
+
 ## Customising the 2FA pages
 
 The platform ships default TOTP and email challenge templates. They extend the base
@@ -153,8 +178,8 @@ layout you set in `platform.security.two_factor.base_template`, so the quickest 
 make them match your app is to point that at your own layout (step 1 above).
 
 For full control you can override the underlying scheb templates
-(`@SolidWorxPlatform/Security/TwoFactor/totp.html.twig` and `email.html.twig`) using
-Symfony's standard
+(`@SolidWorxPlatform/Security/TwoFactor/totp.html.twig`, `email.html.twig` and
+`configure.html.twig`) using Symfony's standard
 [template overriding](https://symfony.com/doc/current/bundles/override.html#templates).
 
 ---

@@ -155,6 +155,7 @@ by name. If no builder registers a menu, that part of the navigation is simply n
 |-----------|-------------|
 | `sidebar` | The vertical sidebar of the `app` layout |
 | `navbar` | The top navigation bar of the `app` and `condensed` layouts |
+| `user_menu` | The user dropdown in the top-right of the `app` and `condensed` layouts |
 
 ```php
 use Knp\Menu\ItemInterface;
@@ -184,6 +185,44 @@ final class AppMenu
 Items without a URI render as dropdown toggles; items with children render a Tabler dropdown. Use
 `->role()` to hide entries the current user may not see.
 
+### The user menu
+
+The dropdown behind the avatar in the top-right corner is the `user_menu` menu, so you add entries
+to it exactly the same way:
+
+```php
+use SolidWorx\Platform\PlatformBundle\Menu\UserMenu;
+
+#[MenuBuilder(name: UserMenu::NAME)]
+public function build(ItemInterface $menu): void
+{
+    $menu->addChild('Profile', Options::create()->route('app_profile')->icon('user')->build());
+
+    $menu->addChild('API keys', Options::create()
+        ->route('app_api_keys')
+        ->icon('key')
+        ->divider()      // draws a separator above this entry
+        ->build());
+}
+```
+
+Because it is a dropdown rather than a navigation bar, it renders slightly differently from the
+sidebar and navbar:
+
+- entries are `dropdown-item`s, not nav links;
+- an entry that has children becomes a `dropdown-header` followed by its children — dropdowns are
+  not nested;
+- `->divider()` draws a separator above the entry (ignored by the other menus).
+
+Two things are always there, whatever your builders do:
+
+- **The platform's own account entries** — currently just **Two-factor authentication**, and only
+  when [2FA is enabled](../security/two-factor.md). They are registered with priority
+  `UserMenu::PRIORITY_ACCOUNT` (`100`), so entries you register at the default priority of `0`
+  land underneath them. Register above it to push your entries to the top.
+- **Logout**, rendered last under a divider. It is a CSRF-protected form rather than a link, so it
+  is not part of the menu; override the `user_menu_items` block if you need it somewhere else.
+
 ---
 
 ## Blocks
@@ -200,7 +239,7 @@ any page template — not just from a layout.
 | `flashes` | all | Flash message rendering |
 | `footer`, `footer_links`, `footer_copyright` | all | The page footer |
 | `brand`, `brand_content` | all | The brand / logo |
-| `user_menu`, `user_menu_avatar`, `user_menu_name`, `user_menu_role`, `user_menu_items` | `app`, `condensed` | The authenticated user dropdown |
+| `user_menu`, `user_menu_avatar`, `user_menu_name`, `user_menu_role`, `user_menu_links`, `user_menu_items` | `app`, `condensed` | The authenticated user dropdown |
 | `navbar`, `navbar_brand`, `navbar_menu`, `navbar_actions` | `app`, `condensed` | The top navigation bar |
 | `sidebar`, `sidebar_brand`, `sidebar_menu`, `sidebar_footer` | `app` | The sidebar |
 | `clean_brand` | `clean` | The brand above a centred card |
@@ -220,11 +259,24 @@ Do this once in your own base template — set `ui.templates.base` to a template
 
 ### Adding entries to the user dropdown
 
+Normally you do this [with a menu builder](#the-user-menu). To add markup the menu cannot express —
+a plan badge, a theme switcher — override the block instead:
+
 ```twig
 {% block user_menu_items %}
-    <a href="{{ path('app_profile') }}" class="dropdown-item">{{ 'Profile'|trans }}</a>
-    <div class="dropdown-divider"></div>
     {{ parent() }}
+    <div class="dropdown-divider"></div>
+    <span class="dropdown-item disabled">{{ 'Signed in as %plan%'|trans({'%plan%': plan}) }}</span>
+{% endblock %}
+```
+
+`{{ parent() }}` renders the `user_menu` entries and the logout link. Override `user_menu_links`
+instead to keep the logout link but replace the entries above it, or `user_menu_avatar` to swap the
+default initials for a real avatar image:
+
+```twig
+{% block user_menu_avatar %}
+    <span class="avatar avatar-sm" style="background-image: url({{ app.user.avatarUrl }})"></span>
 {% endblock %}
 ```
 

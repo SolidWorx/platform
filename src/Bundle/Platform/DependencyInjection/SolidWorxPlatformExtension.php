@@ -20,6 +20,7 @@ use Reflector;
 use SolidWorx\Platform\PlatformBundle\Attributes\Menu\MenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfiguration;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendTwoFactorCode;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\TwoFactorConfiguration;
 use SolidWorx\Platform\PlatformBundle\Controller\Tenant\SelectTenant;
 use SolidWorx\Platform\PlatformBundle\DataCollector\TenantDataCollector;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\Extension\TwoFactorExtension;
@@ -30,6 +31,7 @@ use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantWriteGuardLis
 use SolidWorx\Platform\PlatformBundle\Doctrine\Filter\TenantFilter;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Type\URLType;
 use SolidWorx\Platform\PlatformBundle\Logger\Processor\TenantLoggingProcessor;
+use SolidWorx\Platform\PlatformBundle\Menu\TwoFactorMenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Messenger\TenantMiddleware;
 use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
 use SolidWorx\Platform\PlatformBundle\Model\User;
@@ -154,6 +156,10 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         if (! $config['security']['two_factor']['enabled']) {
             // @TODO: Need to remove the 2FA routes as well if 2fa is not configured
             $container->removeDefinition(ResendTwoFactorCode::class);
+            $container->removeDefinition(TwoFactorConfiguration::class);
+            // Dropping the builder keeps the "Two-factor authentication" entry — and the link to
+            // the route it would generate — out of the user menu entirely.
+            $container->removeDefinition(TwoFactorMenuBuilder::class);
             $container->removeDefinition(TwoFactorCodeValidator::class);
             $container->removeDefinition(TwoFactor::class);
         }

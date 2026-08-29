@@ -248,6 +248,42 @@ final class LayoutRenderingTest extends KernelTestCase
         self::assertStringContainsString('action="/logout"', $html);
     }
 
+    public function testTheUserMenuRendersTheUserMenuEntriesAboveTheLogoutLink(): void
+    {
+        $this->authenticate();
+
+        $html = $this->render('@LayoutTest/app_page.html.twig');
+
+        // Entries are dropdown items, not the sidebar's `<li class="nav-item"><a class="nav-link">`,
+        // and the `icon` extra resolves to a Tabler icon.
+        self::assertMatchesRegularExpression(
+            '#<a href="/profile" class="dropdown-item"><svg [^>]*class="icon dropdown-item-icon"[^>]*>.*?</svg>Profile</a>#s',
+            $html,
+        );
+
+        // An entry with children groups them under a header rather than nesting a dropdown.
+        self::assertStringContainsString('<div class="dropdown-header">Workspace</div>', $html);
+        self::assertStringContainsString('<a href="/settings/api-keys" class="dropdown-item">API keys</a>', $html);
+
+        // The `divider` extra draws a separator above its own entry.
+        self::assertMatchesRegularExpression(
+            '#<div class="dropdown-divider"></div>\s*<div class="dropdown-header">Workspace</div>#',
+            $html,
+        );
+
+        // …and the partial always puts one between the menu and the logout form.
+        self::assertMatchesRegularExpression(
+            '#<div class="dropdown-divider"></div>\s*<form method="post" action="/logout">#',
+            $html,
+        );
+
+        self::assertLessThan(
+            strpos($html, 'action="/logout"'),
+            strpos($html, '<a href="/profile" class="dropdown-item">'),
+            'The menu entries should come before the logout link.',
+        );
+    }
+
     /**
      * @param array<array-key, mixed> $options
      */
