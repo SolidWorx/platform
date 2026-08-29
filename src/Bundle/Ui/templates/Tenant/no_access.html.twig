@@ -1,0 +1,27 @@
+{##
+    Shown when a user belongs to no workspace and onboarding is disabled — an invite-only or
+    sales-led product, where workspaces are provisioned out of band. There is nothing for the user
+    to do here but wait or ask someone.
+##}
+{% extends '@Ui/Layout/security.html.twig' %}
+
+{% block content %}
+    <div class="card card-md">
+        <div class="card-body text-center">
+            <div class="mb-3">
+                {{ ux_icon('tabler:building-off', {width: 48, height: 48, class: 'text-secondary'}) }}
+            </div>
+
+            <h2 class="h2 mb-2">
+                {{ 'No workspace assigned'|trans }}
+            </h2>
+
+            <p class="text-secondary mb-4">
+                {{ message|default('You do not have access to any workspace.'|trans) }}
+                {{ 'Ask an administrator to add you to one.'|trans }}
+            </p>
+
+            <twig:Ui:Security:LogoutLink color="secondary" />
+        </div>
+    </div>
+{% endblock %}

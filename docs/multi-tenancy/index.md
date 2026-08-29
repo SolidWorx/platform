@@ -18,6 +18,11 @@ platform:
         session_key: _tenant_id          # session key holding the selected tenant id
         route_param: tenant              # route parameter for the route resolver
         validate_user_access: true       # deny entering a tenant the user is not a member of
+        require_tenant: true             # always keep a tenant in scope for an authenticated user
+        default_route: null              # where to land after selecting a tenant; null => "/"
+        onboarding:
+            enabled: true                # let a user with no tenants create their first
+            form_type: SolidWorx\Platform\PlatformBundle\Form\Type\Tenant\TenantOnboardingType
         models:
             # The tenant + membership entities. Defaults are the platform's own entities;
             # override with your own to add fields (see "Customizing the tenant entity").
@@ -108,7 +113,7 @@ the first non-null result wins:
 
 | Resolver | Priority | Source |
 |----------|----------|--------|
-| `DomainTenantResolver` | highest | the request host, matched against `Tenant::$domain` |
+| `DomainTenantResolver` | highest | the request host, matched against `Tenant::$domain` (locks the tenant — see [Custom domains](#custom-domains)) |
 | `SessionTenantResolver` | medium | the session key (`_tenant_id` by default) |
 | `RouteTenantResolver` | lowest | a route parameter (`tenant` by default), disabled by default |
 
@@ -179,12 +184,143 @@ foreach ($tenants as $tenant) {
 
 Inside a repository, `TenantFilterAwareTrait::withoutTenantFilter()` provides the same bypass.
 
+## Always having a tenant in scope
+
+Resolvers establish a tenant when they can. The **scope guard** deals with the case where they
+cannot: with `require_tenant: true` (the default), an authenticated user who reaches a page without
+a tenant in scope is taken somewhere they can get one.
+
+`TenantScopeGuardListener` runs on `kernel.controller` — late enough that the controller is known,
+so the opt-out attribute can be read off it — and asks `TenantScopeResolver` what to do:
+
+| The user belongs to | What happens |
+|---|---|
+| exactly one tenant | it is entered automatically and stored in the session; the request continues |
+| more than one | redirected to `/tenant/select` |
+| no tenant, onboarding enabled | redirected to `/tenant/onboarding` |
+| no tenant, onboarding disabled | 403, rendering the "no workspace" page |
+
+Auto-selection runs on *every* request that lacks a tenant, not only at login, so a session that
+loses its tenant repairs itself on the next request. It goes through `TenantManager`, so the
+membership check still applies — it is a convenience, never a way around validation.
+
+The guard never redirects a non-navigational request. An XHR or a request negotiating JSON gets a
+403 with a machine-readable body instead, because a 302 to an HTML page tells a `fetch()` caller
+nothing.
+
+Where the user was headed is remembered (GET requests only, as a path) and replayed once they have
+a tenant; failing that they land on `default_route`, then `/`.
+
+### Pages that work without a tenant
+
+Anonymous requests are ignored outright, which covers login, 2FA, password reset and registration
+without naming any of them. Everything else that must work outside a tenant — account settings,
+billing, an admin console — carries `#[WithoutTenant]`:
+
+```php
+use SolidWorx\Platform\PlatformBundle\Attributes\WithoutTenant;
+
+#[WithoutTenant]                       // the whole controller
+final class BillingController
+{
+    #[WithoutTenant]                   // or a single action
+    public function invoices(): Response { /* ... */ }
+}
+```
+
+Forgetting it on such a page produces a redirect loop — loud and immediate rather than silent.
+
 ## The tenant-selection page
 
 A ready-made page lets an authenticated user pick a tenant. It is served at `/tenant/select`
 (route `solidworx_platform_tenant_select`): a GET lists the user's tenants, a POST stores the choice
 in the session (picked up by the `SessionTenantResolver`). Access is guarded by the `TENANT_ACCESS`
-voter.
+voter, and the page is forbidden outright while the tenant is locked to a custom domain.
+
+Drop the switcher anywhere in your templates — it decides for itself whether it has anything to
+show, so it needs no surrounding condition:
+
+```twig
+<twig:Platform:Tenant:Switcher />
+```
+
+It renders nothing when the user has one tenant or the tenant is domain-locked. It is already
+included in the user menu (`_user_menu.html.twig`, block `user_menu_workspaces`).
+
+## Onboarding
+
+With `onboarding.enabled` (the default), a user with no tenants is sent to `/tenant/onboarding` to
+create their first one. Turn it off for invite-only products, where tenants are provisioned out of
+band; those users see the "no workspace" page instead.
+
+The page is customisable at three levels, cheapest first.
+
+**Add fields** by listening to `TenantOnboardingFormEvent`. Because the form is bound to your
+configured tenant class, mapped fields land on your entity directly:
+
+```php
+use SolidWorx\Platform\PlatformBundle\Form\Event\TenantOnboardingFormEvent;
+
+#[AsEventListener]
+final class AddIndustryField
+{
+    public function __invoke(TenantOnboardingFormEvent $event): void
+    {
+        $event->getBuilder()->add('industry', ChoiceType::class, ['choices' => [/* ... */]]);
+    }
+}
+```
+
+**Replace the form** with `onboarding.form_type` when the shape of the page has to change (a
+multi-step wizard, a different layout). The class must implement `FormTypeInterface`; this is
+validated when the configuration is compiled.
+
+**Change what happens on submit** by decorating or replacing the `TenantOnboarder` service. The
+default persists the tenant, records the creator, creates the `UserTenant` membership, enters the
+tenant and dispatches `TenantCreatedEvent`:
+
+```php
+#[AsDecorator(TenantOnboarder::class)]
+final readonly class SeedingOnboarder implements TenantOnboarder
+{
+    public function __construct(private TenantOnboarder $inner) {}
+
+    public function onboard(TenantInterface $tenant, UserInterface $user): void
+    {
+        $this->inner->onboard($tenant, $user);
+        // ... seed default roles, sample data, a trial
+    }
+}
+```
+
+For seeding alone, listening to `TenantCreatedEvent` is simpler — it fires with the new tenant
+already in scope, so anything tenant-aware you create is attributed to it automatically.
+
+## Custom domains
+
+A request arriving on a host matching `Tenant::$domain` belongs to that tenant, full stop.
+`DomainTenantResolver` is a `LockingTenantResolverInterface`, so winning the chain also engages
+`TenantLock` for the request:
+
+- `TenantManager::switchTo()` and `clear()` throw `TenantLockedException`.
+- `/tenant/select` returns 403.
+- The switcher renders nothing.
+
+`runAs()` and `runWithoutFilter()` are deliberately **exempt**. They are bounded, self-restoring
+scopes for deliberate cross-tenant work, and a report or batch job must still run on a request that
+happened to arrive via a custom domain. The lock exists to stop a *user* changing workspace, which
+is what `switchTo()` and `clear()` express. Code that reaches past `TenantManager` to
+`TenantContext` can still switch under a lock — one more reason to prefer the manager.
+
+Membership is also checked at **login time** on a custom domain. `TenantDomainLoginListener` runs
+inside the firewall on `CheckPassportEvent`, after credentials are verified, and fails
+authentication for a user who is not a member of the domain's tenant. They stay on the login form
+with an explanation and no session is created — as opposed to authenticating successfully and
+meeting a 403 on the next request. It is active when `resolvers.domain` and `validate_user_access`
+are both enabled.
+
+Provisioning a domain (setting and verifying `Tenant::$domain`) is out of scope for the platform;
+populate the column however suits your infrastructure.
 
 ## The write guard
 
