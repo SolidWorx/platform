@@ -1,0 +1,25 @@
+{% extends '@Ui/Layout/security.html.twig' %}
+
+{% block content %}
+    <div class="card card-md">
+        <div class="card-body">
+            <h2 class="h2 text-center mb-2">
+                {{ 'Create your workspace'|trans }}
+            </h2>
+
+            <p class="text-secondary text-center mb-4">
+                {{ 'A workspace keeps your data separate from everyone else\'s. You can invite people to it later.'|trans }}
+            </p>
+
+            {{ form_start(form) }}
+                {{ form_widget(form) }}
+
+                <div class="form-footer">
+                    <button type="submit" class="btn btn-primary w-100">
+                        {{ 'Create workspace'|trans }}
+                    </button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}

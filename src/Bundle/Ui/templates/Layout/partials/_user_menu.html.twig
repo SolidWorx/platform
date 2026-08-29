@@ -15,7 +15,8 @@
         }
 
     The platform registers the two-factor entry there when 2FA is enabled. Logout is not a menu
-    entry — it is a CSRF-protected form — so it is always rendered last, under a divider.
+    entry — it is a CSRF-protected form — so it is always rendered last, under a divider. The
+    workspace switcher is not a menu entry either, and is rendered first when multi-tenancy is on.
 
     Everything is still a block, so a page can bypass the menu altogether:
 
@@ -53,8 +54,23 @@
     {% endif %}
 {% endblock %}
 
-{## The dropdown body. Call `{{ parent() }}` to keep the menu entries and the logout link. ##}
+{## The workspace switcher. Renders nothing when multi-tenancy is off, when the user only has one
+    workspace, or when the workspace is fixed by a custom domain — so it needs no condition beyond
+    the tenancy check. Override this block with an empty one to keep the switcher out of the user
+    menu entirely. ##}
+{% block user_menu_workspaces %}
+    {# Defaulted rather than assumed: the global comes from the Platform bundle, and this template
+       is also rendered by the UI bundle's own layout tests, which build a bare Twig environment. #}
+    {% if platform_multi_tenancy_enabled|default(false) %}
+        <twig:Platform:Tenant:Switcher />
+    {% endif %}
+{% endblock %}
+
+{## The dropdown body. Call `{{ parent() }}` to keep the workspaces, the menu entries and the
+    logout link. ##}
 {% block user_menu_items %}
+    {{ block('user_menu_workspaces') }}
+
     {% set user_menu_links = block('user_menu_links')|trim %}
     {% if user_menu_links is not empty %}
         {{ user_menu_links|raw }}
