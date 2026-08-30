@@ -76,6 +76,10 @@ import {
 
 Overlays a Bootstrap spinner on a container element while an async operation is running.
 
+> Symfony forms are wired to this controller automatically — you do not need to add it to your form
+> markup. See [Form Types → Loading overlay](../form-types/index.md#loading-overlay) for the `loader`
+> option that turns it off per form.
+
 ### Targets
 
 | Target | Element | Description |
