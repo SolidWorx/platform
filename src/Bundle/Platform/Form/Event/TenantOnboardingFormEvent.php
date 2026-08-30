@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Form\Event;
 
+use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 
@@ -35,8 +36,11 @@ use Symfony\Contracts\EventDispatcher\Event;
 final class TenantOnboardingFormEvent extends Event
 {
     /**
-     * @param FormBuilderInterface<mixed> $builder
-     * @param array<string, mixed>        $options
+     * The builder is typed for the tenant it is building — `null` until the form is submitted,
+     * since the tenant model cannot be instantiated without a name.
+     *
+     * @param FormBuilderInterface<TenantInterface|null> $builder
+     * @param array<string, mixed>                       $options
      */
     public function __construct(
         private readonly FormBuilderInterface $builder,
@@ -45,7 +49,7 @@ final class TenantOnboardingFormEvent extends Event
     }
 
     /**
-     * @return FormBuilderInterface<mixed>
+     * @return FormBuilderInterface<TenantInterface|null>
      */
     public function getBuilder(): FormBuilderInterface
     {
