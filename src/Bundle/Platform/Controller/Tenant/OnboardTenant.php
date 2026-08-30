@@ -41,7 +41,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class OnboardTenant extends BaseController
 {
     /**
-     * @param class-string<FormTypeInterface> $formType
+     * @param class-string<FormTypeInterface<TenantInterface>> $formType A replacement form type must
+     *                                                                   still produce a tenant
      */
     public function __construct(
         private readonly TenantOnboarder $onboarder,
