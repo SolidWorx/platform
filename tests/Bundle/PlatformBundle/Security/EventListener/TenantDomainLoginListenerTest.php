@@ -45,7 +45,7 @@ final class TenantDomainLoginListenerTest extends TestCase
         $listener = $this->createListener(new Tenant('Acme'), hasAccess: false);
 
         $this->expectException(CustomUserMessageAuthenticationException::class);
-        $this->expectExceptionMessage('You do not have access to this workspace.');
+        $this->expectExceptionMessageIsOrContains('You do not have access to this workspace.');
 
         $listener($this->createEvent());
     }
