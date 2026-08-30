@@ -104,7 +104,7 @@ final class LoaderTypeExtensionTest extends TypeTestCase
     }
 
     /**
-     * @return list<FormTypeExtensionInterface>
+     * @return list<FormTypeExtensionInterface<mixed>>
      */
     #[Override]
     protected function getTypeExtensions(): array
