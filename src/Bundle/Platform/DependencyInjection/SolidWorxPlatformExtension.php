@@ -24,7 +24,6 @@ use SolidWorx\Platform\PlatformBundle\Controller\Security\TwoFactorConfiguration
 use SolidWorx\Platform\PlatformBundle\Controller\Tenant\SelectTenant;
 use SolidWorx\Platform\PlatformBundle\DataCollector\TenantDataCollector;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\Extension\TwoFactorExtension;
-use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\DefaultEntityMappingListener;
 use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantAwareListener;
 use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantMetadataListener;
 use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantWriteGuardListener;
@@ -34,7 +33,6 @@ use SolidWorx\Platform\PlatformBundle\Logger\Processor\TenantLoggingProcessor;
 use SolidWorx\Platform\PlatformBundle\Menu\TwoFactorMenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Messenger\TenantMiddleware;
 use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
-use SolidWorx\Platform\PlatformBundle\Model\User;
 use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Model\UserTenantInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\TenantRepository;
@@ -96,7 +94,6 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         TenantAccessValidationListener::class,
         TenantRequestListener::class,
         TenantMetadataListener::class,
-        DefaultEntityMappingListener::class,
         TenantAwareListener::class,
         TenantWriteGuardListener::class,
         DomainTenantResolver::class,
@@ -224,6 +221,18 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
                         'prefix' => 'SolidWorx\Platform\PlatformBundle\Model',
                         'alias' => 'Platform',
                     ],
+                    'SolidWorxPlatformBundle' => [
+                        'is_bundle' => true,
+                        'type' => 'attribute',
+                        'dir' => 'Entity',
+                        'prefix' => 'SolidWorx\Platform\PlatformBundle\Entity',
+                        'alias' => 'PlatformEntity',
+                    ],
+                ],
+                'resolve_target_entities' => [
+                    UserInterface::class => $config['models']['user'],
+                    TenantInterface::class => $config['multi_tenancy']['models']['tenant'],
+                    UserTenantInterface::class => $config['multi_tenancy']['models']['user_tenant'],
                 ],
             ];
 
@@ -243,13 +252,6 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
                         'class' => TenantFilter::class,
                         'enabled' => false,
                     ],
-                ];
-
-                $orm['resolve_target_entities'] = [
-                    TenantInterface::class => $multiTenancy['models']['tenant'],
-                    UserTenantInterface::class => $multiTenancy['models']['user_tenant'],
-                    UserInterface::class => $config['models']['user'],
-
                 ];
             }
 

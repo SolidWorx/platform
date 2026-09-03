@@ -20,6 +20,7 @@ use SolidWorx\Platform\PlatformBundle\Entity\Tenant;
 use SolidWorx\Platform\PlatformBundle\Entity\User;
 use SolidWorx\Platform\PlatformBundle\Entity\UserTenant;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use function in_array;
 
 /**
  * Disables a default platform entity when the application has overridden it via configuration.
@@ -35,6 +36,8 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 final readonly class DefaultEntityMappingListener
 {
     public function __construct(
+        #[Autowire(param: 'solidworx_platform.multi_tenancy.enabled')]
+        private bool $multiTenancyEnabled,
         #[Autowire(param: 'solidworx_platform.multi_tenancy.models.tenant')]
         private string $tenantClass,
         #[Autowire(param: 'solidworx_platform.multi_tenancy.models.user_tenant')]
@@ -49,9 +52,11 @@ final readonly class DefaultEntityMappingListener
         $metadata = $event->getClassMetadata();
         $name = $metadata->getName();
 
-        $isSupersededDefault = ($name === Tenant::class && $this->tenantClass !== Tenant::class)
-            || ($name === UserTenant::class && $this->userTenantClass !== UserTenant::class)
-            || ($name === User::class && $this->userClass !== User::class);
+        if (! in_array($name, [Tenant::class, UserTenant::class, User::class], true)) {
+            return;
+        }
+
+        $isSupersededDefault = (! $this->multiTenancyEnabled || $this->isMappedModel($name)) || ($name === User::class && $this->userClass !== User::class);
 
         if (! $isSupersededDefault) {
             return;
@@ -60,5 +65,14 @@ final readonly class DefaultEntityMappingListener
         $metadata->isMappedSuperclass = true;
         $metadata->isEmbeddedClass = false;
         $metadata->setCustomRepositoryClass(null);
+    }
+
+    private function isMappedModel(string $name): bool
+    {
+        return match ($name) {
+            Tenant::class => $this->tenantClass !== Tenant::class,
+            UserTenant::class => $this->userTenantClass !== UserTenant::class,
+            default => false,
+        };
     }
 }
