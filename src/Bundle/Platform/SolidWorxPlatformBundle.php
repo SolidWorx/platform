@@ -14,6 +14,8 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle;
 
 use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\Types;
 use Knp\Bundle\MenuBundle\KnpMenuBundle;
 use LogicException;
 use Override;
@@ -21,6 +23,7 @@ use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigSectionInterface;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\AuthenticationCompilerPass;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\ClearPlatformConfigStatePass;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\MenuCompilerPass;
+use SolidWorx\Platform\PlatformBundle\Doctrine\Type\UTCDateTimeType;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -82,8 +85,8 @@ final class SolidWorxPlatformBundle extends Bundle implements PlatformConfigSect
 
         $parameter = $this->container->getParameter('solidworx_platform.doctrine.types.enable_utc_date');
         if ($parameter === true) {
-            /*Type::overrideType(Types::DATETIMETZ_IMMUTABLE, UTCDateTimeType::class);
-            Type::overrideType(Types::DATETIME_IMMUTABLE, UTCDateTimeType::class);*/
+            Type::overrideType(Types::DATETIMETZ_IMMUTABLE, UTCDateTimeType::class);
+            Type::overrideType(Types::DATETIME_IMMUTABLE, UTCDateTimeType::class);
         }
     }
 
