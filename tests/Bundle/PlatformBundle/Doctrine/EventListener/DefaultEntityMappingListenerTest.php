@@ -79,7 +79,7 @@ final class DefaultEntityMappingListenerTest extends TestCase
      */
     private function listener(string $tenantClass, string $userTenantClass, string $userClass): DefaultEntityMappingListener
     {
-        return new DefaultEntityMappingListener($tenantClass, $userTenantClass, $userClass);
+        return new DefaultEntityMappingListener(true, $tenantClass, $userTenantClass, $userClass);
     }
 
     /**

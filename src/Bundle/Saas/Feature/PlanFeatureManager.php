@@ -24,6 +24,7 @@ use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Exception\UndefinedFeatureException;
 use SolidWorx\Platform\SaasBundle\Repository\PlanFeatureRepositoryInterface;
 use SolidWorx\Platform\SaasBundle\Subscription\SubscriptionProviderInterface;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Service\ResetInterface;
 use function get_debug_type;
@@ -263,7 +264,9 @@ readonly class PlanFeatureManager implements ResetInterface
     #[Override]
     public function reset(): void
     {
-        $this->cache->clear();
+        if ($this->cache instanceof AdapterInterface) {
+            $this->cache->clear();
+        }
     }
 
     private function invalidateCache(Plan $plan): void
