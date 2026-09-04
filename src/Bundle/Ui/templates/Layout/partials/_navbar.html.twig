@@ -69,8 +69,8 @@
                 {% endblock %}
             {% endif %}
 
+            {{ block('navbar_actions') }}
             <div class="navbar-nav flex-row order-md-last">
-                {{ block('navbar_actions') }}
                 {{ block('user_menu') }}
             </div>
 
