@@ -29,12 +29,13 @@ use function is_subclass_of;
 use function sprintf;
 
 /**
- * @template-extends EntityRepository<User>
+ * @template T of User
+ * @template-extends EntityRepository<T>
  */
 class UserRepository extends EntityRepository implements UserRepositoryInterface, UserLoaderInterface
 {
     /**
-     * @param class-string<User> $userClass
+     * @param class-string<T> $userClass
      */
     public function __construct(
         ManagerRegistry $registry,
