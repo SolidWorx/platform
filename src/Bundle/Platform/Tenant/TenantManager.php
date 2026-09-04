@@ -15,32 +15,63 @@ namespace SolidWorx\Platform\PlatformBundle\Tenant;
 
 use Doctrine\ORM\EntityManagerInterface;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Filter\TenantFilter;
+use SolidWorx\Platform\PlatformBundle\Exception\TenantAccessDeniedException;
+use SolidWorx\Platform\PlatformBundle\Exception\TenantLockedException;
 use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
 use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\Uid\Ulid;
+use function sprintf;
 
 /**
  * High-level entry point for working with the tenant in scope and the Doctrine tenant filter.
  *
  * Prefer this over touching {@see TenantContext} and the filter directly: it keeps the context and
- * the filter consistent and provides scoped helpers for cross-tenant work.
+ * the filter consistent, enforces the request's tenant lock, and provides scoped helpers for
+ * cross-tenant work.
+ *
+ * {@see runAs()} and {@see runWithoutFilter()} are deliberately exempt from the lock. They are
+ * bounded, self-restoring scopes for deliberate cross-tenant work — a nightly report running on a
+ * request that happens to arrive via a custom domain must still work. The lock exists to stop a
+ * *user* changing tenants, which is what {@see switchTo()} and {@see clear()} express.
  */
 final readonly class TenantManager
 {
     public function __construct(
         private TenantContext $tenantContext,
         private EntityManagerInterface $entityManager,
+        private TenantLock $tenantLock,
     ) {
     }
 
+    /**
+     * @throws TenantLockedException       when the tenant is locked to the request (custom domain)
+     *                                     and a different tenant is requested
+     * @throws TenantAccessDeniedException when the authenticated user is not a member of the
+     *                                     tenant — raised by the access-validation listener while
+     *                                     the switch event is dispatched
+     */
     public function switchTo(Ulid | TenantInterface $tenant): void
     {
-        $this->tenantContext->setTenant($tenant);
+        $tenantId = $tenant instanceof TenantInterface ? $tenant->getId() : $tenant;
+
+        $this->assertNotLocked($tenantId);
+
+        $this->tenantContext->setTenant($tenantId);
     }
 
+    /**
+     * @throws TenantLockedException when the tenant is locked to the request
+     */
     public function clear(): void
     {
+        $this->assertNotLocked(null);
+
         $this->tenantContext->clear();
+    }
+
+    public function isLocked(): bool
+    {
+        return $this->tenantLock->isLocked();
     }
 
     public function isFilterEnabled(): bool
@@ -116,5 +147,17 @@ final readonly class TenantManager
         } finally {
             $this->tenantContext->pop();
         }
+    }
+
+    private function assertNotLocked(?Ulid $tenantId): void
+    {
+        if (! $this->tenantLock->forbidsSwitchTo($tenantId)) {
+            return;
+        }
+
+        throw new TenantLockedException(sprintf(
+            'The tenant is locked to "%s" for this request and cannot be switched.',
+            $this->tenantLock->getTenantId()?->toRfc4122() ?? '',
+        ));
     }
 }

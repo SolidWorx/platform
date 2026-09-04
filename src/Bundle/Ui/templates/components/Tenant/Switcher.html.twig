@@ -1,0 +1,32 @@
+{##
+    The workspace switcher.
+
+    Renders nothing unless the user actually has a choice — more than one workspace, and a tenant
+    that is not pinned to the request by a custom domain. Callers therefore never need to wrap it:
+
+        <twig:Platform:Tenant:Switcher />
+
+    Pass `itemClass` to restyle the entries for a context other than a dropdown, and `divider` to
+    drop the trailing separator when it is not sitting above other menu entries.
+##}
+{% if isAvailable %}
+    <div class="dropdown-header">{{ 'Workspaces'|trans }}</div>
+
+    {% for tenant in tenants %}
+        <form method="post" action="{{ path('solidworx_platform_tenant_select') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('tenant_select') }}" />
+            <input type="hidden" name="tenant" value="{{ tenant.id }}" />
+            <button type="submit" class="{{ itemClass }} d-flex align-items-center w-100 text-start">
+                <span class="flex-fill">{{ tenant.name }}</span>
+                {# `current` is the very entry from `tenants` that is in scope, so identity is exact. #}
+                {% if current is same as(tenant) %}
+                    {{ ux_icon('tabler:check', {class: 'text-success ms-2'}) }}
+                {% endif %}
+            </button>
+        </form>
+    {% endfor %}
+
+    {% if divider %}
+        <div class="dropdown-divider"></div>
+    {% endif %}
+{% endif %}

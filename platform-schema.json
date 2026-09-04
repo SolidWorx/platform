@@ -98,6 +98,12 @@
                         "session_key": "_tenant_id",
                         "route_param": "tenant",
                         "validate_user_access": true,
+                        "require_tenant": true,
+                        "default_route": null,
+                        "onboarding": {
+                            "enabled": true,
+                            "form_type": "SolidWorx\\Platform\\PlatformBundle\\Form\\Type\\Tenant\\TenantOnboardingType"
+                        },
                         "models": {
                             "tenant": "SolidWorx\\Platform\\PlatformBundle\\Entity\\Tenant",
                             "user_tenant": "SolidWorx\\Platform\\PlatformBundle\\Entity\\UserTenant"
@@ -132,6 +138,39 @@
                             "description": "Deny entering a tenant the authenticated user is not a member of.",
                             "default": true,
                             "type": "boolean"
+                        },
+                        "require_tenant": {
+                            "description": "Require an authenticated user to always have a tenant in scope, redirecting to selection or onboarding otherwise.",
+                            "default": true,
+                            "type": "boolean"
+                        },
+                        "default_route": {
+                            "description": "Route to land on after selecting or creating a tenant, when no page was interrupted. Defaults to \"/\".",
+                            "default": null,
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "onboarding": {
+                            "default": {
+                                "enabled": true,
+                                "form_type": "SolidWorx\\Platform\\PlatformBundle\\Form\\Type\\Tenant\\TenantOnboardingType"
+                            },
+                            "type": "object",
+                            "properties": {
+                                "enabled": {
+                                    "description": "Let a user with no tenants create their first one. Disable for invite-only apps.",
+                                    "default": true,
+                                    "type": "boolean"
+                                },
+                                "form_type": {
+                                    "description": "The form type used on the onboarding page. Must implement Symfony\\Component\\Form\\FormTypeInterface",
+                                    "default": "SolidWorx\\Platform\\PlatformBundle\\Form\\Type\\Tenant\\TenantOnboardingType",
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
                         },
                         "models": {
                             "default": {
@@ -400,6 +439,11 @@
                         "app": "@Ui/Layout/app.html.twig",
                         "condensed": "@Ui/Layout/condensed.html.twig",
                         "clean": "@Ui/Layout/clean.html.twig"
+                    },
+                    "tenant": {
+                        "select": "@Ui/Tenant/select.html.twig",
+                        "onboarding": "@Ui/Tenant/onboarding.html.twig",
+                        "no_access": "@Ui/Tenant/no_access.html.twig"
                     }
                 },
                 "layout": {
@@ -435,6 +479,11 @@
                             "app": "@Ui/Layout/app.html.twig",
                             "condensed": "@Ui/Layout/condensed.html.twig",
                             "clean": "@Ui/Layout/clean.html.twig"
+                        },
+                        "tenant": {
+                            "select": "@Ui/Tenant/select.html.twig",
+                            "onboarding": "@Ui/Tenant/onboarding.html.twig",
+                            "no_access": "@Ui/Tenant/no_access.html.twig"
                         }
                     },
                     "type": "object",
@@ -471,6 +520,33 @@
                                 "clean": {
                                     "description": "No navigation at all, for login / 2FA / error pages",
                                     "default": "@Ui/Layout/clean.html.twig",
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "tenant": {
+                            "description": "The multi-tenancy pages",
+                            "default": {
+                                "select": "@Ui/Tenant/select.html.twig",
+                                "onboarding": "@Ui/Tenant/onboarding.html.twig",
+                                "no_access": "@Ui/Tenant/no_access.html.twig"
+                            },
+                            "type": "object",
+                            "properties": {
+                                "select": {
+                                    "description": "Where a user picks the workspace to work in",
+                                    "default": "@Ui/Tenant/select.html.twig",
+                                    "type": "string"
+                                },
+                                "onboarding": {
+                                    "description": "Where a user creates their first workspace",
+                                    "default": "@Ui/Tenant/onboarding.html.twig",
+                                    "type": "string"
+                                },
+                                "no_access": {
+                                    "description": "Shown when a user has no workspace and onboarding is disabled",
+                                    "default": "@Ui/Tenant/no_access.html.twig",
                                     "type": "string"
                                 }
                             },
