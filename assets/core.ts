@@ -8,6 +8,7 @@ import { definitionsFromContext } from '@hotwired/stimulus-webpack-helpers';
 import CheckboxSelectAll from '@stimulus-components/checkbox-select-all';
 import PasswordVisibility from '@stimulus-components/password-visibility';
 import Clipboard from '@stimulus-components/clipboard';
+import type { Application } from '@hotwired/stimulus';
 
 export const app = startStimulusApp(require.context(
     '@symfony/stimulus-bridge/lazy-controller-loader!./controllers',
@@ -38,7 +39,7 @@ app.register('clipboard', Clipboard);
  *     /\.[jt]sx?$/
  * ));
  */
-export function registerControllers(context) {
+export function registerControllers(context: __WebpackModuleApi.RequireContext): void {
     app.load(definitionsFromContext(context));
 }
 
@@ -56,6 +57,6 @@ export function registerControllers(context) {
  * const app = getApp();
  * app.register('my', MyController);
  */
-export function getApp() {
+export function getApp(): Application {
     return app;
 }

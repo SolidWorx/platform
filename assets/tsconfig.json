@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "CommonJS",
+    "strict": true,
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "resolveJsonModule": true
+  },
+  "include": ["./**/*", "./**/*.ts", "./**/*.tsx"],
+  "exclude": ["node_modules", "vendor", "**/*.spec.ts", "**/*.test.ts", "**/playwright.config.ts"]
+}

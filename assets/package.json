@@ -3,15 +3,28 @@
   "description": "SolidWorx Platform UI scripts",
   "license": "MIT",
   "version": "1.0.0",
+  "main": "./core.ts",
+  "module": "./core.ts",
+  "types": "./core.d.ts",
   "type": "module",
   "files": [
-    "controllers"
+    "controllers",
+    "core.ts",
+    "core.d.ts",
+    "scss",
+    "webpack.config.js"
   ],
   "keywords": ["symfony-ux"],
   "symfony": {
     "controllers": {
       "modal": {
         "main": "controllers/modal.js",
+        "webpackMode": "lazy",
+        "fetch": "lazy",
+        "enabled": true
+      },
+      "modal-prefill": {
+        "main": "controllers/modal_prefill.js",
         "webpackMode": "lazy",
         "fetch": "lazy",
         "enabled": true
@@ -37,14 +50,12 @@
     },
     "importmap": {
       "@hotwired/stimulus": "^3.2.2",
-      "@symfony/stimulus-bridge": "^4.0.1",
       "@tabler/core": "^1.4.0",
       "bootstrap": "^5.3.8"
     }
   },
   "peerDependencies": {
     "@hotwired/stimulus": "^3.2.2",
-    "@symfony/stimulus-bridge": "^4.0.1",
     "@tabler/core": "^1.4.0",
     "bootstrap": "^5.3.8"
   },
@@ -53,7 +64,6 @@
     "@stimulus-components/checkbox-select-all": "^6.1.0",
     "@stimulus-components/clipboard": "^5.0.0",
     "@stimulus-components/password-visibility": "^3.0.0",
-    "@symfony/stimulus-bridge": "^4.0.1",
     "@symfony/ux-turbo": "^2.31.0",
     "@symfony/ux-live-component": "^2.31.0",
     "@symfony/ux-chartjs": "^2.31.0",
@@ -89,9 +99,6 @@
       "optional": false
     },
     "@hotwired/stimulus": {
-      "optional": false
-    },
-    "@symfony/stimulus-bridge": {
       "optional": false
     },
     "webpack": {
