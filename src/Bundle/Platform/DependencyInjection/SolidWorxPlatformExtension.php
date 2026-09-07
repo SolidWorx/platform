@@ -48,6 +48,7 @@ use SolidWorx\Platform\PlatformBundle\Tenant\TenantManager;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantRequestListener;
 use SolidWorx\Platform\PlatformBundle\Twig\Components\Security\TwoFactor;
 use SolidWorx\Platform\PlatformBundle\Validator\Constraint\TwoFactorCodeValidator;
+use Symfony\Component\AssetMapper\AssetMapperInterface;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
@@ -281,6 +282,16 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
             );
         }
 
+        if ($this->isAssetMapperAvailable($container)) {
+            $container->prependExtensionConfig('framework', [
+                'asset_mapper' => [
+                    'paths' => [
+                        __DIR__.'/../../../../assets' => '@solidworx/platform',
+                    ],
+                ],
+            ]);
+        }
+
         if ($config['security']['two_factor']['enabled']) {
             TwoFactorExtension::enable(
                 $container,
@@ -348,5 +359,20 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
 
         /** @var PlatformConfig */
         return $processor->process($treeBuilder->buildTree(), [$this->rawSection]);
+    }
+
+    private function isAssetMapperAvailable(ContainerBuilder $container): bool
+    {
+        if (!interface_exists(AssetMapperInterface::class)) {
+            return false;
+        }
+
+        // check that FrameworkBundle 6.3 or higher is installed
+        $bundlesMetadata = $container->getParameter('kernel.bundles_metadata');
+        if (!isset($bundlesMetadata['FrameworkBundle'])) {
+            return false;
+        }
+
+        return is_file($bundlesMetadata['FrameworkBundle']['path'].'/Resources/config/asset_mapper.php');
     }
 }
