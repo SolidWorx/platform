@@ -24,7 +24,7 @@ use function in_array;
 
 trait UserTwoFactor
 {
-    #[ORM\Column(name: 'totp_secret', type: Types::STRING, length: 45, nullable: true)]
+    #[ORM\Column(name: 'totp_secret', type: Types::STRING, length: 64, nullable: true)]
     private ?string $totpSecret = null;
 
     #[ORM\Column(name: 'auth_code', type: Types::STRING, length: 45, nullable: true)]
