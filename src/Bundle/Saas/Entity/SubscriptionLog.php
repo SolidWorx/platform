@@ -21,7 +21,6 @@ use SolidWorx\Platform\SaasBundle\Enum\SubscriptionLogType;
 use SolidWorx\Platform\SaasBundle\Repository\SubscriptionLogRepository;
 use Symfony\Bridge\Doctrine\IdGenerator\UlidGenerator;
 use Symfony\Bridge\Doctrine\Types\UlidType;
-use Symfony\Component\Uid\NilUlid;
 use Symfony\Component\Uid\Ulid;
 
 #[ORM\Entity(repositoryClass: SubscriptionLogRepository::class)]
@@ -63,7 +62,7 @@ class SubscriptionLog
 
     public function __construct()
     {
-        $this->id = new NilUlid();
+        $this->id = new Ulid();
         $this->createdAt = CarbonImmutable::now();
     }
 
