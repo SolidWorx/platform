@@ -19,6 +19,7 @@ use SolidWorx\Platform\SaasBundle\Webhook\Converter\LemonSqueezyPayloadConverter
 use Symfony\Component\HttpFoundation\ChainRequestMatcher;
 use Symfony\Component\HttpFoundation\Exception\JsonException;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestMatcher\HeaderRequestMatcher;
 use Symfony\Component\HttpFoundation\RequestMatcher\IsJsonRequestMatcher;
 use Symfony\Component\HttpFoundation\RequestMatcher\MethodRequestMatcher;
 use Symfony\Component\HttpFoundation\RequestMatcherInterface;
@@ -43,6 +44,10 @@ final class LemonSqueezyRequestParser extends AbstractRequestParser
         return new ChainRequestMatcher([
             new IsJsonRequestMatcher(),
             new MethodRequestMatcher('POST'),
+            new HeaderRequestMatcher([
+                'x-event-name',
+                'x-signature',
+            ]),
         ]);
     }
 

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\RemoteEvent;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Override;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use SolidWorx\Platform\SaasBundle\Entity\WebhookEventLog;
@@ -42,6 +43,7 @@ final readonly class LemonSqueezyWebhookConsumer implements ConsumerInterface
     public function __construct(
         private EventDispatcherInterface $eventDispatcher,
         private RequestStack $requestStack,
+        private EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -64,6 +66,9 @@ final readonly class LemonSqueezyWebhookConsumer implements ConsumerInterface
             $log->setEventType($event->getName());
             $log->setGatewayEventId($this->extractGatewayEventId($event));
             $log->setExternalSubscriptionId($event->subscriptionId->toBase58());
+
+            $this->entityManager->persist($log);
+            $this->entityManager->flush();
         }
     }
 
@@ -112,8 +117,6 @@ final readonly class LemonSqueezyWebhookConsumer implements ConsumerInterface
             return null;
         }
 
-        $id = $meta['id'] ?? null;
-
-        return is_string($id) ? $id : null;
+        return $meta['webhook_id'] ?? $meta['id'] ?? null;
     }
 }
