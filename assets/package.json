@@ -71,7 +71,7 @@
     "@tabler/core": "^1.4.0",
     "@tiptap/core": "^3.31.3",
     "@tiptap/extension-link": "^2.11.5",
-    "@tiptap/extension-placeholder": "^2.11.5",
+    "@tiptap/extension-placeholder": "^3.31.2",
     "@tiptap/starter-kit": "^2.11.5",
     "bootstrap": "^5.3.8"
   },
