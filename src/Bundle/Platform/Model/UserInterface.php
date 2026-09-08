@@ -32,4 +32,14 @@ use Symfony\Component\Uid\Ulid;
 interface UserInterface extends SecurityUserInterface, PasswordAuthenticatedUserInterface, Stringable, UserTwoFactorInterface
 {
     public function getId(): Ulid;
+
+    /**
+     * Stores an already-hashed password.
+     *
+     * Declared here because the platform has to be able to rotate a password on the user's
+     * behalf — see the change-password page. Callers pass the output of
+     * {@see \Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface::hashPassword()};
+     * a plain-text password must never reach it.
+     */
+    public function setPassword(string $password): static;
 }

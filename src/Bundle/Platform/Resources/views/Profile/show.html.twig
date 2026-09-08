@@ -1,0 +1,203 @@
+{##
+    The profile page: what the platform holds about the signed-in user, and the ways to change it.
+
+    It extends the UI bundle's application layout, so it picks up whatever `platform.ui.templates`
+    an application configures.
+
+    Three levels of customisation, from cheapest to most involved:
+
+    1. **Override a block.** Point `platform.profile.templates.show` at a template of your own that
+       extends this one and redefines only what differs — this is what the blocks are for:
+
+           {% extends '@SolidWorxPlatform/Profile/show.html.twig' %}
+           {% import '@SolidWorxPlatform/Profile/show.html.twig' as profile %}
+
+           {% block profile_detail_rows %}
+               {{ parent() }}
+               {{ profile.detail('Job title'|trans, user.jobTitle) }}
+           {% endblock %}
+
+       The `detail()` and `security_item()` macros below are part of that contract — import them
+       as above rather than hand-rolling the markup, so your rows keep matching the platform's.
+
+    2. **Add a section.** `profile_sections_extra` is an empty block at the bottom of the page,
+       there so an application can add cards without redefining the layout above it.
+
+    3. **Replace the page.** Point `platform.profile.templates.show` at an unrelated template.
+       It is rendered with `user` and `two_factor_enabled`, and nothing else is expected of it.
+##}
+
+{% extends ui_layout_app %}
+
+{% types {
+    ## The signed-in user — always the account the page is about, never one named in the request.
+    user: 'object',
+    ## Whether `platform.security.two_factor.enabled` is on. The 2FA route only exists when it is.
+    two_factor_enabled: 'boolean',
+} %}
+
+{##
+    One label/value pair in the details card.
+
+    `value` may be null or empty, in which case a muted dash is shown rather than a blank row —
+    an empty row reads as a rendering bug, a dash reads as "nothing here yet".
+##}
+{% macro detail(label, value) %}
+    <div class="datagrid-item">
+        <div class="datagrid-title">{{ label }}</div>
+        <div class="datagrid-content">
+            {%- if value is not empty -%}
+                {{ value }}
+            {%- else -%}
+                <span class="text-secondary">&mdash;</span>
+            {%- endif -%}
+        </div>
+    </div>
+{% endmacro %}
+
+{##
+    One row in the security card: a title, an explanation, and the action that changes it.
+##}
+{% macro security_item(title, description, url, action, icon) %}
+    <div class="list-group-item">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <span class="avatar avatar-sm bg-primary-lt">{{ ux_icon('tabler:' ~ icon, {class: 'icon'}) }}</span>
+            </div>
+
+            <div class="col text-truncate">
+                <div class="text-body d-block">{{ title }}</div>
+                <div class="d-block text-secondary text-truncate mt-n1">{{ description }}</div>
+            </div>
+
+            <div class="col-auto">
+                <a href="{{ url }}" class="btn btn-sm">{{ action }}</a>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+
+{% import _self as profile %}
+
+{% block page_pretitle %}{{ 'Account'|trans }}{% endblock %}
+
+{% block page_title %}{{ 'Profile'|trans }}{% endblock %}
+
+{## The buttons in the page header. ##}
+{% block page_title_actions %}
+    <a href="{{ path('solidworx_platform_profile_edit') }}" class="btn btn-primary">
+        {{ ux_icon('tabler:edit', {class: 'icon'}) }}
+        {{ 'Edit profile'|trans }}
+    </a>
+{% endblock %}
+
+{## The user's initials, shown in the avatar. Falls back to the sign-in identifier. ##}
+{% block profile_initials %}
+    {%- set initials = (user.firstName|default('')|slice(0, 1) ~ user.lastName|default('')|slice(0, 1))|upper -%}
+    {{- initials is not empty ? initials : user.userIdentifier|slice(0, 2)|upper -}}
+{% endblock %}
+
+{## The name shown at the top of the details card. Falls back to the sign-in identifier. ##}
+{% block profile_name %}
+    {%- set name = [user.firstName|default(''), user.lastName|default('')]|filter(part => part is not empty)|join(' ') -%}
+    {{- name is not empty ? name : user.userIdentifier -}}
+{% endblock %}
+
+{## The avatar and name banner above the details. ##}
+{% block profile_identity %}
+    <div class="d-flex align-items-center mb-4">
+        <span class="avatar avatar-lg me-3">{{ block('profile_initials') }}</span>
+
+        <div>
+            <h3 class="m-0">{{ block('profile_name') }}</h3>
+            <div class="text-secondary">{{ user.userIdentifier }}</div>
+        </div>
+    </div>
+{% endblock %}
+
+{## The label/value rows. Call `{{ parent() }}` and append to keep the platform fields. ##}
+{% block profile_detail_rows %}
+    {{ profile.detail('First name'|trans, user.firstName|default(null)) }}
+    {{ profile.detail('Last name'|trans, user.lastName|default(null)) }}
+    {{ profile.detail('Email address'|trans, user.email|default(null)) }}
+    {{ profile.detail('Mobile number'|trans, user.mobile|default(null)) }}
+{% endblock %}
+
+{## The whole "Profile details" card. ##}
+{% block profile_details %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">{{ 'Profile details'|trans }}</h3>
+        </div>
+
+        <div class="card-body">
+            {{ block('profile_identity') }}
+
+            <div class="datagrid">
+                {{ block('profile_detail_rows') }}
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <a href="{{ path('solidworx_platform_profile_edit') }}" class="btn btn-outline-primary">
+                {{ ux_icon('tabler:edit', {class: 'icon'}) }}
+                {{ 'Edit profile'|trans }}
+            </a>
+        </div>
+    </div>
+{% endblock %}
+
+{## The rows of the security card. The two-factor row is only rendered when 2FA is enabled —
+    its route does not exist otherwise. ##}
+{% block profile_security_items %}
+    {{ profile.security_item(
+        'Password'|trans,
+        'Change the password you sign in with'|trans,
+        path('solidworx_platform_profile_change_password'),
+        'Change'|trans,
+        'lock'
+    ) }}
+
+    {% if two_factor_enabled %}
+        {{ profile.security_item(
+            'Two-factor authentication'|trans,
+            'Add a second step to your sign-in'|trans,
+            path('solidworx_platform_security_two_factor_configure'),
+            'Configure'|trans,
+            'shield-lock'
+        ) }}
+    {% endif %}
+{% endblock %}
+
+{## The whole "Security" card. ##}
+{% block profile_security %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">{{ 'Security'|trans }}</h3>
+        </div>
+
+        <div class="list-group list-group-flush">
+            {{ block('profile_security_items') }}
+        </div>
+    </div>
+{% endblock %}
+
+{## Empty by design — somewhere to add your own cards under the two the platform ships. ##}
+{% block profile_sections_extra %}{% endblock %}
+
+{% block content %}
+    <div class="row row-cards">
+        <div class="col-lg-7">
+            {{ block('profile_details') }}
+        </div>
+
+        <div class="col-lg-5">
+            {{ block('profile_security') }}
+        </div>
+
+        {% set profile_sections_extra = block('profile_sections_extra')|trim %}
+        {% if profile_sections_extra is not empty %}
+            <div class="col-12">{{ profile_sections_extra|raw }}</div>
+        {% endif %}
+    </div>
+{% endblock %}
