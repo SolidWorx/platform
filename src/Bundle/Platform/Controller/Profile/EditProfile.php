@@ -49,7 +49,7 @@ final class EditProfile extends BaseController
     public const string ROUTE_NAME = 'solidworx_platform_profile_edit';
 
     /**
-     * @param class-string<FormTypeInterface> $formType The class configured under `platform.profile.form_type`
+     * @param class-string<FormTypeInterface<mixed>> $formType The class configured under `platform.profile.form_type`
      */
     public function __construct(
         private readonly EntityManagerInterface $entityManager,

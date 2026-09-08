@@ -67,10 +67,6 @@ final class ProfileType extends AbstractType
     ) {
     }
 
-    /**
-     * @param FormBuilderInterface<UserInterface> $builder
-     * @param array<string, mixed> $options
-     */
     #[Override]
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
