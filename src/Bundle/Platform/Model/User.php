@@ -105,7 +105,11 @@ abstract class User implements UserInterface
         return $this->mobile;
     }
 
-    public function setMobile(string $mobile): static
+    /**
+     * The column is nullable, and an optional form field submits `null` when it is cleared, so
+     * the setter has to accept it.
+     */
+    public function setMobile(?string $mobile): static
     {
         $this->mobile = $mobile;
 

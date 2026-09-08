@@ -92,6 +92,91 @@
                     },
                     "additionalProperties": false
                 },
+                "profile": {
+                    "description": "The user profile pages: details, edit, and change password.",
+                    "default": {
+                        "form_type": "SolidWorx\\Platform\\PlatformBundle\\Form\\Type\\Profile\\ProfileType",
+                        "templates": {
+                            "show": "@SolidWorxPlatform/Profile/show.html.twig",
+                            "edit": "@SolidWorxPlatform/Profile/edit.html.twig",
+                            "change_password": "@SolidWorxPlatform/Profile/change_password.html.twig"
+                        },
+                        "password": {
+                            "min_length": 12,
+                            "strength": "medium",
+                            "check_compromised": true
+                        }
+                    },
+                    "type": "object",
+                    "properties": {
+                        "form_type": {
+                            "description": "The form type used to edit the profile. Must implement Symfony\\Component\\Form\\FormTypeInterface",
+                            "default": "SolidWorx\\Platform\\PlatformBundle\\Form\\Type\\Profile\\ProfileType",
+                            "type": "string"
+                        },
+                        "templates": {
+                            "default": {
+                                "show": "@SolidWorxPlatform/Profile/show.html.twig",
+                                "edit": "@SolidWorxPlatform/Profile/edit.html.twig",
+                                "change_password": "@SolidWorxPlatform/Profile/change_password.html.twig"
+                            },
+                            "type": "object",
+                            "properties": {
+                                "show": {
+                                    "description": "The template showing the profile details.",
+                                    "default": "@SolidWorxPlatform/Profile/show.html.twig",
+                                    "type": "string"
+                                },
+                                "edit": {
+                                    "description": "The template rendering the edit-profile form.",
+                                    "default": "@SolidWorxPlatform/Profile/edit.html.twig",
+                                    "type": "string"
+                                },
+                                "change_password": {
+                                    "description": "The template rendering the change-password form.",
+                                    "default": "@SolidWorxPlatform/Profile/change_password.html.twig",
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "password": {
+                            "description": "The rules a user-chosen password has to satisfy.",
+                            "default": {
+                                "min_length": 12,
+                                "strength": "medium",
+                                "check_compromised": true
+                            },
+                            "type": "object",
+                            "properties": {
+                                "min_length": {
+                                    "description": "The minimum number of characters a password must have.",
+                                    "default": 12,
+                                    "type": "integer"
+                                },
+                                "strength": {
+                                    "description": "The estimated strength a password must reach; \"none\" disables the check.",
+                                    "default": "medium",
+                                    "type": "string",
+                                    "enum": [
+                                        "none",
+                                        "weak",
+                                        "medium",
+                                        "strong",
+                                        "very_strong"
+                                    ]
+                                },
+                                "check_compromised": {
+                                    "description": "Reject passwords that appear in a known data breach (calls the haveibeenpwned range API).",
+                                    "default": true,
+                                    "type": "boolean"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "additionalProperties": false
+                },
                 "multi_tenancy": {
                     "default": {
                         "enabled": false,

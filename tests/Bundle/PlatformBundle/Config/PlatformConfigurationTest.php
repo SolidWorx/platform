@@ -18,10 +18,20 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfiguration;
 use SolidWorx\Platform\PlatformBundle\Entity\User;
+use SolidWorx\Platform\PlatformBundle\Enum\PasswordStrengthLevel;
+use SolidWorx\Platform\PlatformBundle\Form\Type\Profile\ProfileType;
 use Symfony\Component\Config\Definition\ArrayNode;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
+/**
+ * @phpstan-type ProfileConfig array{
+ *     form_type: string,
+ *     templates: array{show: string, edit: string, change_password: string},
+ *     password: array{min_length: int, strength: string, check_compromised: bool},
+ * }
+ */
 #[CoversClass(PlatformConfiguration::class)]
 final class PlatformConfigurationTest extends TestCase
 {
@@ -159,6 +169,95 @@ final class PlatformConfigurationTest extends TestCase
         self::assertSame('App\\Entity\\User', $result['models']['user']);
     }
 
+    public function testProfileDefaultsToThePlatformFormTypeAndTemplates(): void
+    {
+        $result = $this->process([]);
+
+        self::assertSame(ProfileType::class, $result['profile']['form_type']);
+        self::assertSame('@SolidWorxPlatform/Profile/show.html.twig', $result['profile']['templates']['show']);
+        self::assertSame('@SolidWorxPlatform/Profile/edit.html.twig', $result['profile']['templates']['edit']);
+        self::assertSame('@SolidWorxPlatform/Profile/change_password.html.twig', $result['profile']['templates']['change_password']);
+    }
+
+    public function testProfilePasswordRulesDefaultToTwelveCharactersMediumStrengthAndABreachCheck(): void
+    {
+        $result = $this->process([]);
+
+        self::assertSame(12, $result['profile']['password']['min_length']);
+        self::assertSame(PasswordStrengthLevel::Medium->value, $result['profile']['password']['strength']);
+        self::assertTrue($result['profile']['password']['check_compromised']);
+    }
+
+    public function testACustomProfileFormTypeIsApplied(): void
+    {
+        $result = $this->process([
+            'profile' => [
+                'form_type' => TextType::class,
+            ],
+        ]);
+
+        self::assertSame(TextType::class, $result['profile']['form_type']);
+    }
+
+    /**
+     * The controller passes the configured class straight to `createForm()`, so a class that is
+     * not a form type has to be rejected while the container is being built rather than on the
+     * first request to the page.
+     */
+    public function testAProfileFormTypeThatIsNotAFormTypeIsRejected(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+
+        $this->process([
+            'profile' => [
+                'form_type' => User::class,
+            ],
+        ]);
+    }
+
+    public function testAnUnknownPasswordStrengthIsRejected(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+
+        $this->process([
+            'profile' => [
+                'password' => [
+                    'strength' => 'unbreakable',
+                ],
+            ],
+        ]);
+    }
+
+    public function testAPasswordMinimumLengthBelowOneIsRejected(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+
+        $this->process([
+            'profile' => [
+                'password' => [
+                    'min_length' => 0,
+                ],
+            ],
+        ]);
+    }
+
+    public function testProfilePasswordRulesCanBeTightened(): void
+    {
+        $result = $this->process([
+            'profile' => [
+                'password' => [
+                    'min_length' => 16,
+                    'strength' => PasswordStrengthLevel::VeryStrong->value,
+                    'check_compromised' => false,
+                ],
+            ],
+        ]);
+
+        self::assertSame(16, $result['profile']['password']['min_length']);
+        self::assertSame('very_strong', $result['profile']['password']['strength']);
+        self::assertFalse($result['profile']['password']['check_compromised']);
+    }
+
     public function testUnknownKeysAreRejected(): void
     {
         $this->expectException(InvalidConfigurationException::class);
@@ -199,11 +298,11 @@ final class PlatformConfigurationTest extends TestCase
     /**
      * @param array<string, mixed> $config
      *
-     * @return array{name: string, version: string, security: array{two_factor: array{enabled: bool, base_template: string|null}}, doctrine: array{types: array{enable_utc_date: bool}}, models: array{user: string}}
+     * @return array{name: string, version: string, security: array{two_factor: array{enabled: bool, base_template: string|null}}, doctrine: array{types: array{enable_utc_date: bool}}, models: array{user: string}, profile: ProfileConfig}
      */
     private function process(array $config): array
     {
-        /** @var array{name: string, version: string, security: array{two_factor: array{enabled: bool, base_template: string|null}}, doctrine: array{types: array{enable_utc_date: bool}}, models: array{user: string}} */
+        /** @var array{name: string, version: string, security: array{two_factor: array{enabled: bool, base_template: string|null}}, doctrine: array{types: array{enable_utc_date: bool}}, models: array{user: string}, profile: ProfileConfig} */
         return $this->processor->process($this->configuration->getTreeBuilder()->buildTree(), [$config]);
     }
 }

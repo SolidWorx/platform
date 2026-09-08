@@ -22,14 +22,14 @@ namespace SolidWorx\Platform\PlatformBundle\Menu;
  *     #[MenuBuilder(name: UserMenu::NAME)]
  *     public function build(ItemInterface $menu): void
  *     {
- *         $menu->addChild('Profile', Options::create()->route('app_profile')->icon('user')->build());
+ *         $menu->addChild('Billing', Options::create()->route('app_billing')->icon('credit-card')->build());
  *     }
  *
  * Builders run from the highest priority to the lowest, and each one appends to the menu, so
- * priority decides where entries end up in the dropdown. The platform's own account entries
- * (currently only two-factor authentication) use {@see self::PRIORITY_ACCOUNT}, which is above
- * the default of `0` — application entries therefore land underneath them without having to
- * pick a priority at all.
+ * priority decides where entries end up in the dropdown. The platform's own entries — the profile
+ * page at {@see self::PRIORITY_PROFILE}, two-factor authentication at
+ * {@see self::PRIORITY_ACCOUNT} — are both above the default of `0`, so application entries land
+ * underneath them without having to pick a priority at all.
  *
  * The logout link is not part of this menu: it is a CSRF-protected form rather than a link, and
  * the UI bundle always renders it last, under a divider.
@@ -48,4 +48,12 @@ final class UserMenu
      * priority at its default of `0`) to append underneath the platform entries.
      */
     public const int PRIORITY_ACCOUNT = 100;
+
+    /**
+     * The priority of the "Profile" entry, which sits above the rest of the account entries.
+     *
+     * The profile page is the way in to everything else about the account — the details, the
+     * password, the second factors — so it leads the dropdown.
+     */
+    public const int PRIORITY_PROFILE = 200;
 }

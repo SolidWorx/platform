@@ -30,6 +30,7 @@ use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantMetadataListe
 use SolidWorx\Platform\PlatformBundle\Doctrine\EventListener\TenantWriteGuardListener;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Filter\TenantFilter;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Type\URLType;
+use SolidWorx\Platform\PlatformBundle\Enum\PasswordStrengthLevel;
 use SolidWorx\Platform\PlatformBundle\Logger\Processor\TenantLoggingProcessor;
 use SolidWorx\Platform\PlatformBundle\Menu\TwoFactorMenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Messenger\TenantMiddleware;
@@ -73,12 +74,19 @@ use function interface_exists;
  *   write_guard: array{check_user_access: bool}
  * }
  *
+ * @phpstan-type ProfileConfig array{
+ *   form_type: class-string,
+ *   templates: array{show: string, edit: string, change_password: string},
+ *   password: array{min_length: int, strength: string, check_compromised: bool}
+ * }
+ *
  * @phpstan-type PlatformConfig array{
  *   name: string,
  *   version: string,
  *   security: array{two_factor: array{enabled: bool, base_template: string|null}},
  *   doctrine: array{types: array{enable_utc_date: bool}},
  *   models: array{user: string},
+ *   profile: ProfileConfig,
  *   multi_tenancy: MultiTenancyConfig
  * }
  */
@@ -153,6 +161,10 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
 
         $container->setParameter('solidworx_platform.models.user', $config['models']['user']);
 
+        $this->loadProfile($container, $config['profile']);
+
+        $container->setParameter('solidworx_platform.security.two_factor.enabled', $config['security']['two_factor']['enabled']);
+
         if (! $config['security']['two_factor']['enabled']) {
             // @TODO: Need to remove the 2FA routes as well if 2fa is not configured
             $container->removeDefinition(ResendTwoFactorCode::class);
@@ -165,6 +177,22 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         }
 
         $this->loadMultiTenancy($container, $config['multi_tenancy']);
+    }
+
+    /**
+     * @param ProfileConfig $config
+     */
+    private function loadProfile(ContainerBuilder $container, array $config): void
+    {
+        $container->setParameter('solidworx_platform.profile.form_type', $config['form_type']);
+        $container->setParameter('solidworx_platform.profile.templates.show', $config['templates']['show']);
+        $container->setParameter('solidworx_platform.profile.templates.edit', $config['templates']['edit']);
+        $container->setParameter('solidworx_platform.profile.templates.change_password', $config['templates']['change_password']);
+        $container->setParameter('solidworx_platform.profile.password.min_length', $config['password']['min_length']);
+        // Stored as the enum rather than its backing value, so PasswordPolicy receives something
+        // already validated instead of re-parsing a string it would have to guard against.
+        $container->setParameter('solidworx_platform.profile.password.strength', PasswordStrengthLevel::from($config['password']['strength']));
+        $container->setParameter('solidworx_platform.profile.password.check_compromised', $config['password']['check_compromised']);
     }
 
     /**

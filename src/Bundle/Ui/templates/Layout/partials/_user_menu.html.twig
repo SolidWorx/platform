@@ -11,16 +11,17 @@
         #[MenuBuilder(name: UserMenu::NAME)]
         public function build(ItemInterface $menu): void
         {
-            $menu->addChild('Profile', Options::create()->route('app_profile')->icon('user')->build());
+            $menu->addChild('Billing', Options::create()->route('app_billing')->icon('credit-card')->build());
         }
 
-    The platform registers the two-factor entry there when 2FA is enabled. Logout is not a menu
-    entry — it is a CSRF-protected form — so it is always rendered last, under a divider.
+    The platform registers the profile entry there, and the two-factor entry when 2FA is enabled.
+    Logout is not a menu entry — it is a CSRF-protected form — so it is always rendered last,
+    under a divider.
 
     Everything is still a block, so a page can bypass the menu altogether:
 
         {% block user_menu_items %}
-            <a href="{{ path('app_profile') }}" class="dropdown-item">{{ 'Profile'|trans }}</a>
+            <a href="{{ path('app_billing') }}" class="dropdown-item">{{ 'Billing'|trans }}</a>
             <div class="dropdown-divider"></div>
             {{ parent() }}
         {% endblock %}

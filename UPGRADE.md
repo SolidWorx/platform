@@ -2,6 +2,29 @@
 
 ## 0.2 → 0.3
 
+### User profile pages
+
+Every signed-in user now gets `/profile`, `/profile/edit` and `/profile/password`, and a
+**Profile** entry leading the user dropdown. See [the profile guide](./docs/security/profile.md).
+
+Nothing is required to upgrade, but three things changed shape:
+
+- **`SolidWorx\Platform\PlatformBundle\Model\UserInterface` gained `setPassword(string): static`.**
+  It is what lets the platform rotate a password on the user's behalf. Classes extending
+  `Model\User` already have it; a class implementing the interface directly has to add it.
+- **`Model\User::setMobile()` now accepts `null`.** The column has always been nullable, and an
+  optional form field submits `null` when it is cleared. Widening a parameter type is
+  backwards-compatible for callers; an override in your own user class has to widen with it.
+- **`@SolidWorxPlatform/Form/theme.html.twig` now `{% use %}`s `bootstrap_5_layout.html.twig`.**
+  The theme decorates blocks with `{{ parent() }}`, which Twig forbids in a template that neither
+  extends nor uses another — so the theme could not previously be registered at all. Register it
+  on its own now; it carries the Bootstrap layout with it, and there is no need to list
+  `bootstrap_5_layout.html.twig` alongside it.
+
+`platform.yaml` gained a `platform.profile` section (the form type, the three templates and the
+password rules). Every key is optional; regenerate `platform-schema.json` with
+`php bin/console platform:generate-schema` to pick them up in your editor.
+
 ### Tabler page layouts
 
 The UI bundle now ships three layouts — `ui_layout_app` (sidebar + top navbar),
