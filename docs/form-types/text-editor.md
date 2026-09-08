@@ -41,7 +41,7 @@ editor markup is applied (without it, the field gracefully falls back to a plain
 # config/packages/twig.yaml
 twig:
     form_themes:
-        - '@Platform/Form/theme.html.twig'
+        - '@SolidWorxPlatform/Form/theme.html.twig'
 ```
 
 ## Usage

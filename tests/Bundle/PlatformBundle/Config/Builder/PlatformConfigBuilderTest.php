@@ -17,10 +17,14 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Config\Builder\PlatformConfigBuilder;
+use SolidWorx\Platform\PlatformBundle\Config\Builder\ProfileConfigBuilder;
 use SolidWorx\Platform\PlatformBundle\Config\Builder\SecurityConfigBuilder;
+use SolidWorx\Platform\PlatformBundle\Enum\PasswordStrengthLevel;
 
 #[CoversClass(PlatformConfigBuilder::class)]
 #[UsesClass(SecurityConfigBuilder::class)]
+#[UsesClass(ProfileConfigBuilder::class)]
+#[UsesClass(PasswordStrengthLevel::class)]
 final class PlatformConfigBuilderTest extends TestCase
 {
     public function testBuildAlwaysWrapsUnderPlatformKey(): void
@@ -121,6 +125,75 @@ final class PlatformConfigBuilderTest extends TestCase
         $securityBuilder = $builder->security();
 
         self::assertSame($builder, $securityBuilder->end());
+    }
+
+    public function testProfileBuilderChainReturnsParent(): void
+    {
+        $builder = PlatformConfigBuilder::create();
+        $profileBuilder = $builder->profile();
+
+        self::assertSame($builder, $profileBuilder->end());
+    }
+
+    public function testProfileAbsentWhenNotSet(): void
+    {
+        $result = PlatformConfigBuilder::create()->build();
+
+        self::assertArrayNotHasKey('profile', self::section($result, 'platform'));
+    }
+
+    /**
+     * Only what was actually set is emitted, so the configuration tree keeps supplying the
+     * defaults for everything else.
+     */
+    public function testProfileOnlyEmitsWhatWasSet(): void
+    {
+        $result = PlatformConfigBuilder::create()
+            ->profile()
+                ->passwordMinLength(16)
+            ->end()
+            ->build();
+
+        self::assertSame(
+            [
+                'password' => [
+                    'min_length' => 16,
+                ],
+            ],
+            self::section($result, 'platform', 'profile'),
+        );
+    }
+
+    public function testProfileBuildsTheWholeSection(): void
+    {
+        $result = PlatformConfigBuilder::create()
+            ->profile()
+                ->formType(SecurityConfigBuilder::class)
+                ->showTemplate('@App/profile/show.html.twig')
+                ->editTemplate('@App/profile/edit.html.twig')
+                ->changePasswordTemplate('@App/profile/password.html.twig')
+                ->passwordMinLength(16)
+                ->passwordStrength(PasswordStrengthLevel::Strong)
+                ->checkCompromisedPassword(false)
+            ->end()
+            ->build();
+
+        self::assertSame(
+            [
+                'form_type' => SecurityConfigBuilder::class,
+                'templates' => [
+                    'show' => '@App/profile/show.html.twig',
+                    'edit' => '@App/profile/edit.html.twig',
+                    'change_password' => '@App/profile/password.html.twig',
+                ],
+                'password' => [
+                    'min_length' => 16,
+                    'strength' => 'strong',
+                    'check_compromised' => false,
+                ],
+            ],
+            self::section($result, 'platform', 'profile'),
+        );
     }
 
     /**

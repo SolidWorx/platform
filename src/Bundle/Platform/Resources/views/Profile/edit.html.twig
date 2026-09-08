@@ -1,0 +1,68 @@
+{##
+    The edit-profile form.
+
+    The fields come from `platform.profile.form_type`, so adding a field to that form type — or to
+    a form type extension of it — is enough to have it rendered here; this template never names a
+    field. Override `profile_form_fields` only when the *layout* of the form has to change.
+
+    Point `platform.profile.templates.edit` at a template that extends this one to redefine a
+    block, or at an unrelated template to replace the page. It is rendered with `form` and `user`.
+##}
+
+{% extends ui_layout_app %}
+
+{% types {
+    ## The profile form, built from `platform.profile.form_type` and bound to the signed-in user.
+    form: 'object',
+    ## The signed-in user, the same object the form is bound to.
+    user: 'object',
+} %}
+
+{## The platform form theme is Bootstrap 5 — which is what Tabler is — plus the input-group icons
+    on the email, tel and password widgets. ##}
+{% form_theme form '@SolidWorxPlatform/Form/theme.html.twig' %}
+
+{% block page_pretitle %}{{ 'Account'|trans }}{% endblock %}
+
+{% block page_title %}{{ 'Edit profile'|trans }}{% endblock %}
+
+{## Every field of the form, in the order the form type declares them. ##}
+{% block profile_form_fields %}
+    {{ form_widget(form) }}
+{% endblock %}
+
+{## The buttons under the form. ##}
+{% block profile_form_actions %}
+    <div class="d-flex">
+        <a href="{{ path('solidworx_platform_profile_show') }}" class="btn btn-link">{{ 'Cancel'|trans }}</a>
+
+        <button type="submit" class="btn btn-primary ms-auto">
+            {{ ux_icon('tabler:device-floppy', {class: 'icon'}) }}
+            {{ 'Save changes'|trans }}
+        </button>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            {{ form_start(form) }}
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">{{ 'Your details'|trans }}</h3>
+                    </div>
+
+                    <div class="card-body">
+                        {{ form_errors(form) }}
+
+                        {{ block('profile_form_fields') }}
+                    </div>
+
+                    <div class="card-footer">
+                        {{ block('profile_form_actions') }}
+                    </div>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}

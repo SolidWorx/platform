@@ -1,0 +1,8 @@
+{
+    "entrypoints": {
+        "_platform_ui": {
+            "js": ["/build/platform.js"],
+            "css": ["/build/platform.css"]
+        }
+    }
+}
