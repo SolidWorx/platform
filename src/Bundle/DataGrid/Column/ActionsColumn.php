@@ -58,8 +58,11 @@ final class ActionsColumn extends TemplateColumn
     }
 
     /**
-     * Deletes the row. The controller renders the button disabled when no
-     * session is available, because the request needs a CSRF token.
+     * Deletes the row. This column renders its own markup, so it does not
+     * reproduce upstream's `mutationsEnabled` disabling of the delete
+     * button; the server still validates CSRF, so a delete attempted
+     * without a session fails server-side rather than being disabled
+     * client-side.
      */
     public function delete(string $icon = 'tabler:trash', string $label = 'Delete', ?string $confirm = null): static
     {

@@ -54,4 +54,45 @@ final class IconColumnTest extends TestCase
         self::assertFalse($column->isSearchable());
         self::assertFalse($column->isOrderable());
     }
+
+    /**
+     * Guards icons() in isolation. A combined assertion after both mutators
+     * run would still pass even if icons() forgot to re-send the template
+     * parameters, because fallbackIcon()'s later call re-sends whatever
+     * `$this->icons` already holds. Asserting right after icons() alone, with
+     * no later mutator to paper over a missing re-send, closes that gap.
+     */
+    public function testIconsAloneUpdatesTheTemplateParameters(): void
+    {
+        $column = IconColumn::new('status')->icons([
+            'active' => 'tabler:circle-check',
+        ]);
+
+        self::assertSame(
+            [
+                'icons' => [
+                    'active' => 'tabler:circle-check',
+                ],
+                'fallbackIcon' => null,
+            ],
+            $column->getTemplateParameters(),
+        );
+    }
+
+    /**
+     * Guards fallbackIcon() in isolation, for the same reason as
+     * testIconsAloneUpdatesTheTemplateParameters() above.
+     */
+    public function testFallbackIconAloneUpdatesTheTemplateParameters(): void
+    {
+        $column = IconColumn::new('status')->fallbackIcon('tabler:circle-x');
+
+        self::assertSame(
+            [
+                'icons' => [],
+                'fallbackIcon' => 'tabler:circle-x',
+            ],
+            $column->getTemplateParameters(),
+        );
+    }
 }
