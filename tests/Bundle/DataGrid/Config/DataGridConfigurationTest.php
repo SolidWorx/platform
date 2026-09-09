@@ -20,6 +20,9 @@ use SolidWorx\Platform\DataGridBundle\Config\DataGridConfiguration;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
 
+/**
+ * @phpstan-import-type DataGridConfig from DataGridConfiguration
+ */
 #[CoversClass(DataGridConfiguration::class)]
 final class DataGridConfigurationTest extends TestCase
 {
@@ -117,10 +120,11 @@ final class DataGridConfigurationTest extends TestCase
     /**
      * @param array<string, mixed> $values
      *
-     * @return array<string, mixed>
+     * @return DataGridConfig
      */
     private function process(array $values): array
     {
+        /** @var DataGridConfig */
         return $this->processor->process($this->configuration->getTreeBuilder()->buildTree(), [$values]);
     }
 }

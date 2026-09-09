@@ -62,11 +62,13 @@ final class SolidWorxPlatformDataGridExtensionTest extends TestCase
 
         $config = $container->getExtensionConfig('data_tables');
 
-        self::assertSame(15, $config[0]['options']['pageLength']);
-        self::assertSame(
-            '@DataTables/modal/bs5/edit_modal.html.twig',
-            $config[0]['edit_modal']['template'],
-        );
+        $options = $config[0]['options'];
+        self::assertIsArray($options);
+        self::assertSame(15, $options['pageLength']);
+
+        $editModal = $config[0]['edit_modal'];
+        self::assertIsArray($editModal);
+        self::assertSame('@DataTables/modal/bs5/edit_modal.html.twig', $editModal['template']);
     }
 
     public function testPrependIsSkippedWhenTheDataTablesExtensionIsAbsent(): void
