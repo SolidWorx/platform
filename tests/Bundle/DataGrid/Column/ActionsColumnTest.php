@@ -85,12 +85,88 @@ final class ActionsColumnTest extends TestCase
     }
 
     /**
+     * Guards edit() in isolation. A test that only asserts after a later
+     * mutator has also run (e.g. identifiedBy()) would still pass even if
+     * edit() itself forgot to re-send the template parameters, because
+     * addAction() always pushes onto `$this->actions` regardless of whether
+     * applyTemplate() was actually called, and the later mutator's own
+     * applyTemplate() call would re-send that already-mutated array. Asserting
+     * immediately after edit() alone, with nothing after it, closes that gap.
+     */
+    public function testEditAloneUpdatesTheActionsParameter(): void
+    {
+        $column = ActionsColumn::new()->edit();
+
+        self::assertSame(
+            [
+                [
+                    'type' => 'EDIT',
+                    'icon' => 'tabler:pencil',
+                    'label' => 'Edit',
+                    'route' => null,
+                    'routeParameter' => null,
+                    'confirm' => null,
+                ],
+            ],
+            $column->getTemplateParameters()['actions'],
+        );
+    }
+
+    /**
+     * Guards delete() in isolation, for the same reason as
+     * testEditAloneUpdatesTheActionsParameter() above.
+     */
+    public function testDeleteAloneUpdatesTheActionsParameter(): void
+    {
+        $column = ActionsColumn::new()->delete(confirm: 'Delete this client?');
+
+        self::assertSame(
+            [
+                [
+                    'type' => 'DELETE',
+                    'icon' => 'tabler:trash',
+                    'label' => 'Delete',
+                    'route' => null,
+                    'routeParameter' => null,
+                    'confirm' => 'Delete this client?',
+                ],
+            ],
+            $column->getTemplateParameters()['actions'],
+        );
+    }
+
+    /**
+     * Guards link() in isolation, for the same reason as
+     * testEditAloneUpdatesTheActionsParameter() above.
+     */
+    public function testLinkAloneUpdatesTheActionsParameter(): void
+    {
+        $column = ActionsColumn::new()->link(route: 'app_client_show', icon: 'tabler:eye', label: 'View');
+
+        self::assertSame(
+            [
+                [
+                    'type' => 'CUSTOM',
+                    'icon' => 'tabler:eye',
+                    'label' => 'View',
+                    'route' => 'app_client_show',
+                    'routeParameter' => 'id',
+                    'confirm' => null,
+                ],
+            ],
+            $column->getTemplateParameters()['actions'],
+        );
+    }
+
+    /**
      * A test guarding only the state left by the LAST mutator in a chain would
      * still pass even if an earlier mutator (e.g. an action one) forgot to
      * re-send the template parameters, because the later `identifiedBy()`
      * call re-sends whatever `$this->actions` already holds. Chaining both
      * here and asserting on both keys catches that regardless of which
-     * mutator ran first.
+     * mutator ran first. This does not replace the isolated tests above — it
+     * additionally guards the interaction between an action mutator and
+     * identifiedBy() together.
      */
     public function testAnActionMutatorAndIdentifiedByBothSurviveWhenChained(): void
     {
