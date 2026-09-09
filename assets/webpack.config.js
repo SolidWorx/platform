@@ -1,5 +1,6 @@
 import Encore from '@symfony/webpack-encore';
 import ESLintPlugin from 'eslint-webpack-plugin';
+import webpack from 'webpack';
 
 // Manually configure the runtime environment if not already configured yet by the "encore" command.
 // It's useful when you use tools that rely on webpack.config.js file.
@@ -27,6 +28,47 @@ const hasCustomVariables = fs.existsSync(customVariablesPath);
 // matches only the exact request, leaving `bootstrap/scss/...` on the real package.
 const bootstrapAlias = { bootstrap$: '@tabler/core' };
 
+// pentiminax/ux-datatables is not published to npm; its compiled Stimulus
+// controller ships inside the Composer package. Try the platform's own
+// checkout first, then the consuming application's project root.
+const dataTablesCandidates = [
+    path.resolve(__dirname, '../vendor/pentiminax/ux-datatables/assets/dist'),
+    path.resolve(process.cwd(), 'vendor/pentiminax/ux-datatables/assets/dist'),
+];
+const dataTablesAlias = dataTablesCandidates.find((candidate) => fs.existsSync(candidate))
+    ?? path.resolve(__dirname, 'datatables-missing.js');
+
+// The bundle's loaders reference all seven DataTables style frameworks and
+// every extension through static import() calls. Webpack resolves each one at
+// build time and errors on the uninstalled ones, even though only the bs5
+// branch ever executes. Ignoring them yields an empty module instead.
+const DATATABLES_KEPT = new Set([
+    'datatables.net-bs5',
+    'datatables.net-buttons',
+    'datatables.net-buttons-bs5',
+    'datatables.net-columncontrol-bs5',
+    'datatables.net-responsive-bs5',
+]);
+
+// lucide: platform grids render icons server-side via ux_icon(), so
+// hasLucideIcons() is always false and loadLucideIcons() is never called.
+// jszip/pdfmake: client-side Excel and PDF export only; ours is server-side.
+const UNUSED_PACKAGES = new Set(['lucide', 'jszip', 'pdfmake']);
+
+const ignoreUnusedDataTablesPackages = new webpack.IgnorePlugin({
+    checkResource(resource) {
+        if (UNUSED_PACKAGES.has(resource) || resource.startsWith('pdfmake/')) {
+            return true;
+        }
+
+        if (!resource.startsWith('datatables.net-')) {
+            return false;
+        }
+
+        return !DATATABLES_KEPT.has(resource.split('/')[0]);
+    },
+});
+
 Encore
     // directory where compiled assets will be stored
     .setOutputPath('public/static/')
@@ -35,7 +77,8 @@ Encore
 
     .addEntry('_platform_ui', __dirname + '/core.ts')
 
-    .addAliases(bootstrapAlias)
+    .addAliases({ ...bootstrapAlias, '@pentiminax/ux-datatables': dataTablesAlias })
+    .addPlugin(ignoreUnusedDataTablesPackages)
 
     .enableSingleRuntimeChunk()
     .splitEntryChunks()
