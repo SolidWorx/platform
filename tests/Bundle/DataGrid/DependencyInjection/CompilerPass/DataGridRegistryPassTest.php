@@ -20,6 +20,7 @@ use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\DataGridBundle\DependencyInjection\CompilerPass\DataGridRegistryPass;
 use SolidWorx\Platform\DataGridBundle\Grid\DataGridRegistry;
 use SolidWorx\Platform\Tests\Bundle\DataGrid\Fixtures\Grid\ClientDataGrid;
+use SolidWorx\Platform\Tests\Bundle\DataGrid\Fixtures\Grid\DuplicateNamedDataGrid;
 use SolidWorx\Platform\Tests\Bundle\DataGrid\Fixtures\Grid\NamedDataGrid;
 use stdClass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -44,15 +45,25 @@ final class DataGridRegistryPassTest extends TestCase
 
     public function testDuplicateNamesAreRejected(): void
     {
+        // Two DISTINCT classes that collide on name (both resolve to
+        // "overridden") -- not the same class registered twice under two
+        // ids. Registering the same class twice would make $classesByName[$name]
+        // and $class the same string, so the test could not tell a correct
+        // "first class, second class" message apart from a bug that prints
+        // one of them twice.
         $container = $this->containerWith([
-            'app.grid_one' => ClientDataGrid::class,
-            'app.grid_two' => ClientDataGrid::class,
+            'app.grid_one' => NamedDataGrid::class,
+            'app.grid_two' => DuplicateNamedDataGrid::class,
         ]);
 
-        $this->expectException(LogicException::class);
-        $this->expectExceptionMessageIsOrContains('Two data grids resolve to the name "client"');
-
-        new DataGridRegistryPass()->process($container);
+        try {
+            new DataGridRegistryPass()->process($container);
+            self::fail('Expected a LogicException for the colliding "overridden" name.');
+        } catch (LogicException $exception) {
+            self::assertStringContainsString('Two data grids resolve to the name "overridden"', $exception->getMessage());
+            self::assertStringContainsString(NamedDataGrid::class, $exception->getMessage());
+            self::assertStringContainsString(DuplicateNamedDataGrid::class, $exception->getMessage());
+        }
     }
 
     public function testNonGridDataTablesAreIgnored(): void
