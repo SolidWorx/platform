@@ -103,6 +103,11 @@ final class DoctrineColumnFactoryTest extends TestCase
         $columns = $this->indexByName($this->factory->createForEntity(Client::class));
 
         self::assertArrayNotHasKey('tags', $columns);
+
+        // `countries` targets Country, which IS Stringable, so this can only be
+        // excluded by the to-many rule -- unlike `tags`, whose target Tag is not
+        // Stringable and would be excluded by that gate on its own.
+        self::assertArrayNotHasKey('countries', $columns);
     }
 
     /**

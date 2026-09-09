@@ -62,10 +62,20 @@ class Client
     #[ORM\ManyToMany(targetEntity: Tag::class)]
     private Collection $tags;
 
+    /**
+     * A to-many association whose target IS Stringable, so a test asserting it is
+     * skipped can only be passing because of the to-many rule, not the Stringable gate.
+     *
+     * @var Collection<int, Country>
+     */
+    #[ORM\ManyToMany(targetEntity: Country::class)]
+    private Collection $countries;
+
     public function __construct()
     {
         $this->createdAt = new DateTimeImmutable();
         $this->tags = new ArrayCollection();
+        $this->countries = new ArrayCollection();
     }
 
     public function getId(): int
@@ -119,5 +129,13 @@ class Client
     public function getTags(): Collection
     {
         return $this->tags;
+    }
+
+    /**
+     * @return Collection<int, Country>
+     */
+    public function getCountries(): Collection
+    {
+        return $this->countries;
     }
 }
