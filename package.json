@@ -44,7 +44,6 @@
   },
   "private": true,
   "workspaces": [
-    "assets",
-    "test-app"
+    "assets"
   ]
 }
