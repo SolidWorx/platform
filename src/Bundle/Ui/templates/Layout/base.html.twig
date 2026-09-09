@@ -88,6 +88,15 @@
             <link rel="shortcut icon" href="{{ asset('/favicon.ico') }}" type="image/x-icon" />
         {% endblock favicon %}
 
+        {# Encore emits these with `defer`, so they belong in <head> rather than at the
+           end of <body>. Turbo re-evaluates body <script> elements on every page change,
+           which re-registers the whole Stimulus application: controller instances then
+           double per navigation, and one LiveComponent interaction fires 2^N requests.
+           For a LiveAction that creates something, that silently writes duplicate rows. #}
+        {% block javascripts %}
+            {{ encore_entry_script_tags('_platform_ui') }}
+        {% endblock javascripts %}
+
         {% block stylesheets %}
             {{ encore_entry_link_tags('_platform_ui') }}
         {% endblock stylesheets %}
@@ -96,10 +105,6 @@
 
 <body{% if body_class is not empty %} class="{{ body_class }}"{% endif %}{% block body_attributes %}{% endblock %}>
 {% block body %}{% endblock %}
-
-{% block javascripts %}
-    {{ encore_entry_script_tags('_platform_ui') }}
-{% endblock javascripts %}
 </body>
 
 </html>
