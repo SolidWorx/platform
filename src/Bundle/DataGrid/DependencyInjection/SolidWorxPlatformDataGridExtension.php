@@ -15,12 +15,15 @@ namespace SolidWorx\Platform\DataGridBundle\DependencyInjection;
 
 use Override;
 use SolidWorx\Platform\DataGridBundle\Config\DataGridConfiguration;
+use SolidWorx\Platform\DataGridBundle\Grid\AbstractDataGrid;
+use SolidWorx\Platform\DataGridBundle\Grid\DataGridDefaults;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+use Symfony\Component\DependencyInjection\Reference;
 use Webmozart\Assert\Assert;
 use function dirname;
 
@@ -60,6 +63,12 @@ final class SolidWorxPlatformDataGridExtension extends Extension implements Prep
         $container->setParameter('solidworx_platform_datagrid.export.enabled', $config['export']['enabled']);
         $container->setParameter('solidworx_platform_datagrid.export.formats', $config['export']['formats']);
         $container->setParameter('solidworx_platform_datagrid.edit_modal.enabled', $config['edit_modal']['enabled']);
+
+        // Setter injection rather than constructor arguments, so a grid subclass
+        // keeps a zero-argument constructor. Upstream injects its own
+        // DataTableInfrastructure the same way.
+        $container->registerForAutoconfiguration(AbstractDataGrid::class)
+            ->addMethodCall('setDataGridDefaults', [new Reference(DataGridDefaults::class)]);
     }
 
     #[Override]

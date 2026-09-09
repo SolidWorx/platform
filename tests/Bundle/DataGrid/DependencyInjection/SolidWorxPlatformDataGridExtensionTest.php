@@ -17,8 +17,12 @@ use Pentiminax\UX\DataTables\DataTablesBundle;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\DataGridBundle\DependencyInjection\SolidWorxPlatformDataGridExtension;
+use SolidWorx\Platform\DataGridBundle\Grid\AbstractDataGrid;
+use SolidWorx\Platform\DataGridBundle\Grid\DataGridDefaults;
+use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
+use Symfony\Component\DependencyInjection\Reference;
 
 #[CoversClass(SolidWorxPlatformDataGridExtension::class)]
 final class SolidWorxPlatformDataGridExtensionTest extends TestCase
@@ -78,6 +82,41 @@ final class SolidWorxPlatformDataGridExtensionTest extends TestCase
         new SolidWorxPlatformDataGridExtension([])->prepend($container);
 
         self::assertSame([], $container->getExtensionConfig('data_tables'));
+    }
+
+    public function testAbstractDataGridIsAutoconfiguredWithDataGridDefaults(): void
+    {
+        $container = new ContainerBuilder();
+
+        new SolidWorxPlatformDataGridExtension([])->load([], $container);
+
+        $instanceOf = $container->getAutoconfiguredInstanceof();
+
+        self::assertArrayHasKey(AbstractDataGrid::class, $instanceOf);
+
+        $definition = $instanceOf[AbstractDataGrid::class];
+        self::assertInstanceOf(ChildDefinition::class, $definition);
+
+        self::assertCount(1, $definition->getMethodCalls());
+
+        [$method, $arguments] = $this->firstMethodCall($definition);
+        self::assertSame('setDataGridDefaults', $method);
+        self::assertCount(1, $arguments);
+        self::assertInstanceOf(Reference::class, $arguments[0]);
+        self::assertSame(DataGridDefaults::class, (string) $arguments[0]);
+    }
+
+    /**
+     * `Definition::getMethodCalls()` returns a bare `array`, so PHPStan sees
+     * each entry as `mixed`. Narrow the one entry this test cares about to
+     * its real shape instead of destructuring `mixed` directly.
+     *
+     * @return array{0: string, 1: list<mixed>}
+     */
+    private function firstMethodCall(ChildDefinition $definition): array
+    {
+        /** @var array{0: string, 1: list<mixed>} */
+        return $definition->getMethodCalls()[0];
     }
 
     /**
