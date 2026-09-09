@@ -1,0 +1,4 @@
+{%- set icon = icons[data]|default(fallbackIcon) -%}
+{%- if icon is not null -%}
+    {{ ux_icon(icon, {class: 'icon icon-sm', 'aria-hidden': 'true'}) }}
+{%- endif -%}
