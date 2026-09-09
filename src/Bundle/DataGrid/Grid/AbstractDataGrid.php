@@ -47,7 +47,7 @@ abstract class AbstractDataGrid extends AbstractDataTable
      * routes. Null means the bundle-wide `datagrid.security.ajax_access` check
      * is the only gate.
      */
-    public function getSecurityAttribute(): string|Expression|null
+    public function getSecurityAttribute(): string | Expression | null
     {
         return null;
     }
@@ -67,7 +67,9 @@ abstract class AbstractDataGrid extends AbstractDataTable
             ->styleFramework(StyleFramework::Bootstrap5)
             ->pageLength($defaults->pageLength)
             ->lengthMenu($defaults->lengthMenu)
-            ->setAttributes(['class' => $defaults->tableClass]);
+            ->setAttributes([
+                'class' => $defaults->tableClass,
+            ]);
     }
 
     #[Override]

@@ -33,7 +33,7 @@ final readonly class DataGridRegistry
      * @param ServiceProviderInterface<mixed>&ContainerInterface $grids
      */
     public function __construct(
-        private ServiceProviderInterface&ContainerInterface $grids,
+        private ServiceProviderInterface & ContainerInterface $grids,
     ) {
     }
 
