@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle;
 
+use const FILTER_NULL_ON_FAILURE;
+use const FILTER_VALIDATE_BOOL;
 use const GLOB_BRACE;
 use const PATHINFO_EXTENSION;
 use Override;
@@ -33,6 +35,7 @@ use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Yaml\Yaml;
 use function defined;
 use function file_exists;
+use function filter_var;
 use function glob;
 use function implode;
 use function is_array;
@@ -152,7 +155,11 @@ abstract class Kernel extends BaseKernel
             return true;
         }
 
-        return ($dataGridConfig['enabled'] ?? true) === true;
+        // Unlike two-factor (default off, so a type mismatch safely degrades to off), the grid
+        // defaults on: a strict `=== true` would silently disable it for `"true"`, `1`, or an
+        // unresolved `%env(...)%`. Coerce recognisable boolean-ish scalars and fall back to
+        // enabled for anything else, since that is the safe direction for a default-on feature.
+        return filter_var($dataGridConfig['enabled'] ?? true, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE) ?? true;
     }
 
     private function processPlatformConfig(): void

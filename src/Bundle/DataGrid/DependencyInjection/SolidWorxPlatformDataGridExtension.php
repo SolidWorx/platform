@@ -73,13 +73,13 @@ final class SolidWorxPlatformDataGridExtension extends Extension implements Prep
             ]);
         }
 
-        if (! $container->hasExtension('datatables')) {
+        if (! $container->hasExtension('data_tables')) {
             return;
         }
 
         $config = $this->getConfig();
 
-        $container->prependExtensionConfig('datatables', [
+        $container->prependExtensionConfig('data_tables', [
             'options' => [
                 'pageLength' => $config['page_length'],
                 'lengthMenu' => $config['length_menu'],
