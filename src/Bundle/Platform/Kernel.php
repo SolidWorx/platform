@@ -18,6 +18,7 @@ use const PATHINFO_EXTENSION;
 use Override;
 use RuntimeException;
 use Scheb\TwoFactorBundle\SchebTwoFactorBundle;
+use SolidWorx\Platform\DataGridBundle\SolidWorxPlatformDataGridBundle;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigSectionInterface;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigState;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
@@ -83,6 +84,10 @@ abstract class Kernel extends BaseKernel
             yield new SchebTwoFactorBundle();
         }
 
+        if ($this->isDataGridEnabled()) {
+            yield new SolidWorxPlatformDataGridBundle();
+        }
+
         yield new SolidWorxPlatformBundle();
     }
 
@@ -138,6 +143,16 @@ abstract class Kernel extends BaseKernel
         }
 
         return ($twoFactor['enabled'] ?? false) === true;
+    }
+
+    private function isDataGridEnabled(): bool
+    {
+        $dataGridConfig = $this->rawConfig['datagrid'] ?? [];
+        if (! is_array($dataGridConfig)) {
+            return true;
+        }
+
+        return ($dataGridConfig['enabled'] ?? true) === true;
     }
 
     private function processPlatformConfig(): void

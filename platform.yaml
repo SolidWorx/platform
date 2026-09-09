@@ -60,3 +60,18 @@ platform:
 #     sidebar_expand: lg
 #     page_header: true
 #     footer: true
+
+# datagrid:
+#   enabled: true
+#   page_length: 25
+#   length_menu: [10, 25, 50, 100]
+#   responsive: true
+#   column_control: true
+#   table_class: 'table table-vcenter card-table'
+#   security:
+#     ajax_access: 'IS_AUTHENTICATED_FULLY'
+#   export:
+#     enabled: true
+#     formats: [csv, xlsx]
+#   edit_modal:
+#     enabled: true
