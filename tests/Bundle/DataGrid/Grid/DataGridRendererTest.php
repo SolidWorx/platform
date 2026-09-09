@@ -18,6 +18,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\DataGridBundle\Grid\DataGridRenderer;
 use SolidWorx\Platform\Tests\Bundle\DataGrid\Fixtures\Grid\ClientDataGrid;
+use SolidWorx\Platform\Tests\Bundle\DataGrid\Fixtures\Grid\Legacy\ClientDataGrid as LegacyClientDataGrid;
 
 /**
  * `$extension` is a stub fed fixed markup, never the real
@@ -61,7 +62,11 @@ final class DataGridRendererTest extends TestCase
 
     public function testOnlyTheFirstIdOccurrenceIsRewritten(): void
     {
-        $renderer = $this->renderer('<table id="ClientDataGrid" data-x="id=&quot;not-the-id&quot;"></table>');
+        // A second, raw id="…" occurrence after the table's own id — e.g. a
+        // nested element upstream's markup happens to carry. If the rewrite
+        // were not limited to the first occurrence, this decoy would also be
+        // rewritten to "decoy-2".
+        $renderer = $this->renderer('<table id="ClientDataGrid" data-controller="x"><span id="decoy"></span></table>');
         $grid = new ClientDataGrid();
 
         $renderer->render($grid);
@@ -69,7 +74,25 @@ final class DataGridRendererTest extends TestCase
         $html = $renderer->render($grid);
 
         self::assertStringContainsString('id="ClientDataGrid-2"', $html);
-        self::assertStringContainsString('data-x="id=&quot;not-the-id&quot;"', $html);
+        self::assertStringContainsString('id="decoy"', $html);
+        self::assertStringNotContainsString('id="decoy-2"', $html);
+    }
+
+    public function testTwoGridsWithTheSameShortClassNameInDifferentNamespacesShareTheCounter(): void
+    {
+        // Upstream derives the DOM id from the short class name (see
+        // AbstractDataTable::getClassName()), so ClientDataGrid and
+        // Legacy\ClientDataGrid would both render id="ClientDataGrid" even
+        // though their FQCNs differ. The counter must key on that same short
+        // name, or this collision goes undetected.
+        $renderer = $this->renderer('<table id="ClientDataGrid" data-controller="x"></table>');
+
+        $renderer->render(new ClientDataGrid());
+
+        self::assertStringContainsString(
+            'id="ClientDataGrid-2"',
+            $renderer->render(new LegacyClientDataGrid()),
+        );
     }
 
     public function testMarkupWithoutAnIdIsReturnedUnchangedRatherThanThrowing(): void

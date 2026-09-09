@@ -18,6 +18,8 @@ use Pentiminax\UX\DataTables\Twig\DataTablesExtension;
 use Symfony\Contracts\Service\ResetInterface;
 use function preg_replace_callback;
 use function sprintf;
+use function strrpos;
+use function substr;
 
 /**
  * Renders a grid, giving repeat renders of the same grid on one page a unique
@@ -30,13 +32,16 @@ use function sprintf;
  * calls `AbstractDataGrid::defaults()` — and that throws whenever the grid
  * has no {@see DataGridDefaults} injected. So the id is instead read back out
  * of the markup {@see DataTablesExtension::renderDataTable()} already
- * produced, and the repeat-render counter is keyed on the grid's class name,
- * which needs no initialised grid at all.
+ * produced, and the repeat-render counter is keyed on the grid's short class
+ * name — the same derivation upstream uses for the id itself, so two grids
+ * with the same short name in different namespaces are correctly treated as
+ * colliding, even though their FQCNs differ. Deriving that name needs no
+ * initialised grid either.
  */
 final class DataGridRenderer implements ResetInterface
 {
     /**
-     * @var array<class-string<AbstractDataGrid>, positive-int>
+     * @var array<string, positive-int>
      */
     private array $renderCounts = [];
 
@@ -49,7 +54,7 @@ final class DataGridRenderer implements ResetInterface
     {
         $html = $this->dataTables->renderDataTable($grid);
 
-        $key = $grid::class;
+        $key = $this->shortClassName($grid);
         $count = ($this->renderCounts[$key] ?? 0) + 1;
         $this->renderCounts[$key] = $count;
 
@@ -75,5 +80,19 @@ final class DataGridRenderer implements ResetInterface
     public function reset(): void
     {
         $this->renderCounts = [];
+    }
+
+    /**
+     * Replicates upstream's own id derivation (`AbstractDataTable::getClassName()`),
+     * which uses the short class name, not the FQCN — so two grids with the
+     * same short name in different namespaces are treated as one collision
+     * key, matching the single DOM id upstream would give them both.
+     */
+    private function shortClassName(AbstractDataGrid $grid): string
+    {
+        $class = $grid::class;
+        $position = strrpos($class, '\\');
+
+        return $position === false ? $class : substr($class, $position + 1);
     }
 }
