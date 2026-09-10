@@ -22,7 +22,7 @@ export const app = startStimulusApp(require.context(
 app.register('checkbox-select-all', CheckboxSelectAll);
 app.register('password-visibility', PasswordVisibility);
 app.register('clipboard', Clipboard);
-app.register('pentiminax--ux-datatables--datatable', DataTableController);
+app.register('datatable', DataTableController);
 
 /**
  * Register additional controller directories for applications extending the platform.

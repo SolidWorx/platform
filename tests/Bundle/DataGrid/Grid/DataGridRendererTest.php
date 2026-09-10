@@ -19,6 +19,7 @@ use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\DataGridBundle\Grid\DataGridRenderer;
 use SolidWorx\Platform\Tests\Bundle\DataGrid\Fixtures\Grid\ClientDataGrid;
 use SolidWorx\Platform\Tests\Bundle\DataGrid\Fixtures\Grid\Legacy\ClientDataGrid as LegacyClientDataGrid;
+use function sprintf;
 
 /**
  * `$extension` is a stub fed fixed markup, never the real
@@ -105,16 +106,49 @@ final class DataGridRendererTest extends TestCase
         self::assertSame('<table data-controller="x"></table>', $renderer->render($grid));
     }
 
-    public function testStimulusIdentifierMatchesTheRegisteredController(): void
+    public function testStimulusControllerIdentifierIsRewrittenToTheShortName(): void
     {
-        // assets/core.ts registers this exact identifier; if the string here
-        // changes, that registration must change with it.
+        // Upstream hardcodes this long, slash-derived identifier with no way
+        // to override it; assets/core.ts registers the controller under the
+        // short "datatable" name instead, so render() must rewrite it.
         $renderer = $this->renderer('<table id="ClientDataGrid" data-controller="pentiminax--ux-datatables--datatable"></table>');
 
-        self::assertStringContainsString(
-            'data-controller="pentiminax--ux-datatables--datatable"',
-            $renderer->render(new ClientDataGrid()),
+        $html = $renderer->render(new ClientDataGrid());
+
+        self::assertStringContainsString('data-controller="datatable"', $html);
+        self::assertStringNotContainsString('pentiminax--ux-datatables--datatable', $html);
+    }
+
+    public function testStimulusValueAttributeIdentifierIsRewrittenToo(): void
+    {
+        // StimulusAttributes::addController() emits "data-<controller>-<key>-value"
+        // for each Stimulus value; the payload attribute carries the long
+        // identifier as well, and must be rewritten alongside data-controller.
+        $renderer = $this->renderer(
+            '<table id="ClientDataGrid" data-controller="pentiminax--ux-datatables--datatable" data-pentiminax--ux-datatables--datatable-view-value="{}"></table>',
         );
+
+        $html = $renderer->render(new ClientDataGrid());
+
+        self::assertStringContainsString('data-datatable-view-value="{}"', $html);
+        self::assertStringNotContainsString('data-pentiminax--ux-datatables--datatable-view-value', $html);
+    }
+
+    public function testViewValuePayloadContainingTheIdentifierTextIsNotCorrupted(): void
+    {
+        // The view-value JSON payload is attacker-adjacent data -- arbitrary
+        // row and column content -- so the rewrite must never touch text
+        // inside it, even when that text happens to spell out the
+        // identifier itself.
+        $payload = '{&quot;columns&quot;:[{&quot;name&quot;:&quot;pentiminax--ux-datatables--datatable&quot;}]}';
+        $renderer = $this->renderer(sprintf(
+            '<table id="ClientDataGrid" data-controller="pentiminax--ux-datatables--datatable" data-pentiminax--ux-datatables--datatable-view-value="%s"></table>',
+            $payload,
+        ));
+
+        $html = $renderer->render(new ClientDataGrid());
+
+        self::assertStringContainsString($payload, $html);
     }
 
     private function renderer(string $html): DataGridRenderer
