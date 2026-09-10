@@ -126,6 +126,10 @@ abstract class Kernel extends BaseKernel
         $this->configureRoutesTrait($routes);
 
         $routes->import('.', '_solidworx_platform_auth_routes');
+
+        if ($this->isDataGridEnabled()) {
+            $routes->import('datatables.route_loader::loadRoutes', 'service');
+        }
     }
 
     private function isTwoFactorEnabled(): bool

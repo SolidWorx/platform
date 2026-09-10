@@ -73,5 +73,3 @@ platform:
 #   export:
 #     enabled: true
 #     formats: [csv, xlsx]
-#   edit_modal:
-#     enabled: true

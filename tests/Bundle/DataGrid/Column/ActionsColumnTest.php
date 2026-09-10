@@ -15,7 +15,9 @@ namespace SolidWorx\Platform\Tests\Bundle\DataGrid\Column;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 use SolidWorx\Platform\DataGridBundle\Column\ActionsColumn;
+use SolidWorx\Platform\Tests\Bundle\DataGrid\Fixtures\Entity\Client;
 use Symfony\Bridge\Twig\Extension\RoutingExtension;
 use Symfony\Component\Routing\Exception\InvalidParameterException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -193,21 +195,72 @@ final class ActionsColumnTest extends TestCase
     }
 
     /**
-     * Upstream's ActionRowDataResolver::resolveActionUrl() catches
-     * RoutingExceptionInterface around the identical path() call and treats a
-     * null URL as "omit the action". A row with no idField key (or one where
-     * identifiedBy() names a field the row does not carry) resolves `id` to
-     * null; the CUSTOM link must be skipped rather than calling path() with
-     * it, and the row's other actions must still render.
+     * Upstream's TemplateColumnRenderer::renderRow() passes the SOURCE ENTITY as `row` and
+     * the mapped array as `payload` (see RowProcessingPipeline::map(), which calls
+     * renderRow(row: $mappedRow, mappedRow: $row) — the argument names are swapped relative
+     * to the parameter names). A grid that does not drop the id column from
+     * configureColumns() carries it in the mapped array, so the template must read `id` from
+     * `payload`, not from `row` (which is the entity, not an array).
      */
-    public function testRowWithoutTheIdentifierFieldRendersWithoutThrowingOrABrokenLink(): void
+    public function testActionsUseTheIdFromTheMappedPayloadRow(): void
     {
         $column = ActionsColumn::new()
             ->link(route: 'app_client_show', icon: 'tabler:eye', label: 'View')
             ->edit()
             ->delete();
 
-        $html = $this->renderActionsTemplate($column, [
+        $html = $this->renderActionsTemplate($column, new Client(), [
+            'id' => 42,
+            'name' => 'Acme',
+        ]);
+
+        self::assertStringContainsString('data-id="42"', $html);
+        self::assertStringContainsString('data-action-type="EDIT"', $html);
+        self::assertStringContainsString('data-action-type="DELETE"', $html);
+        self::assertStringContainsString('href="/app_client_show"', $html);
+    }
+
+    /**
+     * A grid that overrides configureColumns() and drops the id column entirely never puts
+     * it in the mapped `payload` array. The template must then fall back to reading the
+     * field off the source entity itself (`row`), via a getter.
+     */
+    public function testActionsFallBackToTheEntityWhenThePayloadDropsTheIdentifierColumn(): void
+    {
+        $client = new Client();
+        $idProperty = new ReflectionClass(Client::class)->getProperty('id');
+        $idProperty->setValue($client, 7);
+
+        $column = ActionsColumn::new()
+            ->link(route: 'app_client_show', icon: 'tabler:eye', label: 'View')
+            ->edit()
+            ->delete();
+
+        $html = $this->renderActionsTemplate($column, $client, [
+            'name' => 'Acme',
+        ]);
+
+        self::assertStringContainsString('data-id="7"', $html);
+        self::assertStringContainsString('href="/app_client_show"', $html);
+    }
+
+    /**
+     * Upstream's ActionRowDataResolver::resolveActionUrl() catches
+     * RoutingExceptionInterface around the identical path() call and treats a
+     * null URL as "omit the action". A row where identifiedBy() names a field
+     * that neither the mapped payload nor the source entity carries resolves
+     * `id` to null; the CUSTOM link must be skipped rather than calling
+     * path() with it, and the row's other actions must still render.
+     */
+    public function testRowWithoutTheIdentifierFieldRendersWithoutThrowingOrABrokenLink(): void
+    {
+        $column = ActionsColumn::new()
+            ->link(route: 'app_client_show', icon: 'tabler:eye', label: 'View')
+            ->edit()
+            ->delete()
+            ->identifiedBy('uuid');
+
+        $html = $this->renderActionsTemplate($column, new Client(), [
             'name' => 'Acme',
         ]);
 
@@ -224,9 +277,12 @@ final class ActionsColumnTest extends TestCase
      * passes if the template itself avoids calling path() with a null id,
      * not because the stub happens to tolerate it.
      *
-     * @param array<string, mixed> $row
+     * Binds `row` to the source entity and `payload` to the mapped array, matching the
+     * context upstream's TemplateColumnRenderer::renderRow() builds in production.
+     *
+     * @param array<string, mixed> $payload
      */
-    private function renderActionsTemplate(ActionsColumn $column, array $row): string
+    private function renderActionsTemplate(ActionsColumn $column, object $row, array $payload): string
     {
         $loader = new FilesystemLoader();
         $loader->addPath(__DIR__ . '/../../../../src/Bundle/DataGrid/templates', 'DataGrid');
@@ -257,6 +313,7 @@ final class ActionsColumnTest extends TestCase
         return $twig->render($column->getTemplate(), [
             ...$column->getTemplateParameters(),
             'row' => $row,
+            'payload' => $payload,
         ]);
     }
 }
