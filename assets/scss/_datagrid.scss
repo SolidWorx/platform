@@ -1,0 +1,69 @@
+// DataTables' own Bootstrap 5 theme, plus the extensions the platform enables.
+// The bundle's JS never imports these itself under Encore, because its
+// autoimport map only applies to the Stimulus bridge.
+@import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
+@import 'datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css';
+@import 'datatables.net-columncontrol-bs5/css/columnControl.bootstrap5.min.css';
+@import 'datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css';
+
+// Tabler draws table chrome with its own borders and spacing. DataTables' bs5
+// theme adds a second set, so the two together double every rule.
+.dataTables_wrapper {
+    .table {
+        margin-bottom: 0;
+    }
+
+    // Tabler's .card-table already bleeds the table to the card edges; the
+    // wrapper's padding would undo that.
+    .row {
+        --#{$prefix}gutter-x: 0;
+        align-items: center;
+        margin: 0;
+    }
+}
+
+// The length menu and the search box are plain inputs in the bs5 theme; give
+// them Tabler's control styling.
+div.dt-container {
+    .dt-length select,
+    .dt-search input {
+        @extend .form-select;
+
+        display: inline-block;
+        width: auto;
+    }
+
+    .dt-search input {
+        @extend .form-control;
+    }
+
+    .dt-info {
+        color: var(--#{$prefix}secondary);
+        font-size: $font-size-sm;
+        padding: $card-spacer-y $card-spacer-x;
+    }
+
+    .dt-paging {
+        padding: $card-spacer-y $card-spacer-x;
+
+        .pagination {
+            margin-bottom: 0;
+        }
+    }
+}
+
+// Sort indicators: Tabler's tables use a muted chevron rather than the theme's
+// default arrows.
+table.dataTable thead > tr > th.dt-orderable-asc,
+table.dataTable thead > tr > th.dt-orderable-desc {
+    span.dt-column-order::before,
+    span.dt-column-order::after {
+        color: var(--#{$prefix}secondary);
+        opacity: 1;
+    }
+}
+
+// Row action buttons sit flush right and must not wrap onto a second line.
+table.dataTable td .btn-list {
+    margin: 0;
+}
