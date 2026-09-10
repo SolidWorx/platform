@@ -62,7 +62,6 @@ final class SolidWorxPlatformDataGridExtension extends Extension implements Prep
         $container->setParameter('solidworx_platform_datagrid.security.ajax_access', $config['security']['ajax_access']);
         $container->setParameter('solidworx_platform_datagrid.export.enabled', $config['export']['enabled']);
         $container->setParameter('solidworx_platform_datagrid.export.formats', $config['export']['formats']);
-        $container->setParameter('solidworx_platform_datagrid.edit_modal.enabled', $config['edit_modal']['enabled']);
 
         // Setter injection rather than constructor arguments, so a grid subclass
         // keeps a zero-argument constructor. Upstream injects its own

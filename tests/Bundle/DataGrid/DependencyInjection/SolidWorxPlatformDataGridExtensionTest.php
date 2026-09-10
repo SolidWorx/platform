@@ -41,7 +41,6 @@ final class SolidWorxPlatformDataGridExtensionTest extends TestCase
         self::assertSame('table table-vcenter card-table', $container->getParameter('solidworx_platform_datagrid.table_class'));
         self::assertTrue($container->getParameter('solidworx_platform_datagrid.export.enabled'));
         self::assertSame(['csv', 'xlsx'], $container->getParameter('solidworx_platform_datagrid.export.formats'));
-        self::assertTrue($container->getParameter('solidworx_platform_datagrid.edit_modal.enabled'));
     }
 
     public function testRawSectionOverridesDefaults(): void

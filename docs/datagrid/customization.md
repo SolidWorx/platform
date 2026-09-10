@@ -3,7 +3,7 @@
 ## Configuration reference
 
 `datagrid:` is a top-level section, a sibling of `platform:` — not nested
-under it (the same way `ui:` is). All nine keys are optional; every one has a
+under it (the same way `ui:` is). All eight keys are optional; every one has a
 default.
 
 ```yaml
@@ -47,13 +47,6 @@ datagrid:
     # Export formats offered. One or both of 'csv', 'xlsx'.
     # Default: ['csv', 'xlsx']
     formats: ['csv', 'xlsx']
-
-  edit_modal:
-    # Reserved: not yet read by any platform service. Today, whether a grid
-    # offers the inline edit modal is controlled entirely by whether its
-    # ActionsColumn calls ->edit(), regardless of this value.
-    # Default: true
-    enabled: true
 ```
 
 `page_length` must be a positive integer, `security.ajax_access` cannot be
@@ -64,11 +57,20 @@ is rejected when the container compiles.
 
 `DataGridConfigBuilder` mirrors a subset of the above for `platform.php`
 config (or anywhere else you assemble the array in PHP). It only exposes
-fluent methods for the keys most apps override — `enabled`, `page_length`,
-`length_menu`, `table_class`, `security.ajax_access` and `export.formats`;
-`responsive`, `column_control` and `edit_modal.enabled` are not covered by
-the builder and must be set through the plain array form (or YAML) if you
-need to change them from their defaults.
+fluent methods for the keys most apps override:
+
+| Method | Sets |
+|--------|------|
+| `disabled()` | `enabled: false` — there is no `enabled(bool)` method; the builder only ever turns the bundle off, never explicitly on (the default is already on) |
+| `pageLength(int)` | `page_length` |
+| `lengthMenu(list<int>)` | `length_menu` |
+| `tableClass(string)` | `table_class` |
+| `ajaxAccess(string)` | `security.ajax_access` |
+| `exportFormats(list<'csv'\|'xlsx'>)` | `export.formats` |
+
+`responsive` and `column_control` are not covered by the builder and must be
+set through the plain array form (or YAML) if you need to change them from
+their defaults.
 
 ```php
 use SolidWorx\Platform\DataGridBundle\Config\Builder\DataGridConfigBuilder;
@@ -79,6 +81,13 @@ return [
         ->ajaxAccess('ROLE_ADMIN')
         ->build(),
 ];
+```
+
+To disable the bundle entirely through the builder:
+
+```php
+DataGridConfigBuilder::create()->disabled()->build();
+// ['enabled' => false]
 ```
 
 `build()` only emits the keys you called a method for, so anything you don't

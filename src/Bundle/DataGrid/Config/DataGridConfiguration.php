@@ -27,7 +27,6 @@ use Symfony\Component\Config\Definition\Builder\TreeBuilder;
  *     table_class: string,
  *     security: array{ajax_access: string},
  *     export: array{enabled: bool, formats: list<'csv'|'xlsx'>},
- *     edit_modal: array{enabled: bool},
  * }
  */
 final class DataGridConfiguration implements PlatformConfigurationInterface
@@ -96,15 +95,6 @@ final class DataGridConfiguration implements PlatformConfigurationInterface
                             ->info('Export formats offered')
                             ->enumPrototype()->values(['csv', 'xlsx'])->end()
                             ->defaultValue(['csv', 'xlsx'])
-                        ->end()
-                    ->end()
-                ->end()
-                ->arrayNode('edit_modal')
-                    ->addDefaultsIfNotSet()
-                    ->children()
-                        ->booleanNode('enabled')
-                            ->info('Allow grids to render the inline edit modal')
-                            ->defaultTrue()
                         ->end()
                     ->end()
                 ->end()

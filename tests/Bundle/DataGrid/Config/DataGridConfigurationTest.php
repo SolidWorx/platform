@@ -60,7 +60,6 @@ final class DataGridConfigurationTest extends TestCase
         self::assertSame('IS_AUTHENTICATED_FULLY', $config['security']['ajax_access']);
         self::assertTrue($config['export']['enabled']);
         self::assertSame(['csv', 'xlsx'], $config['export']['formats']);
-        self::assertTrue($config['edit_modal']['enabled']);
     }
 
     public function testValuesCanBeOverridden(): void

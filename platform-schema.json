@@ -644,9 +644,6 @@
                         "csv",
                         "xlsx"
                     ]
-                },
-                "edit_modal": {
-                    "enabled": true
                 }
             },
             "type": "object",
@@ -732,20 +729,6 @@
                                     "xlsx"
                                 ]
                             }
-                        }
-                    },
-                    "additionalProperties": false
-                },
-                "edit_modal": {
-                    "default": {
-                        "enabled": true
-                    },
-                    "type": "object",
-                    "properties": {
-                        "enabled": {
-                            "description": "Allow grids to render the inline edit modal",
-                            "default": true,
-                            "type": "boolean"
                         }
                     },
                     "additionalProperties": false

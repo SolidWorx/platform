@@ -21,12 +21,12 @@ table with no controller or route of your own. See
     enabled: false
   ```
 
-- **`platform-schema.json` gained a `datagrid:` section** (nine keys: `enabled`,
+- **`platform-schema.json` gained a `datagrid:` section** (eight keys: `enabled`,
   `page_length`, `length_menu`, `responsive`, `column_control`, `table_class`,
-  `security.ajax_access`, `export.enabled`/`export.formats`, and
-  `edit_modal.enabled`). Regenerate your own copy with
-  `php bin/console platform:generate-schema` to pick it up in your editor —
-  see [Configuration](./docs/configuration/index.md#regenerating-the-schema).
+  `security.ajax_access`, and `export.enabled`/`export.formats`). Regenerate
+  your own copy with `php bin/console platform:generate-schema` to pick it up
+  in your editor — see
+  [Configuration](./docs/configuration/index.md#regenerating-the-schema).
 
 ### Tabler page layouts
 
