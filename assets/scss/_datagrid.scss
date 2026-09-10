@@ -8,7 +8,16 @@
 
 // Tabler draws table chrome with its own borders and spacing. DataTables' bs5
 // theme adds a second set, so the two together double every rule.
-.dataTables_wrapper {
+//
+// Installed datatables.net is 3.0.3; the bs5 integration's own default
+// classes (node_modules/datatables.net-bs5/js/dataTables.bootstrap5.js)
+// name the outer wrapper `dt-container dt-bootstrap5`. `dataTables_wrapper`
+// is the pre-3.0 class name and does not exist anywhere in the installed
+// packages.
+div.dt-container {
+    // The platform's own DataGridConfiguration defaults table_class to
+    // "table table-vcenter card-table", so the rendered <table> always
+    // carries Bootstrap's real .table class alongside DataTables' own.
     .table {
         margin-bottom: 0;
     }
@@ -20,21 +29,67 @@
         align-items: center;
         margin: 0;
     }
-}
 
-// The length menu and the search box are plain inputs in the bs5 theme; give
-// them Tabler's control styling.
-div.dt-container {
-    .dt-length select,
-    .dt-search input {
-        @extend .form-select;
-
+    // The length menu and the search box are plain inputs in the bs5 theme;
+    // give them Tabler's control styling. Declarations copied from
+    // Bootstrap's _form-select.scss / _form-control.scss (using the same
+    // variables/mixins Tabler already overrides, so the look tracks the
+    // theme) rather than `@extend`ed: extending a fully-realised vendor
+    // class appends our selector as an extra arm to every rule that
+    // mentions it — validation states, input-group compounds, floating
+    // labels, tom-select overrides — which is real output bloat for no
+    // benefit here.
+    .dt-length select {
         display: inline-block;
         width: auto;
+        padding: $form-select-padding-y $form-select-indicator-padding $form-select-padding-y $form-select-padding-x;
+        font-family: $form-select-font-family;
+        @include font-size($form-select-font-size);
+        font-weight: $form-select-font-weight;
+        line-height: $form-select-line-height;
+        color: $form-select-color;
+        appearance: none;
+        background-color: $form-select-bg;
+        background-image: escape-svg($form-select-indicator);
+        background-repeat: no-repeat;
+        background-position: $form-select-bg-position;
+        background-size: $form-select-bg-size;
+        border: $form-select-border-width solid $form-select-border-color;
+        @include border-radius($form-select-border-radius, 0);
+        @include box-shadow($form-select-box-shadow);
+        @include transition($form-select-transition);
+
+        &:focus {
+            border-color: $form-select-focus-border-color;
+            outline: 0;
+            box-shadow: $form-select-focus-box-shadow;
+        }
     }
 
     .dt-search input {
-        @extend .form-control;
+        display: inline-block;
+        width: auto;
+        padding: $input-padding-y $input-padding-x;
+        font-family: $input-font-family;
+        @include font-size($input-font-size);
+        font-weight: $input-font-weight;
+        line-height: $input-line-height;
+        color: $input-color;
+        appearance: none;
+        background-color: $input-bg;
+        background-clip: padding-box;
+        border: $input-border-width solid $input-border-color;
+        @include border-radius($input-border-radius, 0);
+        @include box-shadow($input-box-shadow);
+        @include transition($input-transition);
+
+        &:focus {
+            color: $input-focus-color;
+            background-color: $input-focus-bg;
+            border-color: $input-focus-border-color;
+            outline: 0;
+            box-shadow: $input-focus-box-shadow;
+        }
     }
 
     .dt-info {
@@ -54,16 +109,25 @@ div.dt-container {
 
 // Sort indicators: Tabler's tables use a muted chevron rather than the theme's
 // default arrows.
+//
+// The vendor CSS never tag-qualifies this class (every occurrence in
+// dataTables.bootstrap5.min.css is bare `.dt-column-order`), and the element
+// DataTables actually creates is a <div>
+// (node_modules/datatables.net/js/dataTables.js:
+// `Dom.c('div').classAdd('dt-column-order')`), not a <span>. Matching the
+// vendor's own bare convention here, rather than hardcoding `div.`, so this
+// keeps matching if their markup ever changes.
 table.dataTable thead > tr > th.dt-orderable-asc,
 table.dataTable thead > tr > th.dt-orderable-desc {
-    span.dt-column-order::before,
-    span.dt-column-order::after {
+    .dt-column-order::before,
+    .dt-column-order::after {
         color: var(--#{$prefix}secondary);
         opacity: 1;
     }
 }
 
 // Row action buttons sit flush right and must not wrap onto a second line.
+// .btn-list is the platform's own class (src/Bundle/DataGrid/templates/columns/actions.html.twig).
 table.dataTable td .btn-list {
     margin: 0;
 }
