@@ -2,6 +2,32 @@
 
 ## 0.2 → 0.3
 
+### Data grids
+
+A new `DataGridBundle` wraps [`pentiminax/ux-datatables`](https://github.com/pentiminax/ux-datatables)
+to render a Doctrine entity as a paginated, sortable, searchable Tabler
+table with no controller or route of your own. See
+[the data grids guide](./docs/datagrid/index.md).
+
+- **Two new Composer dependencies**: `pentiminax/ux-datatables` (`~0.87.0`)
+  and `openspout/openspout` (`^4.0`, used for the server-side XLSX export).
+- **Grids are registered by default.** `SolidWorxPlatformDataGridBundle` (and
+  its required `Pentiminax\UX\DataTables\DataTablesBundle`) is registered
+  automatically the same way `SchebTwoFactorBundle` is for two-factor
+  authentication — nothing to opt into. Disable both entirely with:
+
+  ```yaml
+  datagrid:
+    enabled: false
+  ```
+
+- **`platform-schema.json` gained a `datagrid:` section** (nine keys: `enabled`,
+  `page_length`, `length_menu`, `responsive`, `column_control`, `table_class`,
+  `security.ajax_access`, `export.enabled`/`export.formats`, and
+  `edit_modal.enabled`). Regenerate your own copy with
+  `php bin/console platform:generate-schema` to pick it up in your editor —
+  see [Configuration](./docs/configuration/index.md#regenerating-the-schema).
+
 ### Tabler page layouts
 
 The UI bundle now ships three layouts — `ui_layout_app` (sidebar + top navbar),
