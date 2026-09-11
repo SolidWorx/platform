@@ -83,7 +83,7 @@
     "postcss-prefix-custom-properties": "^0.1.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.17.0",
+    "@babel/core": "^8.0.1",
     "@babel/preset-env": "^7.16.0",
     "@symfony/webpack-encore": "^5.2.0",
     "eslint-webpack-plugin": "^5.0.2",
