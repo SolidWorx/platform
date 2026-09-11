@@ -56,8 +56,11 @@ final class DataGridTwigExtension extends AbstractExtension
         ];
     }
 
-    public function renderDataTable(AbstractDataTable $table): string
+    /**
+     * @param array<string, mixed> $attributes
+     */
+    public function renderDataTable(AbstractDataTable $table, array $attributes = []): string
     {
-        return $this->renderer->render($table);
+        return $this->renderer->render($table, $attributes);
     }
 }

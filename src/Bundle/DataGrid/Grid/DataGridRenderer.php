@@ -67,9 +67,15 @@ final class DataGridRenderer implements ResetInterface
     ) {
     }
 
-    public function render(AbstractDataTable $table): string
+    /**
+     * @param array<string, mixed> $attributes forwarded to upstream's
+     *                                          `DataTablesExtension::renderDataTable()` unchanged, so
+     *                                          `{{ render_datatable(table, {class: 'my-table'}) }}` keeps working
+     *                                          through the decorator.
+     */
+    public function render(AbstractDataTable $table, array $attributes = []): string
     {
-        $html = $this->rewriteControllerIdentifier($this->dataTables->renderDataTable($table));
+        $html = $this->rewriteControllerIdentifier($this->dataTables->renderDataTable($table, $attributes));
 
         $key = $this->shortClassName($table);
         $count = ($this->renderCounts[$key] ?? 0) + 1;

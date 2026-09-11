@@ -13,12 +13,14 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\Tests\Bundle\DataGrid\Grid;
 
+use Pentiminax\UX\DataTables\Model\AbstractDataTable;
 use Pentiminax\UX\DataTables\Twig\DataTablesExtension;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\DataGridBundle\Grid\DataGridRenderer;
 use SolidWorx\Platform\Tests\Bundle\DataGrid\Fixtures\Grid\ClientDataGrid;
 use SolidWorx\Platform\Tests\Bundle\DataGrid\Fixtures\Grid\Legacy\ClientDataGrid as LegacyClientDataGrid;
+use function is_string;
 use function sprintf;
 
 /**
@@ -106,6 +108,27 @@ final class DataGridRendererTest extends TestCase
         self::assertSame('<table data-controller="x"></table>', $renderer->render($grid));
     }
 
+    public function testAttributesPassedToRenderReachTheRenderedMarkup(): void
+    {
+        // render_datatable(table, {class: 'my-table'}) is upstream's
+        // documented way to set attributes on the rendered table. render()
+        // must forward $attributes to the inner extension rather than
+        // dropping them -- PHP silently discards extra call-site arguments a
+        // method declares no parameter for, so a signature mismatch here
+        // would fail neither loudly nor with a type error, only by producing
+        // markup that never reflects what the caller asked for.
+        $extension = self::createStub(DataTablesExtension::class);
+        $extension->method('renderDataTable')->willReturnCallback(self::echoAttributesIntoMarkup(...));
+
+        $renderer = new DataGridRenderer($extension);
+
+        $html = $renderer->render(new ClientDataGrid(), [
+            'data-extra' => 'from-caller',
+        ]);
+
+        self::assertStringContainsString('data-extra="from-caller"', $html);
+    }
+
     public function testStimulusControllerIdentifierIsRewrittenToTheShortName(): void
     {
         // Upstream hardcodes this long, slash-derived identifier with no way
@@ -157,5 +180,20 @@ final class DataGridRendererTest extends TestCase
         $extension->method('renderDataTable')->willReturn($html);
 
         return new DataGridRenderer($extension);
+    }
+
+    /**
+     * A stand-in for upstream's real `renderDataTable()`, which folds
+     * `$attributes` into the returned markup -- simplified, but enough to
+     * prove `DataGridRenderer::render()` forwards them rather than dropping
+     * them.
+     *
+     * @param array<string, mixed> $attributes
+     */
+    private static function echoAttributesIntoMarkup(AbstractDataTable $table, array $attributes = []): string
+    {
+        $extra = $attributes['data-extra'] ?? '';
+
+        return sprintf('<table id="ClientDataGrid" data-extra="%s"></table>', is_string($extra) ? $extra : '');
     }
 }
