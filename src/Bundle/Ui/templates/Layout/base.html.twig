@@ -55,7 +55,11 @@
 
 <!doctype html>
 
-<html lang="{{ locale }}"{% if layout.theme is not null %} data-bs-theme="{{ layout.theme }}"{% endif %}{% block html_attributes %}{% endblock %}>
+{##
+    Tabler hides `.navbar-vertical` whenever the page also holds a horizontal navbar, unless the
+    document opts into the vertical position, so the sidebar layout has to say so on `<html>`.
+##}
+<html lang="{{ locale }}"{% if layout.theme is not null %} data-bs-theme="{{ layout.theme }}"{% endif %}{% if layout.sidebar %} data-bs-navbar-position="vertical"{% endif %}{% block html_attributes %}{% endblock %}>
 
 <head>
     {% block head %}

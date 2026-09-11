@@ -1,5 +1,6 @@
 import Encore from '@symfony/webpack-encore';
 import ESLintPlugin from 'eslint-webpack-plugin';
+import prefixCustomProperties from 'postcss-prefix-custom-properties';
 
 // Manually configure the runtime environment if not already configured yet by the "encore" command.
 // It's useful when you use tools that rely on webpack.config.js file.
@@ -9,23 +10,9 @@ if (!Encore.isRuntimeEnvironmentConfigured()) {
 
 import path from 'path';
 import { fileURLToPath } from 'url';
-import fs from 'fs';
 
 //we need to change up how __dirname is used for ES6 purposes
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-// Allow users to override CSS variables by providing a custom variables file
-// Set the SOLIDWORX_PLATFORM_CUSTOM_STYLE_VARIABLES environment variable or create a _variables.scss file
-const customVariablesPath = process.env.SOLIDWORX_PLATFORM_CUSTOM_STYLE_VARIABLES || path.join(process.cwd(), 'assets/scss/_variables.scss');
-const hasCustomVariables = fs.existsSync(customVariablesPath);
-
-// @tabler/core bundles its own copy of Bootstrap's JS and re-exports it, so an
-// application that also imports the standalone `bootstrap` package ends up with two
-// Bootstrap instances on the page. Both register Bootstrap's data-api, which makes
-// every dropdown, collapse and offcanvas toggle fire twice and so appear not to open
-// at all. Point bare `bootstrap` imports at the copy Tabler ships. The trailing `$`
-// matches only the exact request, leaving `bootstrap/scss/...` on the real package.
-const bootstrapAlias = { bootstrap$: '@tabler/core' };
 
 Encore
     // directory where compiled assets will be stored
@@ -35,19 +22,41 @@ Encore
 
     .addEntry('_platform_ui', __dirname + '/core.ts')
 
-    .addAliases(bootstrapAlias)
-
     .enableSingleRuntimeChunk()
     .splitEntryChunks()
     .cleanupOutputBeforeBuild()
     .enableSourceMaps(!Encore.isProduction())
     .enableVersioning(Encore.isProduction())
 
-    .enableSassLoader((options) => {
-        if (hasCustomVariables) {
-            // Inject custom variables before all SCSS imports
-            options.additionalData = `@import "${customVariablesPath}";`;
-        }
+    .enableSassLoader()
+
+    // Tabler's Sass sources write custom properties unprefixed (`--card-bg`); the public
+    // `--tblr-` prefix is added here, at build time, because Tabler 1.5 removed the
+    // `$prefix` Sass variable. Without this step nothing resolves `--tblr-*`.
+    .enablePostCssLoader((options) => {
+        // `config: false` stops postcss-loader searching for a postcss.config.js in the
+        // consuming application, which would otherwise silently replace this plugin list.
+        options.postcssOptions = {
+            config: false,
+            plugins: [
+                prefixCustomProperties({
+                    prefix: 'tblr-',
+                    // Vendor stylesheets read their own variable names — never prefix these.
+                    ignore: [
+                        /^--tblr-/,
+                        // Applications own their design tokens: leave any already-namespaced property alone.
+                        /^--swp-/,
+                        /^--bs-/,
+                        /^--fc-/,
+                        /^--gl-/,
+                        /^--litepicker-/,
+                        /^--plyr-/,
+                        /^--ts-/,
+                        '--section-bg',
+                    ],
+                }),
+            ],
+        };
     })
     .autoProvidejQuery()
 

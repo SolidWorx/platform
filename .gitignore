@@ -3,6 +3,8 @@
 /.phpunit.cache
 /phpstan.neon
 /node_modules/
+/assets/node_modules/
+/assets/public/static/
 /build/
 /npm-debug.log
 /yarn-error.log

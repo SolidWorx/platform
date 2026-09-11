@@ -1,14 +1,19 @@
-// Import user custom variables if provided via webpack
-// This is injected by webpack's sass-loader additionalData option
-// Users can override any Bootstrap/Tabler variables before they are defined
+// Tabler is configured through the Sass module system (`@use ... with`). Setting a
+// variable before the `@use` has no effect — every override belongs in the block below.
+//
+// Custom properties are written unprefixed by Tabler's sources and gain their `--tblr-`
+// prefix from PostCSS at build time; see `enablePostCssLoader()` in webpack.config.js.
+@use '@tabler/core/scss/tabler' with (
+    // Tabler 1.5 ships no web font and falls back to the device's system font. Pull Inter
+    // from Google Fonts and put it at the front of the stack — `$font-google` only adds the
+    // `@import`, it no longer touches the font stack on its own.
+    $font-google: 'Inter',
+    $font-family-sans-serif: ('Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif),
 
-// Default platform variables (can be overridden by custom variables)
-$prefix: 'swp-' !default;
-$nav-link-font-size: 1.2rem !default;
-$font-sans-serif: 'Inter', sans-serif !default;
-$enable-deprecation-messages: false !default;
+    $nav-link-font-size: 1.2rem,
+    $enable-deprecation-messages: false
+);
 
-@import '@tabler/core';
-@import '@tabler/core/scss/vendor/tom-select';
-@import './styles';
-@import './text-editor';
+@use '@tabler/core/scss/vendor/tom-select';
+@use 'styles';
+@use 'text-editor';

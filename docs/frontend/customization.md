@@ -1,79 +1,67 @@
 # Theming & Customization
 
-The platform stylesheet is built on [Tabler](https://tabler.io/) (Bootstrap 5). All visual tokens — colours, spacing, typography — are controlled by SCSS variables that you can override before they are compiled.
+The platform stylesheet is built on [Tabler](https://tabler.io/) 1.5, which bundles Bootstrap 5.3 (there is no separate `bootstrap` dependency). Visual tokens — colours, spacing, typography — are `--tblr-*` CSS custom properties you override at runtime; a small number of build-time settings live in a single Sass configuration block.
 
 ---
 
-## How variable injection works
+## How theming works
 
-The platform's webpack config checks for a custom variables file at build time. If found, its contents are prepended to every SCSS compilation via sass-loader's `additionalData` option. This means your overrides are in scope before `@tabler/core` and the platform's own styles are imported, so Bootstrap and Tabler variables resolve to your values.
-
----
-
-## Providing a custom variables file
-
-### Default location (automatic)
-
-Create `assets/scss/_variables.scss` in your **application** (not inside the platform package). The platform config looks for this file relative to `process.cwd()` — which is your project root — so no extra configuration is needed:
-
-```
-your-app/
-├── assets/
-│   └── scss/
-│       └── _variables.scss   ← picked up automatically
-└── webpack.config.js
-```
-
-### Custom location
-
-Set the `SOLIDWORX_PLATFORM_CUSTOM_STYLE_VARIABLES` environment variable to an absolute path:
-
-```bash
-SOLIDWORX_PLATFORM_CUSTOM_STYLE_VARIABLES=/path/to/my/_theme.scss bun run build
-```
-
-This is useful in monorepos or when your build pipeline manages asset paths.
-
----
-
-## Writing your variables file
-
-Override any Bootstrap or Tabler variable before its `!default` assignment is reached. The platform declares a small set of its own defaults that you can also override:
-
-| Variable | Platform default | Description |
-|----------|-----------------|-------------|
-| `$prefix` | `'swp-'` | CSS custom-property prefix used for platform components |
-| `$nav-link-font-size` | `1.2rem` | Navigation link font size |
-| `$font-sans-serif` | `'Inter', sans-serif` | Body font stack |
-| `$enable-deprecation-messages` | `false` | Suppress Bootstrap deprecation warnings |
-
-Example `_variables.scss`:
+Tabler is configured through the Sass module system. `assets/scss/platform.scss` loads it with
+a single `@use ... with (...)` block, and that block is the only place a Sass variable can be
+set — assigning a variable *before* the `@use` has no effect at all under Sass modules.
 
 ```scss
-// Override the CSS variable prefix used by platform components
-$prefix: 'myapp-';
-
-// Change the primary brand colour (Bootstrap variable)
-$primary: #e74c3c;
-
-// Switch to a system font stack
-$font-sans-serif: system-ui, -apple-system, sans-serif;
-
-// Tighten border radius throughout
-$border-radius: 0.25rem;
-$border-radius-sm: 0.125rem;
-$border-radius-lg: 0.375rem;
+@use '@tabler/core/scss/tabler' with (
+    $font-google: 'Inter',
+    $font-family-sans-serif: ('Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif),
+    $nav-link-font-size: 1.2rem,
+    $enable-deprecation-messages: false
+);
 ```
 
-Because this file is injected before any `@import`, all downstream `!default` declarations pick up your values automatically — you do not need to `@import` anything from inside `_variables.scss`.
+> The old `SOLIDWORX_PLATFORM_CUSTOM_STYLE_VARIABLES` / `assets/scss/_variables.scss` injection
+> hook has been removed. It worked by prepending a file before `@import`, which Sass modules do
+> not support. Use the CSS custom properties below instead.
 
 ---
 
-## SCSS class prefix
+## Overriding tokens from your application
 
-Platform-specific components (currently the rich text editor) use BEM classes prefixed with `$prefix`. If you change `$prefix` to `'myapp-'`, the text editor toolbar class becomes `.myapp-text-editor__toolbar` instead of `.swp-text-editor__toolbar`.
+Override the CSS custom properties. Every visual token Tabler exposes is a `--tblr-*`
+variable, so this needs no Sass and applies at runtime:
 
-The platform Twig templates read the prefix from a server-side configuration value so the generated HTML always matches the compiled CSS. You do not need to configure this separately.
+```scss
+// assets/scss/admin.scss
+:root {
+    --tblr-primary: #e74c3c;
+    --tblr-border-radius: 0.25rem;
+    --tblr-bg-surface: #fff;
+}
+```
+
+Tabler 1.5 removed the Sass variables behind most of these tokens in favour of the custom
+properties, so this is the supported route rather than a workaround. For the few settings with
+no CSS variable (the font stack, feature flags such as `$enable-deprecation-messages`), edit the
+`@use ... with (...)` block above.
+
+---
+
+## The `--tblr-` prefix is added by PostCSS
+
+Tabler's Sass sources write custom properties *unprefixed* (`--card-bg`, `--border-width`).
+The public `--tblr-` prefix is added after Sass runs, by
+[postcss-prefix-custom-properties](https://www.npmjs.com/package/postcss-prefix-custom-properties),
+configured in `webpack.config.js`. Two consequences:
+
+- In SCSS compiled through this pipeline, **write custom properties unprefixed**
+  (`var(--border-color)`, not `var(--tblr-border-color)`) — the prefix is added for you.
+  Names already starting with `--tblr-` are left alone, so reading `var(--tblr-primary)`
+  in your own stylesheet works too.
+- A custom property of your own (`--my-thing`) compiled through this pipeline becomes
+  `--tblr-my-thing`. Name your own tokens `--tblr-…` if you want them left untouched.
+
+There is no platform-specific `$prefix` any more: the compiled CSS uses Tabler's own `--tblr-`
+names, so snippets copied from the Tabler docs work as-is.
 
 ---
 

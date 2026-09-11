@@ -14,7 +14,14 @@
     "scss",
     "webpack.config.js"
   ],
-  "keywords": ["symfony-ux"],
+  "keywords": [
+    "symfony-ux"
+  ],
+  "scripts": {
+    "build": "encore production --config webpack.config.standalone.js",
+    "dev": "encore dev --config webpack.config.standalone.js",
+    "watch": "encore dev --watch --config webpack.config.standalone.js"
+  },
   "symfony": {
     "controllers": {
       "modal": {
@@ -50,14 +57,12 @@
     },
     "importmap": {
       "@hotwired/stimulus": "^3.2.2",
-      "@tabler/core": "^1.4.0",
-      "bootstrap": "^5.3.8"
+      "@tabler/core": "^1.5.1"
     }
   },
   "peerDependencies": {
     "@hotwired/stimulus": "^3.2.2",
-    "@tabler/core": "^1.4.0",
-    "bootstrap": "^5.3.8"
+    "@tabler/core": "^1.5.1"
   },
   "dependencies": {
     "@hotwired/stimulus": "^3.2.2",
@@ -68,12 +73,14 @@
     "@symfony/ux-live-component": "^2.31.0",
     "@symfony/ux-chartjs": "^2.31.0",
     "@symfony/ux-autocomplete": "^2.31.0",
-    "@tabler/core": "^1.4.0",
+    "@tabler/core": "^1.5.1",
     "@tiptap/core": "^3.31.3",
     "@tiptap/extension-link": "^2.11.5",
     "@tiptap/extension-placeholder": "^2.11.5",
     "@tiptap/starter-kit": "^2.11.5",
-    "bootstrap": "^5.3.8"
+    "postcss": "^8.4.0",
+    "postcss-loader": "^8.1.0",
+    "postcss-prefix-custom-properties": "^0.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.17.0",
@@ -83,7 +90,7 @@
     "core-js": "^3.46.0",
     "jquery": "^3.7.1",
     "regenerator-runtime": "^0.14.1",
-    "sass": "^1.69.5",
+    "sass": "^1.93.0",
     "sass-loader": "^16.0.0",
     "ts-loader": "^9.0.0",
     "typescript": "^5.3.3",
@@ -93,9 +100,6 @@
   },
   "peerDependenciesMeta": {
     "@tabler/core": {
-      "optional": false
-    },
-    "bootstrap": {
       "optional": false
     },
     "@hotwired/stimulus": {

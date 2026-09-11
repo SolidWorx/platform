@@ -1,5 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
-import { Modal } from 'bootstrap';
+import { Modal } from '@tabler/core';
 
 /* stimulusFetch: 'lazy' */
 export default class extends Controller {
