@@ -157,12 +157,13 @@ final class DataGridRendererTest extends TestCase
         self::assertStringNotContainsString('data-pentiminax--ux-datatables--datatable-view-value', $html);
     }
 
-    public function testViewValuePayloadContainingTheIdentifierTextIsNotCorrupted(): void
+    public function testViewValuePayloadContainingTheBareIdentifierTextIsNotCorrupted(): void
     {
-        // The view-value JSON payload is attacker-adjacent data -- arbitrary
-        // row and column content -- so the rewrite must never touch text
-        // inside it, even when that text happens to spell out the
-        // identifier itself.
+        // Weak case: the identifier text with neither the "data-" prefix
+        // nor a trailing "-", so it can never match the attribute-name
+        // rewrite regardless of scoping. Kept for coverage, but
+        // testViewValuePayloadContainingTheAtRiskIdentifierShapeIsNotCorrupted
+        // below is the one that actually exercises the risk.
         $payload = '{&quot;columns&quot;:[{&quot;name&quot;:&quot;pentiminax--ux-datatables--datatable&quot;}]}';
         $renderer = $this->renderer(sprintf(
             '<table id="ClientDataGrid" data-controller="pentiminax--ux-datatables--datatable" data-pentiminax--ux-datatables--datatable-view-value="%s"></table>',
@@ -172,6 +173,45 @@ final class DataGridRendererTest extends TestCase
         $html = $renderer->render(new ClientDataGrid());
 
         self::assertStringContainsString($payload, $html);
+    }
+
+    public function testViewValuePayloadContainingTheAtRiskIdentifierShapeIsNotCorrupted(): void
+    {
+        // The at-risk shape: a column `className` (free-form developer
+        // data serialised into the escaped JSON view-value payload)
+        // containing the identifier WITH the "data-" prefix and a
+        // trailing "-", e.g. an old CSS hook surviving a rename. This is
+        // exactly the shape the unscoped str_replace() used to corrupt --
+        // the payload must survive byte-for-byte.
+        $payload = '{&quot;columns&quot;:[{&quot;className&quot;:&quot;data-pentiminax--ux-datatables--datatable-legacy&quot;}]}';
+        $renderer = $this->renderer(sprintf(
+            '<table id="ClientDataGrid" data-controller="pentiminax--ux-datatables--datatable" data-pentiminax--ux-datatables--datatable-view-value="%s"></table>',
+            $payload,
+        ));
+
+        $html = $renderer->render(new ClientDataGrid());
+
+        self::assertStringContainsString($payload, $html);
+    }
+
+    public function testStimulusClassAndOutletAttributeIdentifiersAreRewrittenToo(): void
+    {
+        // StimulusAttributes::addController() can also emit
+        // `-<key>-class` (key kebab-cased the same as `-value` keys) and
+        // `-<outlet>-outlet` (via normalizeControllerName(), which does
+        // NOT lowercase -- an outlet name can carry uppercase letters).
+        // The rewrite must cover both shapes, not just `-value`.
+        $renderer = $this->renderer(
+            '<table id="ClientDataGrid" data-controller="pentiminax--ux-datatables--datatable"'
+            . ' data-pentiminax--ux-datatables--datatable-loading-class="is-loading"'
+            . ' data-pentiminax--ux-datatables--datatable-RelatedOutlet-outlet="#related"></table>',
+        );
+
+        $html = $renderer->render(new ClientDataGrid());
+
+        self::assertStringContainsString('data-datatable-loading-class="is-loading"', $html);
+        self::assertStringContainsString('data-datatable-RelatedOutlet-outlet="#related"', $html);
+        self::assertStringNotContainsString('pentiminax--ux-datatables--datatable', $html);
     }
 
     private function renderer(string $html): DataGridRenderer

@@ -17,6 +17,8 @@ use Override;
 use Pentiminax\UX\DataTables\Model\AbstractDataTable;
 use Pentiminax\UX\DataTables\Twig\DataTablesExtension;
 use Symfony\Contracts\Service\ResetInterface;
+use function preg_quote;
+use function preg_replace;
 use function preg_replace_callback;
 use function sprintf;
 use function str_replace;
@@ -128,11 +130,22 @@ final class DataGridRenderer implements ResetInterface
             $html,
         ) ?? $html;
 
-        return str_replace(
-            'data-' . self::STIMULUS_CONTROLLER_IDENTIFIER . '-',
-            'data-' . self::STIMULUS_CONTROLLER_SHORT_NAME . '-',
+        // Bounded to the attribute-name position: the identifier must sit
+        // directly after `data-` and be immediately followed by more
+        // attribute-name characters and `="`. `StimulusAttributes::addController()`
+        // appends `-<key>-value` (key via its kebab-casing `normalizeKeyName()`,
+        // lowercase letters/digits/hyphens only), `-<key>-class` (same
+        // normalisation) and `-<outlet>-outlet` (via `normalizeControllerName()`,
+        // which does not lowercase, so an outlet name can carry uppercase
+        // letters) -- hence the mixed-case class below. A blanket
+        // `str_replace()` here would also match the identifier wherever it
+        // appears inside the escaped JSON `-view-value` payload, corrupting
+        // attacker-adjacent row/column content.
+        return preg_replace(
+            '/data-' . preg_quote(self::STIMULUS_CONTROLLER_IDENTIFIER, '/') . '-([a-zA-Z0-9-]+)="/',
+            'data-' . self::STIMULUS_CONTROLLER_SHORT_NAME . '-$1="',
             $html,
-        );
+        ) ?? $html;
     }
 
     #[Override]
