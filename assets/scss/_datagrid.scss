@@ -1,0 +1,84 @@
+// DataTables' own Bootstrap 5 theme, plus the extensions the platform enables.
+// The bundle's JS never imports these itself under Encore, because its
+// autoimport map only applies to the Stimulus bridge.
+@import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
+@import 'datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css';
+@import 'datatables.net-columncontrol-bs5/css/columnControl.bootstrap5.min.css';
+@import 'datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css';
+
+// Tabler draws table chrome with its own borders and spacing. DataTables' bs5
+// theme adds a second set, so the two together double every rule.
+//
+// Installed datatables.net is 3.0.3; the bs5 integration's own default
+// classes (node_modules/datatables.net-bs5/js/dataTables.bootstrap5.js)
+// name the outer wrapper `dt-container dt-bootstrap5`. `dataTables_wrapper`
+// is the pre-3.0 class name and does not exist anywhere in the installed
+// packages.
+div.dt-container {
+    // The platform's own DataGridConfiguration defaults table_class to
+    // "table table-vcenter card-table", so the rendered <table> always
+    // carries Bootstrap's real .table class alongside DataTables' own.
+    .table {
+        margin-bottom: 0;
+    }
+
+    // Tabler's .card-table already bleeds the table to the card edges; the
+    // wrapper's padding would undo that.
+    .row {
+        --#{$prefix}gutter-x: 0;
+        align-items: center;
+        margin: 0;
+    }
+
+    // No rule for .dt-length select / .dt-search input here: the bs5
+    // integration already puts the real Bootstrap classes on both elements
+    // (node_modules/datatables.net-bs5/js/dataTables.bootstrap5.js:
+    // `search: { input: 'form-control form-control-sm' }`,
+    // `length: { select: 'form-select form-select-sm' }`), and the vendor
+    // CSS already sizes them inline
+    // (`div.dt-container div.dt-length select{width:auto;display:inline-block;...}`,
+    // `div.dt-container div.dt-search input{...display:inline-block;width:auto}`
+    // in dataTables.bootstrap5.min.css). A hand-copy here only regresses:
+    // it missed the dark-mode chevron (`[data-bs-theme="dark"] .form-select`)
+    // and Tabler's layered focus box-shadow, both of which the real
+    // `.form-select`/`.form-control` rules already handle.
+
+    .dt-info {
+        color: var(--#{$prefix}secondary);
+        font-size: $font-size-sm;
+        padding: $card-spacer-y $card-spacer-x;
+    }
+
+    .dt-paging {
+        padding: $card-spacer-y $card-spacer-x;
+
+        .pagination {
+            margin-bottom: 0;
+        }
+    }
+}
+
+// Sort indicators: Tabler's tables use a muted chevron rather than the theme's
+// default arrows.
+//
+// The vendor CSS never tag-qualifies this class (every occurrence in
+// dataTables.bootstrap5.min.css is bare `.dt-column-order`), and the element
+// DataTables actually creates is a <div>
+// (node_modules/datatables.net/js/dataTables.js:
+// `Dom.c('div').classAdd('dt-column-order')`), not a <span>. Matching the
+// vendor's own bare convention here, rather than hardcoding `div.`, so this
+// keeps matching if their markup ever changes.
+table.dataTable thead > tr > th.dt-orderable-asc,
+table.dataTable thead > tr > th.dt-orderable-desc {
+    .dt-column-order::before,
+    .dt-column-order::after {
+        color: var(--#{$prefix}secondary);
+        opacity: 1;
+    }
+}
+
+// Row action buttons sit flush right and must not wrap onto a second line.
+// .btn-list is the platform's own class (src/Bundle/DataGrid/templates/columns/actions.html.twig).
+table.dataTable td .btn-list {
+    margin: 0;
+}

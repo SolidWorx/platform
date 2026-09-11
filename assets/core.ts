@@ -8,6 +8,9 @@ import { definitionsFromContext } from '@hotwired/stimulus-webpack-helpers';
 import CheckboxSelectAll from '@stimulus-components/checkbox-select-all';
 import PasswordVisibility from '@stimulus-components/password-visibility';
 import Clipboard from '@stimulus-components/clipboard';
+// @ts-expect-error @pentiminax/ux-datatables ships no type declarations; webpack.config.js
+// aliases the bare specifier to the compiled controller inside the Composer package.
+import DataTableController from '@pentiminax/ux-datatables';
 import type { Application } from '@hotwired/stimulus';
 
 export const app = startStimulusApp(require.context(
@@ -19,6 +22,7 @@ export const app = startStimulusApp(require.context(
 app.register('checkbox-select-all', CheckboxSelectAll);
 app.register('password-visibility', PasswordVisibility);
 app.register('clipboard', Clipboard);
+app.register('datatable', DataTableController);
 
 /**
  * Register additional controller directories for applications extending the platform.

@@ -620,6 +620,121 @@
                 }
             },
             "additionalProperties": false
+        },
+        "datagrid": {
+            "description": "Data grid configuration",
+            "default": {
+                "enabled": true,
+                "page_length": 25,
+                "length_menu": [
+                    10,
+                    25,
+                    50,
+                    100
+                ],
+                "responsive": true,
+                "column_control": true,
+                "table_class": "table table-vcenter card-table",
+                "security": {
+                    "ajax_access": "IS_AUTHENTICATED_FULLY"
+                },
+                "export": {
+                    "enabled": true,
+                    "formats": [
+                        "csv",
+                        "xlsx"
+                    ]
+                }
+            },
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "description": "Register the data grid bundle; false removes it and its dependency entirely",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "page_length": {
+                    "description": "Rows shown per page",
+                    "default": 25,
+                    "type": "integer"
+                },
+                "length_menu": {
+                    "description": "Page size options offered to the user",
+                    "default": [
+                        10,
+                        25,
+                        50,
+                        100
+                    ],
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "responsive": {
+                    "description": "Collapse overflowing columns into an expandable child row",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "column_control": {
+                    "description": "Show per-column ordering and search controls in the header",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "table_class": {
+                    "description": "CSS classes applied to the rendered table element",
+                    "default": "table table-vcenter card-table",
+                    "type": "string"
+                },
+                "security": {
+                    "default": {
+                        "ajax_access": "IS_AUTHENTICATED_FULLY"
+                    },
+                    "type": "object",
+                    "properties": {
+                        "ajax_access": {
+                            "description": "Attribute required to reach the /datatables/ajax/* routes",
+                            "default": "IS_AUTHENTICATED_FULLY",
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "export": {
+                    "default": {
+                        "enabled": true,
+                        "formats": [
+                            "csv",
+                            "xlsx"
+                        ]
+                    },
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "Add server-side export buttons to every grid",
+                            "default": true,
+                            "type": "boolean"
+                        },
+                        "formats": {
+                            "description": "Export formats offered",
+                            "default": [
+                                "csv",
+                                "xlsx"
+                            ],
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "csv",
+                                    "xlsx"
+                                ]
+                            }
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
         }
     },
     "additionalProperties": true

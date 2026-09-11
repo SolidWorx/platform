@@ -13,11 +13,14 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle;
 
+use const FILTER_NULL_ON_FAILURE;
+use const FILTER_VALIDATE_BOOL;
 use const GLOB_BRACE;
 use const PATHINFO_EXTENSION;
 use Override;
 use RuntimeException;
 use Scheb\TwoFactorBundle\SchebTwoFactorBundle;
+use SolidWorx\Platform\DataGridBundle\SolidWorxPlatformDataGridBundle;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigSectionInterface;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigState;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
@@ -32,6 +35,7 @@ use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Yaml\Yaml;
 use function defined;
 use function file_exists;
+use function filter_var;
 use function glob;
 use function implode;
 use function is_array;
@@ -83,6 +87,10 @@ abstract class Kernel extends BaseKernel
             yield new SchebTwoFactorBundle();
         }
 
+        if ($this->isDataGridEnabled()) {
+            yield new SolidWorxPlatformDataGridBundle();
+        }
+
         yield new SolidWorxPlatformBundle();
     }
 
@@ -118,6 +126,10 @@ abstract class Kernel extends BaseKernel
         $this->configureRoutesTrait($routes);
 
         $routes->import('.', '_solidworx_platform_auth_routes');
+
+        if ($this->isDataGridEnabled()) {
+            $routes->import('datatables.route_loader::loadRoutes', 'service');
+        }
     }
 
     private function isTwoFactorEnabled(): bool
@@ -138,6 +150,20 @@ abstract class Kernel extends BaseKernel
         }
 
         return ($twoFactor['enabled'] ?? false) === true;
+    }
+
+    private function isDataGridEnabled(): bool
+    {
+        $dataGridConfig = $this->rawConfig['datagrid'] ?? [];
+        if (! is_array($dataGridConfig)) {
+            return true;
+        }
+
+        // Unlike two-factor (default off, so a type mismatch safely degrades to off), the grid
+        // defaults on: a strict `=== true` would silently disable it for `"true"`, `1`, or an
+        // unresolved `%env(...)%`. Coerce recognisable boolean-ish scalars and fall back to
+        // enabled for anything else, since that is the safe direction for a default-on feature.
+        return filter_var($dataGridConfig['enabled'] ?? true, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE) ?? true;
     }
 
     private function processPlatformConfig(): void
