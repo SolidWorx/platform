@@ -77,7 +77,7 @@
     "@tiptap/core": "^3.31.3",
     "@tiptap/extension-link": "^2.11.5",
     "@tiptap/extension-placeholder": "^2.11.5",
-    "@tiptap/starter-kit": "^2.11.5",
+    "@tiptap/starter-kit": "^3.31.3",
     "postcss": "^8.4.0",
     "postcss-loader": "^8.1.0",
     "postcss-prefix-custom-properties": "^0.1.0"
