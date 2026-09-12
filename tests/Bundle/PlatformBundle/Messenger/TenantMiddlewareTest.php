@@ -23,6 +23,7 @@ use SolidWorx\Platform\PlatformBundle\Messenger\TenantMiddleware;
 use SolidWorx\Platform\PlatformBundle\Messenger\TenantStamp;
 use SolidWorx\Platform\PlatformBundle\Tenant\Event\TenantSwitchedEvent;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
+use SolidWorx\Platform\PlatformBundle\Tenant\TenantLock;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantManager;
 use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\Message\TenantAwareMessage;
 use stdClass;
@@ -97,7 +98,7 @@ final class TenantMiddlewareTest extends TestCase
 
     private function middleware(TenantContext $context): TenantMiddleware
     {
-        return new TenantMiddleware($context, new TenantManager($context, self::createStub(EntityManagerInterface::class)));
+        return new TenantMiddleware($context, new TenantManager($context, self::createStub(EntityManagerInterface::class), new TenantLock()));
     }
 
     private function passThroughStack(): StackInterface

@@ -22,12 +22,14 @@ use Symfony\Component\Uid\Ulid;
  * Resolves the tenant from the request host, by matching it against {@see Tenant::$domain}.
  *
  * Highest priority in the chain: a custom domain is an unambiguous, infrastructure-level signal and
- * must win over session or route hints.
+ * must win over session or route hints. For the same reason it is a
+ * {@see LockingTenantResolverInterface} — the tenant it resolves cannot then be switched away from
+ * for the rest of the request.
  */
 #[AutoconfigureTag('platform.tenant_resolver', [
     'priority' => 30,
 ])]
-final readonly class DomainTenantResolver implements TenantResolverInterface
+final readonly class DomainTenantResolver implements LockingTenantResolverInterface
 {
     public function __construct(
         private TenantRepository $tenantRepository,

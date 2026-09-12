@@ -65,6 +65,9 @@ final class SolidWorxPlatformUiExtension extends Extension implements PrependExt
         ;
 
         $container->setParameter('solidworx_platform_ui.template.login', $config['templates']['login']);
+        $container->setParameter('solidworx_platform_ui.template.tenant_select', $config['templates']['tenant']['select']);
+        $container->setParameter('solidworx_platform_ui.template.tenant_onboarding', $config['templates']['tenant']['onboarding']);
+        $container->setParameter('solidworx_platform_ui.template.tenant_no_access', $config['templates']['tenant']['no_access']);
     }
 
     #[Override]

@@ -14,14 +14,18 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle\Controller\Tenant;
 
 use InvalidArgumentException;
+use SolidWorx\Platform\PlatformBundle\Attributes\WithoutTenant;
 use SolidWorx\Platform\PlatformBundle\Controller\BaseController;
 use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\TenantRepository;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
+use SolidWorx\Platform\PlatformBundle\Response\RedirectResponse;
 use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantVoter;
+use SolidWorx\Platform\PlatformBundle\Tenant\Scope\TenantScopeGuardListener;
+use SolidWorx\Platform\PlatformBundle\Tenant\TenantLock;
+use SolidWorx\Platform\PlatformBundle\Tenant\TenantSessionStorage;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -34,9 +38,13 @@ use function is_string;
 /**
  * Lets an authenticated user pick the tenant they want to work in; the choice is stored in the
  * session and picked up by the {@see \SolidWorx\Platform\PlatformBundle\Tenant\Resolver\SessionTenantResolver}.
+ *
+ * Exempt from the scope guard, since this is where the guard sends people. Forbidden outright while
+ * the tenant is locked to the request — on a custom domain there is nothing to choose between.
  */
 #[AsTaggedItem('controller.service_arguments')]
 #[IsGranted('IS_AUTHENTICATED_FULLY')]
+#[WithoutTenant]
 final class SelectTenant extends BaseController
 {
     private const string CSRF_TOKEN_ID = 'tenant_select';
@@ -45,12 +53,15 @@ final class SelectTenant extends BaseController
         private readonly UserTenantRepository $userTenantRepository,
         private readonly TenantRepository $tenantRepository,
         private readonly CsrfTokenManagerInterface $csrfTokenManager,
-        #[Autowire(param: 'solidworx_platform.multi_tenancy.session_key')]
-        private readonly string $sessionKey,
+        private readonly TenantSessionStorage $sessionStorage,
+        private readonly TenantRedirector $redirector,
+        private readonly TenantLock $tenantLock,
+        #[Autowire(param: 'solidworx_platform_ui.template.tenant_select')]
+        private readonly string $template,
     ) {
     }
 
-    #[Route(path: '/tenant/select', name: 'solidworx_platform_tenant_select', methods: ['GET', 'POST'])]
+    #[Route(path: '/tenant/select', name: TenantScopeGuardListener::SELECT_ROUTE, methods: ['GET', 'POST'])]
     public function __invoke(Request $request): Response
     {
         $user = $this->getUser();
@@ -59,11 +70,15 @@ final class SelectTenant extends BaseController
             throw $this->createAccessDeniedException();
         }
 
-        if ($request->isMethod('POST')) {
+        if ($this->tenantLock->isLocked()) {
+            throw $this->createAccessDeniedException('The workspace is fixed by the domain and cannot be changed.');
+        }
+
+        if ($request->isMethod(Request::METHOD_POST)) {
             return $this->select($request);
         }
 
-        return $this->render('@Ui/Tenant/select.html.twig', [
+        return $this->render($this->template, [
             'tenants' => $this->userTenantRepository->findTenantsForUser($user),
         ]);
     }
@@ -97,9 +112,9 @@ final class SelectTenant extends BaseController
 
             $this->denyAccessUnlessGranted(TenantVoter::TENANT_ACCESS, $tenant);
 
-            $request->getSession()->set($this->sessionKey, $tenant->getId()->toRfc4122());
+            $this->sessionStorage->setTenantId($tenant->getId());
 
-            return $this->redirectToRoute('solidworx_platform_tenant_select');
+            return $this->redirector->redirectAfterSelection();
         } finally {
             $this->csrfTokenManager->removeToken(self::CSRF_TOKEN_ID);
         }

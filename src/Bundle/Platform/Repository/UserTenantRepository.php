@@ -18,9 +18,11 @@ use SolidWorx\Platform\PlatformBundle\Entity\UserTenant;
 use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
 use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Model\UserTenantInterface;
+use SolidWorx\Platform\PlatformBundle\Tenant\TenantChoice;
 use Symfony\Bridge\Doctrine\Types\UlidType;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Uid\Ulid;
+use function array_map;
 
 /**
  * @extends EntityRepository<UserTenantInterface>
@@ -55,12 +57,12 @@ class UserTenantRepository extends EntityRepository
     }
 
     /**
-     * @return list<TenantInterface>
+     * @return list<TenantChoice>
      */
     public function findTenantsForUser(UserInterface $user): array
     {
-        /** @var list<TenantInterface> */
-        return $this->createQueryBuilder('ut')
+        /** @var list<array{id: Ulid, name: string}> $rows */
+        $rows = $this->createQueryBuilder('ut')
             ->select('t.id', 't.name')
             ->innerJoin('ut.tenant', 't')
             ->where('IDENTITY(ut.user) = :userId')
@@ -68,5 +70,20 @@ class UserTenantRepository extends EntityRepository
             ->orderBy('t.name', 'ASC')
             ->getQuery()
             ->getResult();
+
+        return array_map(
+            static fn (array $row): TenantChoice => new TenantChoice($row['id'], $row['name']),
+            $rows,
+        );
+    }
+
+    public function countTenantsForUser(UserInterface $user): int
+    {
+        return (int) $this->createQueryBuilder('ut')
+            ->select('COUNT(ut.id)')
+            ->where('IDENTITY(ut.user) = :userId')
+            ->setParameter('userId', $user->getId(), UlidType::NAME)
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 }

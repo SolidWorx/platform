@@ -19,6 +19,7 @@ use EmailChecker\EmailChecker;
 use Monolog\Processor\ProcessorInterface;
 use SolidWorx\Platform\PlatformBundle\Command\UpdateDisposableDomainsCommand;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\Login;
+use SolidWorx\Platform\PlatformBundle\Controller\Tenant\OnboardTenant;
 use SolidWorx\Platform\PlatformBundle\Controller\Tenant\SelectTenant;
 use SolidWorx\Platform\PlatformBundle\Feature\FeatureGate;
 use SolidWorx\Platform\PlatformBundle\Feature\NoopFeatureGate;
@@ -55,6 +56,9 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         ->tag('controller.service_arguments');
 
     $services->set(SelectTenant::class)
+        ->tag('controller.service_arguments');
+
+    $services->set(OnboardTenant::class)
         ->tag('controller.service_arguments');
 
     $services->alias(FeatureGate::class, NoopFeatureGate::class);

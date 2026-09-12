@@ -38,9 +38,10 @@ use Symfony\Component\Config\Definition\Builder\TreeBuilder;
  *     footer: bool,
  * }
  * @phpstan-type UiLayoutTemplates array{app: string, condensed: string, clean: string}
+ * @phpstan-type UiTenantTemplates array{select: string, onboarding: string, no_access: string}
  * @phpstan-type UiConfig array{
  *     icon_pack: string,
- *     templates: array{base: string, login: string, layouts: UiLayoutTemplates},
+ *     templates: array{base: string, login: string, layouts: UiLayoutTemplates, tenant: UiTenantTemplates},
  *     layout: UiLayoutOptions,
  * }
  */
@@ -93,6 +94,24 @@ final class UiConfiguration implements PlatformConfigurationInterface
                                 ->scalarNode('clean')
                                     ->info('No navigation at all, for login / 2FA / error pages')
                                     ->defaultValue('@Ui/Layout/clean.html.twig')
+                                ->end()
+                            ->end()
+                        ->end()
+                        ->arrayNode('tenant')
+                            ->info('The multi-tenancy pages')
+                            ->addDefaultsIfNotSet()
+                            ->children()
+                                ->scalarNode('select')
+                                    ->info('Where a user picks the workspace to work in')
+                                    ->defaultValue('@Ui/Tenant/select.html.twig')
+                                ->end()
+                                ->scalarNode('onboarding')
+                                    ->info('Where a user creates their first workspace')
+                                    ->defaultValue('@Ui/Tenant/onboarding.html.twig')
+                                ->end()
+                                ->scalarNode('no_access')
+                                    ->info('Shown when a user has no workspace and onboarding is disabled')
+                                    ->defaultValue('@Ui/Tenant/no_access.html.twig')
                                 ->end()
                             ->end()
                         ->end()
