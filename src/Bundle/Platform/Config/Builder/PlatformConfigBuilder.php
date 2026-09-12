@@ -38,6 +38,8 @@ final class PlatformConfigBuilder
 
     private ?SecurityConfigBuilder $security = null;
 
+    private ?ProfileConfigBuilder $profile = null;
+
     private ?bool $enableUtcDate = null;
 
     /**
@@ -80,6 +82,12 @@ final class PlatformConfigBuilder
     {
         $this->security = SecurityConfigBuilder::create($this);
         return $this->security;
+    }
+
+    public function profile(): ProfileConfigBuilder
+    {
+        $this->profile = ProfileConfigBuilder::create($this);
+        return $this->profile;
     }
 
     public function enableUtcDate(bool $enable = true): self
@@ -133,6 +141,10 @@ final class PlatformConfigBuilder
 
         if ($this->security instanceof SecurityConfigBuilder) {
             $platform['security'] = $this->security->toArray();
+        }
+
+        if ($this->profile instanceof ProfileConfigBuilder) {
+            $platform['profile'] = $this->profile->toArray();
         }
 
         if ($this->enableUtcDate !== null) {

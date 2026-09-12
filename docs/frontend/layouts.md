@@ -196,7 +196,7 @@ use SolidWorx\Platform\PlatformBundle\Menu\UserMenu;
 #[MenuBuilder(name: UserMenu::NAME)]
 public function build(ItemInterface $menu): void
 {
-    $menu->addChild('Profile', Options::create()->route('app_profile')->icon('user')->build());
+    $menu->addChild('Billing', Options::create()->route('app_billing')->icon('credit-card')->build());
 
     $menu->addChild('API keys', Options::create()
         ->route('app_api_keys')
@@ -216,10 +216,11 @@ sidebar and navbar:
 
 Two things are always there, whatever your builders do:
 
-- **The platform's own account entries** — currently just **Two-factor authentication**, and only
-  when [2FA is enabled](../security/two-factor.md). They are registered with priority
+- **The platform's own account entries** — [**Profile**](../security/profile.md), and
+  **Two-factor authentication** when [2FA is enabled](../security/two-factor.md). Profile leads
+  the dropdown at `UserMenu::PRIORITY_PROFILE` (`200`) and the account entries follow at
   `UserMenu::PRIORITY_ACCOUNT` (`100`), so entries you register at the default priority of `0`
-  land underneath them. Register above it to push your entries to the top.
+  land underneath them both. Register above them to push your entries to the top.
 - **Logout**, rendered last under a divider. It is a CSRF-protected form rather than a link, so it
   is not part of the menu; override the `user_menu_items` block if you need it somewhere else.
 

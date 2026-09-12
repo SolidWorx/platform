@@ -314,5 +314,7 @@ final class LoginExtension
 
 - [Two-Factor Authentication](./two-factor.md) — TOTP, email codes, backup codes and
   trusted devices.
+- [User Profile](./profile.md) — the profile pages, the password rules, and how to add
+  your own fields to them.
 - [Configuration](../configuration/index.md) — the `platform.yaml` reference
   (`platform.models.user`, `platform.security.two_factor`, `platform.ui.templates`).

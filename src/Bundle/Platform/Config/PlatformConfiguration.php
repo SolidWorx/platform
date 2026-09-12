@@ -17,9 +17,13 @@ use Override;
 use SolidWorx\Platform\PlatformBundle\Entity\Tenant;
 use SolidWorx\Platform\PlatformBundle\Entity\User;
 use SolidWorx\Platform\PlatformBundle\Entity\UserTenant;
+use SolidWorx\Platform\PlatformBundle\Enum\PasswordStrengthLevel;
+use SolidWorx\Platform\PlatformBundle\Form\Type\Profile\ProfileType;
 use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
 use SolidWorx\Platform\PlatformBundle\Model\UserTenantInterface;
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Form\FormTypeInterface;
 use function is_string;
 use function is_subclass_of;
 use function sprintf;
@@ -91,6 +95,7 @@ final class PlatformConfiguration implements PlatformConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+                ->append($this->profileNode())
                 ->arrayNode('multi_tenancy')
                     ->addDefaultsIfNotSet()
                     ->children()
@@ -163,5 +168,73 @@ final class PlatformConfiguration implements PlatformConfigurationInterface
         // @formatter:on
 
         return $treeBuilder;
+    }
+
+    /**
+     * The `platform.profile` section: the pages where a user maintains their own account.
+     *
+     * Both extension points live here. `form_type` swaps the edit form out for one that knows
+     * about a custom user class, and `templates` swaps any of the three pages out for a template
+     * of your own — although overriding a block of the shipped template is usually enough, and
+     * survives platform upgrades better.
+     */
+    private function profileNode(): ArrayNodeDefinition
+    {
+        $node = new ArrayNodeDefinition('profile');
+
+        // @formatter:off
+        $node
+            ->info('The user profile pages: details, edit, and change password.')
+            ->addDefaultsIfNotSet()
+            ->children()
+                ->scalarNode('form_type')
+                    ->defaultValue(ProfileType::class)
+                    ->info(sprintf('The form type used to edit the profile. Must implement %s', FormTypeInterface::class))
+                    ->validate()
+                        ->ifTrue(static fn ($v): bool => ! is_string($v) || ! is_subclass_of($v, FormTypeInterface::class))
+                        ->thenInvalid(sprintf('The profile form type must implement %s', FormTypeInterface::class))
+                    ->end()
+                ->end()
+                ->arrayNode('templates')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('show')
+                            ->defaultValue('@SolidWorxPlatform/Profile/show.html.twig')
+                            ->info('The template showing the profile details.')
+                        ->end()
+                        ->scalarNode('edit')
+                            ->defaultValue('@SolidWorxPlatform/Profile/edit.html.twig')
+                            ->info('The template rendering the edit-profile form.')
+                        ->end()
+                        ->scalarNode('change_password')
+                            ->defaultValue('@SolidWorxPlatform/Profile/change_password.html.twig')
+                            ->info('The template rendering the change-password form.')
+                        ->end()
+                    ->end()
+                ->end()
+                ->arrayNode('password')
+                    ->info('The rules a user-chosen password has to satisfy.')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->integerNode('min_length')
+                            ->defaultValue(12)
+                            ->min(1)
+                            ->info('The minimum number of characters a password must have.')
+                        ->end()
+                        ->enumNode('strength')
+                            ->values(PasswordStrengthLevel::values())
+                            ->defaultValue(PasswordStrengthLevel::Medium->value)
+                            ->info('The estimated strength a password must reach; "none" disables the check.')
+                        ->end()
+                        ->booleanNode('check_compromised')
+                            ->defaultTrue()
+                            ->info('Reject passwords that appear in a known data breach (calls the haveibeenpwned range API).')
+                        ->end()
+                    ->end()
+                ->end()
+            ->end();
+        // @formatter:on
+
+        return $node;
     }
 }

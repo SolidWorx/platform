@@ -1,3 +1,20 @@
+{##
+    The platform form theme: Bootstrap 5 (which is what Tabler is), with an input-group icon in
+    front of the fields where one helps, plus the rich text editor widget.
+
+    Register it on its own — it already carries the Bootstrap layout:
+
+        twig:
+            form_themes:
+                - '@SolidWorxPlatform/Form/theme.html.twig'
+
+    The `{% use %}` below is what makes `{{ parent() }}` resolve: Twig forbids `parent()` in a
+    template that neither extends nor uses another, so a theme that decorates blocks has to name
+    the theme it decorates.
+##}
+
+{% use 'bootstrap_5_layout.html.twig' %}
+
 {% block date_widget %}
     {% if widget == 'single_text' %}
         <div class="input-group">

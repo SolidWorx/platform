@@ -15,6 +15,17 @@ platform:
   models:
     user: SolidWorx\Platform\PlatformBundle\Model\User
 
+  # profile:
+  #   form_type: SolidWorx\Platform\PlatformBundle\Form\Type\Profile\ProfileType
+  #   templates:
+  #     show: '@SolidWorxPlatform/Profile/show.html.twig'
+  #     edit: '@SolidWorxPlatform/Profile/edit.html.twig'
+  #     change_password: '@SolidWorxPlatform/Profile/change_password.html.twig'
+  #   password:
+  #     min_length: 12
+  #     strength: medium
+  #     check_compromised: true
+
 # saas:
 #   doctrine:
 #     subscriptions:
