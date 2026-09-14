@@ -43,9 +43,10 @@ Encore
                     prefix: 'tblr-',
                     // Vendor stylesheets read their own variable names — never prefix these.
                     ignore: [
+                        // Tabler's public names. There is no separate platform namespace: 1.5
+                        // dropped `$prefix`, so an application that wants to change a token
+                        // writes Tabler's own name and overwrites it.
                         /^--tblr-/,
-                        // Applications own their design tokens: leave any already-namespaced property alone.
-                        /^--swp-/,
                         /^--bs-/,
                         /^--fc-/,
                         /^--gl-/,

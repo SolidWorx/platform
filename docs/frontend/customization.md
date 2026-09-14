@@ -60,8 +60,16 @@ configured in `webpack.config.js`. Two consequences:
 - A custom property of your own (`--my-thing`) compiled through this pipeline becomes
   `--tblr-my-thing`. Name your own tokens `--tblr-…` if you want them left untouched.
 
-There is no platform-specific `$prefix` any more: the compiled CSS uses Tabler's own `--tblr-`
-names, so snippets copied from the Tabler docs work as-is.
+There is no platform namespace. Tabler 1.5 removed `$prefix`, and the platform does not
+reintroduce one under another name: the compiled CSS uses Tabler's own `--tblr-` names, so
+snippets copied from the Tabler docs work as-is.
+
+That has a consequence worth stating plainly, because it is the whole customization model:
+**an application's design tokens are Tabler's tokens.** Name a token `--tblr-primary` and it
+*is* Tabler's primary — every button, badge and link follows it, with no aliasing layer in
+between. Tokens with no Tabler counterpart (`--tblr-space-4`, say) simply live in the same
+namespace. Applications that used to carry their own prefix should rename rather than map
+one namespace onto the other; a mapping layer only hides which token is really in force.
 
 ---
 
