@@ -35,8 +35,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * also strictly a *first* workspace screen: a user who already has one is sent to the selection
  * page instead.
  */
-#[AsTaggedItem('controller.service_arguments')]
-#[IsGranted('IS_AUTHENTICATED_FULLY')]
+#[AsTaggedItem(index: 'controller.service_arguments')]
+#[IsGranted(attribute: 'IS_AUTHENTICATED_FULLY')]
 #[WithoutTenant]
 final class OnboardTenant extends BaseController
 {

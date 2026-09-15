@@ -27,7 +27,7 @@ use Attribute;
  *
  * @see \SolidWorx\Platform\PlatformBundle\Tenant\Scope\TenantScopeGuardListener
  */
-#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
+#[Attribute(flags: Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
 final readonly class WithoutTenant
 {
 }
