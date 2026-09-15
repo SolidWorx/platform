@@ -160,7 +160,7 @@
                             "type": "object",
                             "properties": {
                                 "enabled": {
-                                    "description": "Let a user with no tenants create their first one. Disable for invite-only apps.",
+                                    "description": "Let users create workspaces, both their first and any after it. Disable for invite-only apps, where tenants are provisioned out of band.",
                                     "default": true,
                                     "type": "boolean"
                                 },

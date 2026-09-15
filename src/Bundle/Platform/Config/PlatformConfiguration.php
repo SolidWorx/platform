@@ -125,7 +125,7 @@ final class PlatformConfiguration implements PlatformConfigurationInterface
                             ->children()
                                 ->booleanNode('enabled')
                                     ->defaultTrue()
-                                    ->info('Let a user with no tenants create their first one. Disable for invite-only apps.')
+                                    ->info('Let users create workspaces, both their first and any after it. Disable for invite-only apps, where tenants are provisioned out of band.')
                                 ->end()
                                 ->scalarNode('form_type')
                                     ->defaultValue(TenantOnboardingType::class)

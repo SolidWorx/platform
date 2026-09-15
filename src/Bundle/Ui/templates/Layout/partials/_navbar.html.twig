@@ -8,7 +8,8 @@
         {% endblock %}
 
     Links come from the KnpMenu menu named `navbar`; if no builder registers that menu, the menu
-    area is simply not rendered.
+    area is simply not rendered. The workspace switcher sits next to the user menu, from the
+    `workspace_switcher` block in `_user_menu.html.twig`.
 
     `navbar_standalone` tells the partial whether it is the only navigation on the page. The
     `condensed` layout sets it to `true` (brand + burger menu are rendered here); the `app` layout
@@ -71,6 +72,7 @@
 
             {{ block('navbar_actions') }}
             <div class="navbar-nav flex-row order-md-last">
+                {{ block('workspace_switcher') }}
                 {{ block('user_menu') }}
             </div>
 

@@ -38,14 +38,20 @@ final readonly class TenantRedirector
     {
         $target = $this->sessionStorage->consumeTargetPath();
 
-        if ($target !== null) {
-            return new RedirectResponse($target);
-        }
+        return new RedirectResponse($target ?? $this->defaultPath());
+    }
 
+    /**
+     * Where the application starts, for links that lead out of the tenant pages — a cancelled
+     * workspace creation, say. Deliberately leaves the remembered target alone: a link is not a
+     * completed selection, and consuming it would strand the next redirect.
+     */
+    public function defaultPath(): string
+    {
         if ($this->defaultRoute !== null) {
-            return new RedirectResponse($this->urlGenerator->generate($this->defaultRoute));
+            return $this->urlGenerator->generate($this->defaultRoute);
         }
 
-        return new RedirectResponse('/');
+        return '/';
     }
 }

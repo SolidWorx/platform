@@ -1,25 +1,44 @@
-{% extends '@Ui/Layout/security.html.twig' %}
+{##
+    Where a workspace is created — the first one a user has, and every one after that.
+
+    The condensed layout keeps the navigation bar at the top (so a user creating a second workspace
+    is not dropped out of the application) without the sidebar, which would offer links that need a
+    workspace to make sense.
+
+    `cancel_path` is null for a user with no workspace yet: there is nowhere to go back to.
+##}
+{% extends ui_layout_condensed %}
 
 {% block content %}
-    <div class="card card-md">
-        <div class="card-body">
-            <h2 class="h2 text-center mb-2">
-                {{ 'Create your workspace'|trans }}
-            </h2>
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card card-md">
+                <div class="card-body">
+                    <h2 class="h2 text-center mb-2">
+                        {{ 'Create a workspace'|trans }}
+                    </h2>
 
-            <p class="text-secondary text-center mb-4">
-                {{ 'A workspace keeps your data separate from everyone else\'s. You can invite people to it later.'|trans }}
-            </p>
+                    <p class="text-secondary text-center mb-4">
+                        {{ 'A workspace keeps your data separate from everyone else\'s. You can invite people to it later.'|trans }}
+                    </p>
 
-            {{ form_start(form) }}
-                {{ form_widget(form) }}
+                    {{ form_start(form) }}
+                        {{ form_widget(form) }}
 
-                <div class="form-footer">
-                    <button type="submit" class="btn btn-primary w-100">
-                        {{ 'Create workspace'|trans }}
-                    </button>
+                        <div class="form-footer d-flex align-items-center gap-2">
+                            {% if cancel_path is not null %}
+                                <a href="{{ cancel_path }}" class="btn btn-link">
+                                    {{ 'Cancel'|trans }}
+                                </a>
+                            {% endif %}
+
+                            <button type="submit" class="btn btn-primary {{ cancel_path is not null ? 'ms-auto' : 'w-100' }}">
+                                {{ 'Create workspace'|trans }}
+                            </button>
+                        </div>
+                    {{ form_end(form) }}
                 </div>
-            {{ form_end(form) }}
+            </div>
         </div>
     </div>
 {% endblock %}

@@ -16,11 +16,11 @@ namespace SolidWorx\Platform\PlatformBundle\Tenant\Scope;
 use SolidWorx\Platform\PlatformBundle\Exception\TenantAccessDeniedException;
 use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
+use SolidWorx\Platform\PlatformBundle\Tenant\Onboarding\TenantCreationGate;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantChoice;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantManager;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantSessionStorage;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use function count;
 
 /**
@@ -41,8 +41,7 @@ final readonly class TenantScopeResolver
         private TenantManager $tenantManager,
         private TenantSessionStorage $sessionStorage,
         private UserTenantRepository $userTenantRepository,
-        #[Autowire(param: 'solidworx_platform.multi_tenancy.onboarding.enabled')]
-        private bool $onboardingEnabled,
+        private TenantCreationGate $creationGate,
     ) {
     }
 
@@ -55,10 +54,22 @@ final readonly class TenantScopeResolver
         $tenants = $this->userTenantRepository->findTenantsForUser($user);
 
         return match (count($tenants)) {
-            0 => $this->onboardingEnabled ? TenantScopeOutcome::NeedsOnboarding : TenantScopeOutcome::NoAccess,
-            1 => $this->autoSelect($tenants[0]),
+            0 => $this->withoutTenants($user),
+            1 => $this->autoSelect($tenants[0], $user),
             default => TenantScopeOutcome::NeedsSelection,
         };
+    }
+
+    /**
+     * A user with nowhere to go is offered onboarding, but only if they are allowed to create a
+     * workspace at all — otherwise they are told they have no access, rather than being sent to a
+     * page that would refuse them.
+     */
+    private function withoutTenants(UserInterface $user): TenantScopeOutcome
+    {
+        return $this->creationGate->check($user)->isAllowed()
+            ? TenantScopeOutcome::NeedsOnboarding
+            : TenantScopeOutcome::NoAccess;
     }
 
     /**
@@ -67,7 +78,7 @@ final readonly class TenantScopeResolver
      * Goes through {@see TenantManager} rather than the context directly, so the switch is still
      * validated: auto-selection is a convenience, never a way around the membership check.
      */
-    private function autoSelect(TenantChoice $choice): TenantScopeOutcome
+    private function autoSelect(TenantChoice $choice, UserInterface $user): TenantScopeOutcome
     {
         try {
             $this->tenantManager->switchTo($choice->id);
@@ -77,7 +88,7 @@ final readonly class TenantScopeResolver
             // tenant the user never chose.
             $this->sessionStorage->clearTenantId();
 
-            return $this->onboardingEnabled ? TenantScopeOutcome::NeedsOnboarding : TenantScopeOutcome::NoAccess;
+            return $this->withoutTenants($user);
         }
 
         $this->sessionStorage->setTenantId($choice->id);

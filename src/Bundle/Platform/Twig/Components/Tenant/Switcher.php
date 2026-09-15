@@ -15,6 +15,7 @@ namespace SolidWorx\Platform\PlatformBundle\Twig\Components\Tenant;
 
 use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
+use SolidWorx\Platform\PlatformBundle\Tenant\Onboarding\TenantCreationGate;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantChoice;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantLock;
@@ -23,15 +24,16 @@ use Symfony\Component\Uid\Ulid;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Symfony\UX\TwigComponent\Attribute\ExposeInTemplate;
 use function array_values;
-use function count;
 
 /**
- * Renders the list of workspaces the current user can switch between.
+ * The workspace menu in the navigation bar: which workspace you are in, the others you can move to,
+ * and the way to create another one.
  *
  * Drop it anywhere with `<twig:Platform:Tenant:Switcher />` — no surrounding condition needed. The
  * component decides for itself whether it has anything to say, and renders nothing when the tenant
- * is locked to the request (a custom domain) or the user only belongs to one workspace, since
- * neither case offers a choice.
+ * is locked to the request (a custom domain) or the user belongs to no workspace at all. A single
+ * workspace still renders: naming the one you are in is the point, even when there is nothing to
+ * switch to.
  */
 #[AsTwigComponent(
     name: 'Platform:Tenant:Switcher',
@@ -39,17 +41,6 @@ use function count;
 )]
 final class Switcher
 {
-    /**
-     * A CSS class applied to each entry, so the component can sit in a dropdown, a sidebar or a
-     * standalone card without being restyled.
-     */
-    public string $itemClass = 'dropdown-item';
-
-    /**
-     * Whether to close the list with a separator, for when it sits above other menu entries.
-     */
-    public bool $divider = true;
-
     /**
      * @var list<TenantChoice>|null
      */
@@ -60,11 +51,13 @@ final class Switcher
         private readonly UserTenantRepository $userTenantRepository,
         private readonly TenantContext $tenantContext,
         private readonly TenantLock $tenantLock,
+        private readonly TenantCreationGate $creationGate,
     ) {
     }
 
     /**
-     * Whether there is a choice worth offering.
+     * Whether there is anything to show. A user with no workspace has no menu — they are on their
+     * way to onboarding, which is a page, not a dropdown entry.
      */
     #[ExposeInTemplate]
     public function isAvailable(): bool
@@ -73,7 +66,23 @@ final class Switcher
             return false;
         }
 
-        return count($this->getTenants()) > 1;
+        return $this->getTenants() !== [];
+    }
+
+    /**
+     * Whether to offer creating another workspace, decided by {@see TenantCreationGate} so the menu
+     * and the page behind it always agree.
+     */
+    #[ExposeInTemplate]
+    public function canCreate(): bool
+    {
+        $user = $this->security->getUser();
+
+        if (! $user instanceof UserInterface) {
+            return false;
+        }
+
+        return $this->creationGate->check($user)->isAllowed();
     }
 
     /**
@@ -105,6 +114,5 @@ final class Switcher
         }
 
         return array_find($this->getTenants(), static fn (TenantChoice $tenant): bool => $tenant->id->equals($tenantId));
-
     }
 }

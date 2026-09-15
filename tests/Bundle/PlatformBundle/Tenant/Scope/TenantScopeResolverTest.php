@@ -22,6 +22,7 @@ use SolidWorx\Platform\PlatformBundle\Exception\TenantAccessDeniedException;
 use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
 use SolidWorx\Platform\PlatformBundle\Tenant\Event\TenantSwitchedEvent;
+use SolidWorx\Platform\PlatformBundle\Tenant\Onboarding\TenantCreationGate;
 use SolidWorx\Platform\PlatformBundle\Tenant\Scope\TenantScopeOutcome;
 use SolidWorx\Platform\PlatformBundle\Tenant\Scope\TenantScopeResolver;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantChoice;
@@ -44,6 +45,7 @@ use Symfony\Component\Uid\Ulid;
 #[UsesClass(TenantChoice::class)]
 #[UsesClass(TenantSessionStorage::class)]
 #[UsesClass(TenantSwitchedEvent::class)]
+#[UsesClass(TenantCreationGate::class)]
 final class TenantScopeResolverTest extends TestCase
 {
     private const string SESSION_KEY = '_tenant_id';
@@ -168,7 +170,7 @@ final class TenantScopeResolverTest extends TestCase
             new TenantManager($this->context, self::createStub(EntityManagerInterface::class), new TenantLock()),
             new TenantSessionStorage($requestStack, self::SESSION_KEY),
             $repository,
-            $onboardingEnabled,
+            new TenantCreationGate(new EventDispatcher(), new TenantLock(), $onboardingEnabled),
         );
     }
 

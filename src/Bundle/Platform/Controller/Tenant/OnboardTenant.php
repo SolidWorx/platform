@@ -18,6 +18,7 @@ use SolidWorx\Platform\PlatformBundle\Controller\BaseController;
 use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
 use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
+use SolidWorx\Platform\PlatformBundle\Tenant\Onboarding\TenantCreationGate;
 use SolidWorx\Platform\PlatformBundle\Tenant\Onboarding\TenantOnboarder;
 use SolidWorx\Platform\PlatformBundle\Tenant\Scope\TenantScopeGuardListener;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
@@ -29,11 +30,14 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
- * Lets a user with no workspace create their first one.
+ * Creates a workspace: the first one for a user who has none, and every one after that.
  *
- * Exempt from the scope guard for the obvious reason — it is where the guard sends people. It is
- * also strictly a *first* workspace screen: a user who already has one is sent to the selection
- * page instead.
+ * Exempt from the scope guard for the obvious reason — it is where the guard sends people — and it
+ * is the same page in both cases, only reached differently: the guard redirects here, or the user
+ * picks "create new workspace" in the switcher. A user who already has a workspace gets a cancel
+ * link back to the application; one who does not has nowhere to cancel to.
+ *
+ * Whether creation is offered at all is {@see TenantCreationGate}'s call, not this controller's.
  */
 #[AsTaggedItem(index: 'controller.service_arguments')]
 #[IsGranted(attribute: 'IS_AUTHENTICATED_FULLY')]
@@ -48,8 +52,7 @@ final class OnboardTenant extends BaseController
         private readonly TenantOnboarder $onboarder,
         private readonly UserTenantRepository $userTenantRepository,
         private readonly TenantRedirector $redirector,
-        #[Autowire(param: 'solidworx_platform.multi_tenancy.onboarding.enabled')]
-        private readonly bool $enabled,
+        private readonly TenantCreationGate $creationGate,
         #[Autowire(param: 'solidworx_platform.multi_tenancy.onboarding.form_type')]
         private readonly string $formType,
         #[Autowire(param: 'solidworx_platform_ui.template.tenant_onboarding')]
@@ -60,18 +63,16 @@ final class OnboardTenant extends BaseController
     #[Route(path: '/tenant/onboarding', name: TenantScopeGuardListener::ONBOARDING_ROUTE, methods: ['GET', 'POST'])]
     public function __invoke(Request $request): Response
     {
-        if (! $this->enabled) {
-            throw $this->createNotFoundException('Tenant onboarding is disabled.');
-        }
-
         $user = $this->getUser();
 
         if (! $user instanceof UserInterface) {
             throw $this->createAccessDeniedException();
         }
 
-        if ($this->userTenantRepository->countTenantsForUser($user) > 0) {
-            return $this->redirectToRoute(TenantScopeGuardListener::SELECT_ROUTE);
+        $check = $this->creationGate->check($user);
+
+        if (! $check->isAllowed()) {
+            throw $this->createAccessDeniedException($check->getReason() ?? 'You cannot create a workspace.');
         }
 
         $form = $this->createForm($this->formType);
@@ -89,6 +90,11 @@ final class OnboardTenant extends BaseController
 
         return $this->render($this->template, [
             'form' => $form,
+            // Cancelling is only meaningful with somewhere to go back to, which a user without a
+            // workspace does not have — the guard would send them straight back here.
+            'cancel_path' => $this->userTenantRepository->countTenantsForUser($user) > 0
+                ? $this->redirector->defaultPath()
+                : null,
         ]);
     }
 }

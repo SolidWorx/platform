@@ -57,8 +57,10 @@
                 </div>
             {% endblock %}
 
-            {# The top navbar is hidden on small screens, so the user menu moves in here. #}
+            {# The top navbar is hidden on small screens, so the user menu and the workspace
+               switcher move in here. #}
             <div class="navbar-nav flex-row d-lg-none">
+                {{ block('workspace_switcher') }}
                 {{ block('user_menu') }}
             </div>
 
