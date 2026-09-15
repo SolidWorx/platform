@@ -46,6 +46,7 @@
         "webmozart/assert": "^2.4"
     },
     "require-dev": {
+        "captainhook/captainhook-phar": "^5.29",
         "ergebnis/composer-normalize": "^2.53",
         "ergebnis/phpunit-slow-test-detector": "^2.25",
         "monolog/monolog": "^3.12",
@@ -83,6 +84,7 @@
     },
     "config": {
         "allow-plugins": {
+            "captainhook/captainhook-phar": true,
             "ergebnis/composer-normalize": true,
             "phpstan/extension-installer": true
         },

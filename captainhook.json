@@ -1,0 +1,37 @@
+{
+    "commit-msg": {
+        "enabled": true,
+        "actions": [
+            {
+                "action": "\\CaptainHook\\App\\Hook\\Message\\Action\\Beams",
+                "options": {
+                    "subjectLength": 50,
+                    "bodyLineLength": 72
+                }
+            }
+        ]
+    },
+    "pre-commit": {
+        "enabled": true,
+        "actions": [
+            {
+                "action": "\\CaptainHook\\App\\Hook\\PHP\\Action\\Linting"
+            },
+            {
+                "action": "vendor/bin/ecs check"
+            },
+            {
+                "action": "vendor/bin/rector --dry-run"
+            },
+            {
+                "action": "vendor/bin/phpstan"
+            },
+            {
+                "action": "phpunit"
+            },
+            {
+                "action": "composer normalize"
+            }
+        ]
+    }
+}
