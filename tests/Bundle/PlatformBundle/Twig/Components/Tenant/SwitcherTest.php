@@ -18,6 +18,8 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Entity\User;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
+use SolidWorx\Platform\PlatformBundle\Tenant\Event\TenantCreationCheckEvent;
+use SolidWorx\Platform\PlatformBundle\Tenant\Onboarding\TenantCreationGate;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantChoice;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantLock;
@@ -30,6 +32,8 @@ use Symfony\Component\Uid\Ulid;
 #[CoversClass(TenantChoice::class)]
 #[UsesClass(TenantContext::class)]
 #[UsesClass(TenantLock::class)]
+#[UsesClass(TenantCreationGate::class)]
+#[UsesClass(TenantCreationCheckEvent::class)]
 final class SwitcherTest extends TestCase
 {
     public function testOffersAChoiceBetweenSeveralWorkspaces(): void
@@ -44,14 +48,46 @@ final class SwitcherTest extends TestCase
     }
 
     /**
-     * One workspace is not a choice, so the switcher stays out of the way rather than rendering a
-     * menu with a single entry.
+     * A single workspace is not a choice, but it is still worth naming: the switcher is where a user
+     * reads which workspace they are in, and where they create another one.
      */
-    public function testRendersNothingWithASingleWorkspace(): void
+    public function testRendersWithASingleWorkspace(): void
     {
         $switcher = $this->createSwitcher([new TenantChoice(new Ulid(), 'Acme')]);
 
+        $this->assertTrue($switcher->isAvailable());
+    }
+
+    public function testRendersNothingWithoutAnyWorkspace(): void
+    {
+        $switcher = $this->createSwitcher([]);
+
         $this->assertFalse($switcher->isAvailable());
+    }
+
+    public function testOffersCreatingAnotherWorkspace(): void
+    {
+        $switcher = $this->createSwitcher([new TenantChoice(new Ulid(), 'Acme')]);
+
+        $this->assertTrue($switcher->canCreate());
+    }
+
+    /**
+     * The menu and the onboarding page ask the same gate, so a refused user is not shown a link to
+     * a page that would turn them away.
+     */
+    public function testHidesCreationWhenTheGateRefuses(): void
+    {
+        $switcher = $this->createSwitcher([new TenantChoice(new Ulid(), 'Acme')], onboardingEnabled: false);
+
+        $this->assertFalse($switcher->canCreate());
+    }
+
+    public function testOffersNothingToCreateForAnAnonymousVisitor(): void
+    {
+        $switcher = $this->createSwitcher([new TenantChoice(new Ulid(), 'Acme')], anonymous: true);
+
+        $this->assertFalse($switcher->canCreate());
     }
 
     public function testRendersNothingForAnAnonymousVisitor(): void
@@ -100,6 +136,7 @@ final class SwitcherTest extends TestCase
         bool $locked = false,
         ?Ulid $currentTenantId = null,
         bool $anonymous = false,
+        bool $onboardingEnabled = true,
     ): Switcher {
         $user = null;
 
@@ -126,6 +163,12 @@ final class SwitcherTest extends TestCase
             $lock->lock(new Ulid());
         }
 
-        return new Switcher($security, $repository, $context, $lock);
+        return new Switcher(
+            $security,
+            $repository,
+            $context,
+            $lock,
+            new TenantCreationGate(new EventDispatcher(), $lock, $onboardingEnabled),
+        );
     }
 }

@@ -21,6 +21,7 @@ use SolidWorx\Platform\PlatformBundle\Attributes\WithoutTenant;
 use SolidWorx\Platform\PlatformBundle\Entity\User;
 use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
+use SolidWorx\Platform\PlatformBundle\Tenant\Onboarding\TenantCreationGate;
 use SolidWorx\Platform\PlatformBundle\Tenant\Scope\TenantScopeGuardListener;
 use SolidWorx\Platform\PlatformBundle\Tenant\Scope\TenantScopeOutcome;
 use SolidWorx\Platform\PlatformBundle\Tenant\Scope\TenantScopeResolver;
@@ -53,6 +54,7 @@ use Twig\Loader\ArrayLoader;
 #[CoversClass(TenantScopeGuardListener::class)]
 #[CoversClass(WithoutTenant::class)]
 #[UsesClass(TenantScopeResolver::class)]
+#[UsesClass(TenantCreationGate::class)]
 #[UsesClass(TenantScopeOutcome::class)]
 #[UsesClass(TenantContext::class)]
 #[UsesClass(TenantManager::class)]
@@ -265,7 +267,7 @@ final class TenantScopeGuardListenerTest extends TestCase
                 new TenantManager($context, self::createStub(EntityManagerInterface::class), new TenantLock()),
                 $sessionStorage,
                 $repository,
-                $onboardingEnabled,
+                new TenantCreationGate(new EventDispatcher(), new TenantLock(), $onboardingEnabled),
             ),
             $sessionStorage,
             $urlGenerator,

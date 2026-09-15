@@ -21,7 +21,7 @@ platform:
         require_tenant: true             # always keep a tenant in scope for an authenticated user
         default_route: null              # where to land after selecting a tenant; null => "/"
         onboarding:
-            enabled: true                # let a user with no tenants create their first
+            enabled: true                # let users create workspaces
             form_type: SolidWorx\Platform\PlatformBundle\Form\Type\Tenant\TenantOnboardingType
         models:
             # The tenant + membership entities. Defaults are the platform's own entities;
@@ -197,8 +197,8 @@ so the opt-out attribute can be read off it — and asks `TenantScopeResolver` w
 |---|---|
 | exactly one tenant | it is entered automatically and stored in the session; the request continues |
 | more than one | redirected to `/tenant/select` |
-| no tenant, onboarding enabled | redirected to `/tenant/onboarding` |
-| no tenant, onboarding disabled | 403, rendering the "no workspace" page |
+| no tenant, allowed to create one | redirected to `/tenant/onboarding` |
+| no tenant, not allowed to create one | 403, rendering the "no workspace" page |
 
 Auto-selection runs on *every* request that lacks a tenant, not only at login, so a session that
 loses its tenant repairs itself on the next request. It goes through `TenantManager`, so the
@@ -235,23 +235,65 @@ Forgetting it on such a page produces a redirect loop — loud and immediate rat
 A ready-made page lets an authenticated user pick a tenant. It is served at `/tenant/select`
 (route `solidworx_platform_tenant_select`): a GET lists the user's tenants, a POST stores the choice
 in the session (picked up by the `SessionTenantResolver`). Access is guarded by the `TENANT_ACCESS`
-voter, and the page is forbidden outright while the tenant is locked to a custom domain.
+voter, and the page is forbidden outright while the tenant is locked to a custom domain. It also
+links to workspace creation when the user is allowed to create one.
 
-Drop the switcher anywhere in your templates — it decides for itself whether it has anything to
-show, so it needs no surrounding condition:
+## The workspace switcher
+
+The switcher is the workspace menu in the navigation bar: it names the workspace you are in, lists
+the others you can move to, and offers "Create new workspace" when creation is allowed. It is
+already rendered next to the user menu (block `workspace_switcher` in `_user_menu.html.twig`, placed
+by `_navbar.html.twig` and, on small screens, by `_sidebar.html.twig`) — override that block with an
+empty one to keep it out of the navigation.
+
+Drop it anywhere else with no surrounding condition; it decides for itself whether it has anything
+to show:
 
 ```twig
 <twig:Platform:Tenant:Switcher />
 ```
 
-It renders nothing when the user has one tenant or the tenant is domain-locked. It is already
-included in the user menu (`_user_menu.html.twig`, block `user_menu_workspaces`).
+It renders nothing when the user belongs to no workspace, or when the tenant is domain-locked. A
+single workspace still renders — naming the one you are in is the point, even when there is nothing
+to switch to.
 
-## Onboarding
+## Creating a workspace
 
-With `onboarding.enabled` (the default), a user with no tenants is sent to `/tenant/onboarding` to
-create their first one. Turn it off for invite-only products, where tenants are provisioned out of
-band; those users see the "no workspace" page instead.
+`/tenant/onboarding` creates a workspace — the first one a user has, and every one after that. The
+scope guard sends a user with no workspace there; a user who already has one arrives from the
+switcher or the selection page, gets a cancel link back to the application, and keeps the navigation
+bar (the page uses the `condensed` layout).
+
+### Deciding who may create one
+
+`TenantCreationGate` answers that, and everything that offers creation asks it first — the switcher
+and the selection page to decide whether to show the link, the controller to decide whether to serve
+the form — so a refusal cannot be routed around by going straight to the URL.
+
+It refuses on its own when `onboarding.enabled` is false (invite-only products, where tenants are
+provisioned out of band) or when the tenant is fixed by a custom domain. Everything else is an
+application concern, and belongs in a `TenantCreationCheckEvent` listener:
+
+```php
+use SolidWorx\Platform\PlatformBundle\Tenant\Event\TenantCreationCheckEvent;
+
+#[AsEventListener]
+final class LimitWorkspaces
+{
+    public function __invoke(TenantCreationCheckEvent $event): void
+    {
+        if ($this->subscription->planOf($event->getUser())->isFree()) {
+            $event->deny('Upgrade to create more than one workspace.');
+        }
+    }
+}
+```
+
+Listeners can only refuse, and have to say why: the reason is what the user is shown, and the first
+refusal wins. A user who is refused before they have any workspace at all sees the "no workspace"
+page rather than an onboarding page that would turn them away.
+
+### Customising the page
 
 The page is customisable at three levels, cheapest first.
 
@@ -304,7 +346,7 @@ A request arriving on a host matching `Tenant::$domain` belongs to that tenant, 
 
 - `TenantManager::switchTo()` and `clear()` throw `TenantLockedException`.
 - `/tenant/select` returns 403.
-- The switcher renders nothing.
+- The switcher renders nothing, and no workspace can be created.
 
 `runAs()` and `runWithoutFilter()` are deliberately **exempt**. They are bounded, self-restoring
 scopes for deliberate cross-tenant work, and a report or batch job must still run on a request that

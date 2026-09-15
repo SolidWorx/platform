@@ -26,6 +26,13 @@
                     {% endfor %}
                 </div>
             {% endif %}
+
+            {% if can_create|default(false) %}
+                <a href="{{ path('solidworx_platform_tenant_onboarding') }}" class="btn btn-outline-primary w-100 mt-4">
+                    {{ ux_icon('tabler:plus', {class: 'icon me-2'}) }}
+                    {{ 'Create new workspace'|trans }}
+                </a>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
