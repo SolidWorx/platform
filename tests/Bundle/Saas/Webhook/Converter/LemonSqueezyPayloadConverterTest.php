@@ -11,7 +11,7 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Bundle\Saas\Webhook\Converter;
+namespace SolidWorx\Platform\Tests\Bundle\Saas\Webhook\Converter;
 
 use JsonException;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -29,6 +29,7 @@ use SolidWorx\Platform\SaasBundle\RemoteEvent\SubscriptionRemoteEvent;
 use SolidWorx\Platform\SaasBundle\Webhook\Converter\LemonSqueezyPayloadConverter;
 use SolidWorx\Platform\Test\Traits\UsesFixturesTrait;
 use Spatie\Snapshots\MatchesSnapshots;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 #[CoversClass(LemonSqueezyPayloadConverter::class)]
 #[UsesClass(RelationshipLinks::class)]
@@ -47,6 +48,7 @@ final class LemonSqueezyPayloadConverterTest extends TestCase
     /**
      * @param array<string, mixed> $payload
      * @param class-string<SubscriptionRemoteEvent|SubscriptionPaymentRemoteEvent> $expectedClass
+     * @throws ExceptionInterface
      */
     #[DataProvider('provideConvert')]
     public function testConvert(array $payload, string $expectedClass): void

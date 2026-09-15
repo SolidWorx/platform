@@ -88,7 +88,7 @@ final readonly class JsonDocumentTransformer implements DataTransformerInterface
 
         try {
             /** @var mixed $decoded */
-            $decoded = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
+            $decoded = json_decode($value, associative: true, depth: 512, flags: JSON_THROW_ON_ERROR);
         } catch (JsonException $jsonException) {
             throw new TransformationFailedException('Invalid JSON document.', 0, $jsonException);
         }
@@ -119,7 +119,7 @@ final readonly class JsonDocumentTransformer implements DataTransformerInterface
     {
         $type = $node['type'] ?? null;
 
-        if (! is_string($type) || ! in_array($type, $this->allowedNodes, true)) {
+        if (! is_string($type) || ! in_array($type, $this->allowedNodes, strict: true)) {
             throw new TransformationFailedException(sprintf('Disallowed node type "%s".', is_string($type) ? $type : get_debug_type($type)));
         }
 
@@ -127,7 +127,7 @@ final readonly class JsonDocumentTransformer implements DataTransformerInterface
             $attrs = $node['attrs'] ?? null;
             $level = is_array($attrs) ? ($attrs['level'] ?? null) : null;
 
-            if (! in_array($level, $this->allowedHeadingLevels, true)) {
+            if (! in_array($level, $this->allowedHeadingLevels, strict: true)) {
                 throw new TransformationFailedException('Disallowed heading level.');
             }
         }
@@ -176,7 +176,7 @@ final readonly class JsonDocumentTransformer implements DataTransformerInterface
 
             $type = $mark['type'] ?? null;
 
-            if (! is_string($type) || ! in_array($type, $this->allowedMarks, true)) {
+            if (! is_string($type) || ! in_array($type, $this->allowedMarks, strict: true)) {
                 throw new TransformationFailedException(sprintf('Disallowed mark type "%s".', is_string($type) ? $type : get_debug_type($type)));
             }
 
@@ -223,6 +223,6 @@ final readonly class JsonDocumentTransformer implements DataTransformerInterface
             return true;
         }
 
-        return in_array(strtolower($scheme), self::SAFE_LINK_SCHEMES, true);
+        return in_array(strtolower($scheme), self::SAFE_LINK_SCHEMES, strict: true);
     }
 }

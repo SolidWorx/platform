@@ -58,7 +58,6 @@ use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
 use Webmozart\Assert\Assert;
-use function dirname;
 use function interface_exists;
 
 /**
@@ -127,7 +126,7 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
     {
         $config = $this->getConfig();
 
-        $loader = new PhpFileLoader($container, new FileLocator(dirname(__DIR__) . '/Resources/config'));
+        $loader = new PhpFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->import('services.php');
 
         $container->setParameter('solidworx_platform.app.name', $config['name']);
@@ -202,8 +201,8 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         // installed. Add it to your bus middleware to propagate the tenant across the bus.
         if (interface_exists(MiddlewareInterface::class)) {
             $container->register(TenantMiddleware::class, TenantMiddleware::class)
-                ->setAutowired(true)
-                ->setAutoconfigured(true);
+                ->setAutowired(autowired: true)
+                ->setAutoconfigured(autoconfigured: true);
         }
     }
 
@@ -218,7 +217,7 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
                     'Platform' => [
                         'is_bundle' => false,
                         'type' => 'attribute',
-                        'dir' => dirname(__DIR__) . '/Model',
+                        'dir' => __DIR__ . '/../Model',
                         'prefix' => 'SolidWorx\Platform\PlatformBundle\Model',
                         'alias' => 'Platform',
                     ],
@@ -243,7 +242,7 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
                 $orm['mappings']['SolidWorxPlatformBundle'] = [
                     'is_bundle' => false,
                     'type' => 'attribute',
-                    'dir' => dirname(__DIR__) . '/Entity',
+                    'dir' => __DIR__ . '/../Entity',
                     'prefix' => 'SolidWorx\Platform\PlatformBundle\Entity',
                     'alias' => 'PlatformEntity',
                 ];
@@ -270,7 +269,7 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         }
 
         if ($container->hasExtension('twig')) {
-            $path = dirname(__DIR__) . '/Resources/views';
+            $path = __DIR__ . '/../Resources/views';
 
             $container->prependExtensionConfig(
                 'twig',
@@ -286,7 +285,7 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
             $container->prependExtensionConfig('framework', [
                 'asset_mapper' => [
                     'paths' => [
-                        __DIR__.'/../../../../assets' => '@solidworx/platform',
+                        __DIR__ . '/../../../../assets' => '@solidworx/platform',
                     ],
                 ],
             ]);
@@ -363,16 +362,17 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
 
     private function isAssetMapperAvailable(ContainerBuilder $container): bool
     {
-        if (!interface_exists(AssetMapperInterface::class)) {
+        if (! interface_exists(AssetMapperInterface::class)) {
             return false;
         }
 
         // check that FrameworkBundle 6.3 or higher is installed
+        /** @var array{FrameworkBundle?: array{path: string}} $bundlesMetadata */
         $bundlesMetadata = $container->getParameter('kernel.bundles_metadata');
-        if (!isset($bundlesMetadata['FrameworkBundle'])) {
+        if (! isset($bundlesMetadata['FrameworkBundle'])) {
             return false;
         }
 
-        return is_file($bundlesMetadata['FrameworkBundle']['path'].'/Resources/config/asset_mapper.php');
+        return is_file($bundlesMetadata['FrameworkBundle']['path'] . '/Resources/config/asset_mapper.php');
     }
 }

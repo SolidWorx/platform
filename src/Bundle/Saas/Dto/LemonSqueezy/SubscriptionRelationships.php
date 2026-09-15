@@ -21,13 +21,13 @@ class SubscriptionRelationships
         public RelationshipLinks $store = new RelationshipLinks(),
         public RelationshipLinks $customer = new RelationshipLinks(),
         public RelationshipLinks $order = new RelationshipLinks(),
-        #[SerializedName('order_item')]
+        #[SerializedName(serializedName: 'order_item')]
         public RelationshipLinks $orderItem = new RelationshipLinks(),
         public RelationshipLinks $product = new RelationshipLinks(),
         public RelationshipLinks $variant = new RelationshipLinks(),
-        #[SerializedName('subscription_items')]
+        #[SerializedName(serializedName: 'subscription_items')]
         public RelationshipLinks $subscriptionItems = new RelationshipLinks(),
-        #[SerializedName('subscription_invoices')]
+        #[SerializedName(serializedName: 'subscription_invoices')]
         public RelationshipLinks $subscriptionInvoices = new RelationshipLinks(),
     ) {
     }

@@ -50,7 +50,7 @@ final class LoaderTypeExtension extends AbstractTypeExtension
     #[Override]
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefault('loader', true);
+        $resolver->setDefault('loader', value: true);
         $resolver->setAllowedTypes('loader', 'bool');
     }
 

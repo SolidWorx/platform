@@ -18,7 +18,6 @@ use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Email\Generator\CodeGenera
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Email\Generator\CodeGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(path: self::PATH, name: self::ROUTE_NAME)]
@@ -44,15 +43,13 @@ class ResendTwoFactorCode extends AbstractController
     ) {
     }
 
-    public function __invoke(Request $request): RedirectResponse
+    public function __invoke(): RedirectResponse
     {
         $user = $this->getUser();
         assert($user instanceof TwoFactorInterface);
         assert($this->codeGenerator instanceof CodeGenerator);
         $this->codeGenerator->reSend($user);
-
         $this->addFlash('success', 'Two-factor authentication code has been re-sent.');
-
         return $this->redirectToRoute('2fa_login');
     }
 }

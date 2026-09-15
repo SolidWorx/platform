@@ -34,7 +34,7 @@ final readonly class TenantRequestListener
      * @param iterable<TenantResolverInterface> $resolvers
      */
     public function __construct(
-        #[AutowireIterator('platform.tenant_resolver')]
+        #[AutowireIterator(tag: 'platform.tenant_resolver')]
         private iterable $resolvers,
         private TenantContext $tenantContext,
     ) {

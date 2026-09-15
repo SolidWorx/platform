@@ -15,7 +15,7 @@ namespace SolidWorx\Platform\PlatformBundle\Attributes\Menu;
 
 use Attribute;
 
-#[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
+#[Attribute(flags: Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 final readonly class MenuBuilder
 {
     public function __construct(

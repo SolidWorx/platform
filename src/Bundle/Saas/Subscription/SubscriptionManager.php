@@ -200,8 +200,8 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
         $subscription->setPlan($newPlan);
         $subscription->setEndDate($renewDate);
         $subscription->setStatus(SubscriptionStatus::ACTIVE);
-        $subscription->setPendingPlan(null);
-        $subscription->setPendingPlanChangeAt(null);
+        $subscription->setPendingPlan(pendingPlan: null);
+        $subscription->setPendingPlanChangeAt(pendingPlanChangeAt: null);
 
         $this->subscriptionRepository->save($subscription);
     }
@@ -230,8 +230,8 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
     {
         $renewDate = $this->paymentIntegration->resume($subscription);
 
-        $subscription->setPendingPlan(null);
-        $subscription->setPendingPlanChangeAt(null);
+        $subscription->setPendingPlan(pendingPlan: null);
+        $subscription->setPendingPlanChangeAt(pendingPlanChangeAt: null);
         $subscription->setEndDate($renewDate);
         $subscription->setStatus(SubscriptionStatus::ACTIVE);
 
@@ -252,8 +252,8 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
         }
 
         $subscription->setPlan($pendingPlan);
-        $subscription->setPendingPlan(null);
-        $subscription->setPendingPlanChangeAt(null);
+        $subscription->setPendingPlan(pendingPlan: null);
+        $subscription->setPendingPlanChangeAt(pendingPlanChangeAt: null);
 
         if ($pendingPlan->isFree()) {
             $subscription->setStatus(SubscriptionStatus::ACTIVE);
@@ -261,7 +261,7 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
             $subscription->setEndDate(CarbonImmutable::now('UTC')->addYears(100));
             // Drop the now-stale external billing id so the subscription
             // matches the canonical free-plan shape (active, no provider id).
-            $subscription->setSubscriptionId(null);
+            $subscription->setSubscriptionId(subscriptionId: null);
         }
 
         $this->subscriptionRepository->save($subscription);

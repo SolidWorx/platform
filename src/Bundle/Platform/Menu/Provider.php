@@ -77,6 +77,7 @@ final class Provider implements MenuProviderInterface
         // to prevent errors when trying to render a menu
         // that has no authorized items.
         if (! $this->has($name)) {
+            /** @phpstan-ignore-next-line  */
             $this->list[$name] = new SplPriorityQueue();
         }
 

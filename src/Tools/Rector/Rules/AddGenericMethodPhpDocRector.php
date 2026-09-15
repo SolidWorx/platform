@@ -210,7 +210,7 @@ final class AddGenericMethodPhpDocRector extends AbstractRector
             ? new NullableTypeNode($genericTypeNode)
             : $genericTypeNode;
 
-        $phpDocInfo->addPhpDocTagNode(new PhpDocTagNode('@param', new ParamTagValueNode($typeNode, false, $paramName, '', false)));
+        $phpDocInfo->addPhpDocTagNode(new PhpDocTagNode('@param', new ParamTagValueNode($typeNode, isVariadic: false, parameterName: $paramName, description: '', isReference: false)));
         $this->docBlockUpdater->updateRefactoredNodeWithPhpDocInfo($node);
 
         return true;

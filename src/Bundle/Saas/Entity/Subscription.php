@@ -84,7 +84,7 @@ class Subscription
      * @var Collection<int, SubscriptionLog>
      */
     #[ORM\OneToMany(targetEntity: SubscriptionLog::class, mappedBy: 'subscription', fetch: 'EXTRA_LAZY')]
-    #[ORM\OrderBy([
+    #[ORM\OrderBy(value: [
         'createdAt' => 'DESC',
     ])]
     private Collection $logs;

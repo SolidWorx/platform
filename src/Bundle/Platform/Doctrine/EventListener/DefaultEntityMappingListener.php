@@ -52,7 +52,7 @@ final readonly class DefaultEntityMappingListener
         $metadata = $event->getClassMetadata();
         $name = $metadata->getName();
 
-        if (! in_array($name, [Tenant::class, UserTenant::class, User::class], true)) {
+        if (! in_array($name, [Tenant::class, UserTenant::class, User::class], strict: true)) {
             return;
         }
 
@@ -64,7 +64,7 @@ final readonly class DefaultEntityMappingListener
 
         $metadata->isMappedSuperclass = true;
         $metadata->isEmbeddedClass = false;
-        $metadata->setCustomRepositoryClass(null);
+        $metadata->setCustomRepositoryClass(repositoryClassName: null);
     }
 
     private function isMappedModel(string $name): bool

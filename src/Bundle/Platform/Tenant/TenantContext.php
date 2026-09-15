@@ -69,7 +69,7 @@ final class TenantContext implements ResetInterface
 
     public function clear(): void
     {
-        $this->setTenant(null);
+        $this->setTenant(tenant: null);
     }
 
     /**
@@ -87,7 +87,7 @@ final class TenantContext implements ResetInterface
     public function pop(): void
     {
         if ($this->stack === []) {
-            $this->setTenant(null);
+            $this->setTenant(tenant: null);
 
             return;
         }
@@ -99,7 +99,7 @@ final class TenantContext implements ResetInterface
     public function reset(): void
     {
         $this->stack = [];
-        $this->setTenant(null);
+        $this->setTenant(tenant: null);
     }
 
     private function normalize(Ulid | TenantInterface | null $tenant): ?Ulid

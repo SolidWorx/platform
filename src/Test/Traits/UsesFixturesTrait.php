@@ -94,7 +94,7 @@ trait UsesFixturesTrait
             throw new RuntimeException(sprintf('Could not read fixture file "%s".', $fixturePath));
         }
 
-        $decoded = json_decode($content, true, flags: JSON_THROW_ON_ERROR);
+        $decoded = json_decode($content, associative: true, flags: JSON_THROW_ON_ERROR);
 
         if (! is_array($decoded)) {
             throw new RuntimeException(sprintf('Fixture file "%s" does not contain a JSON object.', $fixturePath));

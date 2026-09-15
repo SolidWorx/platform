@@ -21,7 +21,7 @@ use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Kernel\RequiredBundle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-#[RequiredBundle(SolidWorxPlatformBundle::class)]
+#[RequiredBundle(class: SolidWorxPlatformBundle::class)]
 final class SolidWorxPlatformUiBundle extends Bundle implements PlatformConfigSectionInterface
 {
     public const string NAMESPACE = __NAMESPACE__;

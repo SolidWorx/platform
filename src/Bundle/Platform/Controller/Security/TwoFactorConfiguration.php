@@ -30,7 +30,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * half-way through the login challenge — the exact opposite of who this page is for.
  */
 #[Route(path: self::PATH, name: self::ROUTE_NAME, methods: ['GET'])]
-#[IsGranted('IS_AUTHENTICATED_FULLY')]
+#[IsGranted(attribute: 'IS_AUTHENTICATED_FULLY')]
 final class TwoFactorConfiguration extends AbstractController
 {
     /**

@@ -17,6 +17,6 @@ use Symfony\Component\Serializer\Attribute\SerializedName;
 
 class SubscriptionInvoiceUrls
 {
-    #[SerializedName('invoice_url')]
+    #[SerializedName(serializedName: 'invoice_url')]
     public string $invoiceUrl;
 }

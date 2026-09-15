@@ -27,7 +27,7 @@ use function is_string;
  * Lowest priority in the chain and disabled by default; enable it for path-based tenancy. It is
  * safe because membership is validated when the tenant is applied.
  */
-#[AutoconfigureTag('platform.tenant_resolver', [
+#[AutoconfigureTag(name: 'platform.tenant_resolver', attributes: [
     'priority' => 10,
 ])]
 final readonly class RouteTenantResolver implements TenantResolverInterface

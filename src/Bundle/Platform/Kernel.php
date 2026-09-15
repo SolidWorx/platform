@@ -165,13 +165,13 @@ abstract class Kernel extends BaseKernel
 
             $this->rawConfig = match ($ext) {
                 'yaml', 'yml' => $this->toConfigArray(Yaml::parseFile($configFile, Yaml::PARSE_CONSTANT)),
-                'json' => $this->toConfigArray(json_decode((string) file_get_contents($configFile), true, 512, JSON_THROW_ON_ERROR)),
+                'json' => $this->toConfigArray(json_decode((string) file_get_contents($configFile), associative: true, depth: 512, flags: JSON_THROW_ON_ERROR)),
                 'php' => $this->toConfigArray(require $configFile),
                 default => throw new RuntimeException(sprintf('Unsupported platform configuration file format: .%s', $ext)),
             };
         }
 
-        $content = "<?php\n\n return " . var_export($this->rawConfig, true) . ";\n";
+        $content = "<?php\n\n return " . var_export($this->rawConfig, return: true) . ";\n";
 
         $cache->write($content);
         $this->publishPlatformConfigState();

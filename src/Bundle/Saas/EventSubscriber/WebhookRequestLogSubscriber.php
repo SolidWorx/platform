@@ -71,7 +71,7 @@ final readonly class WebhookRequestLogSubscriber implements EventSubscriberInter
 
         $gateway = $request->attributes->getString('type');
         $rawBody = $request->getContent();
-        $decodedPayload = json_decode($rawBody, true);
+        $decodedPayload = json_decode($rawBody, associative: true);
         /** @var array<string, mixed> $payload */
         $payload = is_array($decodedPayload) ? $decodedPayload : [];
 
@@ -138,6 +138,6 @@ final readonly class WebhookRequestLogSubscriber implements EventSubscriberInter
 
     private function isSensitiveHeader(string $name): bool
     {
-        return in_array(strtolower($name), self::SENSITIVE_HEADERS, true);
+        return in_array(strtolower($name), self::SENSITIVE_HEADERS, strict: true);
     }
 }

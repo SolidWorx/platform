@@ -35,8 +35,8 @@ use function is_string;
  * Lets an authenticated user pick the tenant they want to work in; the choice is stored in the
  * session and picked up by the {@see \SolidWorx\Platform\PlatformBundle\Tenant\Resolver\SessionTenantResolver}.
  */
-#[AsTaggedItem('controller.service_arguments')]
-#[IsGranted('IS_AUTHENTICATED_FULLY')]
+#[AsTaggedItem(index: 'controller.service_arguments')]
+#[IsGranted(attribute: 'IS_AUTHENTICATED_FULLY')]
 final class SelectTenant extends BaseController
 {
     private const string CSRF_TOKEN_ID = 'tenant_select';

@@ -20,20 +20,20 @@ class FirstSubscriptionItem
 {
     public int $id;
 
-    #[SerializedName('subscription_id')]
+    #[SerializedName(serializedName: 'subscription_id')]
     public int $subscriptionId;
 
-    #[SerializedName('price_id')]
+    #[SerializedName(serializedName: 'price_id')]
     public int $priceId;
 
     public int $quantity;
 
-    #[SerializedName('is_usage_based')]
+    #[SerializedName(serializedName: 'is_usage_based')]
     public bool $isUsageBased;
 
-    #[SerializedName('created_at')]
+    #[SerializedName(serializedName: 'created_at')]
     public DateTimeInterface $createdAt;
 
-    #[SerializedName('updated_at')]
+    #[SerializedName(serializedName: 'updated_at')]
     public DateTimeInterface $updatedAt;
 }

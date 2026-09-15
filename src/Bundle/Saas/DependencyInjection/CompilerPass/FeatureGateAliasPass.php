@@ -32,6 +32,6 @@ final class FeatureGateAliasPass implements CompilerPassInterface
     public function process(ContainerBuilder $container): void
     {
         $container->setAlias(FeatureGate::class, PlanFeatureGate::class)
-            ->setPublic(false);
+            ->setPublic(boolean: false);
     }
 }

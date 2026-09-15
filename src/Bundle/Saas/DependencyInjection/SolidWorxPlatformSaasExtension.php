@@ -125,7 +125,7 @@ final class SolidWorxPlatformSaasExtension extends Extension implements PrependE
             $container->setParameter('solidworx_platform.saas.integration.payment.lemon_squeezy.api_key', $lemonSqueezy['api_key']);
             $container->setParameter('solidworx_platform.saas.integration.payment.lemon_squeezy.store_id', $lemonSqueezy['store_id']);
             $container->setParameter('solidworx_platform.saas.integration.payment.lemon_squeezy.webhook_secret', $lemonSqueezy['webhook_secret']);
-            $container->setParameter('solidworx_platform.saas.integration.payment.lemon_squeezy.enabled', true);
+            $container->setParameter('solidworx_platform.saas.integration.payment.lemon_squeezy.enabled', value: true);
         }
 
         $features = $config['features'];

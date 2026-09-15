@@ -40,7 +40,7 @@ final readonly class SchemaGenerator implements SchemaGeneratorInterface
      * @param iterable<PlatformConfigurationInterface> $configurations
      */
     public function __construct(
-        #[AutowireIterator('solidworx_platform.configuration')]
+        #[AutowireIterator(tag: 'solidworx_platform.configuration')]
         private iterable $configurations,
     ) {
     }
@@ -204,7 +204,7 @@ final readonly class SchemaGenerator implements SchemaGeneratorInterface
         return [
             // A nullable enum (`->values([null, 'light', 'dark'])`) must advertise the null type as
             // well, otherwise the schema contradicts its own enum list.
-            'type' => in_array(null, $values, true) ? ['string', 'null'] : 'string',
+            'type' => in_array(needle: null, haystack: $values, strict: true) ? ['string', 'null'] : 'string',
             'enum' => $values,
         ];
     }

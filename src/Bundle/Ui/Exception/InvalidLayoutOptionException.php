@@ -60,7 +60,7 @@ final class InvalidLayoutOptionException extends InvalidArgumentException
         return new self(sprintf(
             'Layout option "%s" does not accept %s. Expected %s.',
             $option->value,
-            is_scalar($value) || $value === null ? var_export($value, true) : get_debug_type($value),
+            is_scalar($value) || $value === null ? var_export($value, return: true) : get_debug_type($value),
             $expected,
         ));
     }

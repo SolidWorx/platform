@@ -185,7 +185,7 @@ enum LayoutOption: string
         $allowed = $this->allowedValues();
 
         if ($allowed !== null) {
-            return in_array($value, $allowed, true);
+            return in_array($value, $allowed, strict: true);
         }
 
         return is_bool($this->default()) ? is_bool($value) : ($value === null || is_string($value));

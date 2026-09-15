@@ -41,7 +41,7 @@ trait UserTwoFactor
     /**
      * @var list<string>|null
      */
-    #[ORM\Column(name: 'backup_codes', type: 'json', nullable: true)]
+    #[ORM\Column(name: 'backup_codes', type: Types::JSON, nullable: true)]
     private ?array $backupCodes = [];
 
     public function isTotpAuthenticationEnabled(): bool
@@ -119,13 +119,13 @@ trait UserTwoFactor
 
     public function isBackupCode(string $code): bool
     {
-        return in_array($code, $this->backupCodes ?? [], true);
+        return in_array($code, $this->backupCodes ?? [], strict: true);
     }
 
     public function invalidateBackupCode(string $code): void
     {
         $codes = $this->backupCodes ?? [];
-        $key = array_search($code, $codes, true);
+        $key = array_search($code, $codes, strict: true);
         if ($key !== false) {
             unset($codes[$key]);
             $this->backupCodes = array_values($codes);

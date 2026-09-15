@@ -80,7 +80,7 @@ class UserRepository extends EntityRepository implements UserRepositoryInterface
             ->where('(u.email = :email)')
             ->andWhere('u.enabled = :enabled')
             ->setParameter('email', $identifier)
-            ->setParameter('enabled', true)
+            ->setParameter('enabled', value: true)
             ->getQuery();
 
         try {

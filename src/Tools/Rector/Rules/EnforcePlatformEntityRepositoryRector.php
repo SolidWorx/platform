@@ -142,7 +142,7 @@ final class EnforcePlatformEntityRepositoryRector extends AbstractRector
                 }
 
                 $typeName = $value->type->type->name;
-                if (! \in_array($typeName, self::DOCTRINE_SHORT_NAMES, true)) {
+                if (! \in_array($typeName, self::DOCTRINE_SHORT_NAMES, strict: true)) {
                     continue;
                 }
 
@@ -189,6 +189,6 @@ final class EnforcePlatformEntityRepositoryRector extends AbstractRector
 
     private function isDirectDoctrineParent(string $parentFqn): bool
     {
-        return \in_array($parentFqn, self::DOCTRINE_REPOSITORY_CLASSES, true);
+        return \in_array($parentFqn, self::DOCTRINE_REPOSITORY_CLASSES, strict: true);
     }
 }

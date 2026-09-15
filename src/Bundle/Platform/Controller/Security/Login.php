@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
-#[AsTaggedItem('controller.service_arguments')]
+#[AsTaggedItem(index: 'controller.service_arguments')]
 final class Login extends AbstractController
 {
     public function __construct(

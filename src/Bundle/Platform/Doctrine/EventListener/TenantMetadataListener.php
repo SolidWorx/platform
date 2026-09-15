@@ -98,7 +98,7 @@ final class TenantMetadataListener
         foreach ($uniqueConstraints as $name => $definition) {
             $columns = $definition['columns'] ?? [];
 
-            if (count($columns) === 1 && in_array($columns[0], $globallyUniqueFields, true)) {
+            if (count($columns) === 1 && in_array($columns[0], $globallyUniqueFields, strict: true)) {
                 continue;
             }
 
@@ -131,7 +131,7 @@ final class TenantMetadataListener
             return $columns;
         }
 
-        if (in_array($column, $columns, true)) {
+        if (in_array($column, $columns, strict: true)) {
             // Index already contains the column, but not as the leading column. Remove it so we can re-add it to the front.
             $columns = array_filter($columns, static fn (string $c): bool => $c !== $column);
         }
@@ -146,6 +146,6 @@ final class TenantMetadataListener
     {
         $columnSets = array_map(static fn (array $definition): array => $definition['columns'] ?? [], $indexes);
 
-        return in_array([$column], $columnSets, true);
+        return in_array([$column], $columnSets, strict: true);
     }
 }

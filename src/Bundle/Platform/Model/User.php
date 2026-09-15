@@ -78,7 +78,7 @@ abstract class User implements UserInterface
     /**
      * @var string[]
      */
-    #[ORM\Column(name: 'roles', type: 'json')]
+    #[ORM\Column(name: 'roles', type: Types::JSON)]
     protected array $roles = [];
 
     #[ORM\Column(name: 'google_id', type: Types::STRING, length: 45, nullable: true)]
@@ -119,7 +119,7 @@ abstract class User implements UserInterface
             return $this;
         }
 
-        if (! in_array($role, $this->roles, true)) {
+        if (! in_array($role, $this->roles, strict: true)) {
             $this->roles[] = $role;
         }
 
@@ -165,7 +165,7 @@ abstract class User implements UserInterface
 
     public function hasRole(string $role): bool
     {
-        return in_array(strtoupper($role), $this->getRoles(), true);
+        return in_array(strtoupper($role), $this->getRoles(), strict: true);
     }
 
     public function isEnabled(): bool
@@ -180,7 +180,7 @@ abstract class User implements UserInterface
 
     public function removeRole(string $role): static
     {
-        if (false !== $key = array_search(strtoupper($role), $this->roles, true)) {
+        if (false !== $key = array_search(strtoupper($role), $this->roles, strict: true)) {
             unset($this->roles[$key]);
             $this->roles = array_values($this->roles);
         }

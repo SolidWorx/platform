@@ -20,97 +20,97 @@ use Symfony\Component\Serializer\Attribute\SerializedName;
 
 class SubscriptionInvoiceAttributes
 {
-    #[SerializedName('store_id')]
+    #[SerializedName(serializedName: 'store_id')]
     public int $storeId;
 
-    #[SerializedName('subscription_id')]
+    #[SerializedName(serializedName: 'subscription_id')]
     public int $subscriptionId;
 
-    #[SerializedName('customer_id')]
+    #[SerializedName(serializedName: 'customer_id')]
     public int $customerId;
 
-    #[SerializedName('user_name')]
+    #[SerializedName(serializedName: 'user_name')]
     public string $userName;
 
-    #[SerializedName('user_email')]
+    #[SerializedName(serializedName: 'user_email')]
     public string $userEmail;
 
-    #[SerializedName('billing_reason')]
+    #[SerializedName(serializedName: 'billing_reason')]
     public SubscriptionInvoiceBillingReason $billingReason;
 
-    #[SerializedName('card_brand')]
+    #[SerializedName(serializedName: 'card_brand')]
     public ?string $cardBrand = null;
 
-    #[SerializedName('card_last_four')]
+    #[SerializedName(serializedName: 'card_last_four')]
     public ?string $cardLastFour = null;
 
     public string $currency;
 
-    #[SerializedName('currency_rate')]
+    #[SerializedName(serializedName: 'currency_rate')]
     public string $currencyRate;
 
     public SubscriptionInvoiceStatus $status;
 
-    #[SerializedName('status_formatted')]
+    #[SerializedName(serializedName: 'status_formatted')]
     public string $statusFormatted;
 
     public bool $refunded;
 
-    #[SerializedName('refunded_at')]
+    #[SerializedName(serializedName: 'refunded_at')]
     public ?DateTimeInterface $refundedAt = null;
 
     public float $subtotal;
 
-    #[SerializedName('discount_total')]
+    #[SerializedName(serializedName: 'discount_total')]
     public float $discountTotal;
 
     public float $tax;
 
-    #[SerializedName('tax_inclusive')]
+    #[SerializedName(serializedName: 'tax_inclusive')]
     public bool $taxInclusive;
 
     public float $total;
 
-    #[SerializedName('refunded_amount')]
+    #[SerializedName(serializedName: 'refunded_amount')]
     public float $refundedAmount;
 
-    #[SerializedName('subtotal_usd')]
+    #[SerializedName(serializedName: 'subtotal_usd')]
     public float $subtotalUsd;
 
-    #[SerializedName('discount_total_usd')]
+    #[SerializedName(serializedName: 'discount_total_usd')]
     public float $discountTotalUsd;
 
-    #[SerializedName('tax_usd')]
+    #[SerializedName(serializedName: 'tax_usd')]
     public float $taxUsd;
 
-    #[SerializedName('total_usd')]
+    #[SerializedName(serializedName: 'total_usd')]
     public float $totalUsd;
 
-    #[SerializedName('refunded_amount_usd')]
+    #[SerializedName(serializedName: 'refunded_amount_usd')]
     public float $refundedAmountUsd;
 
-    #[SerializedName('subtotal_formatted')]
+    #[SerializedName(serializedName: 'subtotal_formatted')]
     public string $subtotalFormatted;
 
-    #[SerializedName('discount_total_formatted')]
+    #[SerializedName(serializedName: 'discount_total_formatted')]
     public string $discountTotalFormatted;
 
-    #[SerializedName('tax_formatted')]
+    #[SerializedName(serializedName: 'tax_formatted')]
     public string $taxFormatted;
 
-    #[SerializedName('total_formatted')]
+    #[SerializedName(serializedName: 'total_formatted')]
     public string $totalFormatted;
 
-    #[SerializedName('refunded_amount_formatted')]
+    #[SerializedName(serializedName: 'refunded_amount_formatted')]
     public string $refundedAmountFormatted;
 
-    #[SerializedName('created_at')]
+    #[SerializedName(serializedName: 'created_at')]
     public DateTimeInterface $createdAt;
 
-    #[SerializedName('updated_at')]
+    #[SerializedName(serializedName: 'updated_at')]
     public DateTimeInterface $updatedAt;
 
-    #[SerializedName('test_mode')]
+    #[SerializedName(serializedName: 'test_mode')]
     public bool $testMode = false;
 
     public function __construct(

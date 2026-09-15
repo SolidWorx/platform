@@ -15,7 +15,6 @@ namespace SolidWorx\Platform\SaasBundle\Console\Command;
 
 use Carbon\CarbonImmutable;
 use Doctrine\Common\Collections\Criteria;
-use Doctrine\Common\Collections\Order;
 use Doctrine\ORM\Proxy\DefaultProxyClassNameResolver;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Console\Command;
@@ -23,6 +22,7 @@ use SolidWorx\Platform\PlatformBundle\Feature\SubscribableInterface;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Enum\SubscriptionStatus;
 use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepository;
+use SortDirection;
 use Stringable;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
@@ -81,14 +81,14 @@ final class SubscriptionListCommand extends Command
         if ($latest) {
             $criteria->andWhere($expr->gte('startDate', CarbonImmutable::now()->subDays(30)->startOfDay()));
             $criteria->orderBy([
-                'startDate' => Order::Descending,
+                'startDate' => SortDirection::Descending,
             ]);
         }
 
         if ($endingSoon) {
             $criteria->andWhere($expr->lte('endDate', CarbonImmutable::now()->addDays(7)->endOfDay()));
             $criteria->orderBy([
-                'endDate' => Order::Ascending,
+                'endDate' => SortDirection::Descending,
             ]);
         }
 

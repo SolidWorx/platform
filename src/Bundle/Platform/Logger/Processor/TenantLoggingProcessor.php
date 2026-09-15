@@ -21,7 +21,7 @@ use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Symfony\Component\Uid\Ulid;
 
-#[AutoconfigureTag('monolog.processor')]
+#[AutoconfigureTag(name: 'monolog.processor')]
 final readonly class TenantLoggingProcessor implements ProcessorInterface
 {
     public function __construct(

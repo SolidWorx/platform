@@ -11,8 +11,9 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Bundle\Saas\RemoteEvent;
+namespace SolidWorx\Platform\Tests\Bundle\Saas\RemoteEvent;
 
+use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -88,7 +89,7 @@ final class LemonSqueezyWebhookConsumerTest extends TestCase
             )
             ->willReturnArgument(0);
 
-        $consumer = new LemonSqueezyWebhookConsumer($dispatcher, new RequestStack());
+        $consumer = new LemonSqueezyWebhookConsumer($dispatcher, new RequestStack(), self::createStub(EntityManagerInterface::class));
         $consumer->consume($remoteEvent);
     }
 
@@ -100,7 +101,7 @@ final class LemonSqueezyWebhookConsumerTest extends TestCase
         $dispatcher = $this->createMock(EventDispatcherInterface::class);
         $dispatcher->expects($this->never())->method('dispatch');
 
-        $consumer = new LemonSqueezyWebhookConsumer($dispatcher, new RequestStack());
+        $consumer = new LemonSqueezyWebhookConsumer($dispatcher, new RequestStack(), self::createStub(EntityManagerInterface::class));
 
         $consumer->consume(new RemoteEvent('name', 'text', []));
     }

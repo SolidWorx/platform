@@ -18,18 +18,18 @@ use Symfony\Component\Serializer\Attribute\SerializedName;
 
 class Meta
 {
-    #[SerializedName('test_mode')]
+    #[SerializedName(serializedName: 'test_mode')]
     public bool $testMode;
 
-    #[SerializedName('event_name')]
+    #[SerializedName(serializedName: 'event_name')]
     public Event $eventName;
 
-    #[SerializedName('webhook_id')]
+    #[SerializedName(serializedName: 'webhook_id')]
     public string $webhookId;
 
     /**
      * @var array<string, mixed>
      */
-    #[SerializedName('custom_data')]
+    #[SerializedName(serializedName: 'custom_data')]
     public array $customData;
 }

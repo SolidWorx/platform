@@ -51,29 +51,29 @@ class SubscriptionAttributes
 
     public bool $cancelled;
 
-    #[SerializedName('trial_ends_at')]
+    #[SerializedName(serializedName: 'trial_ends_at')]
     public ?DateTimeInterface $trialEndsAt = null;
 
-    #[SerializedName('billing_anchor')]
+    #[SerializedName(serializedName: 'billing_anchor')]
     public int $billingAnchor;
 
-    #[SerializedName('renews_at')]
+    #[SerializedName(serializedName: 'renews_at')]
     public ?DateTimeInterface $renewsAt = null;
 
-    #[SerializedName('ends_at')]
+    #[SerializedName(serializedName: 'ends_at')]
     public ?DateTimeInterface $endsAt = null;
 
-    #[SerializedName('created_at')]
+    #[SerializedName(serializedName: 'created_at')]
     public DateTimeInterface $createdAt;
 
-    #[SerializedName('updated_at')]
+    #[SerializedName(serializedName: 'updated_at')]
     public DateTimeInterface $updatedAt;
 
-    #[SerializedName('test_mode')]
+    #[SerializedName(serializedName: 'test_mode')]
     public bool $testMode;
 
     public function __construct(
-        #[SerializedName('first_subscription_item')]
+        #[SerializedName(serializedName: 'first_subscription_item')]
         public FirstSubscriptionItem $firstSubscriptionItem = new FirstSubscriptionItem(),
         public SubscriptionUrls $urls = new SubscriptionUrls(),
     ) {

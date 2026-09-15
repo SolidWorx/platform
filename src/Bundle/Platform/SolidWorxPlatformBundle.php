@@ -34,10 +34,10 @@ use Symfony\UX\Icons\UXIconsBundle;
 use Twig\Extra\TwigExtraBundle\TwigExtraBundle;
 use function sprintf;
 
-#[RequiredBundle(SolidWorxPlatformBundle::class)]
-#[RequiredBundle(TwigExtraBundle::class)]
-#[RequiredBundle(KnpMenuBundle::class)]
-#[RequiredBundle(UXIconsBundle::class)]
+#[RequiredBundle(class: SolidWorxPlatformBundle::class)]
+#[RequiredBundle(class: TwigExtraBundle::class)]
+#[RequiredBundle(class: KnpMenuBundle::class)]
+#[RequiredBundle(class: UXIconsBundle::class)]
 final class SolidWorxPlatformBundle extends Bundle implements PlatformConfigSectionInterface
 {
     public const string NAMESPACE = __NAMESPACE__;

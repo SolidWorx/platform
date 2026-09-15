@@ -17,12 +17,12 @@ use Symfony\Component\Serializer\Attribute\SerializedName;
 
 class SubscriptionUrls
 {
-    #[SerializedName('update_payment_method')]
+    #[SerializedName(serializedName: 'update_payment_method')]
     public string $updatePaymentMethod;
 
-    #[SerializedName('customer_portal')]
+    #[SerializedName(serializedName: 'customer_portal')]
     public string $customerPortal;
 
-    #[SerializedName('customer_portal_update_subscription')]
+    #[SerializedName(serializedName: 'customer_portal_update_subscription')]
     public string $customerPortalUpdateSubscription;
 }

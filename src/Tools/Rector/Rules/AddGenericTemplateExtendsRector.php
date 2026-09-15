@@ -523,8 +523,8 @@ final class AddGenericTemplateExtendsRector extends AbstractRector
 
         return new ArrayShapeItemNode(
             new IdentifierTypeNode($fieldName),
-            false,
-            $phpType,
+            optional: false,
+            valueType: $phpType,
         );
     }
 
@@ -661,7 +661,7 @@ final class AddGenericTemplateExtendsRector extends AbstractRector
             }
 
             $methodName = $sub->name->toLowerString();
-            return \in_array($methodName, ['setdefaults', 'setdefault'], true);
+            return \in_array($methodName, ['setdefaults', 'setdefault'], strict: true);
         });
 
         if (! $methodCall instanceof MethodCall) {

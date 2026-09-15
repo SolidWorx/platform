@@ -60,8 +60,8 @@ class PlanRepository extends EntityRepository implements PlanRepositoryInterface
         $default = $this->createQueryBuilder('p')
             ->where('p.default = :default')
             ->andWhere('p.active = :active')
-            ->setParameter('default', true)
-            ->setParameter('active', true)
+            ->setParameter('default', value: true)
+            ->setParameter('active', value: true)
             ->orderBy('p.price', 'ASC')
             ->setMaxResults(1)
             ->getQuery()
@@ -73,7 +73,7 @@ class PlanRepository extends EntityRepository implements PlanRepositoryInterface
 
         $fallback = $this->createQueryBuilder('p')
             ->where('p.active = :active')
-            ->setParameter('active', true)
+            ->setParameter('active', value: true)
             ->orderBy('p.price', 'ASC')
             ->addOrderBy('p.name', 'ASC')
             ->setMaxResults(1)
@@ -90,7 +90,7 @@ class PlanRepository extends EntityRepository implements PlanRepositoryInterface
     {
         $result = $this->createQueryBuilder('p')
             ->where('p.active = :active')
-            ->setParameter('active', true)
+            ->setParameter('active', value: true)
             ->orderBy('p.price', 'ASC')
             ->addOrderBy('p.name', 'ASC')
             ->getQuery()

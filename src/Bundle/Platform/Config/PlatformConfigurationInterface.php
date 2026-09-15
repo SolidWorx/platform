@@ -25,7 +25,7 @@ use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
  * Implementations are auto-tagged as `solidworx_platform.configuration` and collected by
  * {@see SchemaGenerator} to build the JSON Schema for `platform.yaml` autocompletion.
  */
-#[AutoconfigureTag('solidworx_platform.configuration')]
+#[AutoconfigureTag(name: 'solidworx_platform.configuration')]
 interface PlatformConfigurationInterface extends PlatformConfigKeyInterface
 {
     /**

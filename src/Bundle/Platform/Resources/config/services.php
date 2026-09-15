@@ -65,7 +65,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
     // The built-in domain list is layered with a supplemental, refreshable file
     // (kept current by the platform:disposable-domains:update command) so that
     // both the vendor baseline and locally tracked domains are matched.
-    $blocklistFile = dirname(__DIR__) . '/data/disposable_email_blocklist.conf';
+    $blocklistFile = __DIR__ . '/../data/disposable_email_blocklist.conf';
 
     $services->set(BuiltInAdapter::class);
 

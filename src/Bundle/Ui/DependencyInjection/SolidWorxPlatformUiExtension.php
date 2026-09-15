@@ -24,7 +24,6 @@ use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Webmozart\Assert\Assert;
-use function dirname;
 
 /**
  * @phpstan-import-type UiConfig from UiConfiguration
@@ -48,7 +47,7 @@ final class SolidWorxPlatformUiExtension extends Extension implements PrependExt
     #[Override]
     public function load(array $configs, ContainerBuilder $container): void
     {
-        $loader = new PhpFileLoader($container, new FileLocator(dirname(__DIR__) . '/Resources/config'));
+        $loader = new PhpFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->import('services.php');
 
         $config = $this->getConfig();
@@ -84,7 +83,7 @@ final class SolidWorxPlatformUiExtension extends Extension implements PrependExt
         if ($container->hasExtension('twig')) {
             $container->prependExtensionConfig('twig', [
                 'paths' => [
-                    dirname(__DIR__) . '/templates/' => 'Ui',
+                    __DIR__ . '/../templates/' => 'Ui',
                 ],
             ]);
         }

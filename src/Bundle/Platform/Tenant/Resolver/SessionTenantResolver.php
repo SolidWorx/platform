@@ -26,7 +26,7 @@ use function is_string;
  * This is the default for an authenticated user once they have selected a tenant. Membership is not
  * checked here — the access-validation listener enforces it uniformly when the tenant is applied.
  */
-#[AutoconfigureTag('platform.tenant_resolver', [
+#[AutoconfigureTag(name: 'platform.tenant_resolver', attributes: [
     'priority' => 20,
 ])]
 final readonly class SessionTenantResolver implements TenantResolverInterface

@@ -16,6 +16,7 @@ use Rector\DeadCode\Rector\Class_\RemoveRefactorDuplicatedNodeInstanceCheckRecto
 use Rector\PHPUnit\Set\PHPUnitSetList;
 use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
+use Rector\Symfony\Configs\Rector\Closure\ServiceArgsToServiceNamedArgRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\AddReturnDocblockForScalarArrayFromAssignsRector;
 use Rector\TypeDeclarationDocblocks\Rector\Class_\AddParamTypeToRefactorMethodRector;
 use Rector\ValueObject\PhpVersion;
@@ -28,15 +29,38 @@ return RectorConfig::configure()
     ->withImportNames()
     ->withComposerBased(twig: true, doctrine: true, phpunit: true, symfony: true)
     ->withPhpVersion(PhpVersion::PHP_84)
+    ->withAttributesSets(symfony: true, doctrine: true, gedmo: true, phpunit: true)
+    ->withPhpLevel(0)
+    ->withRootFiles()
+    ->withEditorUrl('phpstorm://open?url=file://%%f&line=%%l')
+    ->withPreparedSets(
+        deadCode: true,
+        codeQuality: true,
+        codingStyle: true,
+        typeDeclarations: true,
+        typeDeclarationDocblocks: true,
+        privatization: true,
+        naming: false,
+        namedArgs: true,
+        instanceOf: true,
+        if: true,
+        earlyReturn: true,
+        carbon: true,
+        rectorPreset: true,
+        phpunitCodeQuality: true,
+        phpunitNarrowAsserts: true,
+        phpunitMockToStub: true,
+        doctrineCodeQuality: true,
+        symfonyCodeQuality: true,
+        symfonyConfigs: true,
+    )
+    ->withParallel()
     ->withSets([
         SolidWorxSetList::PLATFORM,
         // General
         SetList::CODE_QUALITY,
         SetList::CODING_STYLE,
         SetList::DEAD_CODE,
-        SetList::EARLY_RETURN,
-        SetList::INSTANCEOF,
-        SetList::PHP_84,
         SetList::RECTOR_PRESET,
         SetList::TYPE_DECLARATION,
         SetList::TYPE_DECLARATION_DOCBLOCKS,
@@ -57,4 +81,12 @@ return RectorConfig::configure()
         AddReturnDocblockForScalarArrayFromAssignsRector::class,
         RemoveRefactorDuplicatedNodeInstanceCheckRector::class,
         AddParamTypeToRefactorMethodRector::class,
+
+        /**
+         * This rule changes Symfony service config
+         * from `$services->set(SomeClass::class)->args(['some_value']);` to `$services->set(SomeClass::class)->arg('$someCtorParameter', 'some_value');`
+         * which means that if we change the variable name in the constructor,
+         * the service definition will break.
+         */
+        ServiceArgsToServiceNamedArgRector::class,
     ]);

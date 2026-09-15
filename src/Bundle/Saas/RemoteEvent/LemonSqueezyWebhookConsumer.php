@@ -37,7 +37,7 @@ use Symfony\Component\RemoteEvent\Consumer\ConsumerInterface;
 use Symfony\Component\RemoteEvent\RemoteEvent;
 use Symfony\Component\Webhook\Exception\RejectWebhookException;
 
-#[AsRemoteEventConsumer('lemon_squeezy')]
+#[AsRemoteEventConsumer(name: 'lemon_squeezy')]
 final readonly class LemonSqueezyWebhookConsumer implements ConsumerInterface
 {
     public function __construct(
@@ -111,6 +111,7 @@ final readonly class LemonSqueezyWebhookConsumer implements ConsumerInterface
 
     private function extractGatewayEventId(RemoteEvent $event): ?string
     {
+        /** @var array{webhook_id?: string, id?: string}|null $meta */
         $meta = $event->getPayload()['meta'] ?? null;
 
         if (! is_array($meta)) {
