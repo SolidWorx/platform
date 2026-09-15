@@ -91,7 +91,7 @@ class PlanRepository extends EntityRepository implements PlanRepositoryInterface
             ->andWhere('p.active = :active')
             ->setParameter('price', 0)
             ->setParameter('planId', '0')
-            ->setParameter('active', true)
+            ->setParameter('active', value: true)
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
