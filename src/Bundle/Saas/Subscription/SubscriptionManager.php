@@ -209,7 +209,9 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
             $this->changePlan($subscription, $freePlan);
         }
 
-        $this->activate($subscription);
+        if ($subscription->getStatus() !== SubscriptionStatus::ACTIVE) {
+            $this->activate($subscription);
+        }
     }
 
     /**
