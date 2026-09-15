@@ -45,7 +45,8 @@
                     Additional Tenants
                 </b>
             </div>
-            {% for tenant in collector.userTenants|filter(v => not v.id.equals(collector.tenant.id)) %}
+            {# `collector.tenant` is null on the pages that run without one — login, workspace select, onboarding — where every tenant the user has is an "additional" one. #}
+            {% for tenant in collector.userTenants|filter(v => collector.tenant is empty or not v.id.equals(collector.tenant.id)) %}
                 <div class="sf-toolbar-info-piece">
                     <b>
                         {{ tenant.name }}
@@ -95,7 +96,8 @@
                 Additional tenants for user
             </th>
             <td>
-                {% for tenant in collector.userTenants|filter(v => not v.id.equals(collector.tenant.id)) %}
+                {# `collector.tenant` is null on the pages that run without one — login, workspace select, onboarding — where every tenant the user has is an "additional" one. #}
+            {% for tenant in collector.userTenants|filter(v => collector.tenant is empty or not v.id.equals(collector.tenant.id)) %}
                     {{ tenant.name }} ({{ tenant.id.toBase58 }})<br />
                 {% endfor %}
             </td>
