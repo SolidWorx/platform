@@ -57,7 +57,7 @@ final class TenantRequestListenerTest extends TestCase
             $this->createEvent(),
         );
 
-        $this->assertSame($first->toRfc4122(), $this->context->getTenantId()?->toRfc4122());
+        $this->assertSame($first->toBase58(), $this->context->getTenantId()?->toBase58());
     }
 
     public function testDoesNotLockForAnOrdinaryResolver(): void
@@ -74,7 +74,7 @@ final class TenantRequestListenerTest extends TestCase
         $this->listener([$this->lockingResolver($tenantId)])($this->createEvent());
 
         $this->assertTrue($this->lock->isLocked());
-        $this->assertSame($tenantId->toRfc4122(), $this->lock->getTenantId()?->toRfc4122());
+        $this->assertSame($tenantId->toBase58(), $this->lock->getTenantId()?->toBase58());
     }
 
     /**

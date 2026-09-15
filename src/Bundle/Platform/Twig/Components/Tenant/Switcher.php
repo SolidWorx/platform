@@ -104,12 +104,7 @@ final class Switcher
             return null;
         }
 
-        foreach ($this->getTenants() as $tenant) {
-            if ($tenant->id->equals($tenantId)) {
-                return $tenant;
-            }
-        }
+        return array_find($this->getTenants(), static fn (TenantChoice $tenant): bool => $tenant->id->equals($tenantId));
 
-        return null;
     }
 }

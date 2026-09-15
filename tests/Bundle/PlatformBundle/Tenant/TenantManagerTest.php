@@ -95,8 +95,8 @@ final class TenantManagerTest extends TenantOrmTestCase
 
         $inside = $this->manager->runAs($second, fn (): ?Ulid => $this->context->getTenantId());
 
-        $this->assertSame($second->toRfc4122(), $inside?->toRfc4122());
-        $this->assertSame($first->toRfc4122(), $this->context->getTenantId()?->toRfc4122());
+        $this->assertSame($second->toBase58(), $inside?->toBase58());
+        $this->assertSame($first->toBase58(), $this->context->getTenantId()?->toBase58());
     }
 
     public function testSwitchToIsRefusedWhileLocked(): void
@@ -115,7 +115,7 @@ final class TenantManagerTest extends TenantOrmTestCase
 
         $this->manager->switchTo($tenantId);
 
-        $this->assertSame($tenantId->toRfc4122(), $this->context->getTenantId()?->toRfc4122());
+        $this->assertSame($tenantId->toBase58(), $this->context->getTenantId()?->toBase58());
     }
 
     public function testClearIsRefusedWhileLocked(): void
@@ -141,8 +141,8 @@ final class TenantManagerTest extends TenantOrmTestCase
 
         $inside = $this->manager->runAs($other, fn (): ?Ulid => $this->context->getTenantId());
 
-        $this->assertSame($other->toRfc4122(), $inside?->toRfc4122());
-        $this->assertSame($locked->toRfc4122(), $this->context->getTenantId()?->toRfc4122());
+        $this->assertSame($other->toBase58(), $inside?->toBase58());
+        $this->assertSame($locked->toBase58(), $this->context->getTenantId()?->toBase58());
     }
 
     public function testReportsWhetherItIsLocked(): void

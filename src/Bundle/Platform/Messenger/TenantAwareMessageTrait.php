@@ -32,6 +32,6 @@ trait TenantAwareMessageTrait
 
     public function setTenantId(?Ulid $tenantId): void
     {
-        $this->tenantId = $tenantId?->toRfc4122();
+        $this->tenantId = $tenantId?->toBase58();
     }
 }

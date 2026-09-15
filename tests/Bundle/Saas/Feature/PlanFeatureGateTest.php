@@ -130,11 +130,9 @@ final class PlanFeatureGateTest extends TestCase
         $reflection = new ReflectionClass($plan);
 
         $idProp = $reflection->getProperty('id');
-        $idProp->setAccessible(true);
         $idProp->setValue($plan, new Ulid());
 
         $nameProp = $reflection->getProperty('name');
-        $nameProp->setAccessible(true);
         $nameProp->setValue($plan, 'Pro');
 
         $manager->expects(self::once())

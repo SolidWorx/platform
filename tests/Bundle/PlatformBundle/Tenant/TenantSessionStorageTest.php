@@ -43,7 +43,7 @@ final class TenantSessionStorageTest extends TestCase
         $storage->setTenantId($tenantId);
 
         $this->assertTrue($tenantId->equals($storage->getTenantId() ?? new Ulid()));
-        $this->assertSame($tenantId->toRfc4122(), $this->session->get(self::SESSION_KEY));
+        $this->assertSame($tenantId->toBase58(), $this->session->get(self::SESSION_KEY));
     }
 
     public function testClearsTheTenantId(): void

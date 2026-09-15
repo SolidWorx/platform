@@ -93,7 +93,7 @@ final readonly class TenantWriteGuardListener
         if (! $this->userTenantRepository->hasAccess($user, $tenantId)) {
             throw new TenantAccessDeniedException(sprintf(
                 'The current user is not a member of tenant "%s" and cannot write to it.',
-                $tenantId->toRfc4122(),
+                $tenantId->toBase58(),
             ));
         }
     }

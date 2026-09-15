@@ -66,7 +66,7 @@ final readonly class TenantAccessValidationListener
         if (! $this->userTenantRepository->hasAccess($user, $tenantId)) {
             throw new TenantAccessDeniedException(sprintf(
                 'The current user is not a member of tenant "%s".',
-                $tenantId->toRfc4122(),
+                $tenantId->toBase58(),
             ));
         }
     }

@@ -106,7 +106,7 @@ final class DefaultTenantOnboarderTest extends TestCase
         $this->createOnboarder()->onboard($tenant, $this->user());
 
         $this->assertTrue($tenant->getId()->equals($this->context->getTenantId() ?? new Ulid()));
-        $this->assertSame($tenant->getId()->toRfc4122(), $this->session->get('_tenant_id'));
+        $this->assertSame($tenant->getId()->toBase58(), $this->session->get('_tenant_id'));
     }
 
     /**

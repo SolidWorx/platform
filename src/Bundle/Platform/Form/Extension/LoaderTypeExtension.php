@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle\Form\Extension;
 
 use Override;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\AbstractTypeExtension;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormInterface;
@@ -38,6 +39,13 @@ final class LoaderTypeExtension extends AbstractTypeExtension
      */
     private const string CONTROLLER_PACKAGE = '@solidworx/platform/loading';
 
+    public function __construct(
+        #[Autowire(param: 'form.type_extension.csrf.field_name')]
+        private readonly string $csrfFieldName
+    ) {
+
+    }
+
     /**
      * @return list<class-string>
      */
@@ -60,7 +68,7 @@ final class LoaderTypeExtension extends AbstractTypeExtension
     #[Override]
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {
-        if ($options['loader'] !== true || ! $form->isRoot()) {
+        if ($options['loader'] !== true || ! $form->isRoot() || $form->getName() === $this->csrfFieldName) {
             return;
         }
 
