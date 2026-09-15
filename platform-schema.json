@@ -20,6 +20,11 @@
                 },
                 "security": {
                     "default": {
+                        "access_decision": {
+                            "strategies": {
+                                "TENANT_CREATE": "unanimous"
+                            }
+                        },
                         "two_factor": {
                             "enabled": false,
                             "base_template": null
@@ -27,6 +32,27 @@
                     },
                     "type": "object",
                     "properties": {
+                        "access_decision": {
+                            "default": {
+                                "strategies": {
+                                    "TENANT_CREATE": "unanimous"
+                                }
+                            },
+                            "type": "object",
+                            "properties": {
+                                "strategies": {
+                                    "description": "Security attributes decided with their own strategy, instead of the one Symfony uses for everything else. Keyed by attribute; one of: affirmative, consensus, unanimous, priority",
+                                    "default": {
+                                        "TENANT_CREATE": "unanimous"
+                                    },
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "additionalProperties": false
+                        },
                         "two_factor": {
                             "default": {
                                 "enabled": false,

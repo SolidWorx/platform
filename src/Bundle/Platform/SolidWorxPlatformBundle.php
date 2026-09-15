@@ -20,6 +20,7 @@ use Knp\Bundle\MenuBundle\KnpMenuBundle;
 use LogicException;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigSectionInterface;
+use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\AccessDecisionCompilerPass;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\AuthenticationCompilerPass;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\ClearPlatformConfigStatePass;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\MenuCompilerPass;
@@ -65,6 +66,7 @@ final class SolidWorxPlatformBundle extends Bundle implements PlatformConfigSect
         parent::build($container);
 
         $container->addCompilerPass(new MenuCompilerPass());
+        $container->addCompilerPass(new AccessDecisionCompilerPass());
         $container->addCompilerPass(new AuthenticationCompilerPass());
         $container->addCompilerPass(new ClearPlatformConfigStatePass(), PassConfig::TYPE_AFTER_REMOVING);
     }

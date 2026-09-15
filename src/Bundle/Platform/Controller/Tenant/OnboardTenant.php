@@ -18,7 +18,7 @@ use SolidWorx\Platform\PlatformBundle\Controller\BaseController;
 use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
 use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
-use SolidWorx\Platform\PlatformBundle\Tenant\Onboarding\TenantCreationGate;
+use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantCreationVoter;
 use SolidWorx\Platform\PlatformBundle\Tenant\Onboarding\TenantOnboarder;
 use SolidWorx\Platform\PlatformBundle\Tenant\Scope\TenantScopeGuardListener;
 use Symfony\Component\DependencyInjection\Attribute\AsTaggedItem;
@@ -37,10 +37,14 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * picks "create new workspace" in the switcher. A user who already has a workspace gets a cancel
  * link back to the application; one who does not has nowhere to cancel to.
  *
- * Whether creation is offered at all is {@see TenantCreationGate}'s call, not this controller's.
+ * Whether creation is offered at all is {@see TenantCreationVoter}'s call, not this controller's:
+ * the same `TENANT_CREATE` attribute guards this page, the switcher entry and the selection page, so
+ * a refusal cannot be routed around by going straight to the URL. The 403 carries the voter's own
+ * reason, which Symfony reads off the access decision.
  */
 #[AsTaggedItem(index: 'controller.service_arguments')]
 #[IsGranted(attribute: 'IS_AUTHENTICATED_FULLY')]
+#[IsGranted(attribute: TenantCreationVoter::TENANT_CREATE)]
 #[WithoutTenant]
 final class OnboardTenant extends BaseController
 {
@@ -52,7 +56,6 @@ final class OnboardTenant extends BaseController
         private readonly TenantOnboarder $onboarder,
         private readonly UserTenantRepository $userTenantRepository,
         private readonly TenantRedirector $redirector,
-        private readonly TenantCreationGate $creationGate,
         #[Autowire(param: 'solidworx_platform.multi_tenancy.onboarding.form_type')]
         private readonly string $formType,
         #[Autowire(param: 'solidworx_platform_ui.template.tenant_onboarding')]
@@ -67,12 +70,6 @@ final class OnboardTenant extends BaseController
 
         if (! $user instanceof UserInterface) {
             throw $this->createAccessDeniedException();
-        }
-
-        $check = $this->creationGate->check($user);
-
-        if (! $check->isAllowed()) {
-            throw $this->createAccessDeniedException($check->getReason() ?? 'You cannot create a workspace.');
         }
 
         $form = $this->createForm($this->formType);

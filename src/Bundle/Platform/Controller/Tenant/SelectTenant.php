@@ -21,7 +21,6 @@ use SolidWorx\Platform\PlatformBundle\Repository\TenantRepository;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
 use SolidWorx\Platform\PlatformBundle\Response\RedirectResponse;
 use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantVoter;
-use SolidWorx\Platform\PlatformBundle\Tenant\Onboarding\TenantCreationGate;
 use SolidWorx\Platform\PlatformBundle\Tenant\Scope\TenantScopeGuardListener;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantLock;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantSessionStorage;
@@ -57,7 +56,6 @@ final class SelectTenant extends BaseController
         private readonly TenantSessionStorage $sessionStorage,
         private readonly TenantRedirector $redirector,
         private readonly TenantLock $tenantLock,
-        private readonly TenantCreationGate $creationGate,
         #[Autowire(param: 'solidworx_platform_ui.template.tenant_select')]
         private readonly string $template,
     ) {
@@ -82,7 +80,6 @@ final class SelectTenant extends BaseController
 
         return $this->render($this->template, [
             'tenants' => $this->userTenantRepository->findTenantsForUser($user),
-            'can_create' => $this->creationGate->check($user)->isAllowed(),
         ]);
     }
 

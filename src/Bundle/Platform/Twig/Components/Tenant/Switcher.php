@@ -15,7 +15,6 @@ namespace SolidWorx\Platform\PlatformBundle\Twig\Components\Tenant;
 
 use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
-use SolidWorx\Platform\PlatformBundle\Tenant\Onboarding\TenantCreationGate;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantChoice;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantLock;
@@ -51,7 +50,6 @@ final class Switcher
         private readonly UserTenantRepository $userTenantRepository,
         private readonly TenantContext $tenantContext,
         private readonly TenantLock $tenantLock,
-        private readonly TenantCreationGate $creationGate,
     ) {
     }
 
@@ -67,22 +65,6 @@ final class Switcher
         }
 
         return $this->getTenants() !== [];
-    }
-
-    /**
-     * Whether to offer creating another workspace, decided by {@see TenantCreationGate} so the menu
-     * and the page behind it always agree.
-     */
-    #[ExposeInTemplate]
-    public function canCreate(): bool
-    {
-        $user = $this->security->getUser();
-
-        if (! $user instanceof UserInterface) {
-            return false;
-        }
-
-        return $this->creationGate->check($user)->isAllowed();
     }
 
     /**
