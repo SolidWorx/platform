@@ -46,7 +46,7 @@
         "webmozart/assert": "^2.4"
     },
     "require-dev": {
-        "ergebnis/composer-normalize": "^2.52",
+        "ergebnis/composer-normalize": "^2.53",
         "ergebnis/phpunit-slow-test-detector": "^2.25",
         "monolog/monolog": "^3.12",
         "phpstan/extension-installer": "^1.4",
