@@ -173,12 +173,12 @@ final readonly class TenantScopeGuardListener
             return false;
         }
 
-        if ($request->getRequestFormat(null) === 'json') {
+        if ($request->getRequestFormat(default: null) === 'json') {
             return false;
         }
 
-        return in_array('text/html', $request->getAcceptableContentTypes(), true)
+        return in_array('text/html', $request->getAcceptableContentTypes(), strict: true)
             || $request->getAcceptableContentTypes() === []
-            || in_array('*/*', $request->getAcceptableContentTypes(), true);
+            || in_array('*/*', $request->getAcceptableContentTypes(), strict: true);
     }
 }

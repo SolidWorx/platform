@@ -64,7 +64,7 @@ final readonly class TenantManager
      */
     public function clear(): void
     {
-        $this->assertNotLocked(null);
+        $this->assertNotLocked(tenantId: null);
 
         $this->tenantContext->clear();
     }
