@@ -27,7 +27,7 @@
                 "action": "vendor/bin/phpstan"
             },
             {
-                "action": "phpunit"
+                "action": "vendor/bin/phpunit"
             },
             {
                 "action": "composer normalize"

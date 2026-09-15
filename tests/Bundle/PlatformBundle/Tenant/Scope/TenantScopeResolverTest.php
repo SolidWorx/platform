@@ -86,7 +86,7 @@ final class TenantScopeResolverTest extends TestCase
 
         $this->createResolver([new TenantChoice($tenantId, 'Acme')])->resolve($this->user());
 
-        $this->assertSame($tenantId->toRfc4122(), $this->session->get(self::SESSION_KEY));
+        $this->assertSame($tenantId->toBase58(), $this->session->get(self::SESSION_KEY));
     }
 
     public function testAsksForASelectionWithSeveralTenants(): void
@@ -135,7 +135,7 @@ final class TenantScopeResolverTest extends TestCase
 
     public function testARevokedSoleTenantIsClearedFromTheSession(): void
     {
-        $this->session->set(self::SESSION_KEY, (new Ulid())->toRfc4122());
+        $this->session->set(self::SESSION_KEY, (new Ulid())->toBase58());
 
         $this->eventDispatcher->addListener(
             TenantSwitchedEvent::class,

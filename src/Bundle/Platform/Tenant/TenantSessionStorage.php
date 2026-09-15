@@ -61,7 +61,7 @@ final readonly class TenantSessionStorage
 
     public function setTenantId(Ulid $tenantId): void
     {
-        $this->session()?->set($this->sessionKey, $tenantId->toRfc4122());
+        $this->session()?->set($this->sessionKey, $tenantId->toBase58());
     }
 
     public function clearTenantId(): void

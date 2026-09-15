@@ -27,11 +27,11 @@ final class SessionTenantResolverTest extends TestCase
     public function testResolvesTenantFromSession(): void
     {
         $tenantId = new Ulid();
-        $request = $this->requestWithSession('_tenant_id', $tenantId->toRfc4122());
+        $request = $this->requestWithSession('_tenant_id', $tenantId->toBase58());
 
         $resolver = new SessionTenantResolver('_tenant_id');
 
-        $this->assertSame($tenantId->toRfc4122(), $resolver->resolve($request)?->toRfc4122());
+        $this->assertSame($tenantId->toBase58(), $resolver->resolve($request)?->toBase58());
     }
 
     public function testReturnsNullWhenNoSession(): void

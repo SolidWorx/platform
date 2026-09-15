@@ -44,7 +44,7 @@ final class TenantContextTest extends TestCase
         $context->setTenant($tenantId);
 
         $this->assertTrue($context->hasTenant());
-        $this->assertSame($tenantId->toRfc4122(), $context->getTenantId()?->toRfc4122());
+        $this->assertSame($tenantId->toBase58(), $context->getTenantId()?->toBase58());
 
         $context->clear();
 
@@ -59,7 +59,7 @@ final class TenantContextTest extends TestCase
 
         $context->setTenant($tenant);
 
-        $this->assertSame($tenant->getId()->toRfc4122(), $context->getTenantId()?->toRfc4122());
+        $this->assertSame($tenant->getId()->toBase58(), $context->getTenantId()?->toBase58());
     }
 
     public function testDispatchesEventOnlyWhenChanged(): void
@@ -78,7 +78,7 @@ final class TenantContextTest extends TestCase
 
         $this->assertCount(1, $events);
         $this->assertNotInstanceOf(Ulid::class, $events[0]->getPreviousTenantId());
-        $this->assertSame($tenantId->toRfc4122(), $events[0]->getTenantId()?->toRfc4122());
+        $this->assertSame($tenantId->toBase58(), $events[0]->getTenantId()?->toBase58());
     }
 
     public function testDoesNotCommitWhenListenerVetoes(): void
@@ -108,11 +108,11 @@ final class TenantContextTest extends TestCase
         $context->setTenant($first);
         $context->push($second);
 
-        $this->assertSame($second->toRfc4122(), $context->getTenantId()?->toRfc4122());
+        $this->assertSame($second->toBase58(), $context->getTenantId()?->toBase58());
 
         $context->pop();
 
-        $this->assertSame($first->toRfc4122(), $context->getTenantId()?->toRfc4122());
+        $this->assertSame($first->toBase58(), $context->getTenantId()?->toBase58());
     }
 
     public function testResetClearsState(): void

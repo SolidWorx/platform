@@ -157,7 +157,7 @@ final readonly class TenantManager
 
         throw new TenantLockedException(sprintf(
             'The tenant is locked to "%s" for this request and cannot be switched.',
-            $this->tenantLock->getTenantId()?->toRfc4122() ?? '',
+            $this->tenantLock->getTenantId()?->toBase58() ?? '',
         ));
     }
 }

@@ -55,7 +55,7 @@ final class TenantMiddlewareTest extends TestCase
         $stamp = $envelope->last(TenantStamp::class);
 
         $this->assertInstanceOf(TenantStamp::class, $stamp);
-        $this->assertSame($tenantId->toRfc4122(), $stamp->getTenantId()->toRfc4122());
+        $this->assertSame($tenantId->toBase58(), $stamp->getTenantId()->toBase58());
     }
 
     public function testStampsTenantOnAwareMessage(): void
@@ -69,7 +69,7 @@ final class TenantMiddlewareTest extends TestCase
         $message = new TenantAwareMessage();
         $envelope = $middleware->handle(new Envelope($message), $this->passThroughStack());
 
-        $this->assertSame($tenantId->toRfc4122(), $message->getTenantId()?->toRfc4122());
+        $this->assertSame($tenantId->toBase58(), $message->getTenantId()?->toBase58());
         $this->assertInstanceOf(TenantStamp::class, $envelope->last(TenantStamp::class));
     }
 
@@ -92,7 +92,7 @@ final class TenantMiddlewareTest extends TestCase
 
         $middleware->handle($envelope, $stack);
 
-        $this->assertSame($tenantId->toRfc4122(), $seen?->toRfc4122());
+        $this->assertSame($tenantId->toBase58(), $seen?->toBase58());
         $this->assertFalse($context->hasTenant());
     }
 

@@ -48,7 +48,7 @@ final class TenantAwareListenerTest extends TenantOrmTestCase
         $entityManager->persist($item);
         $entityManager->flush();
 
-        $this->assertSame($tenantId->toRfc4122(), $item->getTenantId()?->toRfc4122());
+        $this->assertSame($tenantId->toBase58(), $item->getTenantId()?->toBase58());
     }
 
     public function testDoesNothingWithoutTenantInScope(): void

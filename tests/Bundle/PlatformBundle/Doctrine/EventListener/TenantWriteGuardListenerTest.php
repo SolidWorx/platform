@@ -73,7 +73,7 @@ final class TenantWriteGuardListenerTest extends TenantOrmTestCase
         $entityManager->persist($item);
         $entityManager->flush();
 
-        $this->assertSame($tenantA->toRfc4122(), $item->getTenantId()?->toRfc4122());
+        $this->assertSame($tenantA->toBase58(), $item->getTenantId()?->toBase58());
     }
 
     public function testDeniesWhenUserIsNotMember(): void

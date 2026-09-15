@@ -37,7 +37,7 @@ final class DomainTenantResolverTest extends TestCase
 
         $request = Request::create('https://acme.example.com/dashboard');
 
-        $this->assertSame($tenant->getId()->toRfc4122(), $resolver->resolve($request)?->toRfc4122());
+        $this->assertSame($tenant->getId()->toBase58(), $resolver->resolve($request)?->toBase58());
     }
 
     public function testReturnsNullForUnknownHost(): void

@@ -27,12 +27,12 @@ final class RouteTenantResolverTest extends TestCase
         $tenantId = new Ulid();
         $request = Request::create('/');
         $request->attributes->set('_route_params', [
-            'tenant' => $tenantId->toRfc4122(),
+            'tenant' => $tenantId->toBase58(),
         ]);
 
         $resolver = new RouteTenantResolver('tenant');
 
-        $this->assertSame($tenantId->toRfc4122(), $resolver->resolve($request)?->toRfc4122());
+        $this->assertSame($tenantId->toBase58(), $resolver->resolve($request)?->toBase58());
     }
 
     public function testReturnsNullWhenParamMissing(): void

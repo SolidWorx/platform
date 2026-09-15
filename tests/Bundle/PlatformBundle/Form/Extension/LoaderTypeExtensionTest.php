@@ -109,6 +109,6 @@ final class LoaderTypeExtensionTest extends TypeTestCase
     #[Override]
     protected function getTypeExtensions(): array
     {
-        return [new LoaderTypeExtension()];
+        return [new LoaderTypeExtension('_token')];
     }
 }

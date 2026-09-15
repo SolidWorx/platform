@@ -28,7 +28,7 @@ final readonly class TenantStamp implements StampInterface
 
     public function __construct(Ulid $tenantId)
     {
-        $this->tenantId = $tenantId->toRfc4122();
+        $this->tenantId = $tenantId->toBase58();
     }
 
     public function getTenantId(): Ulid
