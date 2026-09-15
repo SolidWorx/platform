@@ -21,7 +21,6 @@ use SolidWorx\Platform\PlatformBundle\Attributes\WithoutTenant;
 use SolidWorx\Platform\PlatformBundle\Entity\User;
 use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
-use SolidWorx\Platform\PlatformBundle\Tenant\Onboarding\TenantCreationGate;
 use SolidWorx\Platform\PlatformBundle\Tenant\Scope\TenantScopeGuardListener;
 use SolidWorx\Platform\PlatformBundle\Tenant\Scope\TenantScopeOutcome;
 use SolidWorx\Platform\PlatformBundle\Tenant\Scope\TenantScopeResolver;
@@ -47,6 +46,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\Authorization\UserAuthorizationCheckerInterface;
 use Symfony\Component\Uid\Ulid;
 use Twig\Environment;
 use Twig\Loader\ArrayLoader;
@@ -54,7 +54,6 @@ use Twig\Loader\ArrayLoader;
 #[CoversClass(TenantScopeGuardListener::class)]
 #[CoversClass(WithoutTenant::class)]
 #[UsesClass(TenantScopeResolver::class)]
-#[UsesClass(TenantCreationGate::class)]
 #[UsesClass(TenantScopeOutcome::class)]
 #[UsesClass(TenantContext::class)]
 #[UsesClass(TenantManager::class)]
@@ -254,6 +253,9 @@ final class TenantScopeGuardListenerTest extends TestCase
         $context = new TenantContext(new EventDispatcher());
         $sessionStorage = new TenantSessionStorage($requestStack, '_tenant_id');
 
+        $authorizationChecker = self::createStub(UserAuthorizationCheckerInterface::class);
+        $authorizationChecker->method('isGrantedForUser')->willReturn($onboardingEnabled);
+
         $urlGenerator = self::createStub(UrlGeneratorInterface::class);
         $urlGenerator->method('generate')->willReturnCallback(
             static fn (string $route): string => '/generated/' . $route,
@@ -267,7 +269,7 @@ final class TenantScopeGuardListenerTest extends TestCase
                 new TenantManager($context, self::createStub(EntityManagerInterface::class), new TenantLock()),
                 $sessionStorage,
                 $repository,
-                new TenantCreationGate(new EventDispatcher(), new TenantLock(), $onboardingEnabled),
+                $authorizationChecker,
             ),
             $sessionStorage,
             $urlGenerator,

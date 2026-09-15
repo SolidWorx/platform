@@ -314,5 +314,8 @@ final class LoginExtension
 
 - [Two-Factor Authentication](./two-factor.md) — TOTP, email codes, backup codes and
   trusted devices.
+- [Per-Attribute Access Decision Strategies](./access-decision.md) — decide chosen
+  permissions unanimously (or by consensus) without changing the strategy for the whole
+  application.
 - [Configuration](../configuration/index.md) — the `platform.yaml` reference
   (`platform.models.user`, `platform.security.two_factor`, `platform.ui.templates`).

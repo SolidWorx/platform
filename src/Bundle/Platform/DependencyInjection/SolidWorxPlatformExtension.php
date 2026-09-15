@@ -88,7 +88,10 @@ use function interface_exists;
  * @phpstan-type PlatformConfig array{
  *   name: string,
  *   version: string,
- *   security: array{two_factor: array{enabled: bool, base_template: string|null}},
+ *   security: array{
+ *     access_decision: array{strategies: array<string, string>},
+ *     two_factor: array{enabled: bool, base_template: string|null}
+ *   },
  *   doctrine: array{types: array{enable_utc_date: bool}},
  *   models: array{user: string},
  *   multi_tenancy: MultiTenancyConfig
@@ -173,6 +176,13 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         });
 
         $container->setParameter('solidworx_platform.models.user', $config['models']['user']);
+        // Merged over the application's map rather than replaced by it: an application adding an
+        // attribute of its own must not silently drop the platform's, whose whole point is that a
+        // refusal counts.
+        $container->setParameter(
+            'solidworx_platform.security.access_decision.strategies',
+            PlatformConfiguration::PLATFORM_ACCESS_DECISION_STRATEGIES + $config['security']['access_decision']['strategies'],
+        );
 
         if (! $config['security']['two_factor']['enabled']) {
             // @TODO: Need to remove the 2FA routes as well if 2fa is not configured

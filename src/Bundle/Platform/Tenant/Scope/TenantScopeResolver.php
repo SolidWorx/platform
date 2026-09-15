@@ -16,11 +16,12 @@ namespace SolidWorx\Platform\PlatformBundle\Tenant\Scope;
 use SolidWorx\Platform\PlatformBundle\Exception\TenantAccessDeniedException;
 use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
-use SolidWorx\Platform\PlatformBundle\Tenant\Onboarding\TenantCreationGate;
+use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantCreationVoter;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantChoice;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantManager;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantSessionStorage;
+use Symfony\Component\Security\Core\Authorization\UserAuthorizationCheckerInterface;
 use function count;
 
 /**
@@ -41,7 +42,7 @@ final readonly class TenantScopeResolver
         private TenantManager $tenantManager,
         private TenantSessionStorage $sessionStorage,
         private UserTenantRepository $userTenantRepository,
-        private TenantCreationGate $creationGate,
+        private UserAuthorizationCheckerInterface $authorizationChecker,
     ) {
     }
 
@@ -67,7 +68,9 @@ final readonly class TenantScopeResolver
      */
     private function withoutTenants(UserInterface $user): TenantScopeOutcome
     {
-        return $this->creationGate->check($user)->isAllowed()
+        // Asked about this user rather than the session's, since the guard resolves scope for a
+        // request that may not have finished putting them in a token yet.
+        return $this->authorizationChecker->isGrantedForUser($user, TenantCreationVoter::TENANT_CREATE)
             ? TenantScopeOutcome::NeedsOnboarding
             : TenantScopeOutcome::NoAccess;
     }

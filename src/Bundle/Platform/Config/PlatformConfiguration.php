@@ -20,14 +20,34 @@ use SolidWorx\Platform\PlatformBundle\Entity\UserTenant;
 use SolidWorx\Platform\PlatformBundle\Form\Type\Tenant\TenantOnboardingType;
 use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
 use SolidWorx\Platform\PlatformBundle\Model\UserTenantInterface;
+use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantCreationVoter;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Form\FormTypeInterface;
+use function implode;
+use function in_array;
 use function is_string;
 use function is_subclass_of;
 use function sprintf;
 
 final class PlatformConfiguration implements PlatformConfigurationInterface
 {
+    /**
+     * The attributes the platform decides with a strategy of its own, always merged over whatever
+     * the application configures: dropping one would quietly stop a refusal from counting.
+     *
+     * @var array<string, string>
+     */
+    public const array PLATFORM_ACCESS_DECISION_STRATEGIES = [
+        TenantCreationVoter::TENANT_CREATE => 'unanimous',
+    ];
+
+    /**
+     * The strategies Symfony ships, as named in `security.access_decision_manager.strategy`.
+     *
+     * @var list<string>
+     */
+    private const array ACCESS_DECISION_STRATEGIES = ['affirmative', 'consensus', 'unanimous', 'priority'];
+
     #[Override]
     public function getConfigSectionKey(): string
     {
@@ -55,6 +75,24 @@ final class PlatformConfiguration implements PlatformConfigurationInterface
                 ->arrayNode('security')
                     ->addDefaultsIfNotSet()
                     ->children()
+                        ->arrayNode('access_decision')
+                            ->addDefaultsIfNotSet()
+                            ->children()
+                                ->arrayNode('strategies')
+                                    ->info('Security attributes decided with their own strategy, instead of the one Symfony uses for everything else. Keyed by attribute; one of: ' . implode(', ', self::ACCESS_DECISION_STRATEGIES))
+                                    ->useAttributeAsKey('attribute')
+                                    ->defaultValue([
+                                        TenantCreationVoter::TENANT_CREATE => 'unanimous',
+                                    ])
+                                    ->scalarPrototype()
+                                        ->validate()
+                                            ->ifTrue(static fn ($v): bool => ! in_array($v, self::ACCESS_DECISION_STRATEGIES, strict: true))
+                                            ->thenInvalid(sprintf('The access decision strategy must be one of %s, got %%s', implode(', ', self::ACCESS_DECISION_STRATEGIES)))
+                                        ->end()
+                                    ->end()
+                                ->end()
+                            ->end()
+                        ->end()
                         ->arrayNode('two_factor')
                             ->addDefaultsIfNotSet()
                             ->children()

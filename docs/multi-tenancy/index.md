@@ -255,7 +255,7 @@ to show:
 
 It renders nothing when the user belongs to no workspace, or when the tenant is domain-locked. A
 single workspace still renders — naming the one you are in is the point, even when there is nothing
-to switch to.
+to switch to. The "Create new workspace" entry appears when `TENANT_CREATE` is granted.
 
 ## Creating a workspace
 
@@ -266,32 +266,60 @@ bar (the page uses the `condensed` layout).
 
 ### Deciding who may create one
 
-`TenantCreationGate` answers that, and everything that offers creation asks it first — the switcher
-and the selection page to decide whether to show the link, the controller to decide whether to serve
-the form — so a refusal cannot be routed around by going straight to the URL.
+`TENANT_CREATE` is the permission, and `TenantCreationVoter` answers it. Everything that offers
+creation asks the same question — the switcher and the selection page with `is_granted`, the
+onboarding controller with `#[IsGranted]`, `TenantScopeResolver` with `isGrantedForUser()` — so a
+refusal cannot be routed around by going straight to the URL:
 
-It refuses on its own when `onboarding.enabled` is false (invite-only products, where tenants are
-provisioned out of band) or when the tenant is fixed by a custom domain. Everything else is an
-application concern, and belongs in a `TenantCreationCheckEvent` listener:
+```twig
+{% if is_granted('TENANT_CREATE') %}
+    <a href="{{ path('solidworx_platform_tenant_onboarding') }}">{{ 'Create new workspace'|trans }}</a>
+{% endif %}
+```
+
+The platform's voter refuses for the two reasons it knows about: `onboarding.enabled` is false
+(invite-only products, where tenants are provisioned out of band), or the tenant is fixed by a custom
+domain. It gives a reason with the refusal, and Symfony puts that in the 403 — so `#[IsGranted]`
+needs no message of its own.
+
+Application limits go in your own voter for the same attribute:
 
 ```php
-use SolidWorx\Platform\PlatformBundle\Tenant\Event\TenantCreationCheckEvent;
+use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantCreationVoter;
 
-#[AsEventListener]
-final class LimitWorkspaces
+final class WorkspaceLimitVoter extends Voter
 {
-    public function __invoke(TenantCreationCheckEvent $event): void
+    protected function supports(string $attribute, mixed $subject): bool
     {
-        if ($this->subscription->planOf($event->getUser())->isFree()) {
-            $event->deny('Upgrade to create more than one workspace.');
+        return $attribute === TenantCreationVoter::TENANT_CREATE;
+    }
+
+    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool
+    {
+        if ($this->subscriptions->planOf($token->getUser())->isFree()) {
+            $vote?->addReason('Upgrade to create more than one workspace.');
+
+            return false;
         }
+
+        return true;
     }
 }
 ```
 
-Listeners can only refuse, and have to say why: the reason is what the user is shown, and the first
-refusal wins. A user who is refused before they have any workspace at all sees the "no workspace"
-page rather than an onboarding page that would turn them away.
+That works because of the section below. It would not under Symfony's default strategy.
+
+### Why `TENANT_CREATE` is decided unanimously
+
+The voter above only works because of how the platform decides this permission. Symfony's default
+`affirmative` strategy returns on the first voter that grants, so the platform's own voter would
+outvote your limit and a plan cap would silently do nothing.
+
+`TENANT_CREATE` is therefore decided **unanimously**, where any refusal wins, while every other
+permission in your application keeps the strategy you configured. That is a general platform
+feature, not a tenancy one: see
+[Per-Attribute Access Decision Strategies](../security/access-decision.md) for how it is wired, how
+to use it for your own attributes, and its limits.
 
 ### Customising the page
 
@@ -346,7 +374,7 @@ A request arriving on a host matching `Tenant::$domain` belongs to that tenant, 
 
 - `TenantManager::switchTo()` and `clear()` throw `TenantLockedException`.
 - `/tenant/select` returns 403.
-- The switcher renders nothing, and no workspace can be created.
+- The switcher renders nothing, and `TENANT_CREATE` is refused.
 
 `runAs()` and `runWithoutFilter()` are deliberately **exempt**. They are bounded, self-restoring
 scopes for deliberate cross-tenant work, and a report or batch job must still run on a request that
@@ -372,12 +400,19 @@ when no tenant is in scope (deliberate cross-tenant batch). With
 `write_guard.check_user_access: true`, it additionally verifies the current user is a member of the
 tenant being written to.
 
-## The `TENANT_ACCESS` voter
+## The tenant voters
 
-Authorize access to a specific tenant with the voter:
+Two permissions, both ordinary Symfony voters:
 
 ```php
-$this->denyAccessUnlessGranted(\SolidWorx\Platform\PlatformBundle\Security\Voter\TenantVoter::TENANT_ACCESS, $tenant);
+use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantCreationVoter;
+use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantVoter;
+
+// May the user work in this tenant? Membership decides.
+$this->denyAccessUnlessGranted(TenantVoter::TENANT_ACCESS, $tenant);
+
+// May the user create a workspace at all? See "Deciding who may create one" above.
+$this->denyAccessUnlessGranted(TenantCreationVoter::TENANT_CREATE);
 ```
 
 ## Messenger integration

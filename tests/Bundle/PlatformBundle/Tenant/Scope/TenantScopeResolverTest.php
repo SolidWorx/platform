@@ -22,7 +22,6 @@ use SolidWorx\Platform\PlatformBundle\Exception\TenantAccessDeniedException;
 use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
 use SolidWorx\Platform\PlatformBundle\Tenant\Event\TenantSwitchedEvent;
-use SolidWorx\Platform\PlatformBundle\Tenant\Onboarding\TenantCreationGate;
 use SolidWorx\Platform\PlatformBundle\Tenant\Scope\TenantScopeOutcome;
 use SolidWorx\Platform\PlatformBundle\Tenant\Scope\TenantScopeResolver;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantChoice;
@@ -35,6 +34,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
+use Symfony\Component\Security\Core\Authorization\UserAuthorizationCheckerInterface;
 use Symfony\Component\Uid\Ulid;
 
 #[CoversClass(TenantScopeResolver::class)]
@@ -45,7 +45,6 @@ use Symfony\Component\Uid\Ulid;
 #[UsesClass(TenantChoice::class)]
 #[UsesClass(TenantSessionStorage::class)]
 #[UsesClass(TenantSwitchedEvent::class)]
-#[UsesClass(TenantCreationGate::class)]
 final class TenantScopeResolverTest extends TestCase
 {
     private const string SESSION_KEY = '_tenant_id';
@@ -152,6 +151,18 @@ final class TenantScopeResolverTest extends TestCase
     }
 
     /**
+     * Stands in for the real checker, which would reach `TenantCreationVoter` and give the same
+     * answer for the same configuration.
+     */
+    private function authorizationChecker(bool $onboardingEnabled): UserAuthorizationCheckerInterface
+    {
+        $checker = self::createStub(UserAuthorizationCheckerInterface::class);
+        $checker->method('isGrantedForUser')->willReturn($onboardingEnabled);
+
+        return $checker;
+    }
+
+    /**
      * @param list<TenantChoice> $tenants
      */
     private function createResolver(array $tenants, bool $onboardingEnabled = true): TenantScopeResolver
@@ -170,7 +181,7 @@ final class TenantScopeResolverTest extends TestCase
             new TenantManager($this->context, self::createStub(EntityManagerInterface::class), new TenantLock()),
             new TenantSessionStorage($requestStack, self::SESSION_KEY),
             $repository,
-            new TenantCreationGate(new EventDispatcher(), new TenantLock(), $onboardingEnabled),
+            $this->authorizationChecker($onboardingEnabled),
         );
     }
 

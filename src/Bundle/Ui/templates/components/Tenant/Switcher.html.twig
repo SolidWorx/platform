@@ -7,7 +7,7 @@
         <twig:Platform:Tenant:Switcher />
 
     The entries are the workspaces the user can move to, followed by a link to create another one
-    when the application allows it.
+    when `TENANT_CREATE` is granted — the same permission the onboarding page itself checks.
 ##}
 {% if isAvailable %}
     <div class="nav-item dropdown">
@@ -43,7 +43,7 @@
                 </form>
             {% endfor %}
 
-            {% if canCreate %}
+            {% if is_granted('TENANT_CREATE') %}
                 <div class="dropdown-divider"></div>
 
                 <a href="{{ path('solidworx_platform_tenant_onboarding') }}" class="dropdown-item d-flex align-items-center">

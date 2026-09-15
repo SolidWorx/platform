@@ -97,6 +97,49 @@ final class PlatformConfigurationTest extends TestCase
         self::assertSame(User::class, $result['models']['user']);
     }
 
+    public function testTenantCreationIsDecidedUnanimouslyByDefault(): void
+    {
+        $result = $this->process([]);
+
+        self::assertSame([
+            'TENANT_CREATE' => 'unanimous',
+        ], $result['security']['access_decision']['strategies']);
+    }
+
+    public function testAnApplicationCanDecideItsOwnAttributes(): void
+    {
+        $result = $this->process([
+            'security' => [
+                'access_decision' => [
+                    'strategies' => [
+                        'INVITE_MEMBER' => 'consensus',
+                    ],
+                ],
+            ],
+        ]);
+
+        // The platform's own attributes are merged back in by the extension, not the config tree.
+        self::assertSame([
+            'INVITE_MEMBER' => 'consensus',
+        ], $result['security']['access_decision']['strategies']);
+    }
+
+    public function testAnUnknownStrategyIsRejected(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessageMatches('/must be one of affirmative, consensus, unanimous, priority/');
+
+        $this->process([
+            'security' => [
+                'access_decision' => [
+                    'strategies' => [
+                        'INVITE_MEMBER' => 'democracy',
+                    ],
+                ],
+            ],
+        ]);
+    }
+
     public function testCustomNameIsApplied(): void
     {
         $result = $this->process([
@@ -199,11 +242,11 @@ final class PlatformConfigurationTest extends TestCase
     /**
      * @param array<string, mixed> $config
      *
-     * @return array{name: string, version: string, security: array{two_factor: array{enabled: bool, base_template: string|null}}, doctrine: array{types: array{enable_utc_date: bool}}, models: array{user: string}}
+     * @return array{name: string, version: string, security: array{access_decision: array{strategies: array<string, string>}, two_factor: array{enabled: bool, base_template: string|null}}, doctrine: array{types: array{enable_utc_date: bool}}, models: array{user: string}}
      */
     private function process(array $config): array
     {
-        /** @var array{name: string, version: string, security: array{two_factor: array{enabled: bool, base_template: string|null}}, doctrine: array{types: array{enable_utc_date: bool}}, models: array{user: string}} */
+        /** @var array{name: string, version: string, security: array{access_decision: array{strategies: array<string, string>}, two_factor: array{enabled: bool, base_template: string|null}}, doctrine: array{types: array{enable_utc_date: bool}}, models: array{user: string}} */
         return $this->processor->process($this->configuration->getTreeBuilder()->buildTree(), [$config]);
     }
 }
