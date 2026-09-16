@@ -169,6 +169,7 @@ final class PlatformConfigBuilderTest extends TestCase
         $result = PlatformConfigBuilder::create()
             ->profile()
                 ->formType(SecurityConfigBuilder::class)
+                ->layoutTemplate('@App/profile/layout.html.twig')
                 ->showTemplate('@App/profile/show.html.twig')
                 ->editTemplate('@App/profile/edit.html.twig')
                 ->changePasswordTemplate('@App/profile/password.html.twig')
@@ -182,6 +183,7 @@ final class PlatformConfigBuilderTest extends TestCase
             [
                 'form_type' => SecurityConfigBuilder::class,
                 'templates' => [
+                    'layout' => '@App/profile/layout.html.twig',
                     'show' => '@App/profile/show.html.twig',
                     'edit' => '@App/profile/edit.html.twig',
                     'change_password' => '@App/profile/password.html.twig',

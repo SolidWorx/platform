@@ -34,6 +34,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Twig\Environment;
 use function restore_exception_handler;
+use function substr_count;
 
 /**
  * Renders the three profile templates through the real Twig runtime.
@@ -63,6 +64,9 @@ final class ProfileRenderingTest extends KernelTestCase
 
         $request = Request::create(ShowProfile::PATH);
         $request->setSession(new Session(new MockArraySessionStorage()));
+        // Nothing routes the request here, so `_route` has to be set by hand — it is what KnpMenu's
+        // RouteVoter matches on to decide which navigation entry is the current one.
+        $request->attributes->set('_route', ShowProfile::ROUTE_NAME);
 
         $this->requestStack()->push($request);
 
@@ -181,6 +185,59 @@ final class ProfileRenderingTest extends KernelTestCase
 
         self::assertStringContainsString('autocomplete="current-password"', $html);
         self::assertStringContainsString('autocomplete="new-password"', $html);
+    }
+
+    /**
+     * Every page in the section is reachable from every other one, which is the whole point of the
+     * navigation — and it comes from a menu builder, so a page appears there by registering an
+     * entry rather than by editing a template.
+     */
+    public function testEveryProfilePageCarriesTheSectionNavigation(): void
+    {
+        foreach ([$this->renderShowPage(), $this->renderEditPage(), $this->renderChangePasswordPage()] as $html) {
+            self::assertStringContainsString('swp-settings-nav', $html);
+            self::assertStringContainsString(ShowProfile::PATH, $html);
+            self::assertStringContainsString(ChangePassword::PATH, $html);
+        }
+    }
+
+    /**
+     * `list-group-transparent` carries `margin: 0 -1.25rem`, which cancels the padding of a
+     * `card-body` it sits inside. The navigation list is a direct child of the card, so that margin
+     * would push every row out past the card's edges — which is exactly how it looked once.
+     */
+    public function testTheNavigationDoesNotUseTheBleedingListGroupVariant(): void
+    {
+        self::assertStringContainsString('list-group list-group-flush', $this->renderShowPage());
+        self::assertStringNotContainsString('list-group-transparent', $this->renderShowPage());
+    }
+
+    /**
+     * The entry for the page being rendered is the one marked current, so the navigation says
+     * where you are rather than only where you can go.
+     */
+    public function testTheNavigationMarksThePageBeingRendered(): void
+    {
+        self::assertMatchesRegularExpression(
+            '~<a[^>]+href="' . ShowProfile::PATH . '"[^>]*class="[^"]*\bactive\b~',
+            $this->renderShowPage(),
+        );
+    }
+
+    /**
+     * The reveal toggle comes from the form theme, not from the page, so a password field gets it
+     * wherever it is rendered — here, on the login page, and in any application form.
+     */
+    public function testPasswordFieldsGetTheRevealToggleFromTheFormTheme(): void
+    {
+        $html = $this->renderChangePasswordPage();
+
+        self::assertStringContainsString('password-visibility', $html);
+        self::assertSame(
+            3,
+            substr_count($html, 'data-password-visibility-target="input"'),
+            'The current password and both new-password fields each get their own toggle.',
+        );
     }
 
     private function renderShowPage(bool $twoFactorEnabled = false): string

@@ -1,0 +1,62 @@
+// The vertical navigation beside a settings section — `<twig:Ui:SettingsNav />`.
+//
+// Everything here is what Tabler's `list-group-transparent` does not give a settings navigation:
+// a left accent marking the current page, an icon that picks up the link colour, and a column
+// that stays in view while a long settings page scrolls.
+//
+// It is keyed off the component's own class, so every settings navigation in the application —
+// profile, workspace, admin — looks identical. Never restyle one of them from a page.
+
+.swp-settings-nav {
+    // Colours come from Tabler's own custom properties, so an application that themes Tabler
+    // themes this with it, and dark mode needs no second rule.
+    --swp-settings-nav-accent: var(--tblr-primary);
+
+    // The rows run edge to edge and carry their own background, so the card has to clip them —
+    // otherwise the first and last square off its rounded corners.
+    overflow: hidden;
+
+    .list-group-item {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        padding: .625rem 1rem;
+        // Every border is ours: `list-group-flush` would otherwise draw a divider under each row,
+        // and the rows read as one list without them.
+        border: 0;
+        // The accent is a transparent border on every item, so the row does not shift by 3px
+        // when it becomes the current one.
+        border-inline-start: 3px solid transparent;
+        color: var(--tblr-body-color);
+        border-radius: 0;
+    }
+
+    .list-group-item:hover:not(.active, .disabled) {
+        background: var(--tblr-bg-surface-secondary);
+        color: var(--tblr-body-color);
+    }
+
+    .list-group-item.active {
+        background: rgba(var(--tblr-primary-rgb), .06);
+        border-inline-start-color: var(--swp-settings-nav-accent);
+        color: var(--swp-settings-nav-accent);
+        font-weight: var(--tblr-font-weight-medium);
+    }
+
+    &__icon {
+        flex-shrink: 0;
+        // `currentColor` is what ties the icon to the active state without a second rule for it.
+        color: currentcolor;
+    }
+
+    &__label {
+        min-width: 0;
+    }
+
+    // A settings page is usually longer than its navigation, so the column follows the content
+    // down rather than leaving a tall empty space. Only once there is room for it to matter.
+    @media (width >= 992px) {
+        position: sticky;
+        top: 1.5rem;
+    }
+}

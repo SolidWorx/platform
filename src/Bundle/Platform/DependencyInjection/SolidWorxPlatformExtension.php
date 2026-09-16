@@ -88,7 +88,7 @@ use function interface_exists;
  *
  * @phpstan-type ProfileConfig array{
  *   form_type: class-string,
- *   templates: array{show: string, edit: string, change_password: string},
+ *   templates: array{layout: string, show: string, edit: string, change_password: string},
  *   password: array{min_length: int, strength: string, check_compromised: bool}
  * }
  *
@@ -216,6 +216,7 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
     private function loadProfile(ContainerBuilder $container, array $config): void
     {
         $container->setParameter('solidworx_platform.profile.form_type', $config['form_type']);
+        $container->setParameter('solidworx_platform.profile.templates.layout', $config['templates']['layout']);
         $container->setParameter('solidworx_platform.profile.templates.show', $config['templates']['show']);
         $container->setParameter('solidworx_platform.profile.templates.edit', $config['templates']['edit']);
         $container->setParameter('solidworx_platform.profile.templates.change_password', $config['templates']['change_password']);

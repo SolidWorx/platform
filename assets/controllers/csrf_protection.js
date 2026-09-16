@@ -20,10 +20,40 @@ document.addEventListener('turbo:submit-end', function (event) {
     removeCsrfToken(event.detail.formSubmission.formElement);
 });
 
+// A live component never submits its form: the payload goes out by fetch, and the button that sends
+// it is a plain `type="button"`. So none of the events above ever fire, the field keeps the token
+// *id* Symfony rendered into it, and the matching cookie is never written — every submission then
+// fails as an invalid CSRF token.
+//
+// Catching the click in the capture phase puts the token in place before the component reads the
+// form: `generateCsrfToken` swaps the id for a real token, sets the cookie, and fires `change`,
+// which is what the component listens to in order to pick the new value up.
+//
+// It is a no-op under session-based CSRF, where the rendered value is already a token rather than
+// an id, so this is safe whichever mode an application configures.
+document.addEventListener('click', function (event) {
+    const target = event.target;
+
+    if (!(target instanceof Element)) {
+        return;
+    }
+
+    const trigger = target.closest('[data-action*="live#action"]');
+
+    if (!trigger) {
+        return;
+    }
+
+    const form = trigger.closest('form')
+        ?? trigger.closest('[data-controller~="live"]')?.querySelector('form');
+
+    if (form) {
+        generateCsrfToken(form);
+    }
+}, true);
+
 export function generateCsrfToken (formElement) {
     const csrfField = formElement.querySelector('input[data-controller="csrf-protection"], input[name="_csrf_token"]');
-
-    console.log(csrfField);
 
     if (!csrfField) {
         return;
@@ -37,8 +67,6 @@ export function generateCsrfToken (formElement) {
         csrfField.defaultValue = csrfToken = btoa(String.fromCharCode.apply(null, (window.crypto || window.msCrypto).getRandomValues(new Uint8Array(18))));
     }
     csrfField.dispatchEvent(new Event('change', { bubbles: true }));
-
-    console.log(csrfCookie && tokenCheck.test(csrfToken))
 
     if (csrfCookie && tokenCheck.test(csrfToken)) {
         const cookie = csrfCookie + '_' + csrfToken + '=' + csrfCookie + '; path=/; samesite=strict';

@@ -30,6 +30,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
@@ -62,7 +63,25 @@ final class TwoFactor extends AbstractController
         #[Autowire(service: 'scheb_two_factor.default_trusted_device_manager')]
         private readonly TrustedDeviceManagerInterface $trustedDeviceManager,
         private readonly BackupCodeGeneratorInterface $backupCodeGenerator,
+        private readonly SluggerInterface $slugger,
+        #[Autowire(param: 'solidworx_platform.app.name')]
+        private readonly string $appName,
     ) {
+    }
+
+    /**
+     * The name of the file the browser saves the backup codes as.
+     *
+     * It leads with the application name because these end up in a downloads folder next to every
+     * other file called `backup-codes.txt`, and a user with two accounts has no way to tell them
+     * apart otherwise.
+     */
+    #[ExposeInTemplate]
+    public function backupCodesFilename(): string
+    {
+        $name = $this->slugger->slug($this->appName)->lower()->toString();
+
+        return ($name !== '' ? $name . '-' : '') . 'backup-codes.txt';
     }
 
     #[PreMount()]

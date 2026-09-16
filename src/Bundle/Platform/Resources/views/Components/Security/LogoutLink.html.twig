@@ -33,7 +33,7 @@
 }) %}
 
 <form method="post" action="{{ logout_path(firewall) }}">
-    <input type="hidden" {{ stimulus_controller('@solidworx/platform/csrf-protection') }} name="_csrf_token" value="{{ csrf_token(csrf_token_id) }}"/>
+    <input type="hidden" {{ stimulus_controller('csrf-protection') }} name="_csrf_token" value="{{ csrf_token(csrf_token_id) }}"/>
     <button type="submit" class="{{ button.apply({color, size, outline}, class) }}">
         {% if icon is not empty -%}
             {{ ux_icon('tabler:' ~ icon, {width: 16, height: 16}) }}&nbsp;

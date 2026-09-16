@@ -1,149 +1,311 @@
+{#
+    The two-factor settings, as a live component.
+
+    Every setting is a `<twig:Ui:SettingRow>` — the same component the profile page uses for its
+    security rows — so a second factor and a password read the same way wherever they appear. The
+    cards group them: how you sign in, how you get back in, and what is already trusted.
+
+    Two things happen in the browser rather than on the server, both in the `two-factor` Stimulus
+    controller: stepping through the authenticator setup, and saving the backup codes to a file.
+    See `assets/controllers/two_factor_controller.js` for why.
+#}
+
+{% set user = app.user %}
+{% set email_enabled = user.isEmailAuthEnabled %}
+{% set totp_enabled = user.isTotpAuthenticationEnabled %}
+{% set backup_codes = user.backupCodes %}
+{% set two_factor_controller = '@solidworx/platform/two-factor' %}
+
+{# A failed verification has to reopen on the step that failed, not back at the QR code, so the
+   starting step is decided here rather than in the controller. #}
+{% set initial_step = (form.vars.submitted and not form.vars.valid) ? 1 : 0 %}
+
 <div {{ attributes }}>
-    <div class="card card-outline card-primary">
-        <div class="card-header with-border">
-            <h3 class="card-title">
-                {{ "Two-factor Authentication"|trans }}
-            </h3>
-        </div>
-        <div class="card-body p-0 border-0">
-            <ul class="list-group">
-                <li class="list-group-item">
-                    <div class="row">
-                        <div class="col-4">
-                            {{ 'Email'|trans }}
-                        </div>
-                        {% if app.user.isEmailAuthEnabled %}
-                            <div class="col-4 text-center">
-                                <span class="badge badge-success">{{ 'Enabled'|trans }}</span>
-                            </div>
-                            <div class="col-4 text-right text-end">
-                                <a href="#" class="btn btn-sm btn-danger" {{ live_action('disableEmailAuth:prevent') }}>{{ 'Disable'|trans }}</a>
-                            </div>
-                        {% else %}
-                            <div class="col-4 text-center">
-                                <span class="badge badge-secondary">{{ 'Disabled'|trans }}</span>
-                            </div>
-                            <div class="col-4 text-right text-end">
-                                <a href="#" class="btn btn-sm btn-success" {{ live_action('enableEmailAuth:prevent') }}>{{ 'Enable'|trans }}</a>
-                            </div>
-                        {% endif %}
+    {# The controller sits inside the component root: the root already carries the live
+       controller, and an element cannot have two `data-controller` attributes. #}
+    <div {{ stimulus_controller(two_factor_controller, {
+        step: initial_step,
+        codes: backup_codes,
+        filename: backupCodesFilename,
+    }) }}>
+        <div class="d-flex flex-column gap-4">
+            {# ---------------------------------------------------------------- Sign-in methods #}
+            <twig:Ui:Card
+                icon="tabler:shield-lock"
+                title="{{ 'Two-factor authentication'|trans }}"
+                subtitle="{{ 'Add a second step to your sign-in, so a password on its own is not enough'|trans }}"
+            >
+                <twig:block name="body">
+                    <div class="list-group list-group-flush">
+                        <twig:Ui:SettingRow
+                            icon="tabler:mail"
+                            title="{{ 'Email'|trans }}"
+                            description="{{ 'Receive a verification code by email when you sign in'|trans }}"
+                            status="{{ email_enabled ? 'Enabled'|trans : 'Disabled'|trans }}"
+                            statusColor="{{ email_enabled ? 'success' : 'secondary' }}"
+                            statusIcon="{{ email_enabled ? 'tabler:check' : 'tabler:x' }}"
+                            note="{{ 'Codes are sent to %email%'|trans({'%email%': user.email}) }}"
+                        >
+                            {% if email_enabled %}
+                                <button type="button" class="btn btn-danger" {{ live_action('disableEmailAuth:prevent') }}>
+                                    {{ ux_icon('tabler:x', {class: 'icon'}) }}
+                                    {{ 'Disable'|trans }}
+                                </button>
+                            {% else %}
+                                <button type="button" class="btn btn-primary" {{ live_action('enableEmailAuth:prevent') }}>
+                                    {{ ux_icon('tabler:check', {class: 'icon'}) }}
+                                    {{ 'Enable'|trans }}
+                                </button>
+                            {% endif %}
+                        </twig:Ui:SettingRow>
+
+                        <twig:Ui:SettingRow
+                            icon="tabler:device-mobile"
+                            title="{{ 'Authenticator app'|trans }}"
+                            description="{{ 'Use an app such as Google Authenticator or 1Password to generate codes'|trans }}"
+                            status="{{ totp_enabled ? 'Enabled'|trans : 'Disabled'|trans }}"
+                            statusColor="{{ totp_enabled ? 'success' : 'secondary' }}"
+                            statusIcon="{{ totp_enabled ? 'tabler:check' : 'tabler:x' }}"
+                            note="{{ totp_enabled
+                                ? 'Codes come from the app you paired with this account'|trans
+                                : 'Pair an app to generate codes without waiting for an email'|trans }}"
+                        >
+                            {% if totp_enabled %}
+                                <button type="button" class="btn btn-danger" {{ live_action('disableTOTPAuth:prevent') }}>
+                                    {{ ux_icon('tabler:x', {class: 'icon'}) }}
+                                    {{ 'Disable'|trans }}
+                                </button>
+                            {% else %}
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#totp-setup-modal">
+                                    {{ ux_icon('tabler:qrcode', {class: 'icon'}) }}
+                                    {{ 'Set up'|trans }}
+                                </button>
+                            {% endif %}
+                        </twig:Ui:SettingRow>
                     </div>
-                </li>
-                <li class="list-group-item">
-                    <div class="row">
-                        <div class="col-4">
-                            {{ 'Authenticator app'|trans }}
-                        </div>
+                </twig:block>
+            </twig:Ui:Card>
 
-                        {% if app.user.isTotpAuthenticationEnabled %}
-                            <div class="col-4 text-center">
-                                <span class="badge badge-success">{{ 'Enabled'|trans }}</span>
-                            </div>
-                            <div class="col-4 text-right text-end">
-                                <a href="#" class="btn btn-sm btn-danger" {{ live_action('disableTOTPAuth:prevent') }}>{{ 'Disable'|trans }}</a>
-                            </div>
-                        {% else %}
-                            <div class="col-4 text-center">
-                                <span class="badge badge-secondary">{{ 'Disabled'|trans }}</span>
-                            </div>
-                            <div class="col-4 text-right text-end">
-                                <a href="#" class="btn btn-sm btn-success" data-toggle="modal" data-target="#enable-totp-modal">{{ 'Enable'|trans }}</a>
-                            </div>
-
-                            {% set qrImage = this.qrContent %}
-
-                            {{ form_start(form) }}
-                            <twig:Ui:Modal id="enable-totp-modal" title="TOTP">
-                                <twig:block name="body">
-                                    <div class="text-center">
-                                        <img src="{{ qrImage }}" />
-                                        {{ form_row(form) }}
-                                    </div>
-                                </twig:block>
-                                <twig:block name="footer">
-                                    <button type="button" class="btn btn-default" data-dismiss="modal">{{ 'Close'|trans }}</button>
-                                    <button type="button" class="btn btn-primary" {{ live_action('enableTOTPAuth:prevent') }}>{{ 'Save'|trans }}</button>
-                                </twig:block>
-                            </twig:Ui:Modal>
-                            {{ form_end(form) }}
-                        {% endif %}
-                    </div>
-                </li>
-            </ul>
-        </div>
-    </div>
-    {% if app.user.is2FaEnabled and app.user.backupCodes is not empty %}
-        <div class="card card-outline card-info">
-            <div class="card-header with-border">
-                <h3 class="card-title">
-                    {{ "Recovery Options"|trans }}
-                </h3>
-            </div>
-            <div class="card-body p-0 border-0">
-                <ul class="list-group">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ 'Backup Codes'|trans }}
-
-                        <a href="#" class="btn btn-sm btn-secondary" data-toggle="modal" data-target="#view-backup-codes-modal">
-                            {{ 'View'|trans }}
-                        </a>
-                    </li>
-                </ul>
-
-                <twig:Ui:Modal id="view-backup-codes-modal" title="Backup Codes" :show="showBackupCodes">
+            {# ------------------------------------------------------------------- Backup codes #}
+            {% if user.is2FaEnabled and backup_codes is not empty %}
+                <twig:Ui:Card
+                    icon="tabler:key"
+                    iconColor="warning"
+                    title="{{ 'Backup codes'|trans }}"
+                    subtitle="{{ 'How you get back in when you lose access to your second factor'|trans }}"
+                >
                     <twig:block name="body">
-                        <div class="text-center">
-                            <twig:Ui:Alert type="info">
-                                Use these backup codes when you have lost access to your authentication device.
-                            </twig:Ui:Alert>
-                            <twig:Ui:Alert type="warning">
-                                Store these backup codes in a safe place where it can be accessed when needed.
-                            </twig:Ui:Alert>
-                        </div>
-                        <div class="row m-4">
-                            {% for chunk in app.user.backupCodes|batch(app.user.backupCodes|length / 2) %}
-                                <div class="col-6 col-md-3 offset-md-2">
-                                    {% for code in chunk %}
-                                        <code>{{ code }}</code><br />
-                                    {% endfor %}
-                                </div>
-                            {% endfor %}
+                        <div class="list-group list-group-flush">
+                            <twig:Ui:SettingRow
+                                icon="tabler:lifebuoy"
+                                iconColor="warning"
+                                title="{{ 'Recovery codes'|trans }}"
+                                description="{{ 'Single-use codes that stand in for your second factor'|trans }}"
+                                status="{{ '%count% codes remaining'|trans({'%count%': backup_codes|length}) }}"
+                                statusColor="success"
+                                note="{{ 'Keep them somewhere safe — each one works once, and they are shown in full only here'|trans }}"
+                                noteIcon="tabler:alert-triangle"
+                            >
+                                <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#backup-codes-modal">
+                                    {{ ux_icon('tabler:eye', {class: 'icon'}) }}
+                                    {{ 'View codes'|trans }}
+                                </button>
+
+                                <button type="button" class="btn btn-outline-primary" {{ stimulus_action(two_factor_controller, 'download') }}>
+                                    {{ ux_icon('tabler:download', {class: 'icon'}) }}
+                                    {{ 'Download'|trans }}
+                                </button>
+                            </twig:Ui:SettingRow>
                         </div>
                     </twig:block>
+                </twig:Ui:Card>
+            {% endif %}
+
+            {# ----------------------------------------------------------------- Trusted device #}
+            {% if isDeviceTrusted %}
+                <twig:Ui:Card
+                    icon="tabler:devices-check"
+                    iconColor="success"
+                    title="{{ 'Trusted devices'|trans }}"
+                    subtitle="{{ 'Devices that skip the second step until the trust expires'|trans }}"
+                >
+                    <twig:block name="body">
+                        <div class="list-group list-group-flush">
+                            <twig:Ui:SettingRow
+                                icon="tabler:device-laptop"
+                                iconColor="success"
+                                title="{{ 'This browser'|trans }}"
+                                description="{{ 'Signing in from here will not ask for a code'|trans }}"
+                                status="{{ 'Trusted'|trans }}"
+                                statusColor="success"
+                                statusIcon="tabler:check"
+                                note="{{ 'Revoke this if the device is shared or you no longer have it'|trans }}"
+                            >
+                                <button type="button" class="btn btn-danger" {{ live_action('clearTrustedDevice:prevent') }}>
+                                    {{ ux_icon('tabler:shield-off', {class: 'icon'}) }}
+                                    {{ 'Revoke trust'|trans }}
+                                </button>
+                            </twig:Ui:SettingRow>
+                        </div>
+                    </twig:block>
+                </twig:Ui:Card>
+            {% endif %}
+        </div>
+
+        {# ------------------------------------------------------- Authenticator setup (2 steps) #}
+        {% if not totp_enabled %}
+            {# Read out here, not inside the modal: a component slot compiles to an embed, and the
+               component being rendered rebinds `this` — so inside the slot it is the modal, not
+               this component. Ordinary variables pass through; `this` does not. #}
+            {% set qr_image = this.qrContent %}
+
+            {{ form_start(form) }}
+                <twig:Ui:Modal
+                    id="totp-setup-modal"
+                    title="{{ 'Set up your authenticator app'|trans }}"
+                    size="lg"
+                    :centered="true"
+                    :staticBackdrop="true"
+                >
+                    <twig:block name="body">
+                        <ul class="steps steps-counter mb-4">
+                            <li class="step-item" {{ stimulus_target(two_factor_controller, 'stepItem') }}>
+                                {{ 'Scan the code'|trans }}
+                            </li>
+                            <li class="step-item" {{ stimulus_target(two_factor_controller, 'stepItem') }}>
+                                {{ 'Confirm it works'|trans }}
+                            </li>
+                        </ul>
+
+                        {# Step 1 — pair the app. #}
+                        <div data-step="0" {{ stimulus_target(two_factor_controller, 'step') }}>
+                            <div class="text-center">
+                                <img
+                                    src="{{ qr_image }}"
+                                    alt="{{ 'QR code for pairing an authenticator app'|trans }}"
+                                    class="img-fluid rounded border bg-white p-2"
+                                    width="220"
+                                    height="220"
+                                />
+
+                                <p class="text-secondary mt-3">
+                                    {{ 'Open your authenticator app and scan this code.'|trans }}
+                                </p>
+                            </div>
+
+                            <details class="mt-3" {{ stimulus_controller('clipboard') }}>
+                                <summary class="cursor-pointer">{{ 'Cannot scan it? Enter the key by hand'|trans }}</summary>
+
+                                <div class="input-group mt-2">
+                                    <code class="form-control font-monospace text-break" {{ stimulus_target('clipboard', 'source') }}>{{ totpSecret }}</code>
+
+                                    <button
+                                        type="button"
+                                        class="btn"
+                                        {{ stimulus_target('clipboard', 'button') }}
+                                        {{ stimulus_action('clipboard', 'copy') }}
+                                    >
+                                        {{ ux_icon('tabler:copy', {class: 'icon'}) }}
+                                        {{ 'Copy'|trans }}
+                                    </button>
+                                </div>
+                            </details>
+                        </div>
+
+                        {# Step 2 — prove it worked. Hidden, not removed: the fields still submit. #}
+                        <div class="d-none" data-step="1" {{ stimulus_target(two_factor_controller, 'step') }}>
+                            <div class="mx-auto" style="max-width: 20rem">
+                                {{ form_errors(form) }}
+
+                                {{ form_row(form.code, {
+                                    label: 'Enter the 6-digit code from your app'|trans,
+                                    attr: {
+                                        class: 'form-control-lg text-center font-monospace',
+                                        placeholder: '000000',
+                                        inputmode: 'numeric',
+                                    },
+                                }) }}
+                            </div>
+                        </div>
+
+                        {{ form_row(form.secret) }}
+                    </twig:block>
+
+                    {# Every button sits directly in the footer, so it picks up the modal's own
+                       spacing and right alignment — the same as every other modal in the
+                       application. The step it belongs to is on the element, not implied by its
+                       position, which is what lets them be siblings rather than two groups.
+
+                       "Back" is the exception, pushed left with `me-auto`: it moves between the
+                       steps of a wizard rather than dismissing the dialog, and that belongs on the
+                       left. "Cancel" and "Close" dismiss, so they stay with the primary on the
+                       right, the same as in every other modal. #}
                     <twig:block name="footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">{{ 'Close'|trans }}</button>
-                        <button type="button" class="btn btn-primary" {{ live_action('regenerateBackupCodes:prevent') }}>{{ 'Regenerate'|trans }}</button>
+                        <button type="button" class="btn btn-link" data-step="0" data-bs-dismiss="modal" {{ stimulus_target(two_factor_controller, 'step') }}>
+                            {{ 'Cancel'|trans }}
+                        </button>
+
+                        <button type="button" class="btn btn-primary" data-step="0" {{ stimulus_target(two_factor_controller, 'step') }} {{ stimulus_action(two_factor_controller, 'next') }}>
+                            {{ 'Next'|trans }}
+                            {{ ux_icon('tabler:arrow-right', {class: 'icon'}) }}
+                        </button>
+
+                        <button type="button" class="btn btn-link d-none me-auto" data-step="1" {{ stimulus_target(two_factor_controller, 'step') }} {{ stimulus_action(two_factor_controller, 'previous') }}>
+                            {{ ux_icon('tabler:arrow-left', {class: 'icon'}) }}
+                            {{ 'Back'|trans }}
+                        </button>
+
+                        <button type="button" class="btn btn-primary d-none" data-step="1" {{ stimulus_target(two_factor_controller, 'step') }} {{ live_action('enableTOTPAuth:prevent') }}>
+                            {{ ux_icon('tabler:check', {class: 'icon'}) }}
+                            {{ 'Verify and enable'|trans }}
+                        </button>
                     </twig:block>
                 </twig:Ui:Modal>
-            </div>
-        </div>
-    {% endif %}
+            {{ form_end(form) }}
+        {% endif %}
 
-    {% if isDeviceTrusted %}
-        <div class="card card-outline card-success">
-            <div class="card-header with-border">
-                <h3 class="card-title">
-                    {{ "Trusted Device"|trans }}
-                </h3>
-            </div>
-            <div class="card-body p-0 border-0">
-                <ul class="list-group">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <p class="">
-                            {{ 'Browser Trusted'|trans }}<br />
-                            <small>
-                                {{ 'This device is trusted and won\'t require a 2FA code.'|trans }}'
-                            </small>
-                        </p>
+        {# ------------------------------------------------------------------ Backup codes modal #}
+        {% if backup_codes is not empty %}
+            <twig:Ui:Modal
+                id="backup-codes-modal"
+                title="{{ 'Backup codes'|trans }}"
+                :centered="true"
+                :show="showBackupCodes"
+            >
+                <twig:block name="body">
+                    <twig:Ui:Alert type="warning" icon="tabler:alert-triangle" title="{{ 'Save these now'|trans }}">
+                        {{ 'Each code works once. Store them somewhere you can reach without this account — they are not shown again after you regenerate them.'|trans }}
+                    </twig:Ui:Alert>
 
-                        <span class="badge badge-success">{{ 'Enabled'|trans }}</span>
+                    <div class="row g-2 mt-1">
+                        {% for code in backup_codes %}
+                            <div class="col-6">
+                                <code class="d-block text-center border rounded py-2 font-monospace">{{ code }}</code>
+                            </div>
+                        {% endfor %}
+                    </div>
 
-                        <a href="#" class="btn btn-sm btn-danger" {{ live_action('clearTrustedDevice:prevent') }}>
-                            {{ 'Disable'|trans }}
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    {% endif %}
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary w-100 mt-3"
+                        {{ stimulus_action(two_factor_controller, 'download') }}
+                    >
+                        {{ ux_icon('tabler:download', {class: 'icon'}) }}
+                        {{ 'Download as a text file'|trans }}
+                    </button>
+                </twig:block>
+
+                <twig:block name="footer">
+                    <button type="button" class="btn btn-link" data-bs-dismiss="modal">
+                        {{ 'Close'|trans }}
+                    </button>
+
+                    <button type="button" class="btn btn-primary" {{ live_action('regenerateBackupCodes:prevent') }}>
+                        {{ ux_icon('tabler:refresh', {class: 'icon'}) }}
+                        {{ 'Regenerate codes'|trans }}
+                    </button>
+                </twig:block>
+            </twig:Ui:Modal>
+        {% endif %}
+    </div>
 </div>

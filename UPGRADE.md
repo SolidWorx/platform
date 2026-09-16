@@ -2,12 +2,35 @@
 
 ## 0.2 → 0.3
 
-### User profile pages
+### User profile section
 
-Every signed-in user now gets `/profile`, `/profile/edit` and `/profile/password`, and a
-**Profile** entry leading the user dropdown. See [the profile guide](./docs/security/profile.md).
+Every signed-in user now gets a profile section — `/profile`, `/profile/edit`, `/profile/password`
+and, when 2FA is enabled, `/profile/two-factor` — with a navigation column listing its pages, and
+a **Profile** entry leading the user dropdown. See
+[the profile guide](./docs/security/profile.md).
 
-Nothing is required to upgrade, but three things changed shape:
+Nothing is required to upgrade, but these changed shape:
+
+- **Two-factor authentication moved out of the user dropdown.** It is now an entry on the new
+  `profile_menu`, so it sits with the other account pages instead of behind the avatar. The route
+  and the path are unchanged, so existing links keep working. If you linked to it from a menu
+  builder of your own, nothing breaks — but the platform no longer puts it in `user_menu`.
+- **`UserMenu::PRIORITY_ACCOUNT` no longer has a platform entry at it.** The constant stays, as the
+  anchor for registering an account-level entry in the dropdown. Anything you registered relative to
+  it still lands where it did.
+- **Profile pages extend `profile_layout` rather than `ui_layout_app`.** A template of your own that
+  extends a shipped profile page picks the navigation up automatically. One that *replaced* a page
+  outright keeps working as it is, and can opt into the section by extending `profile_layout`.
+- **`show.html.twig` no longer exports the `security_item()` macro.** Security rows are now
+  `<twig:Ui:SettingRow>`, the shared component the two-factor page uses as well, so a setting reads
+  the same wherever it appears. Replace `{{ profile.security_item(…) }}` calls with the component —
+  see [the profile guide](./docs/security/profile.md#overriding-blocks). The `detail()` macro is
+  unchanged.
+- **`show.html.twig` no longer defines `page_title_actions`.** The "Update profile" button lives in
+  the details card footer. Override the block yourself if you want a header action back.
+- **Every Symfony password field now renders a show/hide toggle**, from the form theme's
+  `password_widget`. No markup changes are needed; if you had built your own toggle around a
+  `PasswordType`, remove it or you will get two.
 
 - **`SolidWorx\Platform\PlatformBundle\Model\UserInterface` gained `setPassword(string): static`.**
   It is what lets the platform rotate a password on the user's behalf. Classes extending
@@ -21,9 +44,16 @@ Nothing is required to upgrade, but three things changed shape:
   on its own now; it carries the Bootstrap layout with it, and there is no need to list
   `bootstrap_5_layout.html.twig` alongside it.
 
-`platform.yaml` gained a `platform.profile` section (the form type, the three templates and the
-password rules). Every key is optional; regenerate `platform-schema.json` with
-`php bin/console platform:generate-schema` to pick them up in your editor.
+`platform.yaml` gained a `platform.profile` section (the form type, the four templates — including
+`templates.layout`, the section's chrome — and the password rules). Every key is optional;
+regenerate `platform-schema.json` with `php bin/console platform:generate-schema` to pick them up in
+your editor.
+
+The UI bundle also gained three shared Twig components — `Ui:SettingRow`, `Ui:SettingsNav` and
+`Ui:PasswordField` — and `Ui:Card` gained `icon` and `iconColor` props. See
+[UI Components](./docs/frontend/components.md). `Ui:Card` now wraps its title and subtitle in a
+`<div>` so the subtitle sits under the title rather than beside it; a stylesheet targeting
+`.card-header > .card-title` directly may need adjusting.
 
 ### Tabler page layouts
 

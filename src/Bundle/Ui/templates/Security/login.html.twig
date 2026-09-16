@@ -44,12 +44,7 @@
                             <a href="./forgot-password.html">Forgot password</a>
                         </span>#}
                     </label>
-                    <div class="input-group input-group-flat" {{ stimulus_controller('password-visibility', controllerClasses = { 'hidden': 'd-none' }) }}>
-
-                        <div class="input-group-text">
-                            {{ ux_icon('tabler:password', {width: 24, height: 24}) }}
-                        </div>
-
+                    <twig:Ui:PasswordField>
                         <input
                                 type="password"
                                 class="form-control"
@@ -59,18 +54,7 @@
                                 name="{{ options.password_parameter }}"
                                 {{ stimulus_target('password-visibility', 'input') }}
                         />
-                        <span class="input-group-text">
-                                <a href="#" class="link-secondary" data-bs-toggle="tooltip" aria-label="Show password" data-bs-original-title="Show password" {{ stimulus_action('password-visibility', 'toggle') }}>
-                                    <span {{ stimulus_target('password-visibility', 'icon') }}>
-                                        {{ ux_icon('tabler:eye', {width: 24, height: 24}) }}
-                                    </span>
-                                    <span {{ stimulus_target('password-visibility', 'icon') }} class="d-none">
-                                        {{ ux_icon('tabler:eye-closed', {width: 24, height: 24}) }}
-                                    </span>
-                                </a>
-                            </span>
-
-                    </div>
+                    </twig:Ui:PasswordField>
                 </div>
                 {% if options.always_remember_me is same as(false) and options.remember_me_parameter is not empty %}
                     <div class="mb-2">
@@ -82,7 +66,7 @@
                 {% endif %}
 
                 {% if options.enable_csrf %}
-                    <input type="hidden" {{ stimulus_controller('@solidworx/platform/csrf-protection') }} name="{{ options.csrf_parameter }}" value="{{ csrf_token(options.csrf_token_id) }}"/>
+                    <input type="hidden" {{ stimulus_controller('csrf-protection') }} name="{{ options.csrf_parameter }}" value="{{ csrf_token(options.csrf_token_id) }}"/>
                 {% endif %}
 
                 <div class="form-footer">

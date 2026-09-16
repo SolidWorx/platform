@@ -75,19 +75,23 @@
 {% block email_widget -%}
     <div class="input-group">
         <div class="input-group-text">
-            {{ ux_icon('tabler:email') }}
+            {{ ux_icon('tabler:mail') }}
         </div>
         {{- parent() -}}
     </div>
 {%- endblock email_widget %}
 
+{##
+    Every password field in the application gets the show/hide toggle, not just the ones somebody
+    remembered to ask for it on. The `input` target is merged into `attr` so it lands on the
+    widget `parent()` renders — the component wraps that input, it does not build it.
+##}
 {% block password_widget -%}
-    <div class="input-group">
-        <div class="input-group-text">
-            {{ ux_icon('tabler:password') }}
-        </div>
-        {{- parent() -}}
-    </div>
+    {%- set attr = attr|merge({'data-password-visibility-target': 'input'}) -%}
+    {#- Captured before the component: a component slot compiles to an embed, and `parent()` inside
+        one resolves against the component rather than this theme. -#}
+    {%- set widget = parent() -%}
+    <twig:Ui:PasswordField>{{ widget|raw }}</twig:Ui:PasswordField>
 {%- endblock password_widget %}
 
 {% block text_editor_widget -%}

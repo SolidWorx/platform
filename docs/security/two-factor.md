@@ -115,7 +115,7 @@ When 2FA is enabled the platform registers these routes:
 | `2fa_login` | `/2fa` | The 2FA challenge form (TOTP / email / backup code). |
 | `2fa_login_check` | `/2fa_check` | Where the 2FA form posts to. |
 | `_solidworx_platform_security_two_factor_resend` | `/2fa/resend` | Re-send the email code, then return to the challenge. |
-| `solidworx_platform_security_two_factor_configure` | `/settings/two-factor` | Where a signed-in user turns their second factors on and off. |
+| `solidworx_platform_security_two_factor_configure` | `/profile/two-factor` | Where a signed-in user turns their second factors on and off. |
 
 The challenge pages let users switch provider via
 `path('2fa_login', {preferProvider: '...'})`.
@@ -154,14 +154,20 @@ shadow it (rules are matched top-to-bottom, first match wins).
 
 ## The configuration page
 
-`/settings/two-factor` renders the `Platform:Security:TwoFactor` live component, which lets a
-signed-in user enable or disable TOTP and email codes, regenerate backup codes and forget a
-trusted device.
+`/profile/two-factor` renders the `Platform:Security:TwoFactor` live component, which lets a
+signed-in user enable or disable TOTP and email codes, view, download and regenerate backup codes,
+and forget a trusted device.
 
-You do not have to link to it yourself: while 2FA is enabled the platform registers a
-**Two-factor authentication** entry in the `user_menu` dropdown — see
-[the user menu](../frontend/layouts.md#the-user-menu). Turn 2FA off and the controller, the menu
+The page belongs to the [profile section](./profile.md): it extends the profile layout and appears
+in the profile navigation beside **Profile** and **Change password**, which is where a user looks
+for it. You do not have to link to it yourself — while 2FA is enabled the platform registers a
+**Two-factor authentication** entry on the `profile_menu`. Turn 2FA off and the controller, the menu
 entry and the component are all removed from the container.
+
+Pairing an authenticator app is a two-step dialog — scan the QR code (or copy the key by hand),
+then confirm a generated code. Both steps are one form; the `two-factor` Stimulus controller shows
+and hides them, and a failed verification reopens on the step that failed. The same controller
+writes the backup codes to a file in the browser, so there is no route that returns recovery codes.
 
 To place the same controls on a page of your own, mount the component directly:
 

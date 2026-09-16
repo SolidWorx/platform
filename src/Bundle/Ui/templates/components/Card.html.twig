@@ -1,6 +1,8 @@
 {% props
     title = '',
     subtitle = '',
+    icon = '',
+    iconColor = 'primary',
     status = '',
     statusPosition = 'top',
     stacked = false,
@@ -85,13 +87,24 @@
                 {% block header %}{% endblock %}
             </div>
         {% elseif title is not empty or subtitle is not empty %}
+            {# `card-header` is a flex row, so the title and subtitle are wrapped — otherwise the
+               subtitle sits beside the title rather than under it, and an icon tile could not be
+               placed in front of both. #}
             <div class="card-header">
-                {% if title is not empty %}
-                    <h3 class="card-title">{{ title }}</h3>
+                {% if icon is not empty %}
+                    <span class="avatar avatar-sm bg-{{ iconColor }}-lt me-3">
+                        {{ ux_icon(icon, {class: 'icon'}) }}
+                    </span>
                 {% endif %}
-                {% if subtitle is not empty %}
-                    <p class="card-subtitle">{{ subtitle }}</p>
-                {% endif %}
+
+                <div>
+                    {% if title is not empty %}
+                        <h3 class="card-title">{{ title }}</h3>
+                    {% endif %}
+                    {% if subtitle is not empty %}
+                        <p class="card-subtitle">{{ subtitle }}</p>
+                    {% endif %}
+                </div>
             </div>
         {% endif %}
 

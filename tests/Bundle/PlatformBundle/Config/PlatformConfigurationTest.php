@@ -28,7 +28,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 /**
  * @phpstan-type ProfileConfig array{
  *     form_type: string,
- *     templates: array{show: string, edit: string, change_password: string},
+ *     templates: array{layout: string, show: string, edit: string, change_password: string},
  *     password: array{min_length: int, strength: string, check_compromised: bool},
  * }
  */
@@ -217,6 +217,7 @@ final class PlatformConfigurationTest extends TestCase
         $result = $this->process([]);
 
         self::assertSame(ProfileType::class, $result['profile']['form_type']);
+        self::assertSame('@SolidWorxPlatform/Profile/layout.html.twig', $result['profile']['templates']['layout']);
         self::assertSame('@SolidWorxPlatform/Profile/show.html.twig', $result['profile']['templates']['show']);
         self::assertSame('@SolidWorxPlatform/Profile/edit.html.twig', $result['profile']['templates']['edit']);
         self::assertSame('@SolidWorxPlatform/Profile/change_password.html.twig', $result['profile']['templates']['change_password']);

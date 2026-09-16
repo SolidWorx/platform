@@ -1,8 +1,8 @@
 {##
     The profile page: what the platform holds about the signed-in user, and the ways to change it.
 
-    It extends the UI bundle's application layout, so it picks up whatever `platform.ui.templates`
-    an application configures.
+    It extends `profile_layout`, so it picks up the profile navigation and whatever
+    `platform.ui.templates` an application configures around it.
 
     Three levels of customisation, from cheapest to most involved:
 
@@ -17,8 +17,9 @@
                {{ profile.detail('Job title'|trans, user.jobTitle) }}
            {% endblock %}
 
-       The `detail()` and `security_item()` macros below are part of that contract — import them
-       as above rather than hand-rolling the markup, so your rows keep matching the platform's.
+       The `detail()` macro below is part of that contract — import it as above rather than
+       hand-rolling the markup, so your rows keep matching the platform's. Security rows are
+       `<twig:Ui:SettingRow>`, the same component the two-factor page uses.
 
     2. **Add a section.** `profile_sections_extra` is an empty block at the bottom of the page,
        there so an application can add cards without redefining the layout above it.
@@ -27,7 +28,7 @@
        It is rendered with `user` and `two_factor_enabled`, and nothing else is expected of it.
 ##}
 
-{% extends ui_layout_app %}
+{% extends profile_layout %}
 
 {% types {
     ## The signed-in user — always the account the page is about, never one named in the request.
@@ -55,41 +56,9 @@
     </div>
 {% endmacro %}
 
-{##
-    One row in the security card: a title, an explanation, and the action that changes it.
-##}
-{% macro security_item(title, description, url, action, icon) %}
-    <div class="list-group-item">
-        <div class="row align-items-center">
-            <div class="col-auto">
-                <span class="avatar avatar-sm bg-primary-lt">{{ ux_icon('tabler:' ~ icon, {class: 'icon'}) }}</span>
-            </div>
-
-            <div class="col text-truncate">
-                <div class="text-body d-block">{{ title }}</div>
-                <div class="d-block text-secondary text-truncate mt-n1">{{ description }}</div>
-            </div>
-
-            <div class="col-auto">
-                <a href="{{ url }}" class="btn btn-sm">{{ action }}</a>
-            </div>
-        </div>
-    </div>
-{% endmacro %}
-
 {% import _self as profile %}
 
-{% block page_pretitle %}{{ 'Account'|trans }}{% endblock %}
-
 {% block page_title %}{{ 'Profile'|trans }}{% endblock %}
-
-{## The buttons in the page header. ##}
-{% block page_title_actions %}
-    <a href="{{ path('solidworx_platform_profile_edit') }}" class="btn btn-primary">
-        {{ ux_icon('tabler:edit', {class: 'icon'}) }}
-        {{ 'Edit profile'|trans }}
-    </a>
-{% endblock %}
 
 {## The user's initials, shown in the avatar. Falls back to the sign-in identifier. ##}
 {% block profile_initials %}
@@ -97,7 +66,7 @@
     {{- initials is not empty ? initials : user.userIdentifier|slice(0, 2)|upper -}}
 {% endblock %}
 
-{## The name shown at the top of the details card. Falls back to the sign-in identifier. ##}
+{## The name shown at the top of the page. Falls back to the sign-in identifier. ##}
 {% block profile_name %}
     {%- set name = [user.firstName|default(''), user.lastName|default('')]|filter(part => part is not empty)|join(' ') -%}
     {{- name is not empty ? name : user.userIdentifier -}}
@@ -105,12 +74,14 @@
 
 {## The avatar and name banner above the details. ##}
 {% block profile_identity %}
-    <div class="d-flex align-items-center mb-4">
-        <span class="avatar avatar-lg me-3">{{ block('profile_initials') }}</span>
+    <div class="card">
+        <div class="card-body d-flex align-items-center gap-3">
+            <span class="avatar avatar-lg">{{ block('profile_initials') }}</span>
 
-        <div>
-            <h3 class="m-0">{{ block('profile_name') }}</h3>
-            <div class="text-secondary">{{ user.userIdentifier }}</div>
+            <div>
+                <h2 class="mb-0">{{ block('profile_name') }}</h2>
+                <div class="text-secondary">{{ user.userIdentifier }}</div>
+            </div>
         </div>
     </div>
 {% endblock %}
@@ -123,81 +94,87 @@
     {{ profile.detail('Mobile number'|trans, user.mobile|default(null)) }}
 {% endblock %}
 
-{## The whole "Profile details" card. ##}
+{## The whole "Personal information" card. ##}
 {% block profile_details %}
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">{{ 'Profile details'|trans }}</h3>
-        </div>
+    {# Rendered out here rather than inside the card: a component slot is compiled as an embed, so
+       `block()` inside one looks the block up in the component, not in this page. #}
+    {% set detail_rows = block('profile_detail_rows') %}
 
-        <div class="card-body">
-            {{ block('profile_identity') }}
-
+    <twig:Ui:Card
+        icon="tabler:user"
+        title="{{ 'Personal information'|trans }}"
+        subtitle="{{ 'Your contact details and account information'|trans }}"
+    >
+        <twig:block name="content">
             <div class="datagrid">
-                {{ block('profile_detail_rows') }}
+                {{ detail_rows|raw }}
             </div>
-        </div>
+        </twig:block>
 
-        <div class="card-footer">
-            <a href="{{ path('solidworx_platform_profile_edit') }}" class="btn btn-outline-primary">
-                {{ ux_icon('tabler:edit', {class: 'icon'}) }}
-                {{ 'Edit profile'|trans }}
-            </a>
-        </div>
-    </div>
+        <twig:block name="footer">
+            <div class="d-flex justify-content-end">
+                <a href="{{ path('solidworx_platform_profile_edit') }}" class="btn btn-primary">
+                    {{ ux_icon('tabler:edit', {class: 'icon'}) }}
+                    {{ 'Update profile'|trans }}
+                </a>
+            </div>
+        </twig:block>
+    </twig:Ui:Card>
 {% endblock %}
 
 {## The rows of the security card. The two-factor row is only rendered when 2FA is enabled —
     its route does not exist otherwise. ##}
 {% block profile_security_items %}
-    {{ profile.security_item(
-        'Password'|trans,
-        'Change the password you sign in with'|trans,
-        path('solidworx_platform_profile_change_password'),
-        'Change'|trans,
-        'lock'
-    ) }}
+    <twig:Ui:SettingRow
+        icon="tabler:lock"
+        title="{{ 'Password'|trans }}"
+        description="{{ 'Change the password you sign in with'|trans }}"
+    >
+        <a href="{{ path('solidworx_platform_profile_change_password') }}" class="btn">
+            {{ 'Change password'|trans }}
+        </a>
+    </twig:Ui:SettingRow>
 
     {% if two_factor_enabled %}
-        {{ profile.security_item(
-            'Two-factor authentication'|trans,
-            'Add a second step to your sign-in'|trans,
-            path('solidworx_platform_security_two_factor_configure'),
-            'Configure'|trans,
-            'shield-lock'
-        ) }}
+        <twig:Ui:SettingRow
+            icon="tabler:shield-lock"
+            title="{{ 'Two-factor authentication'|trans }}"
+            description="{{ 'Add a second step to your sign-in'|trans }}"
+        >
+            <a href="{{ path('solidworx_platform_security_two_factor_configure') }}" class="btn">
+                {{ 'Configure'|trans }}
+            </a>
+        </twig:Ui:SettingRow>
     {% endif %}
 {% endblock %}
 
 {## The whole "Security" card. ##}
 {% block profile_security %}
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">{{ 'Security'|trans }}</h3>
-        </div>
+    {% set security_items = block('profile_security_items') %}
 
-        <div class="list-group list-group-flush">
-            {{ block('profile_security_items') }}
-        </div>
-    </div>
+    <twig:Ui:Card
+        icon="tabler:shield"
+        title="{{ 'Security'|trans }}"
+        subtitle="{{ 'Manage how you sign in to your account'|trans }}"
+    >
+        {# The rows are `list-group-item`s, so the card body is the list itself rather than a
+           padded box around one. #}
+        <twig:block name="body">
+            <div class="list-group list-group-flush">
+                {{ security_items|raw }}
+            </div>
+        </twig:block>
+    </twig:Ui:Card>
 {% endblock %}
 
 {## Empty by design — somewhere to add your own cards under the two the platform ships. ##}
 {% block profile_sections_extra %}{% endblock %}
 
-{% block content %}
-    <div class="row row-cards">
-        <div class="col-lg-7">
-            {{ block('profile_details') }}
-        </div>
-
-        <div class="col-lg-5">
-            {{ block('profile_security') }}
-        </div>
-
-        {% set profile_sections_extra = block('profile_sections_extra')|trim %}
-        {% if profile_sections_extra is not empty %}
-            <div class="col-12">{{ profile_sections_extra|raw }}</div>
-        {% endif %}
+{% block profile_content %}
+    <div class="d-flex flex-column gap-4">
+        {{ block('profile_identity') }}
+        {{ block('profile_details') }}
+        {{ block('profile_security') }}
+        {{ block('profile_sections_extra') }}
     </div>
 {% endblock %}

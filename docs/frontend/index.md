@@ -161,5 +161,6 @@ bun run build
 ## Next steps
 
 - [Layouts](./layouts.md) — the Tabler page layouts, their options and blocks
+- [UI Components](./components.md) — cards, setting rows, settings navigation and password fields
 - [Stimulus controllers reference](./controllers.md) — what each built-in controller does and how to use it
 - [Theming & customization](./customization.md) — overriding SCSS variables and the custom variables file

@@ -123,6 +123,7 @@
                     "default": {
                         "form_type": "SolidWorx\\Platform\\PlatformBundle\\Form\\Type\\Profile\\ProfileType",
                         "templates": {
+                            "layout": "@SolidWorxPlatform/Profile/layout.html.twig",
                             "show": "@SolidWorxPlatform/Profile/show.html.twig",
                             "edit": "@SolidWorxPlatform/Profile/edit.html.twig",
                             "change_password": "@SolidWorxPlatform/Profile/change_password.html.twig"
@@ -142,12 +143,18 @@
                         },
                         "templates": {
                             "default": {
+                                "layout": "@SolidWorxPlatform/Profile/layout.html.twig",
                                 "show": "@SolidWorxPlatform/Profile/show.html.twig",
                                 "edit": "@SolidWorxPlatform/Profile/edit.html.twig",
                                 "change_password": "@SolidWorxPlatform/Profile/change_password.html.twig"
                             },
                             "type": "object",
                             "properties": {
+                                "layout": {
+                                    "description": "The layout every profile page extends, exposed to Twig as the \"profile_layout\" global. It renders the profile navigation beside a \"profile_content\" block.",
+                                    "default": "@SolidWorxPlatform/Profile/layout.html.twig",
+                                    "type": "string"
+                                },
                                 "show": {
                                     "description": "The template showing the profile details.",
                                     "default": "@SolidWorxPlatform/Profile/show.html.twig",
