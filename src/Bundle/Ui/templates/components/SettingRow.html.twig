@@ -1,0 +1,105 @@
+{#
+    One setting, anywhere in the application: an icon, what it is, what it currently says, and the
+    buttons that change it.
+
+        <twig:Ui:SettingRow
+            icon="tabler:lock"
+            title="{{ 'Password'|trans }}"
+            description="{{ 'Change the password you sign in with'|trans }}"
+        >
+            <a href="{{ path('…') }}" class="btn">{{ 'Change'|trans }}</a>
+        </twig:Ui:SettingRow>
+
+    Add `status` to show a state badge under the description — a second factor that is on or off,
+    a number of backup codes left, a device that is trusted:
+
+        <twig:Ui:SettingRow
+            icon="tabler:mail"
+            title="{{ 'Email'|trans }}"
+            description="{{ 'Receive codes by email when you sign in'|trans }}"
+            status="{{ 'Enabled'|trans }}"
+            statusColor="success"
+            statusIcon="tabler:check"
+            note="{{ 'Codes are sent to %email%'|trans({'%email%': user.email}) }}"
+        >
+            …
+        </twig:Ui:SettingRow>
+
+    It is deliberately the *only* way the platform renders a setting. A security row on the profile
+    page and a second-factor row on the two-factor page are the same kind of information, so they
+    are the same component — see the UI consistency rules in CLAUDE.md.
+
+    Rows are `list-group-item`s, so they belong in a `list-group list-group-flush` inside a card:
+
+        <twig:Ui:Card title="{{ 'Security'|trans }}" icon="tabler:shield">
+            <twig:block name="body">
+                <div class="list-group list-group-flush">
+                    <twig:Ui:SettingRow … />
+                </div>
+            </twig:block>
+        </twig:Ui:Card>
+#}
+
+{% props
+    title = '',
+    description = '',
+    icon = '',
+    iconColor = 'primary',
+    status = '',
+    statusColor = 'secondary',
+    statusIcon = '',
+    note = '',
+    noteIcon = ''
+%}
+
+<div {{ attributes.without('class') }} class="{{ html_classes('list-group-item', attributes.render('class')|default('')) }}">
+    <div class="row align-items-center g-3">
+        {% if icon is not empty %}
+            <div class="col-auto">
+                <span class="avatar avatar-sm bg-{{ iconColor }}-lt">
+                    {{ ux_icon(icon, {class: 'icon'}) }}
+                </span>
+            </div>
+        {% endif %}
+
+        <div class="col">
+            {% if title is not empty %}
+                <div class="text-body">{{ title }}</div>
+            {% endif %}
+
+            {% if description is not empty %}
+                <div class="text-secondary">{{ description }}</div>
+            {% endif %}
+
+            {% if status is not empty %}
+                <div class="mt-2">
+                    <span class="badge bg-{{ statusColor }}-lt">
+                        {%- if statusIcon is not empty -%}
+                            {{ ux_icon(statusIcon, {class: 'icon icon-sm me-1'}) }}
+                        {%- endif -%}
+                        {{ status }}
+                    </span>
+                </div>
+            {% endif %}
+
+            {% if note is not empty %}
+                <div class="text-secondary small mt-2">
+                    {%- if noteIcon is not empty -%}
+                        {{ ux_icon(noteIcon, {class: 'icon icon-sm me-1'}) }}
+                    {%- endif -%}
+                    {{ note }}
+                </div>
+            {% endif %}
+        </div>
+
+        {# The actions. Wraps onto its own line below the description on narrow screens. #}
+        {% set actions = block('content')|trim %}
+        {% if actions is not empty %}
+            <div class="col-12 col-sm-auto ms-sm-auto">
+                <div class="btn-list justify-content-end">
+                    {{ actions|raw }}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>

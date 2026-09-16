@@ -60,6 +60,16 @@ final class ProfileConfigBuilder
         return $this;
     }
 
+    /**
+     * The layout every profile page extends, and the one an application's own profile pages extend
+     * through the `profile_layout` Twig global.
+     */
+    public function layoutTemplate(string $template): self
+    {
+        $this->templates['layout'] = $template;
+        return $this;
+    }
+
     public function showTemplate(string $template): self
     {
         $this->templates['show'] = $template;

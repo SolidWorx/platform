@@ -1,0 +1,55 @@
+{##
+    The chrome every page in the profile section shares: the navigation down the left, the page
+    content beside it.
+
+    Any page can join the section by extending it and filling one block. It gets the navigation,
+    the page header and the section's spacing for free:
+
+        {% extends profile_layout %}
+
+        {% block page_title %}{{ 'Notifications'|trans }}{% endblock %}
+
+        {% block profile_content %}
+            <twig:Ui:Card title="{{ 'Email'|trans }}" icon="tabler:bell">…</twig:Ui:Card>
+        {% endblock %}
+
+    Register the page in the navigation with a menu builder on {@see ProfileMenu::NAME} — that is
+    the whole integration; nothing here has to be touched to add a page.
+
+    Extend `profile_layout`, the Twig global, rather than this path: it points at whatever
+    `platform.profile.templates.layout` names, so an application can replace the section's chrome
+    once and have every page — the platform's and its own — follow.
+
+    It extends `ui_layout_app`, so the surrounding application layout is still whatever
+    `platform.ui.templates.layouts.app` configures.
+##}
+
+{% extends ui_layout_app %}
+
+{## Shown above the page title on every page in the section. ##}
+{% block page_pretitle %}{{ 'Account'|trans }}{% endblock %}
+
+{## The navigation column. Renders nothing when no builder has registered `profile_menu`, in
+    which case the content simply takes the full width. ##}
+{% block profile_nav %}
+    <twig:Ui:SettingsNav menu="profile_menu" />
+{% endblock %}
+
+{## The page itself. This is the block a profile page fills. ##}
+{% block profile_content %}{% endblock %}
+
+{% block content %}
+    {% set profile_nav = block('profile_nav')|trim %}
+
+    <div class="row g-4">
+        {% if profile_nav is not empty %}
+            <div class="col-12 col-lg-3">
+                {{ profile_nav|raw }}
+            </div>
+        {% endif %}
+
+        <div class="col-12 {{ profile_nav is not empty ? 'col-lg-9' : '' }}">
+            {{ block('profile_content') }}
+        </div>
+    </div>
+{% endblock %}

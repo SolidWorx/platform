@@ -28,6 +28,7 @@ use SolidWorx\Platform\PlatformBundle\Form\Type\Profile\ProfileType;
 use SolidWorx\Platform\PlatformBundle\Menu\ProfileMenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Security\Password\PasswordPolicy;
 use SolidWorx\Platform\PlatformBundle\Security\Password\PasswordPolicyInterface;
+use SolidWorx\Platform\PlatformBundle\Twig\Extension\ProfileExtension;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use function is_string;
@@ -51,6 +52,7 @@ final class ProfileServicesTest extends TestCase
     public static function profileServices(): iterable
     {
         yield 'menu entry' => [ProfileMenuBuilder::class];
+        yield 'layout global' => [ProfileExtension::class];
         yield 'profile page' => [ShowProfile::class];
         yield 'edit page' => [EditProfile::class];
         yield 'change password page' => [ChangePassword::class];
@@ -114,6 +116,7 @@ final class ProfileServicesTest extends TestCase
         $container = self::container();
 
         self::assertSame(ProfileType::class, $container->getParameter('solidworx_platform.profile.form_type'));
+        self::assertSame('@SolidWorxPlatform/Profile/layout.html.twig', $container->getParameter('solidworx_platform.profile.templates.layout'));
         self::assertSame('@SolidWorxPlatform/Profile/show.html.twig', $container->getParameter('solidworx_platform.profile.templates.show'));
         self::assertSame('@SolidWorxPlatform/Profile/edit.html.twig', $container->getParameter('solidworx_platform.profile.templates.edit'));
         self::assertSame('@SolidWorxPlatform/Profile/change_password.html.twig', $container->getParameter('solidworx_platform.profile.templates.change_password'));

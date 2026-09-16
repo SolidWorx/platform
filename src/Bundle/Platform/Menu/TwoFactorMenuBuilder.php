@@ -18,7 +18,12 @@ use SolidWorx\Platform\PlatformBundle\Attributes\Menu\MenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\TwoFactorConfiguration;
 
 /**
- * Adds the two-factor authentication entry to the user dropdown.
+ * Adds the two-factor authentication entry to the profile navigation.
+ *
+ * It belongs in the profile section rather than the user dropdown: turning a second factor on is
+ * something a user does once, from the same place they change their password, not a destination
+ * worth a permanent shortcut behind the avatar. The dropdown keeps a single **Profile** entry,
+ * which leads here.
  *
  * The service is removed from the container when `platform.security.two_factor.enabled` is
  * false, so the entry — and the route it points at — can never be rendered for an application
@@ -26,7 +31,7 @@ use SolidWorx\Platform\PlatformBundle\Controller\Security\TwoFactorConfiguration
  */
 final class TwoFactorMenuBuilder
 {
-    #[MenuBuilder(name: UserMenu::NAME, priority: UserMenu::PRIORITY_ACCOUNT)]
+    #[MenuBuilder(name: ProfileMenu::NAME, priority: ProfileMenu::PRIORITY_SECURITY)]
     public function build(ItemInterface $menu): void
     {
         $menu->addChild(

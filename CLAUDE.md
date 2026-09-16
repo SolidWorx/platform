@@ -80,6 +80,29 @@ The frontend is decoupled from the backend logic but integrated via Webpack Enco
 -   **Styles:** SCSS files in `assets/scss/`.
 -   **Build:** Run `bun run build` in the `assets/` directory.
 
+### UI Consistency (STRICT — no exceptions)
+
+**The same thing must look the same everywhere in the app.** A visual pattern belongs to the
+application, never to the page that happened to need it first.
+
+1.  **Never write page-scoped or section-scoped styles.** A class like `.profile-section-header`
+    or `.billing-status-row` is a bug: it guarantees that the next page rendering the same
+    information will diverge. There is no such thing as "just for this page".
+2.  **Reach for Tabler/Bootstrap first.** They cover cards, badges, avatars, datagrids,
+    list-groups, steps and nav variants. If a class already exists, use it.
+3.  **When Tabler does not cover it, build a shared Twig component** in
+    `src/Bundle/Ui/templates/components/`, styled once in `assets/scss/`. Components take props;
+    they do not take a page name.
+4.  **Changing a shared pattern means changing every use of it.** Before you alter a section
+    header, an icon tile, a status row or a nav item, grep for every place that renders the same
+    information and update them in the same commit. A restyle that lands on one page only is not
+    finished.
+5.  **Two pieces of markup showing the same kind of information must be the same component.**
+    If you find yourself copying markup between templates, that markup is a component you have
+    not extracted yet.
+
+This applies to templates, SCSS and Stimulus controllers alike.
+
 ### Creating a New Stimulus Controller
 1.  Create file in `assets/controllers/my_feature_controller.js` (**must be `.js`, not `.ts`** — controllers are distributed via npm and consumed by 3rd-party apps that do not process TypeScript from `node_modules`).
 2.  Extend `Controller` from `@hotwired/stimulus`.

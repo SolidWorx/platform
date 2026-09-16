@@ -36,7 +36,7 @@ final class TwoFactorConfiguration extends AbstractController
     /**
      * The path of the two-factor configuration page.
      */
-    public const string PATH = '/settings/two-factor';
+    public const string PATH = '/profile/two-factor';
 
     /**
      * The route name of the two-factor configuration page, linked to from the user menu.

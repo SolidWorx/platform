@@ -10,6 +10,7 @@ Welcome to the SolidWorx Platform documentation. This platform provides the foun
 - [User Profile](./security/profile.md) — the profile pages, password rules and how to extend them
 - [Frontend Assets](./frontend/index.md) — webpack config, Stimulus controllers, theming
 - [Layouts](./frontend/layouts.md) — the Tabler page layouts, their options and blocks
+- [UI Components](./frontend/components.md) — the shared Twig components, and the consistency rule they enforce
 - [Doctrine Types](./doctrine-types/index.md)
 - [Form Types](./form-types/index.md) — reusable form types, including the rich text editor
 - [Multi-Tenancy](./multi-tenancy/index.md)

@@ -53,6 +53,12 @@
         "webpackMode": "lazy",
         "fetch": "lazy",
         "enabled": true
+      },
+      "two-factor": {
+        "main": "controllers/two_factor_controller.js",
+        "webpackMode": "lazy",
+        "fetch": "lazy",
+        "enabled": true
       }
     },
     "importmap": {

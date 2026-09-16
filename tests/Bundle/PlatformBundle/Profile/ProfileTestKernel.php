@@ -19,12 +19,18 @@ use SolidWorx\Platform\PlatformBundle\Controller\Profile\ChangePassword;
 use SolidWorx\Platform\PlatformBundle\Controller\Profile\EditProfile;
 use SolidWorx\Platform\PlatformBundle\Controller\Profile\ShowProfile;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\TwoFactorConfiguration;
+use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\MenuCompilerPass;
+use SolidWorx\Platform\PlatformBundle\DependencyInjection\Util;
 use SolidWorx\Platform\PlatformBundle\Enum\PasswordStrengthLevel;
 use SolidWorx\Platform\PlatformBundle\Form\Type\Profile\ChangePasswordType;
 use SolidWorx\Platform\PlatformBundle\Form\Type\Profile\ProfileType;
+use SolidWorx\Platform\PlatformBundle\Menu\ProfileMenu;
+use SolidWorx\Platform\PlatformBundle\Menu\ProfileMenuBuilder;
+use SolidWorx\Platform\PlatformBundle\Menu\Provider;
 use SolidWorx\Platform\PlatformBundle\Security\Password\PasswordPolicy;
 use SolidWorx\Platform\PlatformBundle\Security\Password\PasswordPolicyInterface;
 use SolidWorx\Platform\PlatformBundle\Twig\Extension\MenuExtension;
+use SolidWorx\Platform\PlatformBundle\Twig\Extension\ProfileExtension;
 use SolidWorx\Platform\PlatformBundle\Twig\Runtime\MenuRuntime;
 use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\ProfileUser;
 use SolidWorx\Platform\UiBundle\Layout\LayoutResolver;
@@ -34,6 +40,7 @@ use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\HttpKernel\Kernel;
@@ -209,6 +216,34 @@ final class ProfileTestKernel extends Kernel
         $services->set(MenuExtension::class)
             ->tag('twig.extension');
 
+        // `profile_layout`, the global every profile page extends. The platform builds it from
+        // `platform.profile.templates.layout`; this is the default that resolves to.
+        $services->set(ProfileExtension::class)
+            ->args(['@SolidWorxPlatform/Profile/layout.html.twig'])
+            ->tag('twig.extension');
+
+        // The profile navigation, wired the way the platform wires it — the real provider and the
+        // real compiler pass — so the rendering tests cover the menu the pages are built around,
+        // not a hand-built stand-in. The builders are tagged directly because the attribute
+        // autoconfiguration lives in the bundle extension, which is not registered here.
+        $services->set(Provider::class)
+            ->args([service('knp_menu.factory'), service('security.authorization_checker')])
+            ->tag('knp_menu.provider');
+
+        $services->set(ProfileMenuBuilder::class)
+            ->tag(Util::tag('menu.builder'), [
+                'alias' => ProfileMenu::NAME,
+                'method' => 'buildProfileMenu',
+                'priority' => ProfileMenu::PRIORITY_ACCOUNT,
+                'role' => '',
+            ]);
+
+        // The two-factor builder is deliberately absent. Its service is removed from the container
+        // when 2FA is off, so registering it here unconditionally would put the entry in the
+        // navigation of a kernel that has 2FA disabled — and the rendering tests check exactly
+        // that the two-factor link appears only when it is enabled. Where the entry lands in the
+        // menu is asserted in ProfileMenuBuilderTest instead.
+
         $services->set(LayoutResolver::class)
             ->args([[]]);
 
@@ -240,6 +275,15 @@ final class ProfileTestKernel extends Kernel
         $services->set(ChangePasswordType::class)
             ->args([service(PasswordPolicy::class)])
             ->tag('form.type');
+    }
+
+    /**
+     * The compiler pass that turns the tagged builders into `Provider::addBuilder()` calls.
+     */
+    #[Override]
+    protected function build(ContainerBuilder $container): void
+    {
+        $container->addCompilerPass(new MenuCompilerPass());
     }
 
     protected function configureRoutes(RoutingConfigurator $routes): void

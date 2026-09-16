@@ -10,6 +10,31 @@ The following third-party controllers are also registered globally by the platfo
 | `password-visibility` | `@stimulus-components/password-visibility` |
 | `clipboard` | `@stimulus-components/clipboard` |
 
+> `password-visibility` is wired into the platform form theme, so every Symfony password
+> field gets a show/hide toggle without any markup of your own — see
+> [`Ui:PasswordField`](./components.md#uipasswordfield).
+
+## csrf-protection
+
+**File:** `controllers/csrf_protection.js`
+
+Symfony's stateless (double-submit) CSRF helper. The token field is rendered holding a token *id*;
+just before the form goes out, this swaps the id for a random token and writes a matching cookie,
+and the server checks the pair.
+
+It listens for the moments a form is sent: a native `submit`, Turbo's `turbo:submit-start`, and —
+added by the platform — the click that triggers a **live component action**. That last one matters
+because a live component never submits its form: the payload goes out by fetch from a plain
+`type="button"`. Without it the field keeps the raw token id, no cookie is ever written, and every
+submission from a live component fails with *"The CSRF token is invalid."*
+
+The listener runs in the capture phase so the token is in place before the component reads the form,
+and `generateCsrfToken()` fires a `change` event, which is how the component picks the new value up.
+Under session-based CSRF the rendered value is already a token rather than an id, so the swap is
+skipped and the whole thing is a no-op.
+
+Nothing needs wiring: Symfony puts `data-controller="csrf-protection"` on the token field itself.
+
 ---
 
 ## modal
@@ -167,3 +192,53 @@ Toolbar buttons are matched by their `data-editor-command` attribute. The contro
 | Action | Description |
 |--------|-------------|
 | `run` | Executes the command specified by `data-editor-command` on the button that triggered the event. Wire to toolbar buttons via `data-action="click->text-editor#run"`. |
+
+---
+
+## two-factor
+
+**File:** `controllers/two_factor_controller.js`
+
+Drives the [two-factor settings page](../security/two-factor.md): stepping through the authenticator
+setup dialog, and saving backup codes to a file.
+
+Both jobs stay in the browser deliberately. The setup dialog is two screens but one form, so the
+steps are shown and hidden rather than added and removed — every field is in the DOM the whole time
+and the live component always receives a complete form. And the backup codes are already rendered on
+the page, so building the file client-side avoids having a route that returns recovery codes.
+
+> This controller is mounted by the `Platform:Security:TwoFactor` component — you do not need to add
+> it to your markup manually.
+
+### Values
+
+| Value | Type | Default | Description |
+|-------|------|---------|-------------|
+| `step` | `Number` | `0` | The step to show. Set by the server so a failed verification reopens on the step that failed. |
+| `codes` | `Array` | `[]` | The backup codes written to the downloaded file. |
+| `filename` | `String` | `'backup-codes.txt'` | Name of the downloaded file. The component sets it from the application name. |
+
+### Targets
+
+| Target | Description |
+|--------|-------------|
+| `step` | Anything belonging to one step — a pane in the body, a button in the footer. Each carries a `data-step` attribute; the ones whose `data-step` matches are shown and the rest get `d-none`. |
+| `stepItem` | The entries of the Tabler `steps` indicator, in order. Only the current one gets `active`. |
+
+Two details of that table are worth the words:
+
+- **The step is on the element, not implied by its position.** That is what lets the footer buttons
+  be siblings inside `.modal-footer`, where they pick up its spacing and right alignment, rather
+  than being grouped into a wrapper per step — which would left-align the dismiss button in this
+  one dialog and nowhere else.
+- **Only the current `step-item` is `active`.** Tabler greys out everything *after* the active one
+  via `.step-item.active ~ .step-item`, so marking the earlier steps active as well greys out the
+  step the user is actually on.
+
+### Actions
+
+| Action | Description |
+|--------|-------------|
+| `next` | Advances one step, stopping at the last. |
+| `previous` | Goes back one step, stopping at the first. |
+| `download` | Writes `codes` to a text file and hands it to the browser. |

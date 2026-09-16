@@ -1,0 +1,37 @@
+{#
+    The vertical navigation down the side of a settings section, rendered from a KnpMenu.
+
+        <twig:Ui:SettingsNav menu="profile_menu" />
+
+    Because it is just a menu, the entries come from the ordinary menu builder — which is what lets
+    an application add its own settings pages without touching a template:
+
+        #[MenuBuilder(name: ProfileMenu::NAME)]
+        public function build(ItemInterface $menu): void
+        {
+            $menu->addChild('API keys', Options::create()->route('app_api_keys')->icon('key')->build());
+        }
+
+    The entry matching the current route is highlighted automatically, by the same KnpMenu matcher
+    the sidebar and navbar use.
+
+    It renders nothing at all when no builder has registered the menu, so a page can mount it
+    unconditionally.
+#}
+
+{% props
+    menu,
+    title = ''
+%}
+
+{% if menu_exists(menu) %}
+    <div {{ attributes.without('class') }} class="{{ html_classes('card', 'swp-settings-nav', attributes.render('class')|default('')) }}">
+        {% if title is not empty %}
+            <div class="card-header">
+                <h3 class="card-title">{{ title }}</h3>
+            </div>
+        {% endif %}
+
+        {{ render_menu(menu, {template: '@SolidWorxPlatform/Menu/settings_nav.html.twig'}) }}
+    </div>
+{% endif %}

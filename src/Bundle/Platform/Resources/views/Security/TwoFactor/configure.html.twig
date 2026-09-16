@@ -1,16 +1,18 @@
-{# The page behind the "Two-factor authentication" entry in the user menu. It extends the UI
-   bundle's application layout, so it inherits whatever `platform.ui.templates` an application
-   configures; override this template outright for full control. #}
-{% extends ui_layout_app %}
+{##
+    The page behind the "Two-factor authentication" entry in the profile navigation.
 
-{% block page_pretitle %}{{ 'Security'|trans }}{% endblock %}
+    It extends `profile_layout`, so it sits in the profile section alongside the profile and
+    change-password pages and picks up the same navigation — a second factor is an account
+    setting, and it is found where the other account settings are.
+
+    Everything on it belongs to the live component; override this template outright for full
+    control, or override the component's template for control over the settings themselves.
+##}
+
+{% extends profile_layout %}
 
 {% block page_title %}{{ 'Two-factor authentication'|trans }}{% endblock %}
 
-{% block content %}
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <twig:Platform:Security:TwoFactor />
-        </div>
-    </div>
+{% block profile_content %}
+    <twig:Platform:Security:TwoFactor />
 {% endblock %}

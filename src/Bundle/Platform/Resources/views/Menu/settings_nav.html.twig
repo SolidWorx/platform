@@ -1,0 +1,86 @@
+{#
+# This file is part of SolidWorx Platform project.
+#
+# (c) Pierre du Plessis <open-source@solidworx.co>
+#
+# This source file is subject to the MIT license that is bundled
+# with this source code in the file LICENSE.
+#}
+
+{#
+    Renders a menu as a vertical list of settings pages, for the navigation column beside a
+    settings section. Mounted through the component rather than by hand:
+
+        <twig:Ui:SettingsNav menu="profile_menu" />
+
+    The entries are `list-group-item`s rather than nav links, which is what gives them the full
+    width of the card and a hit area that covers the whole row. The current page is marked with
+    `active`, matched by KnpMenu against the route.
+
+    Nesting is not supported: a settings navigation is one flat list of pages, and an entry with
+    children would have nowhere to put them. Children are ignored rather than rendered wrongly.
+#}
+
+{% extends 'knp_menu.html.twig' %}
+{% import 'knp_menu.html.twig' as ui %}
+
+{% block list %}
+    {% if item.level == 0 and item.hasChildren and options.depth is not same as(0) and item.displayChildren %}
+        {# Not `list-group-transparent`: that carries `margin: 0 -1.25rem`, which is meant to cancel
+           the padding of a `card-body` it sits inside. This list is a direct child of the card, so
+           the negative margin would push every row out past the card's edges. #}
+        <div class="list-group list-group-flush">
+            {{ block('children') }}
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block item %}
+    {% if item.displayed %}
+        {% if item.uri is not empty %}
+            {{ block('linkElement') }}
+        {% else %}
+            {{ block('spanElement') }}
+        {% endif %}
+    {% endif %}
+{% endblock %}
+
+{% block linkElement %}
+    {%- set classes = ['list-group-item', 'list-group-item-action'] -%}
+    {%- if item.linkAttribute('class') is not empty -%}
+        {%- set classes = classes|merge([item.linkAttribute('class')]) -%}
+    {%- endif -%}
+    {%- if matcher.isCurrent(item) or matcher.isAncestor(item, options.matchingDepth) -%}
+        {%- set classes = classes|merge([options.currentClass, 'active']) -%}
+    {%- endif -%}
+
+    <a
+        href="{{ item.uri }}"
+        {{ ui.attributes(item.linkAttributes|merge({class: classes|join(' ')})) }}
+        {% if matcher.isCurrent(item) %}aria-current="page"{% endif %}
+    >
+        {{- block('itemIcon') -}}
+        <span class="swp-settings-nav__label">{{ block('label') }}</span>
+    </a>
+{% endblock %}
+
+{% block spanElement %}
+    <span class="list-group-item disabled">
+        {{- block('itemIcon') -}}
+        <span class="swp-settings-nav__label">{{ block('label') }}</span>
+    </span>
+{% endblock %}
+
+{% block itemIcon %}
+    {%- if item.extras.icon is defined -%}
+        {{ ux_icon('tabler:' ~ item.extras.icon, {class: 'icon swp-settings-nav__icon'}) }}
+    {%- endif -%}
+{% endblock %}
+
+{% block label %}
+    {%- if options.allow_safe_labels and item.getExtra('safe_label', false) -%}
+        {{ item.label|trans|raw }}
+    {%- else -%}
+        {{ item.label|trans }}
+    {%- endif -%}
+{% endblock %}

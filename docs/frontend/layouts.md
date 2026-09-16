@@ -156,6 +156,7 @@ by name. If no builder registers a menu, that part of the navigation is simply n
 | `sidebar` | The vertical sidebar of the `app` layout |
 | `navbar` | The top navigation bar of the `app` and `condensed` layouts |
 | `user_menu` | The user dropdown in the top-right of the `app` and `condensed` layouts |
+| `profile_menu` | The navigation beside the [profile section](../security/profile.md) |
 
 ```php
 use Knp\Menu\ItemInterface;
@@ -216,13 +217,16 @@ sidebar and navbar:
 
 Two things are always there, whatever your builders do:
 
-- **The platform's own account entries** — [**Profile**](../security/profile.md), and
-  **Two-factor authentication** when [2FA is enabled](../security/two-factor.md). Profile leads
-  the dropdown at `UserMenu::PRIORITY_PROFILE` (`200`) and the account entries follow at
-  `UserMenu::PRIORITY_ACCOUNT` (`100`), so entries you register at the default priority of `0`
-  land underneath them both. Register above them to push your entries to the top.
+- **A [**Profile**](../security/profile.md) entry**, which leads the dropdown at
+  `UserMenu::PRIORITY_PROFILE` (`200`), so entries you register at the default priority of `0` land
+  underneath it. Register above it to push your entries to the top.
 - **Logout**, rendered last under a divider. It is a CSRF-protected form rather than a link, so it
   is not part of the menu; override the `user_menu_items` block if you need it somewhere else.
+
+The account pages themselves — changing a password, setting up a second factor — are *not* in this
+dropdown. They live in the [profile section](../security/profile.md), listed in its own navigation,
+so there is one place to look rather than two. Add your own account pages there with
+[`ProfileMenu`](../security/profile.md#adding-a-page-to-the-profile-section), not here.
 
 ---
 
@@ -410,5 +414,6 @@ extra `<head>` tags, analytics snippets, or a different asset entry.
 
 ## Next steps
 
+- [UI Components](./components.md) — the shared cards, setting rows and navigation used inside these layouts
 - [Theming & customization](./customization.md) — SCSS variables, brand colours
 - [Configuration reference](../configuration/index.md#ui-ui) — the `ui` section of `platform.yaml`

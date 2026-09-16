@@ -1,19 +1,93 @@
 # User Profile
 
-Every signed-in user gets three pages for maintaining their own account, plus a **Profile**
-entry in the user dropdown that leads to them:
+Every signed-in user gets a **profile section**: a set of pages for maintaining their own account,
+with a navigation column listing them, and a **Profile** entry in the user dropdown that leads in.
 
 | Page | Route | Path |
 |------|-------|------|
 | Profile details | `solidworx_platform_profile_show` | `/profile` |
 | Edit profile | `solidworx_platform_profile_edit` | `/profile/edit` |
 | Change password | `solidworx_platform_profile_change_password` | `/profile/password` |
+| [Two-factor authentication](./two-factor.md) | `solidworx_platform_security_two_factor_configure` | `/profile/two-factor` |
 
-The profile page also carries a **Security** card, which links to the change-password page and —
-when `platform.security.two_factor.enabled` is on — to the
-[two-factor configuration page](./two-factor.md).
+The two-factor page is only there when `platform.security.two_factor.enabled` is on; the other
+three are always.
 
 There is nothing to switch on: importing the platform routes is enough.
+
+---
+
+## Adding a page to the profile section
+
+The navigation is a KnpMenu named `profile_menu`, so a page joins the section by registering an
+entry — no template is edited, and nothing has to know the page exists:
+
+```php
+use Knp\Menu\ItemInterface;
+use SolidWorx\Platform\PlatformBundle\Attributes\Menu\MenuBuilder;
+use SolidWorx\Platform\PlatformBundle\Menu\Options;
+use SolidWorx\Platform\PlatformBundle\Menu\ProfileMenu;
+
+final class AccountMenu
+{
+    #[MenuBuilder(name: ProfileMenu::NAME)]
+    public function build(ItemInterface $menu): void
+    {
+        $menu->addChild('Notifications', Options::create()->route('app_notifications')->icon('bell')->build());
+        $menu->addChild('API keys', Options::create()->route('app_api_keys')->icon('key')->build());
+    }
+}
+```
+
+The page itself extends `profile_layout` — the Twig global, not a path — and fills one block. It
+gets the navigation, the page header and the section's spacing for free:
+
+```twig
+{% extends profile_layout %}
+
+{% block page_title %}{{ 'Notifications'|trans }}{% endblock %}
+
+{% block profile_content %}
+    <twig:Ui:Card icon="tabler:bell" title="{{ 'Email'|trans }}" subtitle="{{ 'What we send you'|trans }}">
+        …
+    </twig:Ui:Card>
+{% endblock %}
+```
+
+Builders run from the highest priority to the lowest and each one appends, so priority decides
+where entries land. The platform registers its own above the default of `0`:
+
+| Constant | Value | Entries |
+|----------|-------|---------|
+| `ProfileMenu::PRIORITY_ACCOUNT` | `200` | Profile, Change password |
+| `ProfileMenu::PRIORITY_SECURITY` | `100` | Two-factor authentication |
+
+Leave the priority alone and your entries land underneath them all; register above `200` to lead
+the navigation.
+
+The entry matching the current route is highlighted automatically, by the same KnpMenu matcher the
+sidebar and navbar use.
+
+### Replacing the section's chrome
+
+Point `platform.profile.templates.layout` at a template of your own and every page in the section
+follows — the platform's and yours, since both extend the `profile_layout` global rather than a
+path. Extend the shipped layout to keep the navigation and change only what differs:
+
+```twig
+{# templates/profile/layout.html.twig #}
+{% extends '@SolidWorxPlatform/Profile/layout.html.twig' %}
+
+{% block profile_nav %}
+    {{ parent() }}
+    <div class="mt-3">…a support link under the navigation…</div>
+{% endblock %}
+```
+
+| Block | Purpose |
+|-------|---------|
+| `profile_nav` | The navigation column. Override with an empty block to drop it — the content then takes the full width. |
+| `profile_content` | The page. This is the block a profile page fills. |
 
 ---
 
@@ -189,13 +263,33 @@ The blocks each page exposes:
 
 | Template | Blocks |
 |----------|--------|
-| `show.html.twig` | `profile_initials`, `profile_name`, `profile_identity`, `profile_detail_rows`, `profile_details`, `profile_security_items`, `profile_security`, `profile_sections_extra`, plus the layout's `page_pretitle`, `page_title` and `page_title_actions` |
+| `layout.html.twig` | `profile_nav`, `profile_content` |
+| `show.html.twig` | `profile_initials`, `profile_name`, `profile_identity`, `profile_detail_rows`, `profile_details`, `profile_security_items`, `profile_security`, `profile_sections_extra`, plus the layout's `page_pretitle` and `page_title` |
 | `edit.html.twig` | `profile_form_fields`, `profile_form_actions` |
 | `change_password.html.twig` | `password_requirements`, `password_form_actions` |
 
-`show.html.twig` also exports two macros — `detail(label, value)` and
-`security_item(title, description, url, action, icon)` — so added rows keep matching the
-platform's markup.
+`show.html.twig` also exports a `detail(label, value)` macro, so added rows keep matching the
+platform's markup. Security rows are `<twig:Ui:SettingRow>` — the same component the two-factor
+page uses, so a setting reads identically wherever it appears:
+
+```twig
+{% block profile_security_items %}
+    {{ parent() }}
+
+    <twig:Ui:SettingRow
+        icon="tabler:key"
+        title="{{ 'API keys'|trans }}"
+        description="{{ 'Tokens that act on your behalf'|trans }}"
+    >
+        <a href="{{ path('app_api_keys') }}" class="btn">{{ 'Manage'|trans }}</a>
+    </twig:Ui:SettingRow>
+{% endblock %}
+```
+
+> **One caveat when overriding a block.** A `<twig:…>` component slot compiles to a Twig `embed`,
+> so `block('…')`, `parent()` and `this` *inside* a slot resolve against the component, not your
+> page. Read them into a variable first and print that inside the slot — which is what the shipped
+> templates do. See [the full list](../frontend/components.md#a-caveat-about-what-a-slot-can-see).
 
 ### Replacing a page
 
@@ -207,14 +301,22 @@ The same configuration keys take an unrelated template. Each page is rendered wi
 | `edit` | `form`, `user` |
 | `change_password` | `form`, `user`, `password_requirements` |
 
+A replacement page still extends `profile_layout` if you want the navigation; extend anything else
+and it becomes a standalone page.
+
 ---
 
-## Customising the menu entry
+## Customising the menu entries
 
-The **Profile** entry is an ordinary KnpMenu item on the `user_menu` menu, registered at
-`UserMenu::PRIORITY_PROFILE` so it leads the dropdown. Application entries default to priority
-`0` and therefore land underneath it — see
-[the user menu](../frontend/layouts.md#the-user-menu) for adding your own.
+Two menus are involved, and they do different jobs:
+
+- **`user_menu`** — the dropdown behind the avatar. It carries a single **Profile** entry at
+  `UserMenu::PRIORITY_PROFILE`, which leads into the section. It is deliberately not a copy of the
+  section's navigation. See [the user menu](../frontend/layouts.md#the-user-menu).
+- **`profile_menu`** — the navigation inside the section, covered in
+  [Adding a page to the profile section](#adding-a-page-to-the-profile-section) above.
+
+Both are ordinary KnpMenus, so both take entries through `#[MenuBuilder]`.
 
 ---
 
@@ -226,6 +328,7 @@ platform:
   profile:
     form_type: SolidWorx\Platform\PlatformBundle\Form\Type\Profile\ProfileType
     templates:
+      layout: '@SolidWorxPlatform/Profile/layout.html.twig'
       show: '@SolidWorxPlatform/Profile/show.html.twig'
       edit: '@SolidWorxPlatform/Profile/edit.html.twig'
       change_password: '@SolidWorxPlatform/Profile/change_password.html.twig'

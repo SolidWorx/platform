@@ -21,12 +21,14 @@ use ReflectionMethod;
 use SolidWorx\Platform\PlatformBundle\Attributes\Menu\MenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\TwoFactorConfiguration;
 use SolidWorx\Platform\PlatformBundle\Menu\Options;
+use SolidWorx\Platform\PlatformBundle\Menu\ProfileMenu;
 use SolidWorx\Platform\PlatformBundle\Menu\TwoFactorMenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Menu\UserMenu;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[CoversClass(TwoFactorMenuBuilder::class)]
 #[CoversClass(UserMenu::class)]
+#[CoversClass(ProfileMenu::class)]
 #[CoversClass(Options::class)]
 final class TwoFactorMenuBuilderTest extends TestCase
 {
@@ -54,10 +56,13 @@ final class TwoFactorMenuBuilderTest extends TestCase
     }
 
     /**
+     * The entry belongs in the profile navigation, next to the other account pages, rather than in
+     * the user dropdown — which carries only the way in to the section.
+     *
      * Builders run highest priority first, and each one appends — so registering above the
      * default priority of `0` is what keeps the platform's own entries above an application's.
      */
-    public function testItIsRegisteredOnTheUserMenuAboveApplicationEntries(): void
+    public function testItIsRegisteredOnTheProfileMenuAboveApplicationEntries(): void
     {
         $attributes = new ReflectionMethod(TwoFactorMenuBuilder::class, 'build')->getAttributes(MenuBuilder::class);
 
@@ -65,7 +70,8 @@ final class TwoFactorMenuBuilderTest extends TestCase
 
         $attribute = $attributes[0]->newInstance();
 
-        self::assertSame(UserMenu::NAME, $attribute->name);
+        self::assertSame(ProfileMenu::NAME, $attribute->name);
+        self::assertNotSame(UserMenu::NAME, $attribute->name);
         self::assertGreaterThan(0, $attribute->priority);
     }
 }

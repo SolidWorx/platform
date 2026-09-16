@@ -26,13 +26,16 @@ namespace SolidWorx\Platform\PlatformBundle\Menu;
  *     }
  *
  * Builders run from the highest priority to the lowest, and each one appends to the menu, so
- * priority decides where entries end up in the dropdown. The platform's own entries — the profile
- * page at {@see self::PRIORITY_PROFILE}, two-factor authentication at
- * {@see self::PRIORITY_ACCOUNT} — are both above the default of `0`, so application entries land
- * underneath them without having to pick a priority at all.
+ * priority decides where entries end up in the dropdown. The platform's only entry — the profile
+ * page at {@see self::PRIORITY_PROFILE} — is above the default of `0`, so application entries land
+ * underneath it without having to pick a priority at all.
  *
- * The logout link is not part of this menu: it is a CSRF-protected form rather than a link, and
- * the UI bundle always renders it last, under a divider.
+ * The account pages themselves are not here. Changing a password or setting up a second factor
+ * lives in the profile section, listed in its own navigation — see {@see ProfileMenu}. The
+ * dropdown holds the way in, not a copy of that list.
+ *
+ * The logout link is not part of this menu either: it is a CSRF-protected form rather than a link,
+ * and the UI bundle always renders it last, under a divider.
  */
 final class UserMenu
 {
@@ -42,7 +45,8 @@ final class UserMenu
     public const string NAME = 'user_menu';
 
     /**
-     * The priority the platform registers its own account entries with.
+     * The priority to register an account-level entry with, so it sits with the platform's own
+     * rather than with the application's.
      *
      * Register above it to push an entry to the top of the dropdown, below it (or leave the
      * priority at its default of `0`) to append underneath the platform entries.
