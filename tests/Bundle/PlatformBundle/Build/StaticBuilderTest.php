@@ -476,6 +476,47 @@ final class StaticBuilderTest extends TestCase
         );
     }
 
+    public function testBuildClearsThePreviousBuildsGoBuildLogBeforeStarting(): void
+    {
+        $builder = $this->builder();
+        $options = $this->options();
+        $staged = $this->dir . '/work/frankenphp';
+
+        // A tee'd log left over from a previous build that did reach the link step — must never
+        // be readable against a later, unrelated failure (the same stale-artefact hazard the step
+        // logs already guard against).
+        $this->filesystem->dumpFile(
+            $staged . '/dist/static-php-cli/log/go-build.log',
+            'output from a previous successful build',
+        );
+
+        $this->writeStubArchive($staged);
+
+        $this->filesystem->dumpFile(
+            $this->sourceDir . '/build-static.sh',
+            "#!/bin/bash\n"
+            . "defaultExtensions=\"bcmath,intl,ssh2\"\n"
+            . "defaultExtensionLibs=\"brotli\"\n",
+        );
+
+        try {
+            $builder->build($options, static function (string $output): void {
+            }, clean: false);
+        } catch (RuntimeException) {
+            // Expected — the fixture never installs a real xcaddy.
+        }
+
+        self::assertFileDoesNotExist($staged . '/dist/static-php-cli/log/go-build.log');
+    }
+
+    public function testGoBuildLogPathPointsAtWhereTheShimTeesItsOutput(): void
+    {
+        self::assertSame(
+            $this->dir . '/work/frankenphp/dist/static-php-cli/log/go-build.log',
+            $this->builder()->goBuildLogPath($this->options()),
+        );
+    }
+
     private function writeStubArchive(string $stagedDir): void
     {
         $this->filesystem->mkdir($stagedDir);

@@ -186,6 +186,42 @@ final class BuildCommandTest extends TestCase
         self::assertFileExists($this->findProducedBinary(), 'an unverified binary must be kept, not deleted');
     }
 
+    public function testFailingBuildSurfacesTheShimsGoBuildLogWhenItExists(): void
+    {
+        $this->writeFailingBuildScript(withGoBuildLog: true);
+
+        $tester = $this->tester();
+        $exitCode = $tester->execute([
+            '--app-version' => 'v9.9.9',
+        ]);
+
+        self::assertSame(Command::FAILURE, $exitCode);
+        $output = $tester->getDisplay();
+
+        self::assertStringContainsString('Go build log (xcaddy shim)', $output);
+        self::assertStringContainsString('undefined reference to main.appName', $output);
+        self::assertStringContainsString(
+            $this->dir . '/work/frankenphp/dist/static-php-cli/log/go-build.log',
+            $output,
+        );
+    }
+
+    public function testFailingBuildWithNoShimLogReportsCleanlyWithNoWarning(): void
+    {
+        $this->writeFailingBuildScript(withGoBuildLog: false);
+
+        $tester = $this->tester();
+        $exitCode = $tester->execute([
+            '--app-version' => 'v9.9.9',
+        ]);
+
+        self::assertSame(Command::FAILURE, $exitCode);
+        $output = $tester->getDisplay();
+
+        self::assertStringNotContainsString('Go build log', $output);
+        self::assertStringNotContainsString('go-build.log', $output);
+    }
+
     public function testWarningsDoNotBlockTheBuild(): void
     {
         // Preflight reports dev dependencies as a warning, not an error, whenever
@@ -242,6 +278,44 @@ final class BuildCommandTest extends TestCase
             . "mkdir -p dist\n"
             . "printf '#!/bin/bash\\necho \"{$reportedVersion}\"\\n' > \"dist/frankenphp-\${os}-\${arch}\"\n"
             . "chmod +x \"dist/frankenphp-\${os}-\${arch}\"\n",
+        );
+    }
+
+    /**
+     * A stand-in build-static.sh that installs the xcaddy marker on its first (bootstrap) run —
+     * exactly {@see self::writeFakeBuildScript()} — but fails its second (build) run instead of
+     * producing a binary, optionally leaving behind the go-build.log the real `xcaddy` shim would
+     * have teed the Go linker's output to (see Resources/build/xcaddy).
+     */
+    private function writeFailingBuildScript(bool $withGoBuildLog): void
+    {
+        $this->filesystem->dumpFile($this->dir . '/source/xcaddy', "#!/usr/bin/env bash\necho stub\n");
+
+        $goBuildLogStep = $withGoBuildLog
+            ? "mkdir -p dist/static-php-cli/log\n"
+            . "echo 'go build failed: undefined reference to main.appName' > dist/static-php-cli/log/go-build.log\n"
+            : '';
+
+        $this->filesystem->dumpFile(
+            $this->dir . '/source/build-static.sh',
+            "#!/bin/bash\n"
+            . "defaultExtensions=\"bcmath,intl\"\n"
+            . "defaultExtensionLibs=\"brotli\"\n"
+            . "rawOs=\$(uname -s | tr '[:upper:]' '[:lower:]')\n"
+            . "arch=\$(uname -m)\n"
+            . "case \"\${arch}\" in\n"
+            . "    arm64|aarch64) spcArch=\"aarch64\" ;;\n"
+            . "    x86_64|amd64) spcArch=\"x86_64\" ;;\n"
+            . "    *) spcArch=\"\${arch}\" ;;\n"
+            . "esac\n"
+            . "marker=\"dist/static-php-cli/pkgroot/\${spcArch}-\${rawOs}/go-xcaddy/bin/xcaddy\"\n"
+            . "if [ ! -f \"\${marker}\" ]; then\n"
+            . "    mkdir -p \"\$(dirname \"\${marker}\")\"\n"
+            . "    touch \"\${marker}\"\n"
+            . "    exit 0\n"
+            . "fi\n"
+            . $goBuildLogStep
+            . "exit 1\n",
         );
     }
 

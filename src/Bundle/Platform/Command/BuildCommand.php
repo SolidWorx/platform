@@ -147,7 +147,7 @@ final class BuildCommand extends Command
         } catch (BuildStepFailedException $exception) {
             $this->io->newLine();
             $this->io->error($exception->getMessage());
-            $this->showLogTail($exception->step, $exception->logPath);
+            $this->showLogTail($exception->step, $exception->logPath, $this->builder->goBuildLogPath($options));
 
             return self::FAILURE;
         } catch (Throwable $throwable) {
@@ -263,10 +263,24 @@ final class BuildCommand extends Command
         }
     }
 
-    private function showLogTail(string $step, string $logPath): void
+    private function showLogTail(string $step, string $logPath, string $goBuildLogPath): void
     {
         $this->io->writeln(sprintf(' Failing step: %s', $step));
 
+        $this->printLogTail($logPath, 'Full log');
+
+        // Absent on most failures — the shim (Resources/build/xcaddy) only runs, and only tees
+        // this file, once static-php-cli reaches the link step. When it exists, it is where the
+        // real error actually is: static-php-cli swallows the shim's own streams, so a Go build
+        // failure never reaches the step log above.
+        if (is_file($goBuildLogPath)) {
+            $this->io->newLine();
+            $this->printLogTail($goBuildLogPath, 'Go build log (xcaddy shim)');
+        }
+    }
+
+    private function printLogTail(string $logPath, string $label): void
+    {
         if (! is_file($logPath)) {
             return;
         }
@@ -275,7 +289,7 @@ final class BuildCommand extends Command
         $lines = array_slice($contents === false ? [] : $contents, -self::LOG_TAIL_LINES);
 
         $this->io->writeln($lines);
-        $this->io->writeln(sprintf(' Full log: %s', $logPath));
+        $this->io->writeln(sprintf(' %s: %s', $label, $logPath));
     }
 
     private function option(string $name): ?string

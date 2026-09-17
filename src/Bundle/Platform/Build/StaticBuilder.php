@@ -126,6 +126,16 @@ final readonly class StaticBuilder
     }
 
     /**
+     * Where the `xcaddy` shim tees the Go linker's own output (see Resources/build/xcaddy):
+     * static-php-cli swallows the shim's streams, so this file is the only place a link failure's
+     * real message ends up. Pure and side-effect free for the same reason as {@see self::stagedDir()}.
+     */
+    public function goBuildLogPath(BuildOptions $options): string
+    {
+        return $this->stagedDir($options) . '/dist/static-php-cli/log/go-build.log';
+    }
+
+    /**
      * The extension set build-static.sh falls back to, read from the script itself so it stays
      * correct across upstream syncs.
      *
@@ -236,6 +246,12 @@ final readonly class StaticBuilder
         $logDir = $options->workDir . '/log';
         $this->filesystem->remove($logDir);
         $this->filesystem->mkdir($logDir);
+
+        // The shim itself truncates this on every run that reaches the link step (its `tee` opens
+        // the file fresh), but a build that fails earlier — the PHP compile dying, most commonly —
+        // never invokes the shim at all and would otherwise leave a previous build's go-build.log
+        // sitting there to be printed against this, unrelated, failure.
+        $this->filesystem->remove($this->goBuildLogPath($options));
 
         $staged = $this->stage($options);
 
