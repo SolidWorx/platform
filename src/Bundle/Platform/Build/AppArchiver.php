@@ -78,6 +78,18 @@ final readonly class AppArchiver
             ));
         }
 
+        $fileCount = $this->countFiles($projectDir, $process->getErrorOutput() . "\n" . $process->getOutput());
+
+        if ($fileCount === 0) {
+            $this->filesystem->remove($destination);
+
+            throw new RuntimeException(sprintf(
+                'The application archive built from %s contains no files. Either the project '
+                . 'directory is empty, or the configured excludes matched everything in it.',
+                $projectDir,
+            ));
+        }
+
         $checksum = hash_file('sha256', $destination);
 
         if ($checksum === false) {
@@ -91,7 +103,7 @@ final readonly class AppArchiver
         return new Archive(
             path: $destination,
             checksum: $checksum,
-            fileCount: $this->countFiles($projectDir, $process->getErrorOutput() . "\n" . $process->getOutput()),
+            fileCount: $fileCount,
             bytes: $size === false ? 0 : $size,
         );
     }

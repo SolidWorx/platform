@@ -16,6 +16,7 @@ namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Build;
 use Override;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use SolidWorx\Platform\PlatformBundle\Build\AppArchiver;
 use SolidWorx\Platform\PlatformBundle\Build\Archive;
 use Symfony\Component\Filesystem\Filesystem;
@@ -106,6 +107,36 @@ final class AppArchiverTest extends TestCase
 
         self::assertSame(2, $archive->fileCount);
         self::assertGreaterThan(0, $archive->bytes);
+    }
+
+    public function testThrowsWhenTheProjectDirectoryIsEmpty(): void
+    {
+        $emptyDir = sys_get_temp_dir() . '/platform-archive-empty-' . bin2hex(random_bytes(6));
+        $this->filesystem->mkdir($emptyDir);
+        $destination = $emptyDir . '/var/build/frankenphp/app.tar.gz';
+
+        $this->expectException(RuntimeException::class);
+
+        try {
+            (new AppArchiver($this->filesystem))->archive($emptyDir, $destination, []);
+        } finally {
+            self::assertFileDoesNotExist($destination);
+
+            $this->filesystem->remove($emptyDir);
+        }
+    }
+
+    public function testThrowsWhenExcludesMatchEverything(): void
+    {
+        $destination = $this->dir . '/var/build/frankenphp/app.tar.gz';
+
+        $this->expectException(RuntimeException::class);
+
+        try {
+            (new AppArchiver($this->filesystem))->archive($this->dir, $destination, ['src/', 'public/']);
+        } finally {
+            self::assertFileDoesNotExist($destination);
+        }
     }
 
     private function archive(): Archive
