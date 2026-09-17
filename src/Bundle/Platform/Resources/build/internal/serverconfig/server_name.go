@@ -18,13 +18,13 @@ type Params struct {
 
 // BuildServerName returns the Caddy SERVER_NAME string for the given parameters.
 //
-// When a reverse proxy sits in front of SolidInvoice and forwards requests
+// When a reverse proxy sits in front of the application and forwards requests
 // with a Host header that differs from the machine's IP address, Caddy must
 // be told about that hostname so it can match incoming requests correctly.
 // Use Domain + DisableHttps together to tell Caddy to accept requests for the
 // given hostname over plain HTTP (the reverse proxy handles TLS):
 //
-//	solidinvoice run --domain solidinvoice.example.com --disable-https
+//	app run --domain app.example.com --disable-https
 func BuildServerName(p Params) (string, error) {
 	if p.Domain != "" {
 		validate := validator.New(validator.WithRequiredStructEnabled())

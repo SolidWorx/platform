@@ -114,7 +114,7 @@ func TestBuildServerName(t *testing.T) {
 // forwarded by a reverse proxy with the correct Host header.
 func TestBuildServerNameDomainWithDisableHttps(t *testing.T) {
 	params := serverconfig.Params{
-		Domain:       "solidinvoice.example.com",
+		Domain:       "app.example.com",
 		DisableHttps: true,
 		HttpPort:     "8765",
 	}
@@ -129,7 +129,7 @@ func TestBuildServerNameDomainWithDisableHttps(t *testing.T) {
 	if strings.Contains(got, "https://") {
 		t.Errorf("unexpected https:// in server name for --domain + --disable-https, got: %s", got)
 	}
-	if !strings.Contains(got, "solidinvoice.example.com") {
+	if !strings.Contains(got, "app.example.com") {
 		t.Errorf("expected domain in server name, got: %s", got)
 	}
 }
