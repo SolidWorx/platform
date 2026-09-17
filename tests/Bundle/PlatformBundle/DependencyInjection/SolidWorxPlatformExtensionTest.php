@@ -17,6 +17,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfiguration;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\SolidWorxPlatformExtension;
+use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantCreationVoter;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 #[CoversClass(SolidWorxPlatformExtension::class)]
@@ -110,6 +111,41 @@ final class SolidWorxPlatformExtensionTest extends TestCase
     }
 
     /**
+     * With multi-tenancy off — the default — the container must still compile: nothing tenancy-only
+     * may keep a reference to a service that {@see SolidWorxPlatformExtension::MULTI_TENANCY_SERVICES}
+     * removed, or every application booting without multi-tenancy would fail to boot at all.
+     */
+    public function testTheContainerCompilesWithMultiTenancyDisabled(): void
+    {
+        $container = $this->load([]);
+
+        // SecurityBundle is what normally keeps a voter alive, by collecting every
+        // `security.voter`-tagged service into the access decision manager. Nothing in this bare
+        // container consumes that tag, so without forcing the voter public here,
+        // `RemoveUnusedDefinitionsPass` would quietly drop it — and the dangling constructor
+        // argument that broke compilation in a real application — before autowiring's error could
+        // surface.
+        if ($container->hasDefinition(TenantCreationVoter::class)) {
+            $container->getDefinition(TenantCreationVoter::class)->setPublic(true);
+        }
+
+        $container->compile();
+
+        self::assertFalse($container->hasDefinition(TenantCreationVoter::class));
+    }
+
+    public function testTheVoterIsKeptWhenMultiTenancyIsEnabled(): void
+    {
+        $container = $this->load([
+            'multi_tenancy' => [
+                'enabled' => true,
+            ],
+        ]);
+
+        self::assertTrue($container->hasDefinition(TenantCreationVoter::class));
+    }
+
+    /**
      * @param array<string, mixed> $config
      */
     private function load(array $config): ContainerBuilder
@@ -117,6 +153,7 @@ final class SolidWorxPlatformExtensionTest extends TestCase
         $container = new ContainerBuilder();
         $container->setParameter('kernel.debug', false);
         $container->setParameter('kernel.environment', 'test');
+        $container->setParameter('kernel.project_dir', '/tmp/app');
 
         new SolidWorxPlatformExtension($config)->load([$config], $container);
 

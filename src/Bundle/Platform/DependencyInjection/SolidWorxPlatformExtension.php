@@ -41,6 +41,7 @@ use SolidWorx\Platform\PlatformBundle\Model\UserTenantInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\TenantRepository;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
 use SolidWorx\Platform\PlatformBundle\Security\EventListener\TenantDomainLoginListener;
+use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantCreationVoter;
 use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantVoter;
 use SolidWorx\Platform\PlatformBundle\Tenant\Onboarding\DefaultTenantOnboarder;
 use SolidWorx\Platform\PlatformBundle\Tenant\Onboarding\TenantOnboarder;
@@ -129,6 +130,7 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         SessionTenantResolver::class,
         RouteTenantResolver::class,
         TenantVoter::class,
+        TenantCreationVoter::class,
         TenantRepository::class,
         UserTenantRepository::class,
         SelectTenant::class,

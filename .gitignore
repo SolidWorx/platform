@@ -12,3 +12,4 @@
 /vendor/
 /.claude/settings.local.json
 /docs/superpowers
+/test-app/
