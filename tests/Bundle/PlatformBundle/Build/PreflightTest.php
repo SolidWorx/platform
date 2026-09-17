@@ -109,6 +109,59 @@ final class PreflightTest extends TestCase
         self::assertSame([], (new Preflight($this->finderMissing()))->run($this->dir, skipAppChecks: true));
     }
 
+    public function testToolVersionsOmitsMissingToolWithoutAffectingOthers(): void
+    {
+        $versions = (new Preflight($this->finderWithPaths([
+            'git' => $this->stubScript('echo "git version 2.43.0"'),
+            'composer' => $this->stubScript('echo "Composer version 2.7.1"'),
+            // 'go' is deliberately absent from the map, so the finder reports it missing.
+        ])))->toolVersions();
+
+        self::assertArrayHasKey('git', $versions);
+        self::assertArrayHasKey('composer', $versions);
+        self::assertArrayNotHasKey('go', $versions);
+    }
+
+    public function testToolVersionsOmitsToolWhoseVersionCommandFails(): void
+    {
+        $versions = (new Preflight($this->finderWithPaths([
+            'git' => $this->stubScript('echo "git version 2.43.0"'),
+            'curl' => $this->stubScript('exit 1'),
+        ])))->toolVersions();
+
+        self::assertArrayHasKey('git', $versions);
+        self::assertArrayNotHasKey('curl', $versions);
+    }
+
+    public function testToolVersionsReducesMultiLineOutputToFirstLine(): void
+    {
+        $versions = (new Preflight($this->finderWithPaths([
+            'jq' => $this->stubScript(<<<'SCRIPT'
+                echo "jq-1.7.1"
+                echo "some second line the caller should never see"
+                SCRIPT),
+        ])))->toolVersions();
+
+        self::assertSame('jq-1.7.1', $versions['jq']);
+    }
+
+    public function testToolVersionsUsesVersionSubcommandForGo(): void
+    {
+        // Mirrors the real `go` binary: it rejects --version outright but answers to `version`.
+        $versions = (new Preflight($this->finderWithPaths([
+            'go' => $this->stubScript(<<<'SCRIPT'
+                if [ "$1" = "version" ]; then
+                    echo "go version go1.23.4 darwin/arm64"
+                    exit 0
+                fi
+                echo "flag provided but not defined: -version" >&2
+                exit 2
+                SCRIPT),
+        ])))->toolVersions();
+
+        self::assertSame('go version go1.23.4 darwin/arm64', $versions['go']);
+    }
+
     private function prepareApplication(bool $dev = false): void
     {
         $this->filesystem->dumpFile($this->dir . '/vendor/autoload_runtime.php', '<?php');
@@ -141,5 +194,44 @@ final class PreflightTest extends TestCase
                 return in_array($name, $this->missing, true) ? null : '/usr/bin/' . $name;
             }
         };
+    }
+
+    /**
+     * @param array<string, string> $paths Tool name to the executable path reported for it; a tool
+     *                                     absent from this map is reported missing.
+     */
+    private function finderWithPaths(array $paths): ExecutableFinder
+    {
+        return new class($paths) extends ExecutableFinder {
+            /**
+             * @param array<string, string> $paths
+             */
+            public function __construct(
+                private readonly array $paths
+            ) {
+            }
+
+            /**
+             * @param array<array-key, mixed> $extraDirs
+             */
+            public function find(string $name, ?string $default = null, array $extraDirs = []): ?string
+            {
+                return $this->paths[$name] ?? null;
+            }
+        };
+    }
+
+    /**
+     * Writes an executable shell script into the test's temp directory and returns its path, so a
+     * spawned `--version` (or equivalent) process behaves deterministically instead of depending on
+     * whatever happens to be installed on the machine running the test.
+     */
+    private function stubScript(string $body): string
+    {
+        $path = $this->dir . '/stub-' . bin2hex(random_bytes(6)) . '.sh';
+        $this->filesystem->dumpFile($path, "#!/bin/sh\n" . $body . "\n");
+        $this->filesystem->chmod($path, 0o755);
+
+        return $path;
     }
 }

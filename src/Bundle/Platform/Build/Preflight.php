@@ -51,6 +51,17 @@ final readonly class Preflight
         'bash' => 'macOS: preinstalled · Debian/Ubuntu: apt-get install bash · Fedora: dnf install bash',
     ];
 
+    /**
+     * The flag each tool needs to report its version, for tools that disagree with the `--version`
+     * default. Go's flag parser rejects `--version` outright ("flag provided but not defined:
+     * -version"); its own spelling is the bare subcommand `version`.
+     *
+     * @var array<string, string>
+     */
+    private const array VERSION_ARGUMENTS = [
+        'go' => 'version',
+    ];
+
     public function __construct(
         private ExecutableFinder $executableFinder,
     ) {
@@ -74,9 +85,9 @@ final readonly class Preflight
      * Versions of the tools that were found, for the success line. Tools that are missing or refuse
      * to report a version are simply absent.
      *
-     * These processes run `<tool> --version`, which every tool here (including git) answers without
-     * touching any repository state — so, unlike VersionResolver::run(), there is nothing to
-     * sanitise out of the inherited environment.
+     * These processes run `<tool> --version` (or {@see VERSION_ARGUMENTS}'s override), which every
+     * tool here answers without touching any repository state — so, unlike VersionResolver::run(),
+     * there is nothing to sanitise out of the inherited environment.
      *
      * @return array<string, string>
      */
@@ -91,7 +102,7 @@ final readonly class Preflight
                 continue;
             }
 
-            $process = new Process([$path, '--version']);
+            $process = new Process([$path, self::VERSION_ARGUMENTS[$tool] ?? '--version']);
             $process->run();
 
             if (! $process->isSuccessful()) {
