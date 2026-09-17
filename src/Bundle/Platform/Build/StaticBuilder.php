@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Build;
 
+use const FILE_APPEND;
 use InvalidArgumentException;
 use RuntimeException;
 use Symfony\Component\Filesystem\Filesystem;
@@ -22,6 +23,7 @@ use function array_filter;
 use function array_values;
 use function explode;
 use function file_get_contents;
+use function file_put_contents;
 use function hash_file;
 use function implode;
 use function is_file;
@@ -30,6 +32,7 @@ use function preg_match;
 use function sprintf;
 use function str_contains;
 use function strtolower;
+use function trim;
 
 /**
  * Drives the vendored build-static.sh.
@@ -76,11 +79,19 @@ final readonly class StaticBuilder
      */
     public function stage(BuildOptions $options): string
     {
-        $target = $options->workDir . '/frankenphp';
+        $target = $this->stagedDir($options);
 
         $this->filesystem->mkdir($target);
 
-        foreach (new Finder()->files()->in($this->sourceDir) as $file) {
+        // app.tar.gz, app_checksum.txt and dist/ are the build's own OUTPUT, written into this same
+        // Resources/build source tree by a developer who once ran (or is running) a build straight
+        // out of the source checkout — exactly what .gitignore anticipates by listing them there.
+        // BuildCommand has already written the real, freshly-built archive and checksum into
+        // $target before this method runs; copying stale ones from $this->sourceDir over them would
+        // silently ship an old archive instead of the one just built. dist/ is excluded (not merely
+        // skipped file-by-file) because static-php-cli's own checkout underneath it can run into the
+        // gigabytes, and Finder would otherwise have to walk all of it for nothing.
+        foreach (new Finder()->files()->in($this->sourceDir)->exclude('dist')->notName(['app.tar.gz', 'app_checksum.txt']) as $file) {
             $destination = $target . '/' . $file->getRelativePathname();
 
             if (is_file($destination) && hash_file('sha256', $destination) === hash_file('sha256', $file->getPathname())) {
@@ -94,6 +105,24 @@ final readonly class StaticBuilder
         $this->filesystem->chmod($target . '/xcaddy', 0o755);
 
         return $target;
+    }
+
+    /**
+     * Where the vendored sources are staged for this build. Pure and side-effect free, so the
+     * command can also use it to print what a --dry-run would do without actually staging anything.
+     */
+    public function stagedDir(BuildOptions $options): string
+    {
+        return $options->workDir . '/frankenphp';
+    }
+
+    /**
+     * Where the application archive is extracted to for EMBED. Pure and side-effect free for the
+     * same reason as {@see self::stagedDir()}.
+     */
+    public function embedDir(BuildOptions $options): string
+    {
+        return $options->workDir . '/embed';
     }
 
     /**
@@ -116,21 +145,28 @@ final readonly class StaticBuilder
     /**
      * @return array<string, string>
      */
-    public function environment(BuildOptions $options, string $projectDir): array
+    public function environment(BuildOptions $options, string $embedDir): array
     {
         $this->assertSafeForLdflags($options);
 
         $environment = [
-            // EMBED only feeds `spc dump-extensions`, and the archive is this directory, so there is
-            // nothing to gain from extracting the tarball to hand over a copy of it.
-            'EMBED' => $projectDir,
+            // EMBED must be a bounded directory, never the project directory itself:
+            // build-static.sh appends `--with-frankenphp-app=${EMBED}` to SPC_OPT_BUILD_ARGS
+            // unconditionally (it is not conditional on xcaddy being the real binary), so
+            // static-php-cli receives and walks this path regardless of the shim replacing xcaddy.
+            // The project directory contains work_dir — itself multi-gigabyte once PHP is compiled
+            // — so pointing EMBED at it risked spc traversing its own buildroot. $embedDir is a
+            // throwaway extraction of the just-built archive under work_dir instead: bounded,
+            // cleaned before every build so no stale extraction survives, and removed again after
+            // a successful one.
+            'EMBED' => $embedDir,
             'FRANKENPHP_VERSION' => $options->version,
             'PHP_EXTENSION_LIBS' => implode(',', $options->phpExtensionLibs),
             // The zstd extension probes for apc_serializer.h via phpincludedir, which a static build
             // with an empty prefix leaves unset. Pointing it at the PHP source tree satisfies the
             // check without patching static-php-cli.
-            'phpincludedir' => $options->workDir . '/frankenphp/dist/static-php-cli/source/php-src',
-            'PLATFORM_APP_SOURCE_DIR' => $options->workDir . '/frankenphp',
+            'phpincludedir' => $this->stagedDir($options) . '/dist/static-php-cli/source/php-src',
+            'PLATFORM_APP_SOURCE_DIR' => $this->stagedDir($options),
             'PLATFORM_APP_NAME' => $options->appName,
             'PLATFORM_APP_DESCRIPTION' => $options->description,
             'PLATFORM_APP_PORT' => $options->defaultPort,
@@ -168,6 +204,16 @@ final readonly class StaticBuilder
     }
 
     /**
+     * Validates configuration that would otherwise only fail at the very end of the build (see
+     * {@see self::assertSafeForLdflags()}). Public so the command can run it early — before the
+     * archive is even built — on every path, including --dry-run.
+     */
+    public function validate(BuildOptions $options): void
+    {
+        $this->assertSafeForLdflags($options);
+    }
+
+    /**
      * Runs the build and returns the path of the binary build-static.sh produced.
      *
      * static-php-cli installs its own xcaddy during the first build, then calls it. On a cold cache
@@ -176,14 +222,30 @@ final readonly class StaticBuilder
      *
      * @param callable(string): void $onOutput
      */
-    public function build(BuildOptions $options, string $projectDir, callable $onOutput, bool $clean): string
+    public function build(BuildOptions $options, callable $onOutput, bool $clean): string
     {
         // Cheap and config-only: catching a typo here costs nothing, catching it after the staging
-        // and compile steps below costs the whole build.
+        // and compile steps below costs the whole build. The command already calls validate() much
+        // earlier than this, but build() may also be called directly, so it re-checks its own input.
         $this->assertSafeForLdflags($options);
 
+        // Every step streams to a log unconditionally, and the log is cleared at the start of every
+        // build so a previous successful run's output can never be printed against a later
+        // failure — the same stale-artefact hazard AppArchiver already guards against for the
+        // archive/checksum pair.
+        $logDir = $options->workDir . '/log';
+        $this->filesystem->remove($logDir);
+        $this->filesystem->mkdir($logDir);
+
         $staged = $this->stage($options);
-        $environment = $this->environment($options, $projectDir);
+
+        $embedDir = $this->embedDir($options);
+        // Cleaned before extracting, not just relied upon to be absent, so a stale extraction left
+        // by an interrupted previous build never survives into this one.
+        $this->filesystem->remove($embedDir);
+        $this->extractEmbed($staged . '/app.tar.gz', $embedDir);
+
+        $environment = $this->environment($options, $embedDir);
 
         if ($clean) {
             // Owned here rather than delegated to the script. build-static.sh's own CLEAN handling
@@ -208,10 +270,14 @@ final readonly class StaticBuilder
         // Nested rather than two sequential checks: run() can turn the outer condition from true to
         // false, so the two are not the same check twice and must not be collapsed into one.
         if (! is_file($xcaddy)) {
-            $this->run($staged, $environment, $onOutput, allowFailure: true);
+            $this->run($staged, $environment, $onOutput, allowFailure: true, step: 'bootstrap', logDir: $logDir);
 
             if (! is_file($xcaddy)) {
-                throw new RuntimeException('static-php-cli did not install xcaddy; see the build log for what went wrong.');
+                throw new BuildStepFailedException(
+                    'bootstrap',
+                    $logDir . '/bootstrap.log',
+                    'static-php-cli did not install xcaddy; see the build log for what went wrong.',
+                );
             }
         }
 
@@ -224,13 +290,43 @@ final readonly class StaticBuilder
         // back the previous build.
         $this->filesystem->remove($binary);
 
-        $this->run($staged, $environment, $onOutput, allowFailure: false);
+        $this->run($staged, $environment, $onOutput, allowFailure: false, step: 'build', logDir: $logDir);
 
         if (! is_file($binary)) {
-            throw new RuntimeException(sprintf('The build finished but produced no binary at %s.', $binary));
+            throw new BuildStepFailedException(
+                'build',
+                $logDir . '/build.log',
+                sprintf('The build finished but produced no binary at %s.', $binary),
+            );
         }
 
+        // EMBED was only ever a throwaway copy of the archive already sitting in $staged; keeping
+        // it around after a successful build would leave the whole application sitting at full size
+        // under work_dir for no reason.
+        $this->filesystem->remove($embedDir);
+
         return $binary;
+    }
+
+    /**
+     * Extracts the just-built application archive into a bounded directory for EMBED, so
+     * static-php-cli never has to walk the project directory (and its own multi-gigabyte
+     * work_dir) directly. See {@see self::environment()}.
+     */
+    private function extractEmbed(string $archive, string $embedDir): void
+    {
+        $this->filesystem->mkdir($embedDir);
+
+        $process = new Process(['tar', '-xzf', $archive, '-C', $embedDir], timeout: null);
+        $process->run();
+
+        if (! $process->isSuccessful()) {
+            throw new RuntimeException(sprintf(
+                'Could not extract %s for EMBED: %s',
+                $archive,
+                trim($process->getErrorOutput()) !== '' ? trim($process->getErrorOutput()) : 'tar exited with code ' . $process->getExitCode(),
+            ));
+        }
     }
 
     /**
@@ -249,19 +345,32 @@ final readonly class StaticBuilder
      * @param array<string, string>  $environment
      * @param callable(string): void $onOutput
      */
-    private function run(string $staged, array $environment, callable $onOutput, bool $allowFailure): void
+    private function run(string $staged, array $environment, callable $onOutput, bool $allowFailure, string $step, string $logDir): void
     {
         // RELEASE is unset explicitly: upstream uses it to upload to dunglas/frankenphp.
         $environment['RELEASE'] = '';
 
+        // CI is unset explicitly too: when set, build-static.sh:212-215 removes ./downloads and
+        // ./source after a run. Our own cold-cache path runs the script twice on purpose (see
+        // build()'s doc comment) and needs both directories to survive between the two runs —
+        // phpincludedir above also points into source. Upstream's cleanup assumes a single run;
+        // left inherited from a real CI environment (our own documented CI usage sets one), the
+        // second run would fail. RELEASE is neutralised the same way, for the same reason.
+        $environment['CI'] = '';
+
+        $logPath = $logDir . '/' . $step . '.log';
+
         $process = new Process(['./build-static.sh'], $staged, $environment, timeout: null);
 
-        $process->run(static function (string $type, string $buffer) use ($onOutput): void {
+        $process->run(static function (string $type, string $buffer) use ($onOutput, $logPath): void {
+            // Written unconditionally, regardless of -v: this is the only durable record of a step
+            // that can take 30-60 minutes, and $onOutput only echoes to the console when verbose.
+            file_put_contents($logPath, $buffer, FILE_APPEND);
             $onOutput($buffer);
         });
 
         if (! $allowFailure && ! $process->isSuccessful()) {
-            throw new RuntimeException(sprintf('build-static.sh exited with code %d.', (int) $process->getExitCode()));
+            throw new BuildStepFailedException($step, $logPath, sprintf('build-static.sh exited with code %d.', (int) $process->getExitCode()));
         }
     }
 

@@ -20,8 +20,10 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use SolidWorx\Platform\PlatformBundle\Build\BuildOptions;
+use SolidWorx\Platform\PlatformBundle\Build\BuildStepFailedException;
 use SolidWorx\Platform\PlatformBundle\Build\StaticBuilder;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Process\Process;
 
 /**
  * @phpstan-import-type BuildConfig from BuildOptions
@@ -98,16 +100,28 @@ final class StaticBuilderTest extends TestCase
         self::assertSame(['bcmath', 'intl', 'ssh2'], $this->builder()->defaultExtensions());
     }
 
-    public function testEnvironmentExportsAnEmptyExtensionsValueWhenComposerShouldDecide(): void
+    public function testEnvironmentExportsAnEmptyExtensionsValueWhenTheScriptShouldDecide(): void
     {
-        $environment = $this->builder()->environment($this->options(), '/app');
+        $environment = $this->builder()->environment($this->options(), $this->dir . '/embed');
 
         self::assertArrayHasKey('PHP_EXTENSIONS', $environment);
         self::assertSame('', $environment['PHP_EXTENSIONS']);
-        self::assertSame('/app', $environment['EMBED']);
         self::assertSame('8.5', $environment['PHP_VERSION']);
         self::assertSame('libavif', $environment['PHP_EXTENSION_LIBS']);
         self::assertSame('v2.4.0', $environment['FRANKENPHP_VERSION']);
+    }
+
+    public function testEnvironmentPointsEmbedAtTheGivenBoundedDirectoryRatherThanTheProject(): void
+    {
+        // EMBED must never be the project directory itself (Task 3): build-static.sh appends
+        // --with-frankenphp-app=${EMBED} to SPC_OPT_BUILD_ARGS unconditionally, so static-php-cli
+        // would otherwise be handed the project's own multi-gigabyte work_dir to traverse.
+        $embedDir = $this->dir . '/embed';
+
+        $environment = $this->builder()->environment($this->options(), $embedDir);
+
+        self::assertSame($embedDir, $environment['EMBED']);
+        self::assertNotSame($this->dir, $environment['EMBED']);
     }
 
     public function testEnvironmentExportsPhpVersionAndPhpExtensionsEvenWhenUnconfigured(): void
@@ -115,7 +129,7 @@ final class StaticBuilderTest extends TestCase
         $config = $this->config();
         $config['php']['version'] = null;
 
-        $environment = $this->builder()->environment(BuildOptions::fromConfig($config, 'v2.4.0', []), '/app');
+        $environment = $this->builder()->environment(BuildOptions::fromConfig($config, 'v2.4.0', []), $this->dir . '/embed');
 
         // Both keys must always be present, even empty: build-static.sh treats an empty value the
         // same as an unset one, but only an explicit empty string stops a PHP_VERSION or
@@ -134,7 +148,7 @@ final class StaticBuilderTest extends TestCase
 
         $environment = $this->builder()->environment(
             BuildOptions::fromConfig($config, 'v2.4.0', []),
-            '/app',
+            $this->dir . '/embed',
         );
 
         self::assertSame('bcmath,intl', $environment['PHP_EXTENSIONS']);
@@ -142,7 +156,7 @@ final class StaticBuilderTest extends TestCase
 
     public function testEnvironmentCarriesTheApplicationIdentityForTheShim(): void
     {
-        $environment = $this->builder()->environment($this->options(), '/app');
+        $environment = $this->builder()->environment($this->options(), $this->dir . '/embed');
 
         self::assertSame('Acme', $environment['PLATFORM_APP_NAME']);
         self::assertSame('ACME', $environment['PLATFORM_APP_ENV_PREFIX']);
@@ -166,6 +180,10 @@ final class StaticBuilderTest extends TestCase
         $options = $this->options();
         $staged = $this->dir . '/work/frankenphp';
 
+        // build() extracts EMBED from this before it ever looks at dist/ or CLEAN — in real usage
+        // BuildCommand has already written it by the time build() runs.
+        $this->writeStubArchive($staged);
+
         // A stale dist/ from a previous run, the way a warm work directory would have one.
         $this->filesystem->mkdir($staged . '/dist');
         $this->filesystem->dumpFile($staged . '/dist/marker.txt', 'stale build output');
@@ -186,7 +204,7 @@ final class StaticBuilderTest extends TestCase
         );
 
         try {
-            $builder->build($options, '/app', static function (string $output): void {
+            $builder->build($options, static function (string $output): void {
             }, clean: true);
         } catch (RuntimeException) {
             // Expected — see above.
@@ -202,11 +220,13 @@ final class StaticBuilderTest extends TestCase
         $options = $this->options();
         $staged = $this->dir . '/work/frankenphp';
 
+        $this->writeStubArchive($staged);
+
         $this->filesystem->mkdir($staged . '/dist');
         $this->filesystem->dumpFile($staged . '/dist/marker.txt', 'kept build output');
 
         try {
-            $builder->build($options, '/app', static function (string $output): void {
+            $builder->build($options, static function (string $output): void {
             }, clean: false);
         } catch (RuntimeException) {
             // Expected — the fixture's build-static.sh never installs a real xcaddy.
@@ -235,7 +255,7 @@ final class StaticBuilderTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        $this->builder()->environment(BuildOptions::fromConfig($config, 'v2.4.0', []), '/app');
+        $this->builder()->environment(BuildOptions::fromConfig($config, 'v2.4.0', []), $this->dir . '/embed');
     }
 
     public function testEnvironmentExceptionNamesTheOffendingKeyAndValue(): void
@@ -244,7 +264,7 @@ final class StaticBuilderTest extends TestCase
         $config['description'] = "Pierre's invoicing app";
 
         try {
-            $this->builder()->environment(BuildOptions::fromConfig($config, 'v2.4.0', []), '/app');
+            $this->builder()->environment(BuildOptions::fromConfig($config, 'v2.4.0', []), $this->dir . '/embed');
             self::fail('Expected an InvalidArgumentException.');
         } catch (InvalidArgumentException $exception) {
             self::assertStringContainsString('description', $exception->getMessage());
@@ -259,7 +279,7 @@ final class StaticBuilderTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        $this->builder()->environment(BuildOptions::fromConfig($config, 'v2.4.0', []), '/app');
+        $this->builder()->environment(BuildOptions::fromConfig($config, 'v2.4.0', []), $this->dir . '/embed');
     }
 
     public function testEnvironmentRejectsAnApostropheInTheEnvPrefix(): void
@@ -269,7 +289,7 @@ final class StaticBuilderTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        $this->builder()->environment(BuildOptions::fromConfig($config, 'v2.4.0', []), '/app');
+        $this->builder()->environment(BuildOptions::fromConfig($config, 'v2.4.0', []), $this->dir . '/embed');
     }
 
     public function testEnvironmentRejectsAnApostropheInTheDefaultPort(): void
@@ -279,7 +299,7 @@ final class StaticBuilderTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        $this->builder()->environment(BuildOptions::fromConfig($config, 'v2.4.0', []), '/app');
+        $this->builder()->environment(BuildOptions::fromConfig($config, 'v2.4.0', []), $this->dir . '/embed');
     }
 
     public function testEnvironmentRejectsAnApostropheInTheInstallCheckCommand(): void
@@ -289,7 +309,7 @@ final class StaticBuilderTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        $this->builder()->environment(BuildOptions::fromConfig($config, 'v2.4.0', []), '/app');
+        $this->builder()->environment(BuildOptions::fromConfig($config, 'v2.4.0', []), $this->dir . '/embed');
     }
 
     public function testEnvironmentRejectsAnApostropheInABootCommand(): void
@@ -299,14 +319,14 @@ final class StaticBuilderTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        $this->builder()->environment(BuildOptions::fromConfig($config, 'v2.4.0', []), '/app');
+        $this->builder()->environment(BuildOptions::fromConfig($config, 'v2.4.0', []), $this->dir . '/embed');
     }
 
     public function testEnvironmentRejectsAnApostropheInTheVersion(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $this->builder()->environment(BuildOptions::fromConfig($this->config(), "v2.4.0's-tag", []), '/app');
+        $this->builder()->environment(BuildOptions::fromConfig($this->config(), "v2.4.0's-tag", []), $this->dir . '/embed');
     }
 
     public function testEnvironmentAllowsOrdinaryPunctuation(): void
@@ -314,9 +334,156 @@ final class StaticBuilderTest extends TestCase
         $config = $this->config();
         $config['description'] = 'Acme does things - fast, reliably & well.';
 
-        $environment = $this->builder()->environment(BuildOptions::fromConfig($config, 'v2.4.0', []), '/app');
+        $environment = $this->builder()->environment(BuildOptions::fromConfig($config, 'v2.4.0', []), $this->dir . '/embed');
 
         self::assertSame('Acme does things - fast, reliably & well.', $environment['PLATFORM_APP_DESCRIPTION']);
+    }
+
+    public function testValidateRejectsUnsafeLdflagsValues(): void
+    {
+        $config = $this->config();
+        $config['name'] = "Acme's";
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->builder()->validate(BuildOptions::fromConfig($config, 'v2.4.0', []));
+    }
+
+    public function testValidatePassesForSafeValues(): void
+    {
+        $this->expectNotToPerformAssertions();
+
+        $this->builder()->validate($this->options());
+    }
+
+    public function testStageDoesNotCopyTheBuildsOwnStaleOutputOverTheFreshOne(): void
+    {
+        // Exactly what .gitignore anticipates: a developer once built straight out of the source
+        // checkout, leaving these three behind in Resources/build.
+        $this->filesystem->dumpFile($this->sourceDir . '/app.tar.gz', 'stale-archive-bytes');
+        $this->filesystem->dumpFile($this->sourceDir . '/app_checksum.txt', 'stale-checksum');
+        $this->filesystem->dumpFile($this->sourceDir . '/dist/static-php-cli/marker.txt', 'stale build tree');
+
+        $target = $this->builder()->stage($this->options());
+
+        // BuildCommand has already written the real, freshly-built archive and checksum into the
+        // staged directory before stage() runs.
+        $this->filesystem->dumpFile($target . '/app.tar.gz', 'fresh-archive-bytes');
+        $this->filesystem->dumpFile($target . '/app_checksum.txt', 'fresh-checksum');
+
+        $this->builder()->stage($this->options());
+
+        self::assertSame('fresh-archive-bytes', file_get_contents($target . '/app.tar.gz'));
+        self::assertSame('fresh-checksum', file_get_contents($target . '/app_checksum.txt'));
+        self::assertFileDoesNotExist($target . '/dist/static-php-cli/marker.txt');
+    }
+
+    public function testBuildNeutralisesTheInheritedCiVariable(): void
+    {
+        $builder = $this->builder();
+        $options = $this->options();
+        $staged = $this->dir . '/work/frankenphp';
+
+        $this->writeStubArchive($staged);
+
+        // build-static.sh:212-215 removes ./downloads and ./source when CI is set — this stand-in
+        // instead leaves a marker so the test can observe whether CI reached it.
+        $this->filesystem->dumpFile(
+            $this->sourceDir . '/build-static.sh',
+            "#!/bin/bash\n"
+            . "defaultExtensions=\"bcmath,intl,ssh2\"\n"
+            . "defaultExtensionLibs=\"brotli\"\n"
+            . "if [ -n \"\${CI:-}\" ]; then\n"
+            . "    mkdir -p dist\n"
+            . "    touch dist/CI_WAS_SET\n"
+            . "fi\n",
+        );
+
+        putenv('CI=true');
+
+        try {
+            $builder->build($options, static function (string $output): void {
+            }, clean: false);
+        } catch (RuntimeException) {
+            // Expected — the fixture never installs a real xcaddy.
+        } finally {
+            putenv('CI');
+        }
+
+        self::assertFileDoesNotExist($staged . '/dist/CI_WAS_SET', 'the inherited CI variable reached build-static.sh');
+    }
+
+    public function testBuildWritesTheFailingStepsLogAndNamesItInTheException(): void
+    {
+        $builder = $this->builder();
+        $options = $this->options();
+        $staged = $this->dir . '/work/frankenphp';
+
+        $this->writeStubArchive($staged);
+
+        $this->filesystem->dumpFile(
+            $this->sourceDir . '/build-static.sh',
+            "#!/bin/bash\n"
+            . "defaultExtensions=\"bcmath,intl,ssh2\"\n"
+            . "defaultExtensionLibs=\"brotli\"\n"
+            . "echo 'about to install xcaddy'\n"
+            . "echo 'still nothing here' >&2\n",
+        );
+
+        try {
+            $builder->build($options, static function (string $output): void {
+            }, clean: false);
+            self::fail('Expected a BuildStepFailedException.');
+        } catch (BuildStepFailedException $exception) {
+            self::assertSame('bootstrap', $exception->step);
+            self::assertSame($this->dir . '/work/log/bootstrap.log', $exception->logPath);
+            self::assertFileExists($exception->logPath);
+            self::assertStringContainsString('about to install xcaddy', (string) file_get_contents($exception->logPath));
+        }
+    }
+
+    public function testBuildClearsThePreviousBuildsLogsBeforeStarting(): void
+    {
+        $builder = $this->builder();
+        $options = $this->options();
+        $logDir = $this->dir . '/work/log';
+
+        // A log left over from a previous, successful build — must never be readable against a
+        // later failure (the same stale-artefact hazard AppArchiver guards against for the
+        // archive/checksum pair).
+        $this->filesystem->dumpFile($logDir . '/bootstrap.log', 'output from a previous successful build');
+
+        $this->writeStubArchive($this->dir . '/work/frankenphp');
+
+        $this->filesystem->dumpFile(
+            $this->sourceDir . '/build-static.sh',
+            "#!/bin/bash\n"
+            . "defaultExtensions=\"bcmath,intl,ssh2\"\n"
+            . "defaultExtensionLibs=\"brotli\"\n"
+            . "echo 'this build never wrote the stale line'\n",
+        );
+
+        try {
+            $builder->build($options, static function (string $output): void {
+            }, clean: false);
+        } catch (RuntimeException) {
+            // Expected — the fixture never installs a real xcaddy.
+        }
+
+        self::assertStringNotContainsString(
+            'output from a previous successful build',
+            (string) file_get_contents($logDir . '/bootstrap.log'),
+        );
+    }
+
+    private function writeStubArchive(string $stagedDir): void
+    {
+        $this->filesystem->mkdir($stagedDir);
+
+        $source = $this->dir . '/archive-source';
+        $this->filesystem->dumpFile($source . '/marker.txt', 'stub archive contents');
+
+        new Process(['tar', '-czf', $stagedDir . '/app.tar.gz', '-C', $source, '.'])->mustRun();
     }
 
     private function builder(): StaticBuilder
