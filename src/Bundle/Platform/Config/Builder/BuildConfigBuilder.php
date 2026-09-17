@@ -22,11 +22,11 @@ use function array_values;
  *
  *     return PlatformConfigBuilder::create()
  *         ->name('Acme')
- *         ->build()
+ *         ->binaryBuild()
  *             ->binaryName('acme')
  *             ->envPrefix('ACME')
  *         ->end()
- *         ->toArray();
+ *         ->build();
  */
 final class BuildConfigBuilder
 {

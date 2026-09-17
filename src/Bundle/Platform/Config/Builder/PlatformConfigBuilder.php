@@ -28,7 +28,7 @@ use Webmozart\Assert\Assert;
  *                 ->baseTemplate('@App/2fa.html.twig')
  *             ->end()
  *         ->end()
- *         ->toArray();
+ *         ->build();
  */
 final class PlatformConfigBuilder
 {
@@ -84,7 +84,12 @@ final class PlatformConfigBuilder
         return $this->security;
     }
 
-    public function build(): BuildConfigBuilder
+    /**
+     * Opens the `platform.build:` (binary-build) configuration section. Named `binaryBuild()`
+     * rather than `build()` because the terminal call that returns the whole configuration array
+     * is `build()` — the same name `userModel()` uses for the `models.user` key.
+     */
+    public function binaryBuild(): BuildConfigBuilder
     {
         $this->buildConfig = BuildConfigBuilder::create($this);
         return $this->buildConfig;
@@ -132,7 +137,7 @@ final class PlatformConfigBuilder
      *
      * @return array<string, mixed>
      */
-    public function toArray(): array
+    public function build(): array
     {
         $platform = [
             'name' => $this->name,

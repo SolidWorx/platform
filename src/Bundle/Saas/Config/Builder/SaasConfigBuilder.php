@@ -30,7 +30,7 @@ use Webmozart\Assert\Assert;
  *                 ->payment()->returnRoute('app_payment_return')->end()
  *                 ->build()
  *         )
- *         ->toArray();
+ *         ->build();
  */
 final class SaasConfigBuilder
 {

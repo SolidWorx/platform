@@ -30,7 +30,7 @@ namespace SolidWorx\Platform\UiBundle\Config\Builder;
  *                 ->layoutDefaults(['navbar_sticky' => true, 'fluid' => true])
  *                 ->build()
  *         )
- *         ->toArray();
+ *         ->build();
  */
 final class UiConfigBuilder
 {

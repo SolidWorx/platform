@@ -25,14 +25,14 @@ final class PlatformConfigBuilderTest extends TestCase
 {
     public function testBuildAlwaysWrapsUnderPlatformKey(): void
     {
-        $result = PlatformConfigBuilder::create()->toArray();
+        $result = PlatformConfigBuilder::create()->build();
 
         self::assertArrayHasKey('platform', $result);
     }
 
     public function testDefaultNameAndVersion(): void
     {
-        $result = PlatformConfigBuilder::create()->toArray();
+        $result = PlatformConfigBuilder::create()->build();
 
         self::assertSame('SolidWorx Platform', self::section($result, 'platform')['name']);
         self::assertSame('1.0.0', self::section($result, 'platform')['version']);
@@ -43,7 +43,7 @@ final class PlatformConfigBuilderTest extends TestCase
         $result = PlatformConfigBuilder::create()
             ->name('My App')
             ->version('2.5.0')
-            ->toArray();
+            ->build();
 
         self::assertSame('My App', self::section($result, 'platform')['name']);
         self::assertSame('2.5.0', self::section($result, 'platform')['version']);
@@ -53,14 +53,14 @@ final class PlatformConfigBuilderTest extends TestCase
     {
         $result = PlatformConfigBuilder::create()
             ->userModel('App\Entity\User')
-            ->toArray();
+            ->build();
 
         self::assertSame('App\Entity\User', self::section($result, 'platform', 'models')['user']);
     }
 
     public function testModelsAbsentWhenNotSet(): void
     {
-        $result = PlatformConfigBuilder::create()->toArray();
+        $result = PlatformConfigBuilder::create()->build();
         self::assertArrayNotHasKey('models', self::section($result, 'platform'));
     }
 
@@ -68,14 +68,14 @@ final class PlatformConfigBuilderTest extends TestCase
     {
         $result = PlatformConfigBuilder::create()
             ->enableUtcDate(true)
-            ->toArray();
+            ->build();
 
         self::assertTrue(self::section($result, 'platform', 'doctrine', 'types')['enable_utc_date']);
     }
 
     public function testDoctrineAbsentWhenUtcDateNotSet(): void
     {
-        $result = PlatformConfigBuilder::create()->toArray();
+        $result = PlatformConfigBuilder::create()->build();
         self::assertArrayNotHasKey('doctrine', self::section($result, 'platform'));
     }
 
@@ -88,14 +88,14 @@ final class PlatformConfigBuilderTest extends TestCase
                 ],
             ],
         ];
-        $result = PlatformConfigBuilder::create()->withSaasConfig($saas)->toArray();
+        $result = PlatformConfigBuilder::create()->withSaasConfig($saas)->build();
 
         self::assertSame($saas, self::section($result, 'platform')['saas']);
     }
 
     public function testSaasAbsentWhenNotSet(): void
     {
-        $result = PlatformConfigBuilder::create()->toArray();
+        $result = PlatformConfigBuilder::create()->build();
         self::assertArrayNotHasKey('saas', self::section($result, 'platform'));
     }
 
@@ -104,14 +104,14 @@ final class PlatformConfigBuilderTest extends TestCase
         $ui = [
             'icon_pack' => 'tabler',
         ];
-        $result = PlatformConfigBuilder::create()->withUiConfig($ui)->toArray();
+        $result = PlatformConfigBuilder::create()->withUiConfig($ui)->build();
 
         self::assertSame($ui, self::section($result, 'platform')['ui']);
     }
 
     public function testUiAbsentWhenNotSet(): void
     {
-        $result = PlatformConfigBuilder::create()->toArray();
+        $result = PlatformConfigBuilder::create()->build();
         self::assertArrayNotHasKey('ui', self::section($result, 'platform'));
     }
 
