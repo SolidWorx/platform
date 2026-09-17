@@ -52,8 +52,10 @@ final readonly class StaticBuilder
      *
      * - an apostrophe closes the quote early and corrupts every flag written after it — an
      *   entirely ordinary value such as "Pierre's invoicing app" breaks the build;
-     * - a double quote or backslash can be re-interpreted once that quoting is broken;
-     * - a raw newline or carriage return splits the single-line flags string outright.
+     * - a double quote, backslash, newline, or carriage return cannot break the quoting on their
+     *   own (only the apostrophe actually confuses go's `quoted.Split`), but none of them are
+     *   values any real config would legitimately need, so they are rejected too as cheap
+     *   insurance against whatever the next upstream change to the quoting does.
      *
      * None of this surfaces until the link step, at the very end of an hour-long build, so these
      * are rejected eagerly by {@see self::assertSafeForLdflags()} instead.
@@ -138,17 +140,16 @@ final readonly class StaticBuilder
             'PLATFORM_APP_VERSION' => $options->version,
         ];
 
-        if ($options->phpVersion !== null) {
-            $environment['PHP_VERSION'] = $options->phpVersion;
-        }
+        // Always exported, even as an empty string: build-static.sh treats an empty value and an
+        // unset one identically (it tests `[ -z "${VAR}" ]`), but Symfony's Process inherits the
+        // whole parent environment, so an omitted key here would fall through to whatever a
+        // developer's shell, CI image, or PHP version manager happens to already export under
+        // that name — silently compiling a different PHP version or extension set than
+        // platform.yaml asked for. Only an explicit empty string shadows that.
+        $environment['PHP_VERSION'] = $options->phpVersion ?? '';
 
         $extensions = $options->resolveExtensions($this->defaultExtensions());
-
-        // Left unset on purpose when empty: that is the signal build-static.sh uses to derive the
-        // extension set from the application's composer.json.
-        if ($extensions !== []) {
-            $environment['PHP_EXTENSIONS'] = implode(',', $extensions);
-        }
+        $environment['PHP_EXTENSIONS'] = implode(',', $extensions);
 
         return $environment;
     }
@@ -185,7 +186,20 @@ final readonly class StaticBuilder
         $environment = $this->environment($options, $projectDir);
 
         if ($clean) {
-            $environment['CLEAN'] = '1';
+            // Owned here rather than delegated to the script. build-static.sh's own CLEAN handling
+            // (`rm -Rf dist/` + `go clean -cache`) runs on every invocation, but this method may
+            // call the script twice on a cold cache: the first run installs the real xcaddy and
+            // compiles PHP, then it gets overwritten with our shim below. Exporting CLEAN would
+            // make the *second* run wipe dist/ again, destroying the shim and the freshly compiled
+            // PHP right before the link step, reinstalling the real xcaddy, and building stock
+            // upstream FrankenPHP instead of the application — with no error, since the binary
+            // still ends up at the expected path. Removing the staged dist/ directory once, here,
+            // before either run happens, produces a genuinely cold cache without that self-sabotage.
+            //
+            // go clean -cache is deliberately NOT reproduced: it wipes the machine-wide Go build
+            // cache shared by every Go project on the machine, which this command has no business
+            // doing to a developer's machine.
+            $this->filesystem->remove($staged . '/dist');
         }
 
         $platform = $this->hostPlatform();
@@ -306,10 +320,10 @@ final readonly class StaticBuilder
                 }
 
                 throw new InvalidArgumentException(sprintf(
-                    'The %s value "%s" contains a character (apostrophe, double quote, backslash, or '
-                    . "newline) that breaks build-static.sh's xcaddy shim, which wraps this value in single "
-                    . 'quotes to build -ldflags — a problem that otherwise only surfaces at the very end of '
-                    . 'the build.',
+                    'The %s value "%s" contains a character (apostrophe, double quote, backslash, '
+                    . "newline, or carriage return) that breaks build-static.sh's xcaddy shim, which wraps "
+                    . 'this value in single quotes to build -ldflags — a problem that otherwise only '
+                    . 'surfaces at the very end of the build.',
                     $candidate['key'],
                     $candidate['value'],
                 ));

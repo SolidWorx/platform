@@ -18,6 +18,7 @@ use Override;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use SolidWorx\Platform\PlatformBundle\Build\BuildOptions;
 use SolidWorx\Platform\PlatformBundle\Build\StaticBuilder;
 use Symfony\Component\Filesystem\Filesystem;
@@ -97,15 +98,33 @@ final class StaticBuilderTest extends TestCase
         self::assertSame(['bcmath', 'intl', 'ssh2'], $this->builder()->defaultExtensions());
     }
 
-    public function testEnvironmentOmitsExtensionsWhenComposerShouldDecide(): void
+    public function testEnvironmentExportsAnEmptyExtensionsValueWhenComposerShouldDecide(): void
     {
         $environment = $this->builder()->environment($this->options(), '/app');
 
-        self::assertArrayNotHasKey('PHP_EXTENSIONS', $environment);
+        self::assertArrayHasKey('PHP_EXTENSIONS', $environment);
+        self::assertSame('', $environment['PHP_EXTENSIONS']);
         self::assertSame('/app', $environment['EMBED']);
         self::assertSame('8.5', $environment['PHP_VERSION']);
         self::assertSame('libavif', $environment['PHP_EXTENSION_LIBS']);
         self::assertSame('v2.4.0', $environment['FRANKENPHP_VERSION']);
+    }
+
+    public function testEnvironmentExportsPhpVersionAndPhpExtensionsEvenWhenUnconfigured(): void
+    {
+        $config = $this->config();
+        $config['php']['version'] = null;
+
+        $environment = $this->builder()->environment(BuildOptions::fromConfig($config, 'v2.4.0', []), '/app');
+
+        // Both keys must always be present, even empty: build-static.sh treats an empty value the
+        // same as an unset one, but only an explicit empty string stops a PHP_VERSION or
+        // PHP_EXTENSIONS a developer's shell or CI image happens to export from bleeding through
+        // Symfony Process's inherited environment.
+        self::assertArrayHasKey('PHP_VERSION', $environment);
+        self::assertSame('', $environment['PHP_VERSION']);
+        self::assertArrayHasKey('PHP_EXTENSIONS', $environment);
+        self::assertSame('', $environment['PHP_EXTENSIONS']);
     }
 
     public function testEnvironmentResolvesExtensionsWhenTheyAreCustomised(): void
@@ -139,6 +158,61 @@ final class StaticBuilderTest extends TestCase
 
         self::assertContains($platform['os'], ['mac', 'linux']);
         self::assertNotSame('', $platform['arch']);
+    }
+
+    public function testBuildRemovesStagedDistBeforeRunningAndNeverExportsCleanToTheScript(): void
+    {
+        $builder = $this->builder();
+        $options = $this->options();
+        $staged = $this->dir . '/work/frankenphp';
+
+        // A stale dist/ from a previous run, the way a warm work directory would have one.
+        $this->filesystem->mkdir($staged . '/dist');
+        $this->filesystem->dumpFile($staged . '/dist/marker.txt', 'stale build output');
+
+        // A stand-in for the real build-static.sh: instant, and it lets the test observe whether
+        // CLEAN reached it by leaving a file behind if it did. It never installs a real xcaddy,
+        // so build() is expected to give up right after the bootstrap attempt below — that
+        // failure is not what this test is about.
+        $this->filesystem->dumpFile(
+            $this->sourceDir . '/build-static.sh',
+            "#!/bin/bash\n"
+            . "defaultExtensions=\"bcmath,intl,ssh2\"\n"
+            . "defaultExtensionLibs=\"brotli\"\n"
+            . "if [ -n \"\${CLEAN:-}\" ]; then\n"
+            . "    mkdir -p dist\n"
+            . "    touch dist/CLEAN_WAS_SET\n"
+            . "fi\n",
+        );
+
+        try {
+            $builder->build($options, '/app', static function (string $output): void {
+            }, clean: true);
+        } catch (RuntimeException) {
+            // Expected — see above.
+        }
+
+        self::assertFileDoesNotExist($staged . '/dist/marker.txt', 'the stale dist/ was not removed before build-static.sh ran');
+        self::assertFileDoesNotExist($staged . '/dist/CLEAN_WAS_SET', 'CLEAN reached build-static.sh');
+    }
+
+    public function testBuildLeavesStagedDistAloneWhenNotCleaning(): void
+    {
+        $builder = $this->builder();
+        $options = $this->options();
+        $staged = $this->dir . '/work/frankenphp';
+
+        $this->filesystem->mkdir($staged . '/dist');
+        $this->filesystem->dumpFile($staged . '/dist/marker.txt', 'kept build output');
+
+        try {
+            $builder->build($options, '/app', static function (string $output): void {
+            }, clean: false);
+        } catch (RuntimeException) {
+            // Expected — the fixture's build-static.sh never installs a real xcaddy.
+        }
+
+        self::assertFileExists($staged . '/dist/marker.txt');
     }
 
     /**
