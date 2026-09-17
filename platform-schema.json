@@ -118,6 +118,197 @@
                     },
                     "additionalProperties": false
                 },
+                "build": {
+                    "description": "Static single-executable binary build (platform:build).",
+                    "default": {
+                        "name": null,
+                        "description": "",
+                        "binary_name": null,
+                        "env_prefix": null,
+                        "default_port": "8080",
+                        "output_dir": "%kernel.project_dir%/build",
+                        "work_dir": "%kernel.project_dir%/var/build",
+                        "php": {
+                            "version": null,
+                            "extensions": [],
+                            "add": [],
+                            "remove": [],
+                            "extension_libs": [
+                                "libavif",
+                                "nghttp2",
+                                "nghttp3",
+                                "ngtcp2"
+                            ]
+                        },
+                        "exclude": [
+                            "node_modules/",
+                            "var/cache/",
+                            "var/log/",
+                            ".git/",
+                            "tests/"
+                        ],
+                        "hooks": {
+                            "install_check": null,
+                            "on_boot": [
+                                "cache:clear"
+                            ]
+                        }
+                    },
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "description": "Display name of the built application. Defaults to platform.name.",
+                            "default": null,
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "description": {
+                            "description": "One-line description shown by the binary on startup.",
+                            "default": "",
+                            "type": "string"
+                        },
+                        "binary_name": {
+                            "description": "File name of the produced binary. Defaults to a slug of the build name.",
+                            "default": null,
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "env_prefix": {
+                            "description": "Prefix for the binary's environment variables (e.g. ACME gives ACME_PORT). Defaults to the upper-cased binary name.",
+                            "default": null,
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "default_port": {
+                            "description": "Port the binary listens on when none is given.",
+                            "default": "8080",
+                            "type": "string"
+                        },
+                        "output_dir": {
+                            "description": "Directory the finished binary is written to.",
+                            "default": "%kernel.project_dir%/build",
+                            "type": "string"
+                        },
+                        "work_dir": {
+                            "description": "Persistent build cache. Keeping it between builds turns an hour into minutes.",
+                            "default": "%kernel.project_dir%/var/build",
+                            "type": "string"
+                        },
+                        "php": {
+                            "default": {
+                                "version": null,
+                                "extensions": [],
+                                "add": [],
+                                "remove": [],
+                                "extension_libs": [
+                                    "libavif",
+                                    "nghttp2",
+                                    "nghttp3",
+                                    "ngtcp2"
+                                ]
+                            },
+                            "type": "object",
+                            "properties": {
+                                "version": {
+                                    "description": "PHP version to compile. Null lets the build script resolve the latest.",
+                                    "default": null,
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
+                                },
+                                "extensions": {
+                                    "description": "Explicit extension list. Empty derives the set from composer.json.",
+                                    "default": [],
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "add": {
+                                    "description": "Extensions appended to the resolved set. Setting this switches the base off composer.json \u2014 see the build documentation.",
+                                    "default": [],
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "remove": {
+                                    "description": "Extensions subtracted from the resolved set. Setting this switches the base off composer.json \u2014 see the build documentation.",
+                                    "default": [],
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "extension_libs": {
+                                    "default": [
+                                        "libavif",
+                                        "nghttp2",
+                                        "nghttp3",
+                                        "ngtcp2"
+                                    ],
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "exclude": {
+                            "description": "Paths kept out of the embedded application archive, relative to the project root. Replaces the defaults rather than adding to them; .git, var/cache, var/log and node_modules are always excluded regardless of this setting.",
+                            "default": [
+                                "node_modules/",
+                                "var/cache/",
+                                "var/log/",
+                                ".git/",
+                                "tests/"
+                            ],
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "hooks": {
+                            "default": {
+                                "install_check": null,
+                                "on_boot": [
+                                    "cache:clear"
+                                ]
+                            },
+                            "type": "object",
+                            "properties": {
+                                "install_check": {
+                                    "description": "Console command that exits 0 when the app is installed. Workers wait for it before consuming.",
+                                    "default": null,
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
+                                },
+                                "on_boot": {
+                                    "description": "Console commands run each time the binary starts.",
+                                    "default": [
+                                        "cache:clear"
+                                    ],
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "additionalProperties": false
+                },
                 "multi_tenancy": {
                     "default": {
                         "enabled": false,
