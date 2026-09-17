@@ -17,6 +17,8 @@ use EmailChecker\Adapter\FileAdapter;
 use EmailChecker\Constraints\NotThrowawayEmailValidator;
 use EmailChecker\EmailChecker;
 use Monolog\Processor\ProcessorInterface;
+use SolidWorx\Platform\PlatformBundle\Build\StaticBuilder;
+use SolidWorx\Platform\PlatformBundle\Command\BuildCommand;
 use SolidWorx\Platform\PlatformBundle\Command\UpdateDisposableDomainsCommand;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\Login;
 use SolidWorx\Platform\PlatformBundle\Controller\Tenant\OnboardTenant;
@@ -27,6 +29,8 @@ use SolidWorx\Platform\PlatformBundle\Feature\NullSubscriberResolver;
 use SolidWorx\Platform\PlatformBundle\Feature\SubscriberResolver;
 use SolidWorx\Platform\PlatformBundle\SolidWorxPlatformBundle;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Symfony\Component\Process\ExecutableFinder;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
 return static function (ContainerConfigurator $containerConfigurator): void {
@@ -91,4 +95,15 @@ return static function (ContainerConfigurator $containerConfigurator): void {
 
     $services->set(UpdateDisposableDomainsCommand::class)
         ->arg('$blocklistFile', $blocklistFile);
+
+    // Not in the SolidWorx\Platform namespace tree autoloaded above, so Preflight's own
+    // ExecutableFinder dependency needs an explicit registration for autowiring to resolve it.
+    $services->set(ExecutableFinder::class);
+
+    $services->set(StaticBuilder::class)
+        ->arg('$sourceDir', __DIR__ . '/../build');
+
+    $services->set(BuildCommand::class)
+        ->arg('$projectDir', param('kernel.project_dir'))
+        ->arg('$buildConfig', param('solidworx_platform.build'));
 };

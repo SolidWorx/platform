@@ -36,20 +36,25 @@ abstract class Command extends SymfonyCommand
     #[Override]
     final public function run(InputInterface $input, OutputInterface $output): int
     {
-        if (! isset($this->io)) {
-            throw new LogicException('The IO object has not been set on the command');
-        }
-
         return parent::run($input, $output);
     }
 
     /**
      * Set the execute method to final to ensure the function is not overridden.
      * All command functionality should be implemented in the handle method.
+     *
+     * The IO readiness check lives here rather than in run(): parent::run() calls initialize()
+     * before execute(), and a command may build its own IO there (see BuildCommand) instead of
+     * relying on ConsoleCommandEventSubscriber to set it beforehand. Checking in run() itself would
+     * reject that before initialize() ever had a chance to run.
      */
     #[Override]
     final protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        if (! isset($this->io)) {
+            throw new LogicException('The IO object has not been set on the command');
+        }
+
         return $this->handle();
     }
 

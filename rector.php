@@ -17,6 +17,7 @@ use Rector\PHPUnit\Set\PHPUnitSetList;
 use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
 use Rector\Symfony\Configs\Rector\Closure\ServiceArgsToServiceNamedArgRector;
+use Rector\Symfony\Configs\Rector\Closure\ServiceSettersToSettersAutodiscoveryRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\AddReturnDocblockForScalarArrayFromAssignsRector;
 use Rector\TypeDeclarationDocblocks\Rector\Class_\AddParamTypeToRefactorMethodRector;
 use Rector\ValueObject\PhpVersion;
@@ -89,4 +90,14 @@ return RectorConfig::configure()
          * the service definition will break.
          */
         ServiceArgsToServiceNamedArgRector::class,
+
+        /**
+         * In `Resources/config/services.php` this rule replaces explicit registrations for classes
+         * outside the bundle's own autoloaded namespace (e.g. `EmailChecker\Adapter\BuiltInAdapter`,
+         * `Symfony\Component\Process\ExecutableFinder`) with a directory-based `$services->load()`
+         * pointed at the third-party vendor package's source tree — deleting the registrations
+         * those services actually need and adding a load() call against a path that was never meant
+         * to be autodiscovered. Confirmed by running the rule for real: it broke the container.
+         */
+        ServiceSettersToSettersAutodiscoveryRector::class,
     ]);
