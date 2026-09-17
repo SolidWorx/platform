@@ -69,6 +69,15 @@ To write to a custom path:
 php bin/console platform:generate-schema --output=config/platform-schema.json
 ```
 
+> **Run this from an application that registers every bundle you ship.** The generator only
+> emits a section for a bundle that the *running* application actually registers in
+> `config/bundles.php` — it has no other way to discover which sections exist. This repository's
+> own `test-app` deliberately leaves `SolidWorxPlatformSaasBundle` out of its `bundles.php` (the
+> SaaS bundle needs entities of its own that `test-app` doesn't define), so regenerating the
+> schema from `test-app` silently drops the entire `saas` block. Generate it from an application
+> that registers every bundle instead — or from the platform's own configuration classes directly
+> — never from a partial app like `test-app`.
+
 ---
 
 ## Full configuration reference
@@ -164,6 +173,31 @@ platform:
     # Must implement the Symfony UserInterface.
     # Default: SolidWorx\Platform\PlatformBundle\Model\User
     user: App\Entity\User
+```
+
+---
+
+### Build (`platform.build`)
+
+Compiles the application into a single static executable via `platform:build`. Every key has a
+sensible default — most applications need nothing here at all. See
+[Building a Static Binary](../build/index.md) for the full configuration reference, how PHP
+extensions are resolved, and the command's own options.
+
+```yaml
+platform:
+  build:
+    # Display name the binary reports.
+    # Default: platform.name
+    name: 'Acme'
+
+    # One-line description shown at startup.
+    # Default: ''
+    description: 'Acme invoicing, compiled'
+
+    # Port used when none is given.
+    # Default: '8080'
+    default_port: '9000'
 ```
 
 ---

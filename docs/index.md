@@ -12,6 +12,7 @@ Welcome to the SolidWorx Platform documentation. This platform provides the foun
 - [Doctrine Types](./doctrine-types/index.md)
 - [Form Types](./form-types/index.md) — reusable form types, including the rich text editor
 - [Multi-Tenancy](./multi-tenancy/index.md)
+- [Building a Static Binary](./build/index.md) — compile the application into one self-contained executable
 - [Rector Rules](./rector-rules/index.md)
 
 ## Upgrading
