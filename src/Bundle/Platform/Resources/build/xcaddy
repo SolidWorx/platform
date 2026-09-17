@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+
+# A stand-in for xcaddy.
+#
+# static-php-cli calls `xcaddy build` to produce the FrankenPHP binary. Replacing that binary with
+# this script builds the platform's own Go application instead, while keeping every CGO flag and
+# environment variable static-php-cli has set up — which is what lets build-static.sh stay a
+# verbatim upstream copy.
+#
+# Supplied by the platform:build command:
+#   PLATFORM_APP_SOURCE_DIR    directory holding app.go and go.mod
+#   PLATFORM_APP_NAME          display name
+#   PLATFORM_APP_DESCRIPTION   one-line description
+#   PLATFORM_APP_PORT          default listen port
+#   PLATFORM_APP_ENV_PREFIX    environment variable prefix
+#   PLATFORM_APP_INSTALL_CHECK console command reporting install state (may be empty)
+#   PLATFORM_APP_BOOT_COMMANDS comma-separated console commands run at startup
+#   PLATFORM_APP_VERSION       version string
+
+set -euo pipefail
+
+OUTPUT="dist/static-php-cli/buildroot/bin/frankenphp"
+
+# xcaddy's own arguments are irrelevant here: the module set is fixed by app.go's imports, and the
+# output path is the one static-php-cli expects to find.
+while [[ $# -gt 0 ]]; do
+	case $1 in
+		--output) shift 2 ;;
+		--with) shift 2 ;;
+		*) shift ;;
+	esac
+done
+
+if [ -z "${PLATFORM_APP_SOURCE_DIR:-}" ] || [ ! -d "${PLATFORM_APP_SOURCE_DIR}" ]; then
+	echo "PLATFORM_APP_SOURCE_DIR is not set or does not exist" >&2
+	exit 1
+fi
+
+cd "${PLATFORM_APP_SOURCE_DIR}"
+
+DYNSYM="$(pwd)/dist/static-php-cli/buildroot/lib/libphp.a.dynsym"
+CURRENT_OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
+
+if [ "${CURRENT_OS}" = "linux" ]; then
+	# musl static build: GNU ld wants a dynamic symbol list and a static PIE.
+	EXTLDFLAGS="-static-pie -Wl,-z,stack-size=0x80000 -Wl,--dynamic-list=${DYNSYM}"
+	BUILD_TAGS="static_build,nobadger,nomysql,nopgx,nowatcher"
+else
+	EXTLDFLAGS="-pie -Wl,-exported_symbols_list,${DYNSYM}"
+	BUILD_TAGS="nobadger,nomysql,nopgx,nowatcher"
+fi
+
+# Quoting each -X value keeps descriptions with spaces intact: the go command splits -ldflags with
+# shell-like quoting rather than on plain whitespace.
+LDFLAGS="-linkmode=external -extldflags '${EXTLDFLAGS} '"
+LDFLAGS="${LDFLAGS} -X 'main.appName=${PLATFORM_APP_NAME:-}'"
+LDFLAGS="${LDFLAGS} -X 'main.appDescription=${PLATFORM_APP_DESCRIPTION:-}'"
+LDFLAGS="${LDFLAGS} -X 'main.defaultPort=${PLATFORM_APP_PORT:-8080}'"
+LDFLAGS="${LDFLAGS} -X 'main.envPrefix=${PLATFORM_APP_ENV_PREFIX:-PLATFORM}'"
+LDFLAGS="${LDFLAGS} -X 'main.installCheckCommand=${PLATFORM_APP_INSTALL_CHECK:-}'"
+LDFLAGS="${LDFLAGS} -X 'main.bootCommands=${PLATFORM_APP_BOOT_COMMANDS:-}'"
+LDFLAGS="${LDFLAGS} -X 'github.com/caddyserver/caddy/v2.CustomVersion=${PLATFORM_APP_VERSION:-dev}'"
+
+GO_BUILD_LOG="$(pwd)/dist/static-php-cli/log/go-build.log"
+mkdir -p "$(dirname "${GO_BUILD_LOG}")"
+
+# Tee the output: static-php-cli swallows our streams, and a failed link is undiagnosable without it.
+set +e
+go build \
+	-v \
+	-buildmode=pie \
+	-ldflags "${LDFLAGS}" \
+	-tags="${BUILD_TAGS}" \
+	-o "${OUTPUT}" \
+	. 2>&1 | tee "${GO_BUILD_LOG}"
+GO_BUILD_RC=${PIPESTATUS[0]}
+set -e
+
+if [ "${GO_BUILD_RC}" -ne 0 ]; then
+	echo "go build failed with exit code ${GO_BUILD_RC}; full output in ${GO_BUILD_LOG}" >&2
+	exit "${GO_BUILD_RC}"
+fi

@@ -13,3 +13,6 @@
 /.claude/settings.local.json
 /docs/superpowers
 /test-app/
+/src/Bundle/Platform/Resources/build/app.tar.gz
+/src/Bundle/Platform/Resources/build/app_checksum.txt
+/src/Bundle/Platform/Resources/build/dist/
