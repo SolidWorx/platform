@@ -30,8 +30,14 @@ abstract class Command extends SymfonyCommand
     }
 
     /**
-     * Set the run method to final to ensure the function is not overridden
-     * @throws LogicException|ExceptionInterface
+     * Sealed against subclass overrides so every command's behaviour lives in handle().
+     *
+     * The IO-readiness check does not live here: initialize() — where a self-initializing command
+     * such as BuildCommand sets its own IO — only runs inside parent::run(), so checking any
+     * earlier than that would reject it before it had a chance. See execute() below.
+     *
+     * @throws ExceptionInterface When input binding fails.
+     * @throws LogicException     Propagated from execute() when no IO was set.
      */
     #[Override]
     final public function run(InputInterface $input, OutputInterface $output): int

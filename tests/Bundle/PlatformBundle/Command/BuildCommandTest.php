@@ -114,6 +114,26 @@ final class BuildCommandTest extends TestCase
         $tester->assertCommandIsSuccessful();
     }
 
+    public function testWarningsDoNotBlockTheBuild(): void
+    {
+        // Preflight reports dev dependencies as a warning, not an error, whenever
+        // vendor/composer/installed.json marks them installed — the ordinary state of a
+        // developer's first build, so the command must proceed rather than fail.
+        $this->filesystem->dumpFile($this->dir . '/vendor/composer/installed.json', '{"dev": true}');
+
+        $tester = $this->tester();
+
+        $tester->execute([
+            '--dry-run' => true,
+        ]);
+
+        $tester->assertCommandIsSuccessful();
+        $output = $tester->getDisplay();
+
+        self::assertStringContainsString('Development dependencies will be embedded', $output);
+        self::assertStringContainsString('Dry run', $output);
+    }
+
     /**
      * @param list<string> $missingTools
      */
