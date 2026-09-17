@@ -53,9 +53,13 @@ final readonly class AppArchiver
     }
 
     /**
-     * @param list<string> $exclude Paths relative to the project root.
+     * @param list<string> $exclude   Paths relative to the project root.
+     * @param string|null  $outputDir Where the finished binary is written; excluded the same way
+     *                                 as the archive's own destination when it sits inside the
+     *                                 project. Without this, a second build embeds the binary
+     *                                 produced by the first — and the one before that, and so on.
      */
-    public function archive(string $projectDir, string $destination, array $exclude): Archive
+    public function archive(string $projectDir, string $destination, array $exclude, ?string $outputDir = null): Archive
     {
         $this->filesystem->mkdir(dirname($destination));
 
@@ -67,7 +71,7 @@ final readonly class AppArchiver
 
         $command = ['tar', '-czvf', $destination, '-C', $projectDir];
 
-        foreach ($this->excludes($projectDir, $destination, $exclude) as $path) {
+        foreach ($this->excludes($projectDir, $destination, $outputDir, $exclude) as $path) {
             $command[] = '--exclude=./' . $path;
         }
 
@@ -115,14 +119,16 @@ final readonly class AppArchiver
     }
 
     /**
-     * The archive's own destination is always excluded: `work_dir` defaults to `var/build`, inside
-     * the project, so without this tar reads the file it is in the middle of writing.
+     * The archive's own destination and the output directory are always excluded when they sit
+     * inside the project: `work_dir` defaults to `var/build`, so without this tar would read the
+     * file it is in the middle of writing; `output_dir` defaults to `build`, so without this the
+     * previous build's binary would be embedded inside the next one.
      *
      * @param list<string> $exclude
      *
      * @return list<string>
      */
-    private function excludes(string $projectDir, string $destination, array $exclude): array
+    private function excludes(string $projectDir, string $destination, ?string $outputDir, array $exclude): array
     {
         $excludes = self::ALWAYS_EXCLUDE;
 
@@ -130,15 +136,29 @@ final readonly class AppArchiver
             $excludes[] = trim($path, '/');
         }
 
-        $relative = Path::makeRelative(dirname($destination), $projectDir);
+        $excludes[] = $this->relativeExclude($projectDir, dirname($destination));
+        $excludes[] = $outputDir === null ? null : $this->relativeExclude($projectDir, $outputDir);
 
-        // An empty or parent-relative path means the destination lives outside the project; tar will
-        // never walk into it, so there is nothing to exclude.
-        if ($relative !== '' && ! str_starts_with($relative, '..')) {
-            $excludes[] = trim($relative, '/');
+        return array_values(array_unique(array_filter(
+            $excludes,
+            static fn (?string $path): bool => $path !== null,
+        )));
+    }
+
+    /**
+     * A directory relative to the project root, ready to pass to `--exclude`, or null when it
+     * cannot be expressed that way: an empty or parent-relative path means the directory lives
+     * outside the project, and tar will never walk into it, so there is nothing to exclude.
+     */
+    private function relativeExclude(string $projectDir, string $dir): ?string
+    {
+        $relative = Path::makeRelative($dir, $projectDir);
+
+        if ($relative === '' || str_starts_with($relative, '..')) {
+            return null;
         }
 
-        return array_values(array_unique($excludes));
+        return trim($relative, '/');
     }
 
     /**

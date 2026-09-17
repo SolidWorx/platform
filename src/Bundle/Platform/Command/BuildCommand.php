@@ -113,6 +113,7 @@ final class BuildCommand extends Command
             $this->projectDir,
             $options->workDir . '/frankenphp/app.tar.gz',
             $options->exclude,
+            $options->outputDir,
         );
 
         $this->io->writeln(sprintf(

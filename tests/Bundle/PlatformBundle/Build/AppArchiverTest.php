@@ -145,6 +145,83 @@ final class AppArchiverTest extends TestCase
         }
     }
 
+    public function testOutputDirectoryInsideTheProjectIsExcluded(): void
+    {
+        $outputDir = $this->dir . '/build';
+        $this->filesystem->dumpFile($outputDir . '/acme-mac-arm64', 'a previous build\'s binary');
+
+        $archive = (new AppArchiver($this->filesystem))->archive(
+            $this->dir,
+            $this->dir . '/var/build/frankenphp/app.tar.gz',
+            ['node_modules/', 'var/'],
+            $outputDir,
+        );
+
+        $entries = $this->entries($archive->path);
+
+        self::assertNotContains('./build/acme-mac-arm64', $entries);
+        self::assertContains('./src/App.php', $entries);
+    }
+
+    public function testOutputDirectoryOutsideTheProjectIsIgnored(): void
+    {
+        $outputDir = sys_get_temp_dir() . '/platform-archive-output-' . bin2hex(random_bytes(6));
+        $this->filesystem->dumpFile($outputDir . '/acme-mac-arm64', 'not part of the project at all');
+
+        try {
+            $archive = (new AppArchiver($this->filesystem))->archive(
+                $this->dir,
+                $this->dir . '/var/build/frankenphp/app.tar.gz',
+                ['node_modules/', 'var/'],
+                $outputDir,
+            );
+
+            $entries = $this->entries($archive->path);
+
+            self::assertContains('./src/App.php', $entries);
+            self::assertContains('./public/index.php', $entries);
+        } finally {
+            $this->filesystem->remove($outputDir);
+        }
+    }
+
+    public function testOutputDirectorySameAsWorkDirectoryDoesNotBreakTar(): void
+    {
+        $destination = $this->dir . '/var/build/frankenphp/app.tar.gz';
+
+        $archive = (new AppArchiver($this->filesystem))->archive(
+            $this->dir,
+            $destination,
+            ['node_modules/', 'var/cache/'],
+            dirname($destination),
+        );
+
+        $entries = $this->entries($archive->path);
+
+        self::assertContains('./src/App.php', $entries);
+        self::assertContains('./public/index.php', $entries);
+    }
+
+    public function testOutputDirectoryNestedAboveWorkDirectoryDoesNotBreakTar(): void
+    {
+        // The output directory is the parent of where the archive itself is staged — its exclusion
+        // subsumes the destination's own, and tar must tolerate the overlapping --exclude flags.
+        $destination = $this->dir . '/var/build/frankenphp/app.tar.gz';
+
+        $archive = (new AppArchiver($this->filesystem))->archive(
+            $this->dir,
+            $destination,
+            ['node_modules/'],
+            $this->dir . '/var',
+        );
+
+        $entries = $this->entries($archive->path);
+
+        self::assertContains('./src/App.php', $entries);
+        self::assertContains('./public/index.php', $entries);
+        self::assertNotContains('./var/cache/prod/container.php', $entries);
+    }
+
     private function archive(): Archive
     {
         return (new AppArchiver($this->filesystem))->archive(
