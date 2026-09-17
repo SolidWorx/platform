@@ -114,6 +114,11 @@ final class AppArchiverTest extends TestCase
         $emptyDir = sys_get_temp_dir() . '/platform-archive-empty-' . bin2hex(random_bytes(6));
         $this->filesystem->mkdir($emptyDir);
         $destination = $emptyDir . '/var/build/frankenphp/app.tar.gz';
+        $checksumFile = dirname($destination) . '/app_checksum.txt';
+
+        // Simulates a stale checksum left behind by an earlier successful run in this same
+        // (persistent) work_dir.
+        $this->filesystem->dumpFile($checksumFile, 'stale-checksum-from-a-previous-run');
 
         $this->expectException(RuntimeException::class);
 
@@ -121,6 +126,7 @@ final class AppArchiverTest extends TestCase
             (new AppArchiver($this->filesystem))->archive($emptyDir, $destination, []);
         } finally {
             self::assertFileDoesNotExist($destination);
+            self::assertFileDoesNotExist($checksumFile);
 
             $this->filesystem->remove($emptyDir);
         }

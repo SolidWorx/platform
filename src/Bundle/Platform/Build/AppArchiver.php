@@ -59,6 +59,12 @@ final readonly class AppArchiver
     {
         $this->filesystem->mkdir(dirname($destination));
 
+        // `work_dir` is a persistent build cache, so a previous run's archive and checksum may
+        // still be sitting here. Clear both before tar runs: whatever happens next — success, a
+        // tar failure, the zero-file guard below, or a checksum failure — no stale pair is left
+        // for a later run, or the Go build that compares them at startup, to be misled by.
+        $this->filesystem->remove([$destination, dirname($destination) . '/' . self::CHECKSUM_FILE]);
+
         $command = ['tar', '-czvf', $destination, '-C', $projectDir];
 
         foreach ($this->excludes($projectDir, $destination, $exclude) as $path) {
