@@ -92,11 +92,11 @@ A few things about `exclude` that are easy to get wrong:
   being excluded.
 - `.git`, `var/cache`, `var/log` and `node_modules` are excluded **no matter what** `exclude`
   says — they're hard-coded in the archiver, not merely defaults you can override away.
-- `work_dir` is excluded automatically too, because that's where the archive itself is staged
-  while it's being written.
-- `output_dir` is **not** excluded automatically. The default (`%kernel.project_dir%/build`) sits
-  inside the project, so a second build will happily embed the binary from your *first* build
-  into the next archive unless you add `output_dir` to `exclude` yourself.
+- `work_dir` is excluded automatically when it sits inside the project, because that's where the
+  archive itself is staged while it's being written.
+- `output_dir` is excluded automatically the same way, because otherwise a second build would
+  embed the binary produced by the first build into the next archive — and the one before that,
+  and so on.
 
 Both `work_dir` and `output_dir` should be in your `.gitignore` — `work_dir` because it becomes a
 multi-gigabyte build cache once PHP is compiled, `output_dir` because it holds binaries, not
