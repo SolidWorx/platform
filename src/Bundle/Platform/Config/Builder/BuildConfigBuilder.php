@@ -64,6 +64,11 @@ final class BuildConfigBuilder
     /**
      * @var list<string>
      */
+    private array $extensionLibs = [];
+
+    /**
+     * @var list<string>
+     */
     private array $exclude = [];
 
     private ?string $installCheck = null;
@@ -149,6 +154,12 @@ final class BuildConfigBuilder
         return $this;
     }
 
+    public function extensionLibs(string ...$libs): self
+    {
+        $this->extensionLibs = array_values($libs);
+        return $this;
+    }
+
     public function exclude(string ...$paths): self
     {
         $this->exclude = array_values($paths);
@@ -203,6 +214,7 @@ final class BuildConfigBuilder
             'extensions' => $this->extensions,
             'add' => $this->add,
             'remove' => $this->remove,
+            'extension_libs' => $this->extensionLibs,
         ] as $key => $value) {
             if ($value !== []) {
                 $php[$key] = $value;

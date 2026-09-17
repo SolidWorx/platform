@@ -25,18 +25,19 @@ final class BuildConfigBuilderTest extends TestCase
     {
         $config = PlatformConfigBuilder::create()
             ->name('Acme')
-            ->build()
+            ->binaryBuild()
                 ->binaryName('acme')
                 ->envPrefix('ACME')
                 ->defaultPort('9000')
                 ->phpVersion('8.5')
                 ->addExtensions('excimer')
                 ->removeExtensions('ssh2', 'memcached')
+                ->extensionLibs('libavif', 'nghttp2')
                 ->exclude('node_modules/', 'tests/')
                 ->installCheck('acme:is-installed')
                 ->onBoot('cache:clear', 'acme:keys:generate')
             ->end()
-            ->toArray();
+            ->build();
 
         self::assertSame([
             'binary_name' => 'acme',
@@ -46,6 +47,7 @@ final class BuildConfigBuilderTest extends TestCase
                 'version' => '8.5',
                 'add' => ['excimer'],
                 'remove' => ['ssh2', 'memcached'],
+                'extension_libs' => ['libavif', 'nghttp2'],
             ],
             'exclude' => ['node_modules/', 'tests/'],
             'hooks' => [
@@ -58,10 +60,10 @@ final class BuildConfigBuilderTest extends TestCase
     public function testOmittedValuesAreAbsent(): void
     {
         $config = PlatformConfigBuilder::create()
-            ->build()
+            ->binaryBuild()
                 ->binaryName('acme')
             ->end()
-            ->toArray();
+            ->build();
 
         self::assertSame([
             'binary_name' => 'acme',
