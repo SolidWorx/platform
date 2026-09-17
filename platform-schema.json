@@ -224,7 +224,7 @@
                                     ]
                                 },
                                 "extensions": {
-                                    "description": "Explicit extension list. Empty derives the set from composer.json.",
+                                    "description": "Explicit extension list. Empty falls through to build-static.sh's own ~70-extension default list \u2014 see the build documentation.",
                                     "default": [],
                                     "type": "array",
                                     "items": {
@@ -232,7 +232,7 @@
                                     }
                                 },
                                 "add": {
-                                    "description": "Extensions appended to the resolved set. Setting this switches the base off composer.json \u2014 see the build documentation.",
+                                    "description": "Extensions appended to the resolved set (the explicit list above, or build-static.sh's default list) \u2014 see the build documentation.",
                                     "default": [],
                                     "type": "array",
                                     "items": {
@@ -240,7 +240,7 @@
                                     }
                                 },
                                 "remove": {
-                                    "description": "Extensions subtracted from the resolved set. Setting this switches the base off composer.json \u2014 see the build documentation.",
+                                    "description": "Extensions subtracted from the resolved set (the explicit list above, or build-static.sh's default list) \u2014 see the build documentation.",
                                     "default": [],
                                     "type": "array",
                                     "items": {

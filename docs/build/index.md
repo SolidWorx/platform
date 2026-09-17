@@ -104,25 +104,27 @@ source.
 
 ### How PHP extensions are decided
 
-Leave `php.extensions`, `php.add` and `php.remove` **all empty** (or omit `php` entirely) and
-`build-static.sh` derives the extension set from your application's `composer.json` on its own —
-the easiest option, and the right one for most applications:
+`build-static.sh` has code that is *meant* to derive the extension set from your application's
+`composer.json` when `php.extensions`, `php.add` and `php.remove` are all left empty. In practice
+that path never runs: the script's own gate checks for `${EMBED}/vendor/installed.json`, but
+Composer 2 writes that file to `vendor/composer/installed.json` — one directory level different.
+The condition is therefore always false, and leaving `php` empty (or omitting it entirely) always
+falls through to the script's own vendored `defaultExtensions` list instead — around 70
+extensions, from `amqp` to `zstd`:
 
 ```yaml
 platform:
   build:
-    php: {} # or omit the key entirely — composer.json drives the extension set
+    php: {} # or omit the key entirely — always resolves to build-static.sh's own ~70-extension list
 ```
 
-The moment **any one** of the three is set, that automatic detection turns off — `build-static.sh`
-only derives from `composer.json` when its extension list is left unset, and there is no hook to
-post-process that result afterwards. The base then becomes:
-
-- your own `php.extensions` list, if you set one, otherwise
-- the `defaultExtensions` list vendored inside `build-static.sh` itself (around 60 extensions,
-  from `amqp` to `zstd`),
-
-with `php.add` and `php.remove` applied on top of whichever base that is. Two examples:
+This is an upstream bug in a script the platform keeps byte-identical on purpose (see
+[`src/Bundle/Platform/Resources/build/UPSTREAM.md`](../../src/Bundle/Platform/Resources/build/UPSTREAM.md)),
+so it is not patched here — and it is not worked around by writing files into your project either.
+If the ~70-extension default is too broad for a lean binary, don't rely on it: set an explicit
+`php.extensions` list, or trim the default down with `php.remove`. Whichever of the three you set,
+the base becomes your own `php.extensions` list if you gave one, otherwise the same vendored
+`defaultExtensions` list, with `php.add` and `php.remove` applied on top. Two examples:
 
 ```yaml
 # Compile only these four extensions — nothing from composer.json, nothing from
