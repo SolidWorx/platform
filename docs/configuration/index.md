@@ -404,7 +404,7 @@ return PlatformConfigBuilder::create()
             ->layoutDefaults(['navbar_sticky' => true])
             ->build()
     )
-    ->build();
+    ->toArray();
 ```
 
 The PHP builder produces the same raw array as YAML. No validation occurs at this stage — validation runs during container compilation, just like the YAML path.

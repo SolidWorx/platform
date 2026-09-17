@@ -190,3 +190,24 @@ Both are fixed: the rules are now distinct array entries, and the resend rule's 
 the route attribute — so it always matches the real route and is ordered **before**
 `^/2fa` so the broader prefix does not shadow it (access-control rules are matched
 top-to-bottom, first match wins).
+
+### `PlatformConfigBuilder::build()` renamed to `toArray()`
+
+`build()` now opens the binary-build configuration section, matching `security()` and the other
+section accessors. The terminal call that returns the configuration array is `toArray()`.
+
+Before:
+
+```php
+return PlatformConfigBuilder::create()
+    ->name('My App')
+    ->build();
+```
+
+After:
+
+```php
+return PlatformConfigBuilder::create()
+    ->name('My App')
+    ->toArray();
+```

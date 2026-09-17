@@ -76,6 +76,39 @@ final class SolidWorxPlatformExtensionTest extends TestCase
         );
     }
 
+    public function testBuildParameterFallsBackToPlatformName(): void
+    {
+        $container = $this->load([
+            'name' => 'Acme Billing',
+        ]);
+
+        $build = $container->getParameter('solidworx_platform.build');
+
+        self::assertIsArray($build);
+        self::assertSame('Acme Billing', $build['name']);
+        self::assertSame('acme-billing', $build['binary_name']);
+        self::assertSame('ACME_BILLING', $build['env_prefix']);
+    }
+
+    public function testBuildParameterKeepsExplicitIdentity(): void
+    {
+        $container = $this->load([
+            'name' => 'Acme Billing',
+            'build' => [
+                'name' => 'Acme',
+                'binary_name' => 'acme',
+                'env_prefix' => 'ACMEBILL',
+            ],
+        ]);
+
+        $build = $container->getParameter('solidworx_platform.build');
+
+        self::assertIsArray($build);
+        self::assertSame('Acme', $build['name']);
+        self::assertSame('acme', $build['binary_name']);
+        self::assertSame('ACMEBILL', $build['env_prefix']);
+    }
+
     /**
      * @param array<string, mixed> $config
      */

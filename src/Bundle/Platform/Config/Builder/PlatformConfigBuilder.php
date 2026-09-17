@@ -28,7 +28,7 @@ use Webmozart\Assert\Assert;
  *                 ->baseTemplate('@App/2fa.html.twig')
  *             ->end()
  *         ->end()
- *         ->build();
+ *         ->toArray();
  */
 final class PlatformConfigBuilder
 {
@@ -37,6 +37,8 @@ final class PlatformConfigBuilder
     private string $version = '1.0.0';
 
     private ?SecurityConfigBuilder $security = null;
+
+    private ?BuildConfigBuilder $buildConfig = null;
 
     private ?bool $enableUtcDate = null;
 
@@ -82,6 +84,12 @@ final class PlatformConfigBuilder
         return $this->security;
     }
 
+    public function build(): BuildConfigBuilder
+    {
+        $this->buildConfig = BuildConfigBuilder::create($this);
+        return $this->buildConfig;
+    }
+
     public function enableUtcDate(bool $enable = true): self
     {
         $this->enableUtcDate = $enable;
@@ -124,7 +132,7 @@ final class PlatformConfigBuilder
      *
      * @return array<string, mixed>
      */
-    public function build(): array
+    public function toArray(): array
     {
         $platform = [
             'name' => $this->name,
@@ -133,6 +141,10 @@ final class PlatformConfigBuilder
 
         if ($this->security instanceof SecurityConfigBuilder) {
             $platform['security'] = $this->security->toArray();
+        }
+
+        if ($this->buildConfig instanceof BuildConfigBuilder) {
+            $platform['build'] = $this->buildConfig->toArray();
         }
 
         if ($this->enableUtcDate !== null) {

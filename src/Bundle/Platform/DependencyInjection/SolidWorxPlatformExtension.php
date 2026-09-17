@@ -94,6 +94,18 @@ use function interface_exists;
  *   },
  *   doctrine: array{types: array{enable_utc_date: bool}},
  *   models: array{user: string},
+ *   build: array{
+ *     name: string|null,
+ *     description: string,
+ *     binary_name: string|null,
+ *     env_prefix: string|null,
+ *     default_port: string,
+ *     output_dir: string,
+ *     work_dir: string,
+ *     php: array{version: string|null, extensions: list<string>, add: list<string>, remove: list<string>, extension_libs: list<string>},
+ *     exclude: list<string>,
+ *     hooks: array{install_check: string|null, on_boot: list<string>}
+ *   },
  *   multi_tenancy: MultiTenancyConfig
  * }
  */
@@ -176,6 +188,7 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         });
 
         $container->setParameter('solidworx_platform.models.user', $config['models']['user']);
+        $container->setParameter('solidworx_platform.build', $this->resolveBuildConfig($config));
         // Merged over the application's map rather than replaced by it: an application adding an
         // attribute of its own must not silently drop the platform's, whose whole point is that a
         // refusal counts.
@@ -261,6 +274,37 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
                 ->setAutowired(autowired: true)
                 ->setAutoconfigured(autoconfigured: true);
         }
+    }
+
+    /**
+     * Identity defaults cascade: the build name falls back to the platform name, the binary name to
+     * a slug of it, and the environment prefix to the upper-cased binary name. Resolving here rather
+     * than in the tree keeps the fallbacks in one place, where the sibling `name` is visible.
+     *
+     * @param PlatformConfig $config
+     *
+     * @return array<string, mixed>
+     */
+    private function resolveBuildConfig(array $config): array
+    {
+        $build = $config['build'];
+
+        $name = $build['name'] ?? $config['name'];
+        $binaryName = $build['binary_name'] ?? $this->slug($name);
+        $envPrefix = $build['env_prefix'] ?? strtoupper(str_replace('-', '_', $binaryName));
+
+        $build['name'] = $name;
+        $build['binary_name'] = $binaryName;
+        $build['env_prefix'] = $envPrefix;
+
+        return $build;
+    }
+
+    private function slug(string $value): string
+    {
+        $slug = strtolower(trim((string) preg_replace('/[^A-Za-z0-9]+/', '-', $value), '-'));
+
+        return $slug === '' ? 'app' : $slug;
     }
 
     #[Override]

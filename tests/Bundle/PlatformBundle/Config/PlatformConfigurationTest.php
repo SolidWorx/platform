@@ -239,14 +239,53 @@ final class PlatformConfigurationTest extends TestCase
         self::assertSame('App\\Entity\\Admin', $result['models']['user']);
     }
 
+    public function testBuildDefaults(): void
+    {
+        $result = $this->process([]);
+
+        self::assertNull($result['build']['name']);
+        self::assertSame('8080', $result['build']['default_port']);
+        self::assertSame('%kernel.project_dir%/build', $result['build']['output_dir']);
+        self::assertSame('%kernel.project_dir%/var/build', $result['build']['work_dir']);
+        self::assertNull($result['build']['php']['version']);
+        self::assertSame([], $result['build']['php']['extensions']);
+        self::assertSame(['libavif', 'nghttp2', 'nghttp3', 'ngtcp2'], $result['build']['php']['extension_libs']);
+        self::assertSame(['cache:clear'], $result['build']['hooks']['on_boot']);
+        self::assertNull($result['build']['hooks']['install_check']);
+        self::assertContains('node_modules/', $result['build']['exclude']);
+        self::assertContains('.git/', $result['build']['exclude']);
+    }
+
+    public function testBuildExcludeReplacesDefaultsWhenConfigured(): void
+    {
+        $result = $this->process([
+            'build' => [
+                'exclude' => ['custom/'],
+            ],
+        ]);
+
+        self::assertSame(['custom/'], $result['build']['exclude']);
+    }
+
+    public function testBuildRejectsNonStringPort(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+
+        $this->process([
+            'build' => [
+                'default_port' => [],
+            ],
+        ]);
+    }
+
     /**
      * @param array<string, mixed> $config
      *
-     * @return array{name: string, version: string, security: array{access_decision: array{strategies: array<string, string>}, two_factor: array{enabled: bool, base_template: string|null}}, doctrine: array{types: array{enable_utc_date: bool}}, models: array{user: string}}
+     * @return array{name: string, version: string, security: array{access_decision: array{strategies: array<string, string>}, two_factor: array{enabled: bool, base_template: string|null}}, doctrine: array{types: array{enable_utc_date: bool}}, models: array{user: string}, build: array{name: string|null, description: string, binary_name: string|null, env_prefix: string|null, default_port: string, output_dir: string, work_dir: string, php: array{version: string|null, extensions: list<string>, add: list<string>, remove: list<string>, extension_libs: list<string>}, exclude: list<string>, hooks: array{install_check: string|null, on_boot: list<string>}}}
      */
     private function process(array $config): array
     {
-        /** @var array{name: string, version: string, security: array{access_decision: array{strategies: array<string, string>}, two_factor: array{enabled: bool, base_template: string|null}}, doctrine: array{types: array{enable_utc_date: bool}}, models: array{user: string}} */
+        /** @var array{name: string, version: string, security: array{access_decision: array{strategies: array<string, string>}, two_factor: array{enabled: bool, base_template: string|null}}, doctrine: array{types: array{enable_utc_date: bool}}, models: array{user: string}, build: array{name: string|null, description: string, binary_name: string|null, env_prefix: string|null, default_port: string, output_dir: string, work_dir: string, php: array{version: string|null, extensions: list<string>, add: list<string>, remove: list<string>, extension_libs: list<string>}, exclude: list<string>, hooks: array{install_check: string|null, on_boot: list<string>}}} */
         return $this->processor->process($this->configuration->getTreeBuilder()->buildTree(), [$config]);
     }
 }
