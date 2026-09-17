@@ -18,6 +18,7 @@ use const FILE_SKIP_EMPTY_LINES;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Build\AppArchiver;
 use SolidWorx\Platform\PlatformBundle\Build\BuildOptions;
+use SolidWorx\Platform\PlatformBundle\Build\BuildStepFailedException;
 use SolidWorx\Platform\PlatformBundle\Build\Preflight;
 use SolidWorx\Platform\PlatformBundle\Build\Problem;
 use SolidWorx\Platform\PlatformBundle\Build\StaticBuilder;
@@ -109,43 +110,49 @@ final class BuildCommand extends Command
             return self::FAILURE;
         }
 
-        $archive = $this->archiver->archive(
-            $this->projectDir,
-            $options->workDir . '/frankenphp/app.tar.gz',
-            $options->exclude,
-            $options->outputDir,
-        );
-
-        $this->io->writeln(sprintf(
-            ' <info>✓</info> Archive         %s files · %s',
-            number_format($archive->fileCount),
-            $this->formatBytes($archive->bytes),
-        ));
-
-        $platform = $this->builder->hostPlatform();
-        $binaryName = $options->binaryFileName($platform['os'], $platform['arch']);
-
-        if ($this->io->getOption('dry-run') === true) {
-            $this->io->newLine();
-            $this->io->writeln(sprintf(' Dry run — would build <info>%s/%s</info>', $options->outputDir, $binaryName));
-            $this->io->writeln(sprintf(' Work directory  %s', $options->workDir));
-
-            return self::SUCCESS;
-        }
-
-        $this->io->writeln(' <comment>…</comment> PHP runtime     building static PHP — the first run takes 30–60 minutes');
-
         try {
+            // Runs on every path, including --dry-run, and before the archive is even built: a bad
+            // config value otherwise only fails at the very end of an hour-long build.
+            $this->builder->validate($options);
+
+            $archive = $this->archiver->archive(
+                $this->projectDir,
+                $options->workDir . '/frankenphp/app.tar.gz',
+                $options->exclude,
+                $options->outputDir,
+            );
+
+            $this->io->writeln(sprintf(
+                ' <info>✓</info> Archive         %s files · %s',
+                number_format($archive->fileCount),
+                $this->formatBytes($archive->bytes),
+            ));
+
+            $platform = $this->builder->hostPlatform();
+            $binaryName = $options->binaryFileName($platform['os'], $platform['arch']);
+
+            if ($this->io->getOption('dry-run') === true) {
+                $this->reportDryRun($options, $binaryName);
+
+                return self::SUCCESS;
+            }
+
+            $this->io->writeln(' <comment>…</comment> PHP runtime     building static PHP — the first run takes 30–60 minutes');
+
             $produced = $this->builder->build(
                 $options,
-                $this->projectDir,
                 fn (string $buffer): null => $this->stream($buffer),
                 $this->io->getOption('clean') === true,
             );
+        } catch (BuildStepFailedException $exception) {
+            $this->io->newLine();
+            $this->io->error($exception->getMessage());
+            $this->showLogTail($exception->step, $exception->logPath);
+
+            return self::FAILURE;
         } catch (Throwable $throwable) {
             $this->io->newLine();
             $this->io->error($throwable->getMessage());
-            $this->showLogTail($options);
 
             return self::FAILURE;
         }
@@ -235,19 +242,40 @@ final class BuildCommand extends Command
         return null;
     }
 
-    private function showLogTail(BuildOptions $options): void
+    /**
+     * Prints the environment and exact command a real build would run, without running it.
+     * Nothing here is a secret — these are build settings, not credentials — so nothing is redacted.
+     */
+    private function reportDryRun(BuildOptions $options, string $binaryName): void
     {
-        $log = $options->workDir . '/frankenphp/dist/static-php-cli/log/go-build.log';
+        $staged = $this->builder->stagedDir($options);
+        $environment = $this->builder->environment($options, $this->builder->embedDir($options));
 
-        if (! is_file($log)) {
+        $this->io->newLine();
+        $this->io->writeln(sprintf(' Dry run — would build <info>%s/%s</info>', $options->outputDir, $binaryName));
+        $this->io->writeln(sprintf(' Work directory  %s', $options->workDir));
+        $this->io->newLine();
+        $this->io->writeln(sprintf(' Command   cd %s && ./build-static.sh', $staged));
+        $this->io->writeln(' Environment');
+
+        foreach ($environment as $key => $value) {
+            $this->io->writeln(sprintf('   %s=%s', $key, $value));
+        }
+    }
+
+    private function showLogTail(string $step, string $logPath): void
+    {
+        $this->io->writeln(sprintf(' Failing step: %s', $step));
+
+        if (! is_file($logPath)) {
             return;
         }
 
-        $contents = file($log, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $contents = file($logPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         $lines = array_slice($contents === false ? [] : $contents, -self::LOG_TAIL_LINES);
 
         $this->io->writeln($lines);
-        $this->io->writeln(sprintf(' Full log: %s', $log));
+        $this->io->writeln(sprintf(' Full log: %s', $logPath));
     }
 
     private function option(string $name): ?string

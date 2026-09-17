@@ -26,6 +26,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\ExecutableFinder;
+use function glob;
 
 #[CoversClass(BuildCommand::class)]
 final class BuildCommandTest extends TestCase
@@ -114,6 +115,77 @@ final class BuildCommandTest extends TestCase
         $tester->assertCommandIsSuccessful();
     }
 
+    public function testOutputOptionOverridesTheConfiguredOutputDirectory(): void
+    {
+        $tester = $this->tester();
+
+        $tester->execute([
+            '--dry-run' => true,
+            '--output' => $this->dir . '/custom-out',
+        ]);
+
+        $tester->assertCommandIsSuccessful();
+        self::assertStringContainsString($this->dir . '/custom-out/acme-', $tester->getDisplay());
+    }
+
+    public function testPhpVersionOptionOverridesTheConfiguredPhpVersion(): void
+    {
+        $tester = $this->tester();
+
+        $tester->execute([
+            '--dry-run' => true,
+            '--php-version' => '8.4',
+        ]);
+
+        $tester->assertCommandIsSuccessful();
+        self::assertStringContainsString('PHP_VERSION=8.4', $tester->getDisplay());
+    }
+
+    public function testDryRunPrintsTheResolvedEnvironmentAndCommand(): void
+    {
+        $tester = $this->tester();
+
+        $tester->execute([
+            '--dry-run' => true,
+        ]);
+
+        $tester->assertCommandIsSuccessful();
+        $output = $tester->getDisplay();
+
+        self::assertStringContainsString('build-static.sh', $output);
+        self::assertStringContainsString('Environment', $output);
+        self::assertStringContainsString('PLATFORM_APP_NAME=Acme', $output);
+    }
+
+    public function testFinalizedBinaryPassesTheSmokeTestAndSucceeds(): void
+    {
+        $this->writeFakeBuildScript('v9.9.9');
+
+        $tester = $this->tester();
+        $exitCode = $tester->execute([
+            '--app-version' => 'v9.9.9',
+        ]);
+
+        self::assertSame(Command::SUCCESS, $exitCode);
+        $output = $tester->getDisplay();
+        self::assertStringContainsString('Version   v9.9.9', $output);
+        self::assertFileExists($this->findProducedBinary());
+    }
+
+    public function testUnverifiedBinaryFailsTheCommandButKeepsTheFile(): void
+    {
+        $this->writeFakeBuildScript('v0.0.0-does-not-match');
+
+        $tester = $this->tester();
+        $exitCode = $tester->execute([
+            '--app-version' => 'v9.9.9',
+        ]);
+
+        self::assertSame(Command::FAILURE, $exitCode);
+        self::assertStringContainsString('unverified', $tester->getDisplay());
+        self::assertFileExists($this->findProducedBinary(), 'an unverified binary must be kept, not deleted');
+    }
+
     public function testWarningsDoNotBlockTheBuild(): void
     {
         // Preflight reports dev dependencies as a warning, not an error, whenever
@@ -132,6 +204,54 @@ final class BuildCommandTest extends TestCase
 
         self::assertStringContainsString('Development dependencies will be embedded', $output);
         self::assertStringContainsString('Dry run', $output);
+    }
+
+    /**
+     * A stand-in for build-static.sh that finishes near-instantly instead of taking 30-60 minutes:
+     * it fabricates the xcaddy install marker StaticBuilder looks for and, in the same run, writes
+     * a "binary" at the exact path StaticBuilder expects — a tiny script that just echoes
+     * $reportedVersion when run, which is all BuildCommand::smokeTest() actually checks.
+     *
+     * The xcaddy pkgroot directory and the produced binary name are deliberately keyed off
+     * *different* forms of the OS name, because StaticBuilder::build() itself mixes them: the
+     * xcaddy path is built from the raw `strtolower(php_uname('s'))` (e.g. "darwin"), while the
+     * binary path uses hostPlatform()'s mapped value (e.g. "mac"). Collapsing both to the mapped
+     * name here would put the xcaddy stub somewhere StaticBuilder never looks, so the bootstrap
+     * step would "fail" every time regardless of what this test is trying to exercise.
+     */
+    private function writeFakeBuildScript(string $reportedVersion): void
+    {
+        $this->filesystem->dumpFile($this->dir . '/source/xcaddy', "#!/usr/bin/env bash\necho stub\n");
+
+        $this->filesystem->dumpFile(
+            $this->dir . '/source/build-static.sh',
+            "#!/bin/bash\n"
+            . "defaultExtensions=\"bcmath,intl\"\n"
+            . "defaultExtensionLibs=\"brotli\"\n"
+            . "rawOs=\$(uname -s | tr '[:upper:]' '[:lower:]')\n"
+            . "os=\"\${rawOs}\"\n"
+            . "if [ \"\${os}\" = \"darwin\" ]; then os=\"mac\"; fi\n"
+            . "arch=\$(uname -m)\n"
+            . "case \"\${arch}\" in\n"
+            . "    arm64|aarch64) spcArch=\"aarch64\" ;;\n"
+            . "    x86_64|amd64) spcArch=\"x86_64\" ;;\n"
+            . "    *) spcArch=\"\${arch}\" ;;\n"
+            . "esac\n"
+            . "mkdir -p \"dist/static-php-cli/pkgroot/\${spcArch}-\${rawOs}/go-xcaddy/bin\"\n"
+            . "touch \"dist/static-php-cli/pkgroot/\${spcArch}-\${rawOs}/go-xcaddy/bin/xcaddy\"\n"
+            . "mkdir -p dist\n"
+            . "printf '#!/bin/bash\\necho \"{$reportedVersion}\"\\n' > \"dist/frankenphp-\${os}-\${arch}\"\n"
+            . "chmod +x \"dist/frankenphp-\${os}-\${arch}\"\n",
+        );
+    }
+
+    private function findProducedBinary(): string
+    {
+        $matches = glob($this->dir . '/out/acme-*');
+        self::assertNotFalse($matches);
+        self::assertCount(1, $matches);
+
+        return $matches[0];
     }
 
     /**
