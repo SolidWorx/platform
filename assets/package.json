@@ -75,7 +75,7 @@
     "@stimulus-components/checkbox-select-all": "^6.1.0",
     "@stimulus-components/clipboard": "^5.0.0",
     "@stimulus-components/password-visibility": "^3.0.0",
-    "@symfony/ux-turbo": "^2.31.0",
+    "@symfony/ux-turbo": "^3.2.0",
     "@symfony/ux-live-component": "^2.31.0",
     "@symfony/ux-chartjs": "^2.31.0",
     "@symfony/ux-autocomplete": "^2.31.0",
