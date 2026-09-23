@@ -76,7 +76,7 @@
     "@stimulus-components/clipboard": "^5.0.0",
     "@stimulus-components/password-visibility": "^3.0.0",
     "@symfony/ux-turbo": "^3.2.0",
-    "@symfony/ux-live-component": "^2.31.0",
+    "@symfony/ux-live-component": "^3.5.1",
     "@symfony/ux-chartjs": "^3.2.0",
     "@symfony/ux-autocomplete": "^2.31.0",
     "@tabler/core": "^1.5.1",
