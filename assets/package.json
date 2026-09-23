@@ -78,7 +78,7 @@
     "@symfony/ux-turbo": "^3.2.0",
     "@symfony/ux-live-component": "^2.31.0",
     "@symfony/ux-chartjs": "^3.2.0",
-    "@symfony/ux-autocomplete": "^2.31.0",
+    "@symfony/ux-autocomplete": "^3.5.1",
     "@tabler/core": "^1.5.1",
     "@tiptap/core": "^3.31.3",
     "@tiptap/extension-link": "^3.31.3",
