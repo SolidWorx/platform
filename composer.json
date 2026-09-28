@@ -47,7 +47,7 @@
     },
     "require-dev": {
         "captainhook/captainhook-phar": "^5.29",
-        "ergebnis/composer-normalize": "^2.53",
+        "ergebnis/composer-normalize": "^2.54",
         "ergebnis/phpunit-slow-test-detector": "^2.25",
         "monolog/monolog": "^3.12",
         "phpstan/extension-installer": "^1.4",
