@@ -43,7 +43,7 @@ class SubscriptionAttributes
 
     public string $statusFormatted;
 
-    public string $cardBrand;
+    public ?string $cardBrand = null;
 
     public string $cardLastFour;
 
