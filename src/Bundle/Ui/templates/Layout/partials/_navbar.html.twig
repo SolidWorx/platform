@@ -16,14 +16,14 @@
     sets it to `false`, because the sidebar already owns the brand and the mobile navigation.
 ##}
 
-{% types {
+{# Expected context. Not a `{% types %}` tag: since Twig 3.29 a template declaring types cannot be pulled in with `{% use %}`.
     ## The resolved layout options, from `ui_layout_resolve()` in the base layout.
     layout: 'map',
     ## The Bootstrap container class the page body uses, e.g. `container-xl`.
     container_class: 'string',
     ## Whether this navbar is the only navigation on the page. Defaults to true.
     navbar_standalone?: 'boolean',
-} %}
+#}
 
 {## Right-hand side of the navbar, before the user menu. Empty by default — put search,
     notifications or any other quick action here. ##}

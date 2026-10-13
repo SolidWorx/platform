@@ -15,10 +15,10 @@
         {% set brand_url = path('app_dashboard') %}
 ##}
 
-{% types {
+{# Expected context. Not a `{% types %}` tag: since Twig 3.29 a template declaring types cannot be pulled in with `{% use %}`.
     ## Where the brand links to. Defaults to `/`.
     brand_url?: 'string',
-} %}
+#}
 
 {## The brand link. The layouts wrap this in the Tabler `navbar-brand` element, so override
     `brand_content` rather than this block unless you need to change the link itself. ##}
