@@ -93,12 +93,21 @@ use function interface_exists;
  *   password: array{min_length: int, strength: string, check_compromised: bool}
  * }
  *
+ * @phpstan-type EmailVerificationConfig array{
+ *   enabled: bool,
+ *   lifetime: int,
+ *   firewall: string,
+ *   banner_template: string,
+ *   email: array{template: string, subject: string}
+ * }
+ *
  * @phpstan-type PlatformConfig array{
  *   name: string,
  *   version: string,
  *   security: array{
  *     access_decision: array{strategies: array<string, string>},
- *     two_factor: array{enabled: bool, base_template: string|null}
+ *     two_factor: array{enabled: bool, base_template: string|null},
+ *     email_verification: EmailVerificationConfig
  *   },
  *   doctrine: array{types: array{enable_utc_date: bool}},
  *   models: array{user: string},
@@ -209,7 +218,26 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
             $container->removeDefinition(TwoFactor::class);
         }
 
+        $this->loadEmailVerification($container, $config['security']['email_verification']);
+
         $this->loadMultiTenancy($container, $config['multi_tenancy']);
+    }
+
+    /**
+     * Only parameters: with verification disabled the services stay, and the gate answers "not
+     * gated" — application code injecting it keeps working either way. An application can also
+     * override `solidworx_platform.security.email_verification.enabled` in its own container config
+     * to switch it per environment or deployment.
+     *
+     * @param EmailVerificationConfig $config
+     */
+    private function loadEmailVerification(ContainerBuilder $container, array $config): void
+    {
+        $container->setParameter('solidworx_platform.security.email_verification.enabled', $config['enabled']);
+        $container->setParameter('solidworx_platform.security.email_verification.firewall', $config['firewall']);
+        $container->setParameter('solidworx_platform.security.email_verification.banner_template', $config['banner_template']);
+        $container->setParameter('solidworx_platform.security.email_verification.email.template', $config['email']['template']);
+        $container->setParameter('solidworx_platform.security.email_verification.email.subject', $config['email']['subject']);
     }
 
     /**
@@ -407,6 +435,12 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
                     ],
                 ]
             );
+        }
+
+        if ($container->hasExtension('symfonycasts_verify_email')) {
+            $container->prependExtensionConfig('symfonycasts_verify_email', [
+                'lifetime' => $config['security']['email_verification']['lifetime'],
+            ]);
         }
 
         if ($container->hasExtension('symfonycasts_reset_password')) {

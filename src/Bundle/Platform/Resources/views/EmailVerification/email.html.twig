@@ -1,0 +1,12 @@
+{##
+    The verification email. Replace it with `platform.security.email_verification.email.template`.
+
+    Context: `user`, `signedUrl`, `expiresAtMessageKey` and `expiresAtMessageData`.
+##}
+<p>{{ 'Please confirm your email address by clicking the link below.'|trans }}</p>
+
+<p><a href="{{ signedUrl }}">{{ 'Confirm my email address'|trans }}</a></p>
+
+<p>{{ 'This link will expire in %count%.'|trans({'%count%': expiresAtMessageKey|trans(expiresAtMessageData, 'VerifyEmailBundle')}) }}</p>
+
+<p>{{ "If you didn't create an account, you can ignore this email."|trans }}</p>

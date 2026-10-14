@@ -1,0 +1,27 @@
+{##
+    The banner at the top of every page while the signed-in user's email address is unverified.
+
+    To change what it says, point `platform.security.email_verification.banner_template` at a
+    template of your own that extends this one and redefines the blocks that differ:
+
+        {% extends '@SolidWorxPlatform/EmailVerification/banner.html.twig' %}
+
+        {% block message %}{{ 'Sending is disabled until you verify your email address.'|trans }}{% endblock %}
+
+    Keep the `actions` block (or include `_resend_form.html.twig` yourself): the banner is the one
+    place a user who never got the email is guaranteed to find a way to ask for another.
+##}
+<div class="alert alert-warning alert-banner mb-0 rounded-0" role="alert">
+    <div class="d-flex align-items-center gap-3">
+        <div class="alert-icon">
+            {{ ux_icon('tabler:mail-exclamation', {width: 24, height: 24}) }}
+        </div>
+        <div class="flex-grow-1">
+            <strong>{% block title %}{{ 'Verify your email'|trans }}{% endblock %}</strong> -
+            {% block message %}{{ 'Please verify your email address. Check your inbox for the verification link.'|trans }}{% endblock %}
+        </div>
+        {% block actions %}
+            {{ include('@SolidWorxPlatform/EmailVerification/_resend_form.html.twig', {button_class: 'btn btn-warning btn-sm'}) }}
+        {% endblock %}
+    </div>
+</div>

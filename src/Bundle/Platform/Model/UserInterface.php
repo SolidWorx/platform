@@ -42,4 +42,15 @@ interface UserInterface extends SecurityUserInterface, PasswordAuthenticatedUser
      * a plain-text password must never reach it.
      */
     public function setPassword(string $password): static;
+
+    public function getEmail(): ?string;
+
+    /**
+     * Whether the user has confirmed they own their email address.
+     *
+     * @see \SolidWorx\Platform\PlatformBundle\Security\EmailVerification\EmailVerificationGateInterface
+     */
+    public function isVerified(): bool;
+
+    public function setVerified(bool $verified): static;
 }

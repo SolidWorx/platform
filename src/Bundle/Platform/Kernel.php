@@ -30,6 +30,7 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Yaml\Yaml;
+use SymfonyCasts\Bundle\VerifyEmail\SymfonyCastsVerifyEmailBundle;
 use function defined;
 use function file_exists;
 use function glob;
@@ -77,7 +78,19 @@ abstract class Kernel extends BaseKernel
     #[Override]
     public function registerBundles(): iterable
     {
-        yield from parent::registerBundles();
+        $verifyEmailRegistered = false;
+
+        foreach (parent::registerBundles() as $bundle) {
+            $verifyEmailRegistered = $verifyEmailRegistered || $bundle instanceof SymfonyCastsVerifyEmailBundle;
+
+            yield $bundle;
+        }
+
+        // Signs and checks the email verification links. Skipped when the application already
+        // lists it in its own bundles.php, since a bundle cannot be registered twice.
+        if (! $verifyEmailRegistered) {
+            yield new SymfonyCastsVerifyEmailBundle();
+        }
 
         if ($this->isTwoFactorEnabled()) {
             yield new SchebTwoFactorBundle();

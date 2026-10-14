@@ -18,6 +18,7 @@ use PHPUnit\Framework\Attributes\CoversNothing;
 use SolidWorx\Platform\PlatformBundle\Controller\Profile\ChangePassword;
 use SolidWorx\Platform\PlatformBundle\Controller\Profile\EditProfile;
 use SolidWorx\Platform\PlatformBundle\Controller\Profile\ShowProfile;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendVerificationEmail;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\TwoFactorConfiguration;
 use SolidWorx\Platform\PlatformBundle\Form\Type\Profile\ChangePasswordType;
 use SolidWorx\Platform\PlatformBundle\Form\Type\Profile\ProfileType;
@@ -119,6 +120,25 @@ final class ProfileRenderingTest extends KernelTestCase
     {
         self::assertStringNotContainsString(TwoFactorConfiguration::PATH, $this->renderShowPage(twoFactorEnabled: false));
         self::assertStringContainsString(TwoFactorConfiguration::PATH, $this->renderShowPage(twoFactorEnabled: true));
+    }
+
+    /**
+     * The profile is the second place, after the banner, where a user who never got the email can
+     * ask for another — as a POST form with its CSRF token, since the endpoint takes nothing else.
+     */
+    public function testAnUnverifiedUserCanAskForANewVerificationEmail(): void
+    {
+        $html = $this->renderShowPage();
+
+        self::assertStringContainsString('action="' . ResendVerificationEmail::PATH . '"', $html);
+        self::assertStringContainsString('name="_token"', $html);
+    }
+
+    public function testAVerifiedUserIsNotOfferedANewVerificationEmail(): void
+    {
+        $this->user->setVerified(true);
+
+        self::assertStringNotContainsString(ResendVerificationEmail::PATH, $this->renderShowPage());
     }
 
     public function testTheEditPageRendersEveryFieldOfTheProfileForm(): void
