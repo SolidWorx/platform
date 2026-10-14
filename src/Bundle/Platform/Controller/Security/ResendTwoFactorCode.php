@@ -18,16 +18,15 @@ use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Email\Generator\CodeGenera
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Email\Generator\CodeGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\Routing\Attribute\Route;
 
-#[Route(path: self::PATH, name: self::ROUTE_NAME)]
 class ResendTwoFactorCode extends AbstractController
 {
     /**
      * The path of the resend-code endpoint.
      *
      * This is the single source of truth for the route: it is referenced both by the
-     * route attribute above and by the 2FA access-control rule in
+     * route registered by
+     * {@see \SolidWorx\Platform\PlatformBundle\Routing\LoginPageRouteLoader} and by the 2FA access-control rule in
      * {@see \SolidWorx\Platform\PlatformBundle\DependencyInjection\Extension\TwoFactorExtension::securityConfig()},
      * so the two can never drift.
      */

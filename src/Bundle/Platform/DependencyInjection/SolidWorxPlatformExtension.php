@@ -212,7 +212,6 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         $container->setParameter('solidworx_platform.security.two_factor.enabled', $config['security']['two_factor']['enabled']);
 
         if (! $config['security']['two_factor']['enabled']) {
-            // @TODO: Need to remove the 2FA routes as well if 2fa is not configured
             $container->removeDefinition(ResendTwoFactorCode::class);
             $container->removeDefinition(TwoFactorConfiguration::class);
             // Dropping the builder keeps the "Two-factor authentication" entry — and the link to

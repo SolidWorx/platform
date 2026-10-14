@@ -15,7 +15,9 @@ namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Routing;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendTwoFactorCode;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendVerificationEmail;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\TwoFactorConfiguration;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\VerifyEmail;
 use SolidWorx\Platform\PlatformBundle\Routing\LoginPageRouteLoader;
 use Symfony\Component\Routing\RouteCollection;
@@ -43,9 +45,31 @@ final class LoginPageRouteLoaderTest extends TestCase
         $this->assertNull($routes->get(ResendVerificationEmail::ROUTE_NAME));
     }
 
-    private function load(bool $emailVerificationEnabled): RouteCollection
+    public function testTwoFactorRoutesAreAddedWhenEnabled(): void
     {
-        $routes = new LoginPageRouteLoader([], $emailVerificationEnabled)->load('.', '_solidworx_platform_auth_routes');
+        $routes = $this->load(twoFactorEnabled: true);
+
+        $this->assertSame('/2fa', $routes->get('2fa_login')?->getPath());
+        $this->assertSame('scheb_two_factor.form_controller::form', $routes->get('2fa_login')->getDefault('_controller'));
+        $this->assertSame('/2fa_check', $routes->get('2fa_login_check')?->getPath());
+        $this->assertSame(ResendTwoFactorCode::PATH, $routes->get(ResendTwoFactorCode::ROUTE_NAME)?->getPath());
+        $this->assertSame(TwoFactorConfiguration::PATH, $routes->get(TwoFactorConfiguration::ROUTE_NAME)?->getPath());
+        $this->assertSame(['GET'], $routes->get(TwoFactorConfiguration::ROUTE_NAME)->getMethods());
+    }
+
+    public function testTwoFactorRoutesAreOmittedWhenDisabled(): void
+    {
+        $routes = $this->load(twoFactorEnabled: false);
+
+        $this->assertNull($routes->get('2fa_login'));
+        $this->assertNull($routes->get('2fa_login_check'));
+        $this->assertNull($routes->get(ResendTwoFactorCode::ROUTE_NAME));
+        $this->assertNull($routes->get(TwoFactorConfiguration::ROUTE_NAME));
+    }
+
+    private function load(bool $emailVerificationEnabled = false, bool $twoFactorEnabled = false): RouteCollection
+    {
+        $routes = new LoginPageRouteLoader([], $emailVerificationEnabled, $twoFactorEnabled)->load('.', '_solidworx_platform_auth_routes');
         $this->assertInstanceOf(RouteCollection::class, $routes);
 
         return $routes;
