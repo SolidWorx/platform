@@ -253,6 +253,7 @@ webpack_encore:
     output_path: '%kernel.project_dir%/public/static'
 YAML
 
+# shellcheck disable=SC2016 # PHP code: the $ variables are PHP's, not the shell's.
 php -r '
 $file = "config/bundles.php";
 $bundles = file_get_contents($file);
@@ -294,6 +295,7 @@ JS
 rm -rf assets/app.js assets/stimulus_bootstrap.js assets/styles assets/controllers/hello_controller.js assets/controllers/csrf_protection_controller.js
 mkdir -p assets/controllers
 
+# shellcheck disable=SC2016 # PHP code: the $ variables are PHP's, not the shell's.
 php -r '
 $file = "package.json";
 $pkg = json_decode(file_get_contents($file), true);
