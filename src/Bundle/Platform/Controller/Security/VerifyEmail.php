@@ -52,8 +52,7 @@ final class VerifyEmail extends BaseController
     public function __invoke(Request $request): Response
     {
         $id = $request->query->getString('id');
-
-        $user = Ulid::isValid($id, Ulid::FORMAT_BASE_58) ? $this->entityManager->find(UserInterface::class, Ulid::fromString($id)) : null;
+        $user = Ulid::isValid($id, Ulid::FORMAT_BASE_32) ? $this->entityManager->find(UserInterface::class, Ulid::fromString($id)) : null;
 
         if (! $user instanceof UserInterface) {
             $this->addFlash(Flash::Error->value, 'The email verification link is invalid.');
