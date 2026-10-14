@@ -23,6 +23,7 @@ use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigState;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Exception\EnvNotFoundException;
 use Symfony\Component\DependencyInjection\Kernel\BundleInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -227,7 +228,13 @@ abstract class Kernel extends BaseKernel
             return $value;
         }
 
-        return $container->resolveEnvPlaceholders($container->getParameterBag()->resolveValue($value), format: true);
+        try {
+            return $container->resolveEnvPlaceholders($container->getParameterBag()->resolveValue($value), format: true);
+        } catch (EnvNotFoundException) {
+            // If the env var is not defined, return the original value. This allows for optional
+            // env vars in the platform config.
+            return $value;
+        }
     }
 
     /**

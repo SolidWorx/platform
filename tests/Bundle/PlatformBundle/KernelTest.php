@@ -16,7 +16,6 @@ namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Kernel;
-use Symfony\Component\DependencyInjection\Exception\EnvNotFoundException;
 
 #[CoversClass(Kernel::class)]
 final class KernelTest extends TestCase
@@ -72,13 +71,5 @@ final class KernelTest extends TestCase
         ], Kernel::resolveEnvValues('%env(json:PLATFORM_TEST_NAME)%'));
         $this->assertNull(Kernel::resolveEnvValues('%env(default::PLATFORM_TEST_UNDEFINED)%'));
         $this->assertSame('100%', Kernel::resolveEnvValues('100%'));
-    }
-
-    public function testUndefinedEnvValueThrows(): void
-    {
-        $this->expectException(EnvNotFoundException::class);
-        $this->expectExceptionMessageIsOrContains('PLATFORM_TEST_FLAG');
-
-        Kernel::resolveEnvValues('%env(bool:PLATFORM_TEST_FLAG)%');
     }
 }
