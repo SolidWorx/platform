@@ -85,6 +85,12 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    # Super-linter reports a commit status per linter and posts its summary as a PR comment.
+    permissions:
+      contents: read
+      statuses: write
+      pull-requests: write
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v7.0.1
