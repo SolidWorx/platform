@@ -171,7 +171,7 @@ abstract class Kernel extends BaseKernel
         if ($configFile !== null) {
             $ext = pathinfo($configFile, PATHINFO_EXTENSION);
 
-            $this->rawConfig = $this->toConfigArray(self::resolveEnvValues(match ($ext) {
+            $this->rawConfig = $this->toConfigArray(static::resolveEnvValues(match ($ext) {
                 'yaml', 'yml' => Yaml::parseFile($configFile, Yaml::PARSE_CONSTANT),
                 'json' => json_decode((string) file_get_contents($configFile), associative: true, depth: 512, flags: JSON_THROW_ON_ERROR),
                 'php' => require $configFile,
