@@ -1,0 +1,12 @@
+{##
+    The "resend verification email" button: a POST form carrying its CSRF token, since the
+    endpoint accepts nothing else. After sending, the user is brought back to the page they were on.
+
+    @param string button_class  optional, the classes of the button (default "btn")
+##}
+<form method="post" action="{{ path('_solidworx_platform_verify_email_resend') }}" class="d-inline">
+    <input type="hidden" name="_token" value="{{ csrf_token('resend_verification_email') }}">
+    <button type="submit" class="{{ button_class|default('btn') }}">
+        {{ 'Resend verification email'|trans }}
+    </button>
+</form>

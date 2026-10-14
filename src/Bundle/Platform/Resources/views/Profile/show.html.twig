@@ -125,6 +125,16 @@
 {## The rows of the security card. The two-factor row is only rendered when 2FA is enabled —
     its route does not exist otherwise. ##}
 {% block profile_security_items %}
+    {% if is_email_verification_gated() %}
+        <twig:Ui:SettingRow
+            icon="tabler:mail-exclamation"
+            title="{{ 'Email verification'|trans }}"
+            description="{{ 'Your email address is not verified yet. Did not get the email? Send another one.'|trans }}"
+        >
+            {{ include('@SolidWorxPlatform/EmailVerification/_resend_form.html.twig') }}
+        </twig:Ui:SettingRow>
+    {% endif %}
+
     <twig:Ui:SettingRow
         icon="tabler:lock"
         title="{{ 'Password'|trans }}"

@@ -18,6 +18,7 @@ use Override;
 use SolidWorx\Platform\PlatformBundle\Controller\Profile\ChangePassword;
 use SolidWorx\Platform\PlatformBundle\Controller\Profile\EditProfile;
 use SolidWorx\Platform\PlatformBundle\Controller\Profile\ShowProfile;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendVerificationEmail;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\TwoFactorConfiguration;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\MenuCompilerPass;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\Util;
@@ -27,8 +28,11 @@ use SolidWorx\Platform\PlatformBundle\Form\Type\Profile\ProfileType;
 use SolidWorx\Platform\PlatformBundle\Menu\ProfileMenu;
 use SolidWorx\Platform\PlatformBundle\Menu\ProfileMenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Menu\Provider;
+use SolidWorx\Platform\PlatformBundle\Security\EmailVerification\EmailVerificationGate;
+use SolidWorx\Platform\PlatformBundle\Security\EmailVerification\EmailVerificationGateInterface;
 use SolidWorx\Platform\PlatformBundle\Security\Password\PasswordPolicy;
 use SolidWorx\Platform\PlatformBundle\Security\Password\PasswordPolicyInterface;
+use SolidWorx\Platform\PlatformBundle\Twig\Extension\EmailVerificationExtension;
 use SolidWorx\Platform\PlatformBundle\Twig\Extension\MenuExtension;
 use SolidWorx\Platform\PlatformBundle\Twig\Extension\ProfileExtension;
 use SolidWorx\Platform\PlatformBundle\Twig\Runtime\MenuRuntime;
@@ -244,6 +248,15 @@ final class ProfileTestKernel extends Kernel
         // that the two-factor link appears only when it is enabled. Where the entry lands in the
         // menu is asserted in ProfileMenuBuilderTest instead.
 
+        // The real gate, so the profile page shows the resend button exactly when the signed-in
+        // user is unverified.
+        $services->set(EmailVerificationGate::class)
+            ->arg('$enabled', true);
+        $services->alias(EmailVerificationGateInterface::class, EmailVerificationGate::class);
+
+        $services->set(EmailVerificationExtension::class)
+            ->tag('twig.extension');
+
         $services->set(LayoutResolver::class)
             ->args([[]]);
 
@@ -292,5 +305,6 @@ final class ProfileTestKernel extends Kernel
         $routes->add(EditProfile::ROUTE_NAME, EditProfile::PATH);
         $routes->add(ChangePassword::ROUTE_NAME, ChangePassword::PATH);
         $routes->add(TwoFactorConfiguration::ROUTE_NAME, TwoFactorConfiguration::PATH);
+        $routes->add(ResendVerificationEmail::ROUTE_NAME, ResendVerificationEmail::PATH);
     }
 }

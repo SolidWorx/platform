@@ -25,6 +25,8 @@ use SolidWorx\Platform\PlatformBundle\Feature\FeatureGate;
 use SolidWorx\Platform\PlatformBundle\Feature\NoopFeatureGate;
 use SolidWorx\Platform\PlatformBundle\Feature\NullSubscriberResolver;
 use SolidWorx\Platform\PlatformBundle\Feature\SubscriberResolver;
+use SolidWorx\Platform\PlatformBundle\Security\EmailVerification\EmailVerificationGate;
+use SolidWorx\Platform\PlatformBundle\Security\EmailVerification\EmailVerificationGateInterface;
 use SolidWorx\Platform\PlatformBundle\Security\Password\PasswordPolicy;
 use SolidWorx\Platform\PlatformBundle\Security\Password\PasswordPolicyInterface;
 use SolidWorx\Platform\PlatformBundle\SolidWorxPlatformBundle;
@@ -66,6 +68,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
     $services->alias(FeatureGate::class, NoopFeatureGate::class);
     $services->alias(SubscriberResolver::class, NullSubscriberResolver::class);
     $services->alias(PasswordPolicyInterface::class, PasswordPolicy::class);
+    $services->alias(EmailVerificationGateInterface::class, EmailVerificationGate::class);
 
     // Disposable / throwaway email detection.
     //

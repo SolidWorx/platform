@@ -28,6 +28,16 @@
                         "two_factor": {
                             "enabled": false,
                             "base_template": null
+                        },
+                        "email_verification": {
+                            "enabled": true,
+                            "lifetime": 604800,
+                            "firewall": "main",
+                            "banner_template": "@SolidWorxPlatform/EmailVerification/banner.html.twig",
+                            "email": {
+                                "template": "@SolidWorxPlatform/EmailVerification/email.html.twig",
+                                "subject": "Please confirm your email address"
+                            }
                         }
                     },
                     "type": "object",
@@ -72,6 +82,62 @@
                                         "string",
                                         "null"
                                     ]
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "email_verification": {
+                            "default": {
+                                "enabled": true,
+                                "lifetime": 604800,
+                                "firewall": "main",
+                                "banner_template": "@SolidWorxPlatform/EmailVerification/banner.html.twig",
+                                "email": {
+                                    "template": "@SolidWorxPlatform/EmailVerification/email.html.twig",
+                                    "subject": "Please confirm your email address"
+                                }
+                            },
+                            "type": "object",
+                            "properties": {
+                                "enabled": {
+                                    "description": "Send new users a verification link, show unverified users a banner, and gate actions through EmailVerificationGateInterface.",
+                                    "default": true,
+                                    "type": "boolean"
+                                },
+                                "lifetime": {
+                                    "description": "How long, in seconds, a verification link stays valid. Defaults to 7 days.",
+                                    "default": 604800,
+                                    "type": "integer"
+                                },
+                                "firewall": {
+                                    "description": "The firewall whose form login signs the user in once they verify, and whose login page they land on when a link is invalid.",
+                                    "default": "main",
+                                    "type": "string"
+                                },
+                                "banner_template": {
+                                    "description": "The banner shown to unverified users. Extend the default and override its blocks to change the message.",
+                                    "default": "@SolidWorxPlatform/EmailVerification/banner.html.twig",
+                                    "type": "string"
+                                },
+                                "email": {
+                                    "default": {
+                                        "template": "@SolidWorxPlatform/EmailVerification/email.html.twig",
+                                        "subject": "Please confirm your email address"
+                                    },
+                                    "type": "object",
+                                    "properties": {
+                                        "template": {
+                                            "description": "The HTML template of the verification email.",
+                                            "default": "@SolidWorxPlatform/EmailVerification/email.html.twig",
+                                            "type": "string"
+                                        },
+                                        "subject": {
+                                            "description": "The subject of the verification email (translated).",
+                                            "default": "Please confirm your email address",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "additionalProperties": false
                                 }
                             },
                             "additionalProperties": false

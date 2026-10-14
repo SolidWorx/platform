@@ -2,6 +2,32 @@
 
 ## 0.2 → 0.3
 
+### Email verification
+
+The platform now owns email verification, built on `symfonycasts/verify-email-bundle` (registered
+by the platform kernel — drop it from your `bundles.php` if you listed it; it is skipped if you
+don't). It is on by default under `platform.security.email_verification`:
+
+- New, unverified users get a signed link (valid **7 days**, `lifetime`) when they are saved.
+- `GET /verify` (`_solidworx_platform_verify_email`) checks the link, marks the user verified and
+  signs them in through the `form_login` of `firewall` (default `main`).
+- `POST /verify/resend` (`_solidworx_platform_verify_email_resend`) sends a new link, CSRF-checked
+  and limited to one a minute. Render the button with
+  `@SolidWorxPlatform/EmailVerification/_resend_form.html.twig`.
+- Unverified users see a banner, with that button, at the top of every page. Change its wording by
+  pointing `banner_template` at a template extending
+  `@SolidWorxPlatform/EmailVerification/banner.html.twig`. The profile page shows the button too.
+- Gate actions with `EmailVerificationGateInterface::isGated()` (or the `is_email_verification_gated()`
+  / `email_verification_message()` Twig functions), and refuse unverified users on a firewall with
+  `Security\EmailVerification\VerifiedUserChecker`.
+
+**Breaking:** `Model\UserInterface` now declares `getEmail()`, `isVerified()` and `setVerified()`.
+Users extending `Model\User` already have them.
+
+Set `enabled: false` to turn it all off; the gate then never gates. Applications that decide per
+deployment can override the `solidworx_platform.security.email_verification.enabled` parameter in
+their own container config instead.
+
 ### User profile section
 
 Every signed-in user now gets a profile section — `/profile`, `/profile/edit`, `/profile/password`
