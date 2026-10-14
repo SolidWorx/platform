@@ -13,10 +13,10 @@
     `sidebar_transparent` and `sidebar_expand`.
 ##}
 
-{% types {
+{# Expected context. Not a `{% types %}` tag: since Twig 3.29 a template declaring types cannot be pulled in with `{% use %}`.
     ## The resolved layout options, from `ui_layout_resolve()` in the base layout.
     layout: 'map',
-} %}
+#}
 
 {## The navigation links, rendered from the KnpMenu menu named `sidebar`. ##}
 {% block sidebar_menu %}
