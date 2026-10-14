@@ -30,7 +30,7 @@
                             "base_template": null
                         },
                         "email_verification": {
-                            "enabled": true,
+                            "enabled": "1",
                             "lifetime": 604800,
                             "firewall": "main",
                             "banner_template": "@SolidWorxPlatform/EmailVerification/banner.html.twig",
@@ -72,8 +72,8 @@
                             "properties": {
                                 "enabled": {
                                     "description": "Enable two-factor authentication.",
-                                    "default": false,
-                                    "type": "boolean"
+                                    "default": "0",
+                                    "type": "string"
                                 },
                                 "base_template": {
                                     "description": "The base layout template for 2FA pages.",
@@ -88,7 +88,7 @@
                         },
                         "email_verification": {
                             "default": {
-                                "enabled": true,
+                                "enabled": "1",
                                 "lifetime": 604800,
                                 "firewall": "main",
                                 "banner_template": "@SolidWorxPlatform/EmailVerification/banner.html.twig",
@@ -101,8 +101,8 @@
                             "properties": {
                                 "enabled": {
                                     "description": "Send new users a verification link, show unverified users a banner, and gate actions through EmailVerificationGateInterface.",
-                                    "default": true,
-                                    "type": "boolean"
+                                    "default": "1",
+                                    "type": "string"
                                 },
                                 "lifetime": {
                                     "description": "How long, in seconds, a verification link stays valid. Defaults to 7 days.",
