@@ -257,9 +257,9 @@ php -r '
 $file = "config/bundles.php";
 $bundles = file_get_contents($file);
 
-// The kernel registers SchebTwoFactorBundle when platform.yaml enables 2FA, and the SaaS
-// bundle has required config of its own — neither belongs here by default.
-$bundles = preg_replace("/^.*(SchebTwoFactorBundle|SolidWorxPlatformSaasBundle).*\n/m", "", $bundles);
+// The kernel registers SchebTwoFactorBundle and SymfonyCastsVerifyEmailBundle when platform.yaml
+// enables them, and the SaaS bundle has required config of its own — none belong here by default.
+$bundles = preg_replace("/^.*(SchebTwoFactorBundle|SymfonyCastsVerifyEmailBundle|SolidWorxPlatformSaasBundle).*\n/m", "", $bundles);
 
 if (!str_contains($bundles, "SolidWorxPlatformUiBundle")) {
     $bundles = preg_replace("/\];\s*$/", "    SolidWorx\\Platform\\UiBundle\\SolidWorxPlatformUiBundle::class => [\"all\" => true],\n];\n", $bundles);

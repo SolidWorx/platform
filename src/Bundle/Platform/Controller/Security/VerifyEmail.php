@@ -23,7 +23,6 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Ulid;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
@@ -34,7 +33,6 @@ use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
  * It works without a session — the link is usually opened from a mail client — and signs the user
  * in on success, through the `form_login` authenticator of `platform.security.email_verification.firewall`.
  */
-#[Route(path: self::PATH, name: self::ROUTE_NAME, methods: ['GET'])]
 final class VerifyEmail extends BaseController
 {
     public const string PATH = '/verify';

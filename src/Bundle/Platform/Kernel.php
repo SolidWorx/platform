@@ -78,21 +78,16 @@ abstract class Kernel extends BaseKernel
     #[Override]
     public function registerBundles(): iterable
     {
-        $verifyEmailRegistered = false;
-
         foreach (parent::registerBundles() as $bundle) {
-            $verifyEmailRegistered = $verifyEmailRegistered || $bundle instanceof SymfonyCastsVerifyEmailBundle;
-
             yield $bundle;
         }
 
-        // Signs and checks the email verification links. Skipped when the application already
-        // lists it in its own bundles.php, since a bundle cannot be registered twice.
-        if (! $verifyEmailRegistered) {
+        // Signs and checks the email verification links.
+        if ($this->isSecurityFeatureEnabled('email_verification', default: true)) {
             yield new SymfonyCastsVerifyEmailBundle();
         }
 
-        if ($this->isTwoFactorEnabled()) {
+        if ($this->isSecurityFeatureEnabled('two_factor', default: false)) {
             yield new SchebTwoFactorBundle();
         }
 
@@ -133,24 +128,24 @@ abstract class Kernel extends BaseKernel
         $routes->import('.', '_solidworx_platform_auth_routes');
     }
 
-    private function isTwoFactorEnabled(): bool
+    private function isSecurityFeatureEnabled(string $feature, bool $default): bool
     {
         $platformConfig = $this->rawConfig['platform'] ?? [];
         if (! is_array($platformConfig)) {
-            return false;
+            return $default;
         }
 
         $security = $platformConfig['security'] ?? [];
         if (! is_array($security)) {
-            return false;
+            return $default;
         }
 
-        $twoFactor = $security['two_factor'] ?? [];
-        if (! is_array($twoFactor)) {
-            return false;
+        $config = $security[$feature] ?? [];
+        if (! is_array($config)) {
+            return $default;
         }
 
-        return ($twoFactor['enabled'] ?? false) === true;
+        return ($config['enabled'] ?? $default) === true;
     }
 
     private function processPlatformConfig(): void
