@@ -15,7 +15,6 @@ namespace SolidWorx\Platform\PlatformBundle\Controller\Security;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
@@ -29,7 +28,6 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * `IS_AUTHENTICATED_2FA_IN_PROGRESS` access-control rules, which only match users who are
  * half-way through the login challenge — the exact opposite of who this page is for.
  */
-#[Route(path: self::PATH, name: self::ROUTE_NAME, methods: ['GET'])]
 #[IsGranted(attribute: 'IS_AUTHENTICATED_FULLY')]
 final class TwoFactorConfiguration extends AbstractController
 {

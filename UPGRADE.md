@@ -28,6 +28,13 @@ Users extending `Model\User` already have them.
 Set `enabled: false` to turn it all off: the bundle, the `/verify` routes and the services behind
 them are not registered, and the gate never gates.
 
+### Two-factor routes
+
+The `2fa_login`, `2fa_login_check`, `/2fa/resend` and `/profile/two-factor` routes are now
+registered by the platform kernel only when `platform.security.two_factor.enabled` is true. They
+are no longer in `Resources/config/routing.php` or on controller attributes, so nothing changes in
+your routing config; with 2FA disabled the routes simply no longer exist.
+
 ### User profile section
 
 Every signed-in user now gets a profile section — `/profile`, `/profile/edit`, `/profile/password`

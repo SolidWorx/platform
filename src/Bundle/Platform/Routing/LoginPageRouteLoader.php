@@ -16,7 +16,9 @@ namespace SolidWorx\Platform\PlatformBundle\Routing;
 use InvalidArgumentException;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\Login;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendTwoFactorCode;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendVerificationEmail;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\TwoFactorConfiguration;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\VerifyEmail;
 use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
@@ -44,9 +46,12 @@ class LoginPageRouteLoader extends Loader
      */
     public function __construct(
         private readonly iterable $authenticators,
-        // The email verification routes only exist while the feature, and the bundle behind it, is on.
+        // The email verification and 2FA routes only exist while the feature, and the bundle
+        // behind it, is on.
         #[Autowire(param: 'solidworx_platform.security.email_verification.enabled')]
         private readonly bool $emailVerificationEnabled = false,
+        #[Autowire(param: 'solidworx_platform.security.two_factor.enabled')]
+        private readonly bool $twoFactorEnabled = false,
         ?string $env = null,
     ) {
         parent::__construct($env);
@@ -118,6 +123,32 @@ class LoginPageRouteLoader extends Loader
                     '_controller' => ResendVerificationEmail::class,
                 ],
                 methods: ['POST'],
+            ));
+        }
+
+        if ($this->twoFactorEnabled) {
+            $collection->add('2fa_login', new Route(
+                path: '/2fa',
+                defaults: [
+                    '_controller' => 'scheb_two_factor.form_controller::form',
+                ],
+            ));
+
+            $collection->add('2fa_login_check', new Route(path: '/2fa_check'));
+
+            $collection->add(ResendTwoFactorCode::ROUTE_NAME, new Route(
+                path: ResendTwoFactorCode::PATH,
+                defaults: [
+                    '_controller' => ResendTwoFactorCode::class,
+                ],
+            ));
+
+            $collection->add(TwoFactorConfiguration::ROUTE_NAME, new Route(
+                path: TwoFactorConfiguration::PATH,
+                defaults: [
+                    '_controller' => TwoFactorConfiguration::class,
+                ],
+                methods: ['GET'],
             ));
         }
 
