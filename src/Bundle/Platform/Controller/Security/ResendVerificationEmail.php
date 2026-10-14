@@ -21,7 +21,6 @@ use SolidWorx\Platform\PlatformBundle\Response\RedirectResponse;
 use SolidWorx\Platform\PlatformBundle\Security\EmailVerification\EmailVerifier;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use function is_int;
 use function str_starts_with;
@@ -34,7 +33,6 @@ use function str_starts_with;
  * one with `@SolidWorxPlatform/EmailVerification/_resend_form.html.twig`. Works outside a tenant,
  * since the banner shows on every page — including ones that stand in for a missing tenant or plan.
  */
-#[Route(path: self::PATH, name: self::ROUTE_NAME, methods: ['POST'])]
 #[IsGranted(attribute: 'IS_AUTHENTICATED')]
 #[WithoutTenant]
 final class ResendVerificationEmail extends BaseController

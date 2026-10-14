@@ -4,9 +4,10 @@
 
 ### Email verification
 
-The platform now owns email verification, built on `symfonycasts/verify-email-bundle` (registered
-by the platform kernel — drop it from your `bundles.php` if you listed it; it is skipped if you
-don't). It is on by default under `platform.security.email_verification`:
+The platform now owns email verification, built on `symfonycasts/verify-email-bundle`. The platform
+kernel registers that bundle while the feature is enabled, so **remove
+`SymfonyCasts\Bundle\VerifyEmail\SymfonyCastsVerifyEmailBundle` from your `bundles.php`** — a
+bundle cannot be registered twice. It is on by default under `platform.security.email_verification`:
 
 - New, unverified users get a signed link (valid **7 days**, `lifetime`) when they are saved.
 - `GET /verify` (`_solidworx_platform_verify_email`) checks the link, marks the user verified and
@@ -24,9 +25,8 @@ don't). It is on by default under `platform.security.email_verification`:
 **Breaking:** `Model\UserInterface` now declares `getEmail()`, `isVerified()` and `setVerified()`.
 Users extending `Model\User` already have them.
 
-Set `enabled: false` to turn it all off; the gate then never gates. Applications that decide per
-deployment can override the `solidworx_platform.security.email_verification.enabled` parameter in
-their own container config instead.
+Set `enabled: false` to turn it all off: the bundle, the `/verify` routes and the services behind
+them are not registered, and the gate never gates.
 
 ### User profile section
 

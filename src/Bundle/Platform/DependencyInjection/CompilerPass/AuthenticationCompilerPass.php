@@ -78,6 +78,6 @@ final class AuthenticationCompilerPass implements CompilerPassInterface
             }
         }
 
-        $routeLoader->addArgument(new IteratorArgument($authenticators));
+        $routeLoader->setArgument('$authenticators', new IteratorArgument($authenticators));
     }
 }

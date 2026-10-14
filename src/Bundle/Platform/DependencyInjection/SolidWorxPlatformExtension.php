@@ -20,7 +20,9 @@ use Reflector;
 use SolidWorx\Platform\PlatformBundle\Attributes\Menu\MenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfiguration;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendTwoFactorCode;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendVerificationEmail;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\TwoFactorConfiguration;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\VerifyEmail;
 use SolidWorx\Platform\PlatformBundle\Controller\Tenant\OnboardTenant;
 use SolidWorx\Platform\PlatformBundle\Controller\Tenant\SelectTenant;
 use SolidWorx\Platform\PlatformBundle\Controller\Tenant\TenantRedirector;
@@ -41,6 +43,8 @@ use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Model\UserTenantInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\TenantRepository;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
+use SolidWorx\Platform\PlatformBundle\Security\EmailVerification\EmailVerifier;
+use SolidWorx\Platform\PlatformBundle\Security\EmailVerification\SendVerificationEmailListener;
 use SolidWorx\Platform\PlatformBundle\Security\EventListener\TenantDomainLoginListener;
 use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantCreationVoter;
 use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantVoter;
@@ -224,10 +228,9 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
     }
 
     /**
-     * Only parameters: with verification disabled the services stay, and the gate answers "not
-     * gated" — application code injecting it keeps working either way. An application can also
-     * override `solidworx_platform.security.email_verification.enabled` in its own container config
-     * to switch it per environment or deployment.
+     * With verification disabled the kernel does not register SymfonyCastsVerifyEmailBundle, so
+     * everything that signs or checks a link is removed. The gate stays and answers "not gated",
+     * so application code injecting it keeps working either way.
      *
      * @param EmailVerificationConfig $config
      */
@@ -238,6 +241,13 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         $container->setParameter('solidworx_platform.security.email_verification.banner_template', $config['banner_template']);
         $container->setParameter('solidworx_platform.security.email_verification.email.template', $config['email']['template']);
         $container->setParameter('solidworx_platform.security.email_verification.email.subject', $config['email']['subject']);
+
+        if (! $config['enabled']) {
+            $container->removeDefinition(EmailVerifier::class);
+            $container->removeDefinition(SendVerificationEmailListener::class);
+            $container->removeDefinition(VerifyEmail::class);
+            $container->removeDefinition(ResendVerificationEmail::class);
+        }
     }
 
     /**

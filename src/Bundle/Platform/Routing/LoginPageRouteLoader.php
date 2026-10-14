@@ -16,8 +16,11 @@ namespace SolidWorx\Platform\PlatformBundle\Routing;
 use InvalidArgumentException;
 use Override;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\Login;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendVerificationEmail;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\VerifyEmail;
 use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -41,6 +44,9 @@ class LoginPageRouteLoader extends Loader
      */
     public function __construct(
         private readonly iterable $authenticators,
+        // The email verification routes only exist while the feature, and the bundle behind it, is on.
+        #[Autowire(param: 'solidworx_platform.security.email_verification.enabled')]
+        private readonly bool $emailVerificationEnabled = false,
         ?string $env = null,
     ) {
         parent::__construct($env);
@@ -95,6 +101,24 @@ class LoginPageRouteLoader extends Loader
                 ),
             );
 
+        }
+
+        if ($this->emailVerificationEnabled) {
+            $collection->add(VerifyEmail::ROUTE_NAME, new Route(
+                path: VerifyEmail::PATH,
+                defaults: [
+                    '_controller' => VerifyEmail::class,
+                ],
+                methods: ['GET'],
+            ));
+
+            $collection->add(ResendVerificationEmail::ROUTE_NAME, new Route(
+                path: ResendVerificationEmail::PATH,
+                defaults: [
+                    '_controller' => ResendVerificationEmail::class,
+                ],
+                methods: ['POST'],
+            ));
         }
 
         return $collection;
