@@ -171,12 +171,12 @@ abstract class Kernel extends BaseKernel
         if ($configFile !== null) {
             $ext = pathinfo($configFile, PATHINFO_EXTENSION);
 
-            $this->rawConfig = match ($ext) {
-                'yaml', 'yml' => $this->toConfigArray(Yaml::parseFile($configFile, Yaml::PARSE_CONSTANT)),
-                'json' => $this->toConfigArray(json_decode((string) file_get_contents($configFile), associative: true, depth: 512, flags: JSON_THROW_ON_ERROR)),
-                'php' => $this->toConfigArray(require $configFile),
+            $this->rawConfig = $this->toConfigArray(self::resolveEnvValues(match ($ext) {
+                'yaml', 'yml' => Yaml::parseFile($configFile, Yaml::PARSE_CONSTANT),
+                'json' => json_decode((string) file_get_contents($configFile), associative: true, depth: 512, flags: JSON_THROW_ON_ERROR),
+                'php' => require $configFile,
                 default => throw new RuntimeException(sprintf('Unsupported platform configuration file format: .%s', $ext)),
-            };
+            }));
         }
 
         $content = "<?php\n\n return " . var_export($this->rawConfig, return: true) . ";\n";
@@ -206,6 +206,28 @@ abstract class Kernel extends BaseKernel
         }
 
         return $config;
+    }
+
+    /**
+     * Resolves `%env()%` values while the file is parsed, using Symfony's built-in env var
+     * processors (`bool:`, `int:`, `json:`, `default::`, `file:`, ...).
+     *
+     * The platform configuration decides which bundles, routes and services exist, so it cannot
+     * use the container's runtime env placeholders: the value is baked into the cache, and
+     * changing the variable requires a `cache:clear`. Custom application env var processors are
+     * not available this early, and only strings containing `%env(` are resolved.
+     */
+    public static function resolveEnvValues(mixed $value, ContainerBuilder $container = new ContainerBuilder()): mixed
+    {
+        if (is_array($value)) {
+            return array_map(static fn (mixed $item): mixed => self::resolveEnvValues($item, $container), $value);
+        }
+
+        if (! is_string($value) || ! str_contains($value, '%env(')) {
+            return $value;
+        }
+
+        return $container->resolveEnvPlaceholders($container->getParameterBag()->resolveValue($value), format: true);
     }
 
     /**
