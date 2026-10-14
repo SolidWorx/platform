@@ -52,7 +52,7 @@ final class GenerateSchemaCommandTest extends TestCase
 
     public function testCommandDescription(): void
     {
-        self::assertNotEmpty($this->makeCommand()->getDescription());
+        self::assertSame('Generates the JSON Schema for platform.yaml IDE autocompletion.', $this->makeCommand()->getDescription());
     }
 
     public function testCommandHasOutputOption(): void
@@ -103,7 +103,11 @@ final class GenerateSchemaCommandTest extends TestCase
         self::assertFileExists($this->tmpFile);
         $content = file_get_contents($this->tmpFile);
         self::assertNotFalse($content);
-        self::assertNotEmpty($content);
+        self::assertSame('{
+    "$schema": "https://example.com",
+    "type": "object",
+    "properties": []
+}', $content);
     }
 
     public function testWrittenFileContainsValidJson(): void
