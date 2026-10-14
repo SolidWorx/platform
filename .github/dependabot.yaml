@@ -1,11 +1,9 @@
-# https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes#configuring-automatically-generated-release-notes
+# https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference
 
 version: 2
 
 updates:
-  - allow:
-      - dependency-type: "development"
-    commit-message:
+  - commit-message:
       include: "scope"
       prefix: "composer"
     directory: "/"
@@ -30,11 +28,13 @@ updates:
 
   - commit-message:
       include: "scope"
-      prefix: "node"
-    directory: "/"
+      prefix: "bun"
+    directories:
+      - "/"
+      - "/assets"
     labels:
       - "dependency"
     open-pull-requests-limit: 10
-    package-ecosystem: "npm"
+    package-ecosystem: "bun"
     schedule:
       interval: "daily"
