@@ -353,8 +353,6 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
             ];
 
             if ($config['multi_tenancy']['enabled']) {
-                $multiTenancy = $config['multi_tenancy'];
-
                 $orm['mappings']['SolidWorxPlatformBundle'] = [
                     'is_bundle' => false,
                     'type' => 'attribute',
