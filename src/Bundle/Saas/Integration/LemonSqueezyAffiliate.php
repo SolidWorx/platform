@@ -32,7 +32,7 @@ final class LemonSqueezyAffiliate
 
     public static function isValid(mixed $ref): bool
     {
-        return is_string($ref) && preg_match('/^[A-Za-z0-9_-]{1,128}$/', $ref) === 1;
+        return is_string($ref) && preg_match('/^[A-Za-z0-9_-]{1,128}$/D', $ref) === 1;
     }
 
     public static function fromCookie(?Request $request): ?string

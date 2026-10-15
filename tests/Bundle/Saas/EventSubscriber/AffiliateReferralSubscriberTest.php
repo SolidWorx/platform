@@ -38,6 +38,9 @@ final class AffiliateReferralSubscriberTest extends TestCase
         yield 'invalid ref' => [[
             'aff_ref' => 'a b',
         ], HttpKernelInterface::MAIN_REQUEST, null];
+        yield 'trailing newline' => [[
+            'aff_ref' => "click_1\n",
+        ], HttpKernelInterface::MAIN_REQUEST, null];
         yield 'no ref' => [[], HttpKernelInterface::MAIN_REQUEST, null];
         yield 'sub request' => [[
             'aff_ref' => 'click_1',
