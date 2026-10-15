@@ -81,6 +81,13 @@ class Subscription
     private ?DateTimeImmutable $pendingPlanChangeAt = null;
 
     /**
+     * Affiliate click id captured when the subscription was created. Passed to
+     * the payment provider at checkout so the referring affiliate is credited.
+     */
+    #[ORM\Column(type: Types::STRING, length: 128, nullable: true)]
+    private ?string $affiliateRef = null;
+
+    /**
      * @var Collection<int, SubscriptionLog>
      */
     #[ORM\OneToMany(targetEntity: SubscriptionLog::class, mappedBy: 'subscription', fetch: 'EXTRA_LAZY')]
@@ -229,6 +236,18 @@ class Subscription
     public function setPendingPlanChangeAt(?DateTimeImmutable $pendingPlanChangeAt): static
     {
         $this->pendingPlanChangeAt = $pendingPlanChangeAt;
+
+        return $this;
+    }
+
+    public function getAffiliateRef(): ?string
+    {
+        return $this->affiliateRef;
+    }
+
+    public function setAffiliateRef(?string $affiliateRef): static
+    {
+        $this->affiliateRef = $affiliateRef;
 
         return $this;
     }
