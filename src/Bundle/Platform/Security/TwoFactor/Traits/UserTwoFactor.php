@@ -68,7 +68,8 @@ trait UserTwoFactor
 
     public function getTotpAuthenticationConfiguration(): TotpConfigurationInterface | null
     {
-        $period = 20;
+        // Google and Microsoft Authenticator ignore the period in the QR code and always use 30 seconds
+        $period = 30;
         $digits = 6;
 
         return $this->totpSecret !== null ? new TotpConfiguration($this->totpSecret, TotpConfiguration::ALGORITHM_SHA1, $period, $digits) : null;
