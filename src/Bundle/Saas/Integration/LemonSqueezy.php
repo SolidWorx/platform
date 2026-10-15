@@ -24,6 +24,7 @@ use SolidWorx\Platform\SaasBundle\Exception\PaymentIntegrationException;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
@@ -45,10 +46,12 @@ class LemonSqueezy implements PaymentIntegrationInterface
         #[Autowire(param: 'solidworx_platform.saas.payment.return_route')]
         private readonly string $returnRoute,
         private readonly UrlGeneratorInterface $router,
+        private readonly RequestStack $requestStack,
+        ?HttpClientInterface $httpClient = null,
     ) {
-        $this->httpClient = HttpClient::createForBaseUri(
-            self::BASE_URI,
+        $this->httpClient = ($httpClient ?? HttpClient::create())->withOptions(
             [
+                'base_uri' => self::BASE_URI,
                 'headers' => [
                     'Authorization' => sprintf('Bearer %s', $apiKey),
                     'Accept' => 'application/vnd.api+json',
@@ -199,7 +202,27 @@ class LemonSqueezy implements PaymentIntegrationInterface
         $data = $response->toArray();
         $attributes = $this->arrayValue($this->arrayValue($data, 'data'), 'attributes');
 
-        return $this->stringValue($attributes, 'url');
+        return $this->withAffiliateRef($this->stringValue($attributes, 'url'), $subscription);
+    }
+
+    /**
+     * affiliate.js only rewrites <a> links that point at Lemon Squeezy, so a
+     * checkout created through the API and reached via a server redirect never
+     * gets the referral. Lemon Squeezy documents appending `aff_ref` manually
+     * in that case. The cookie is the most recent click in this browser; the
+     * stored ref covers checkouts from another device.
+     */
+    private function withAffiliateRef(string $url, Subscription $subscription): string
+    {
+        $ref = LemonSqueezyAffiliate::fromCookie($this->requestStack->getMainRequest()) ?? $subscription->getAffiliateRef();
+
+        if ($ref === null) {
+            return $url;
+        }
+
+        return $url . (str_contains($url, '?') ? '&' : '?') . http_build_query([
+            LemonSqueezyAffiliate::QUERY_PARAMETER => $ref,
+        ]);
     }
 
     #[Override]

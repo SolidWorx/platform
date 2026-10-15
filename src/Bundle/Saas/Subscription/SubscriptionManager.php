@@ -27,10 +27,12 @@ use SolidWorx\Platform\SaasBundle\Exception\ActiveSubscriptionPlanChangeExceptio
 use SolidWorx\Platform\SaasBundle\Exception\InvalidPlanException;
 use SolidWorx\Platform\SaasBundle\Exception\NoFreePlanConfiguredException;
 use SolidWorx\Platform\SaasBundle\Exception\TrialConfigurationException;
+use SolidWorx\Platform\SaasBundle\Integration\LemonSqueezyAffiliate;
 use SolidWorx\Platform\SaasBundle\Integration\Options;
 use SolidWorx\Platform\SaasBundle\Integration\PaymentIntegrationInterface;
 use SolidWorx\Platform\SaasBundle\Repository\PlanRepositoryInterface;
 use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepositoryInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Uid\Ulid;
 
 final readonly class SubscriptionManager implements SubscriptionProviderInterface
@@ -39,6 +41,7 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
         private SubscriptionRepositoryInterface $subscriptionRepository,
         private PlanRepositoryInterface $planRepository,
         private PaymentIntegrationInterface $paymentIntegration,
+        private ?RequestStack $requestStack = null,
     ) {
     }
 
@@ -72,6 +75,7 @@ final readonly class SubscriptionManager implements SubscriptionProviderInterfac
         $subscription->setStartDate(Carbon::parse('NOW'));
         $subscription->setEndDate((Carbon::parse('NOW')));
         $subscription->setPlan($plan);
+        $subscription->setAffiliateRef(LemonSqueezyAffiliate::fromCookie($this->requestStack?->getMainRequest()));
 
         $this->subscriptionRepository->save($subscription);
 
