@@ -68,7 +68,8 @@
   },
   "peerDependencies": {
     "@hotwired/stimulus": "^3.2.2",
-    "@tabler/core": "^1.5.1"
+    "@tabler/core": "^1.5.1",
+    "@symfony/webpack-encore": "^5.2.0 || ^6.0.0 || ^7.0.0"
   },
   "dependencies": {
     "@hotwired/stimulus": "^3.2.2",
@@ -91,7 +92,6 @@
   "devDependencies": {
     "@babel/core": "^8.0.5",
     "@babel/preset-env": "^8.0.5",
-    "@symfony/webpack-encore": "^5.2.0",
     "eslint-webpack-plugin": "^5.0.2",
     "core-js": "^3.46.0",
     "jquery": "^3.7.1",
@@ -112,6 +112,9 @@
       "optional": false
     },
     "webpack": {
+      "optional": false
+    },
+    "@symfony/webpack-encore": {
       "optional": false
     }
   }
