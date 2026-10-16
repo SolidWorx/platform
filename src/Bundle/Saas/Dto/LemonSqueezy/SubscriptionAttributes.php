@@ -45,7 +45,7 @@ class SubscriptionAttributes
 
     public ?string $cardBrand = null;
 
-    public string $cardLastFour;
+    public ?string $cardLastFour = null;
 
     public ?string $pause = null;
 
