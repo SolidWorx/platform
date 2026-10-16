@@ -224,7 +224,7 @@ readonly class PlanFeatureManager implements ResetInterface
         foreach ($planFeatures as $planFeature) {
             $plan = $planFeature->getPlan();
 
-            if ($excludePlan instanceof Plan && $plan->getId()->equals($excludePlan->getId())) {
+            if ($excludePlan instanceof Plan && ($plan->getId()->equals($excludePlan->getId()) || ! $plan->isActive())) {
                 continue;
             }
 
