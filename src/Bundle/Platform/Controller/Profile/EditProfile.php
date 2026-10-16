@@ -18,10 +18,12 @@ use SolidWorx\Platform\PlatformBundle\Controller\BaseController;
 use SolidWorx\Platform\PlatformBundle\Enum\Flash;
 use SolidWorx\Platform\PlatformBundle\Form\Type\Profile\ProfileType;
 use SolidWorx\Platform\PlatformBundle\Response\RedirectResponse;
+use SolidWorx\Platform\PlatformBundle\Security\EmailVerification\EmailVerifier;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\FormTypeInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -33,6 +35,9 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
  * `platform.profile.form_type` names — {@see ProfileType} unless an application replaced it —
  * which is also the boundary that decides which columns are writable: a field the form does not
  * declare cannot be set, no matter what the request body contains.
+ *
+ * Changing the email address un-verifies the account and mails a link to the new address, so a
+ * verified user cannot switch to an address they do not own and keep the verified status.
  */
 #[Route(path: self::PATH, name: self::ROUTE_NAME, methods: ['GET', 'POST'])]
 #[IsGranted(attribute: 'IS_AUTHENTICATED_FULLY')]
@@ -57,6 +62,8 @@ final class EditProfile extends BaseController
         private readonly string $template,
         #[Autowire(param: 'solidworx_platform.profile.form_type')]
         private readonly string $formType,
+        // Not registered while email verification is turned off.
+        private readonly ?EmailVerifier $emailVerifier = null,
     ) {
     }
 
@@ -64,15 +71,34 @@ final class EditProfile extends BaseController
     {
         $user = $this->currentUser();
 
+        $originalEmail = $user->getEmail();
+
         $form = $this->createForm($this->formType, $user);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $emailChanged = $this->emailVerifier instanceof EmailVerifier && $user->getEmail() !== $originalEmail;
+
+            if ($emailChanged) {
+                $user->setVerified(verified: false);
+            }
+
             $this->entityManager->flush();
 
-            return new RedirectResponse($this->generateUrl(ShowProfile::ROUTE_NAME))
-                ->withFlash(Flash::Success, 'Your profile has been updated.');
+            $response = new RedirectResponse($this->generateUrl(ShowProfile::ROUTE_NAME));
+
+            if (! $emailChanged) {
+                return $response->withFlash(Flash::Success, 'Your profile has been updated.');
+            }
+
+            try {
+                $this->emailVerifier->sendEmailConfirmation($user);
+            } catch (TransportExceptionInterface) {
+                return $response->withFlash(Flash::Warning, 'Your profile has been updated, but the verification email could not be sent. Please request a new one.');
+            }
+
+            return $response->withFlash(Flash::Info, 'Your profile has been updated. We sent a verification link to your new email address.');
         }
 
         return $this->render(
