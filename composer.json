@@ -18,7 +18,7 @@
         "scheb/2fa-bundle": "^8.0",
         "scheb/2fa-email": "^8.0",
         "scheb/2fa-totp": "^8.0",
-        "scheb/2fa-trusted-device": "^8.0",
+        "scheb/2fa-trusted-device": "^8.6",
         "symfony/console": "^8.1",
         "symfony/dependency-injection": "^8.1",
         "symfony/event-dispatcher": "^8.1",
