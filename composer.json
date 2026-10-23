@@ -10,7 +10,7 @@
         "doctrine/doctrine-bundle": "^2.13 || ^3.0",
         "doctrine/orm": "^2.15 || ^3.6",
         "endroid/qr-code": "^6.0",
-        "knplabs/knp-menu-bundle": "^3.6",
+        "knplabs/knp-menu-bundle": "^3.7",
         "league/uri": "^7.8",
         "mattketmo/email-checker": "^3.0",
         "nesbot/carbon": "^3.9",
