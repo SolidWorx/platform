@@ -9,10 +9,14 @@ request's host. With nothing checking that host, anyone could trigger one of tho
 victim with a forged `Host` header, and the genuine link inside would point at their site. Outside
 debug mode the platform now refuses to build such a link unless one of these is set:
 
+- `framework.router.default_uri`: if your app already sets it, you're done. Emailed links start
+  with it, whatever the request said.
+- `platform.security.base_url` (new, for example `https://app.example.com`): the same, for the
+  emailed links only. Takes precedence over `default_uri`. Both accept `%env()%`, resolved at
+  runtime.
 - `framework.trusted_hosts`: Symfony rejects requests for any other host. Use this with
-  domain-based multi-tenancy, so each tenant's links keep their own domain.
-- `platform.security.base_url` (new, for example `https://app.example.com`): every emailed link
-  starts with it, whatever the request said.
+  domain-based multi-tenancy, so each tenant's links keep their own domain. If you also set
+  `default_uri`, set `platform.security.base_url: ''` so the links use the request's host.
 
 Until one is set, verification emails are **not sent**: signing up still works, and a critical
 message is logged. The resend button reports that the email could not be sent, and the reset
@@ -31,7 +35,7 @@ It is **off by default**; nothing changes until you set
   bundle then loads even while the feature is off.)
 - Create the new `reset_password_request` table with a migration.
 - Make sure your emails have a sender, for example `framework.mailer.headers.from`.
-- Set `framework.trusted_hosts`, or `platform.security.base_url`; see
+- Set `framework.router.default_uri`, `platform.security.base_url` or `framework.trusted_hosts`; see
   [Emailed links](#emailed-links-need-a-trusted-host). Outside debug mode the reset pages refuse
   to run until one is set.
 - The login page and the change-password page link to `/reset-password`, and

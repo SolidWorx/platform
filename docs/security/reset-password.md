@@ -50,30 +50,45 @@ Switch it on in `platform.yaml` and you get, with no code of your own:
                from: 'Acme <noreply@acme.test>'
    ```
 
-4. **Pin down the host the link points at.** The link in the email is built from the
-   request's host. If nothing checks that host, an attacker can request a reset for
-   someone else's address with a forged `Host` header, and the victim receives a genuine
-   link pointing at the attacker's site. Do one of these:
+4. **Pin down the host the link points at.** Left alone, the link in the email is built
+   from the request's host. If nothing checks that host, an attacker can request a reset
+   for someone else's address with a forged `Host` header, and the victim receives a
+   genuine link pointing at the attacker's site.
+
+   If your app already sets `framework.router.default_uri`, you're done: emailed links
+   start with it. Otherwise do one of these:
+
+   ```yaml
+   # config/packages/routing.yaml: the URL of your application, also used by console commands.
+   framework:
+       router:
+           default_uri: '%env(APP_URL)%'
+   ```
+
+   ```yaml
+   # platform.yaml: the same, for emailed links only (password reset and email verification).
+   # Takes precedence over default_uri.
+   platform:
+     security:
+       base_url: '%env(APP_URL)%'
+   ```
 
    ```yaml
    # config/packages/framework.yaml: Symfony rejects requests for any other host.
    # Use this with domain-based multi-tenancy, so each tenant's link keeps its own domain.
+   # If you also set default_uri, add `platform.security.base_url: ''` so links use the
+   # request's host instead.
    framework:
        trusted_hosts: ['^app\.acme\.test$', '^.+\.acme\.test$']
    ```
 
-   ```yaml
-   # platform.yaml: every emailed link starts with this URL, whatever the request said.
-   # Applies to the email verification links too.
-   platform:
-     security:
-       base_url: 'https://app.acme.test'
-   ```
+   `%env()%` values are read when the first link is built, not when the kernel boots. A
+   URL from the secrets vault, or one set only once the app is installed, works. An empty
+   value counts as not set.
 
-   Outside debug mode, the reset pages refuse to run (with an error naming both options)
+   Outside debug mode, the reset pages refuse to run (with an error naming the settings)
    until one of them is set. In debug mode the request host is used as is, so a local
-   setup works without either. Console commands and workers are not affected: they have
-   no `Host` header, and use `framework.router.default_uri`.
+   setup works without any of them.
 
 5. **Clear the cache.** The platform configuration decides which bundles and routes
    exist, so it is baked into the container:
@@ -190,7 +205,7 @@ platform:
 ```
 
 The host of the emailed link comes from `platform.security.base_url` (shared with email
-verification), or from the request when that is null. See step 4 of
+verification), else `framework.router.default_uri`, else the request. See step 4 of
 [Enabling it](#enabling-it).
 
 The new password is validated by the same `PasswordPolicyInterface` as the change-password

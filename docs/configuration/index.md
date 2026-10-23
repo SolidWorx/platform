@@ -99,9 +99,12 @@ platform:
 platform:
   security:
     # The URL emailed links (password reset, email verification) start with, for example
-    # https://app.example.com. When null, links use the host of the request, and outside
-    # debug mode `framework.trusted_hosts` must be set; otherwise no link is sent, so a
-    # forged Host header cannot point one at another site.
+    # https://app.example.com. Accepts %env()%, resolved at runtime, so the value may come
+    # from the secrets vault or be set after installation.
+    # When null, `framework.router.default_uri` is used. When that is empty too, or this is
+    # set to '', links use the host of the request, and outside debug mode
+    # `framework.trusted_hosts` must be set; otherwise no link is sent, so a forged Host
+    # header cannot point one at another site.
     # Default: null
     base_url: null
 

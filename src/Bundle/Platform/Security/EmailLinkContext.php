@@ -13,12 +13,15 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Security;
 
+use InvalidArgumentException;
 use SolidWorx\Platform\PlatformBundle\Exception\UntrustedLinkHostException;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouterInterface;
+use function preg_match;
+use function sprintf;
 
 /**
  * Builds the absolute links the platform emails — password reset and email verification — on a
@@ -28,19 +31,21 @@ use Symfony\Component\Routing\RouterInterface;
  * anyone could trigger an email to a victim with a `Host` header of their own, and the victim
  * would receive a genuine link pointing at the attacker's site. So either:
  *
- * - `platform.security.base_url` is set, and the router builds the link on it; or
+ * - `platform.security.base_url` (else `framework.router.default_uri`) is set, and the router
+ *   builds the link on it; or
  * - `framework.trusted_hosts` is set, so Symfony has already rejected any other host — which
  *   keeps per-tenant custom domains working.
  *
  * With neither, {@see UntrustedLinkHostException} is thrown rather than a link sent. Debug mode is
  * exempt so a local setup works as is, and so is code running outside a request (a console
- * command, a worker), where the host comes from `framework.router.default_uri`, not a header.
+ * command, a worker), where the router has no header to take a host from.
  */
 final readonly class EmailLinkContext
 {
     public function __construct(
         private RouterInterface $router,
         private RequestStack $requestStack,
+        // `platform.security.base_url`, else `framework.router.default_uri`; '' when neither is set.
         #[Autowire(param: 'solidworx_platform.security.base_url')]
         private ?string $baseUrl = null,
         #[Autowire(param: 'kernel.debug')]
@@ -64,7 +69,9 @@ final readonly class EmailLinkContext
      */
     public function build(callable $build): mixed
     {
-        if ($this->baseUrl === null) {
+        $baseUrl = $this->baseUrl();
+
+        if ($baseUrl === null) {
             $this->assertRequestHostIsTrusted();
 
             return $build();
@@ -72,7 +79,7 @@ final readonly class EmailLinkContext
 
         $original = $this->router->getContext();
 
-        $context = RequestContext::fromUri($this->baseUrl);
+        $context = RequestContext::fromUri($baseUrl);
         $context->setParameters($original->getParameters());
 
         $this->router->setContext($context);
@@ -89,10 +96,31 @@ final readonly class EmailLinkContext
      */
     public function assertRequestHostIsTrusted(): void
     {
-        if ($this->baseUrl !== null || $this->debug || ! $this->requestStack->getCurrentRequest() instanceof Request || Request::getTrustedHosts() !== []) {
+        if ($this->baseUrl() !== null || $this->debug || ! $this->requestStack->getCurrentRequest() instanceof Request || Request::getTrustedHosts() !== []) {
             return;
         }
 
         throw new UntrustedLinkHostException();
+    }
+
+    public static function isValidBaseUrl(string $url): bool
+    {
+        return preg_match('#^https?://[^/]+#', $url) === 1;
+    }
+
+    /**
+     * Checked here rather than in the configuration, because an %env()% value is only known now.
+     */
+    private function baseUrl(): ?string
+    {
+        if ($this->baseUrl === null || $this->baseUrl === '') {
+            return null;
+        }
+
+        if (! self::isValidBaseUrl($this->baseUrl)) {
+            throw new InvalidArgumentException(sprintf('The base URL for emailed links must start with http:// or https:// and a host, got "%s". Check "platform.security.base_url" or "framework.router.default_uri".', $this->baseUrl));
+        }
+
+        return $this->baseUrl;
     }
 }

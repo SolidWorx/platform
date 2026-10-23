@@ -22,6 +22,7 @@ use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Controller\Profile\EditProfile;
 use SolidWorx\Platform\PlatformBundle\Enum\Flash;
 use SolidWorx\Platform\PlatformBundle\Response\RedirectResponse;
+use SolidWorx\Platform\PlatformBundle\Security\EmailLinkContext;
 use SolidWorx\Platform\PlatformBundle\Security\EmailVerification\EmailVerifier;
 use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\ProfileUser;
 use Symfony\Component\DependencyInjection\Container;
@@ -29,12 +30,14 @@ use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\RawMessage;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Translation\IdentityTranslator;
@@ -150,7 +153,7 @@ final class EditProfileTest extends TestCase
             }
         };
 
-        return new EmailVerifier($helper, $mailer, self::createStub(EntityManagerInterface::class), new IdentityTranslator(), 'email.html.twig', 'Confirm');
+        return new EmailVerifier($helper, $mailer, self::createStub(EntityManagerInterface::class), new IdentityTranslator(), 'email.html.twig', 'Confirm', new EmailLinkContext(self::createStub(RouterInterface::class), new RequestStack()));
     }
 
     public function record(RawMessage $message): void

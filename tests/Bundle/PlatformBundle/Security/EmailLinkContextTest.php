@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Security;
 
+use InvalidArgumentException;
 use Override;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
@@ -107,6 +108,26 @@ final class EmailLinkContextTest extends TestCase
         $this->requestStack->pop();
 
         self::assertSame('http://evil.example/reset-password/reset/abc', $this->context(null)->build($this->resetUrl(...)));
+    }
+
+    /**
+     * `framework.router.default_uri` is the fallback, and is '' when the application has none.
+     */
+    public function testAnEmptyBaseUrlMeansNone(): void
+    {
+        $this->expectException(UntrustedLinkHostException::class);
+
+        $this->context('')->build($this->resetUrl(...));
+    }
+
+    /**
+     * An %env()% value cannot be checked when the configuration loads, so it is checked here.
+     */
+    public function testABaseUrlWithoutASchemeIsRejected(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->context('app.example.com')->build($this->resetUrl(...));
     }
 
     private function resetUrl(): string

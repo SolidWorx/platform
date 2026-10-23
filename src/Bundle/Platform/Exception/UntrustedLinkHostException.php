@@ -23,6 +23,6 @@ final class UntrustedLinkHostException extends LogicException
 {
     public function __construct()
     {
-        parent::__construct('Emailed links are built from the request host, which nothing restricts. Set "framework.trusted_hosts", or "platform.security.base_url" to the URL of your application.');
+        parent::__construct('Emailed links are built from the request host, which nothing restricts. Set "framework.router.default_uri" or "platform.security.base_url" to the URL of your application, or restrict the host with "framework.trusted_hosts".');
     }
 }

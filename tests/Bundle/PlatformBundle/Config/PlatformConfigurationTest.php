@@ -130,6 +130,27 @@ final class PlatformConfigurationTest extends TestCase
         ]);
     }
 
+    public function testABaseUrlFromAnEnvVarIsLeftForRuntime(): void
+    {
+        self::assertSame('%env(APP_URL)%', $this->process([
+            'security' => [
+                'base_url' => '%env(APP_URL)%',
+            ],
+        ])['security']['base_url']);
+    }
+
+    /**
+     * Opts out of the framework.router.default_uri fallback, so per-tenant domains keep their own host.
+     */
+    public function testAnEmptyBaseUrlIsAllowed(): void
+    {
+        self::assertSame('', $this->process([
+            'security' => [
+                'base_url' => '',
+            ],
+        ])['security']['base_url']);
+    }
+
     public function testAResetLinkLifetimeUnderAMinuteIsRejected(): void
     {
         $this->expectException(InvalidConfigurationException::class);

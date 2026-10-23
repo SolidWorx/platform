@@ -230,7 +230,10 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
             PlatformConfiguration::PLATFORM_ACCESS_DECISION_STRATEGIES + $config['security']['access_decision']['strategies'],
         );
 
-        $container->setParameter('solidworx_platform.security.base_url', $config['security']['base_url']);
+        // Without a URL of its own, the platform uses the one the application already gave the router
+        // for console commands. Either may be an %env()%, resolved when the service is first built, so
+        // a value from the secrets vault or set after installation works.
+        $container->setParameter('solidworx_platform.security.base_url', $config['security']['base_url'] ?? '%router.request_context.base_url%');
 
         $this->loadProfile($container, $config['profile']);
 

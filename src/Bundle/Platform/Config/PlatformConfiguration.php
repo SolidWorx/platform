@@ -22,6 +22,7 @@ use SolidWorx\Platform\PlatformBundle\Form\Type\Profile\ProfileType;
 use SolidWorx\Platform\PlatformBundle\Form\Type\Tenant\TenantOnboardingType;
 use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
 use SolidWorx\Platform\PlatformBundle\Model\UserTenantInterface;
+use SolidWorx\Platform\PlatformBundle\Security\EmailLinkContext;
 use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantCreationVoter;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -30,7 +31,6 @@ use function implode;
 use function in_array;
 use function is_string;
 use function is_subclass_of;
-use function preg_match;
 use function sprintf;
 
 final class PlatformConfiguration implements PlatformConfigurationInterface
@@ -99,9 +99,10 @@ final class PlatformConfiguration implements PlatformConfigurationInterface
                         ->end()
                         ->scalarNode('base_url')
                             ->defaultNull()
-                            ->info('The URL emailed links (password reset, email verification) start with, e.g. https://app.example.com. Leave null to use the host of the request, which then has to be restricted with framework.trusted_hosts outside debug mode.')
+                            ->info('The URL emailed links (password reset, email verification) start with, e.g. https://app.example.com. Accepts %env()%, resolved at runtime. Leave null to use framework.router.default_uri. Set to "" (or leave both empty) to use the host of the request instead, e.g. for per-tenant domains; that host then has to be restricted with framework.trusted_hosts outside debug mode.')
                             ->validate()
-                                ->ifTrue(static fn (mixed $v): bool => $v !== null && (! is_string($v) || preg_match('#^https?://[^/]+#', $v) !== 1))
+                                // An %env()% value is only known at runtime, where EmailLinkContext checks it.
+                                ->ifTrue(static fn (mixed $v): bool => $v !== null && (! is_string($v) || ($v !== '' && ! str_contains($v, '%env(') && ! EmailLinkContext::isValidBaseUrl($v))))
                                 ->thenInvalid('The base URL must start with http:// or https:// and a host, got %s.')
                             ->end()
                         ->end()

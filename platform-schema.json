@@ -86,7 +86,7 @@
                             "additionalProperties": false
                         },
                         "base_url": {
-                            "description": "The URL emailed links (password reset, email verification) start with, e.g. https://app.example.com. Leave null to use the host of the request, which then has to be restricted with framework.trusted_hosts outside debug mode.",
+                            "description": "The URL emailed links (password reset, email verification) start with, e.g. https://app.example.com. Accepts %env()%, resolved at runtime. Leave null to use framework.router.default_uri. Set to \"\" (or leave both empty) to use the host of the request instead, e.g. for per-tenant domains; that host then has to be restricted with framework.trusted_hosts outside debug mode.",
                             "default": null,
                             "type": [
                                 "string",
