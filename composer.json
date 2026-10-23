@@ -14,7 +14,7 @@
         "league/uri": "^7.8",
         "mattketmo/email-checker": "^3.0",
         "nesbot/carbon": "^3.9",
-        "scheb/2fa-backup-code": "^8.0",
+        "scheb/2fa-backup-code": "^8.6",
         "scheb/2fa-bundle": "^8.0",
         "scheb/2fa-email": "^8.0",
         "scheb/2fa-totp": "^8.0",
