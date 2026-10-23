@@ -9,7 +9,7 @@
         "php": ">=8.4",
         "doctrine/doctrine-bundle": "^2.13 || ^3.0",
         "doctrine/orm": "^2.15 || ^3.6",
-        "endroid/qr-code": "^6.0",
+        "endroid/qr-code": "^6.1",
         "knplabs/knp-menu-bundle": "^3.6",
         "league/uri": "^7.8",
         "mattketmo/email-checker": "^3.0",
