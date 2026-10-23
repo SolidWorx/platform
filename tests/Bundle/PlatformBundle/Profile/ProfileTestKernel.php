@@ -19,12 +19,17 @@ use SolidWorx\Platform\PlatformBundle\Controller\Profile\ChangePassword;
 use SolidWorx\Platform\PlatformBundle\Controller\Profile\EditProfile;
 use SolidWorx\Platform\PlatformBundle\Controller\Profile\ShowProfile;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendVerificationEmail;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResetPassword\CheckResetPasswordEmail;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResetPassword\RequestResetPassword;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResetPassword\ResetPassword;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\TwoFactorConfiguration;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\MenuCompilerPass;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\Util;
 use SolidWorx\Platform\PlatformBundle\Enum\PasswordStrengthLevel;
 use SolidWorx\Platform\PlatformBundle\Form\Type\Profile\ChangePasswordType;
 use SolidWorx\Platform\PlatformBundle\Form\Type\Profile\ProfileType;
+use SolidWorx\Platform\PlatformBundle\Form\Type\Security\ResetPasswordRequestType;
+use SolidWorx\Platform\PlatformBundle\Form\Type\Security\ResetPasswordType;
 use SolidWorx\Platform\PlatformBundle\Menu\ProfileMenu;
 use SolidWorx\Platform\PlatformBundle\Menu\ProfileMenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Menu\Provider;
@@ -68,8 +73,9 @@ use function sys_get_temp_dir;
  * the Twig runtime are all the real ones, which is the point: a broken block, a renamed macro or
  * a field that stops rendering shows up here.
  *
- * The three profile routes and the two-factor route exist so the templates can generate the URLs
- * they link to; they deliberately have no controllers, because nothing here dispatches a request.
+ * The three profile routes, the two-factor route and the login and password reset routes exist so
+ * the templates can generate the URLs they link to; they deliberately have no controllers, because
+ * nothing here dispatches a request. Password reset is switched on, so the pages link to it.
  */
 final class ProfileTestKernel extends Kernel
 {
@@ -173,6 +179,9 @@ final class ProfileTestKernel extends Kernel
             'paths' => [
                 $projectDir . '/src/Bundle/Ui/templates' => 'Ui',
                 $projectDir . '/src/Bundle/Platform/Resources/views' => 'SolidWorxPlatform',
+            ],
+            'globals' => [
+                'platform_reset_password_enabled' => true,
             ],
         ]);
 
@@ -288,6 +297,13 @@ final class ProfileTestKernel extends Kernel
         $services->set(ChangePasswordType::class)
             ->args([service(PasswordPolicy::class)])
             ->tag('form.type');
+
+        $services->set(ResetPasswordRequestType::class)
+            ->tag('form.type');
+
+        $services->set(ResetPasswordType::class)
+            ->args([service(PasswordPolicy::class)])
+            ->tag('form.type');
     }
 
     /**
@@ -306,5 +322,12 @@ final class ProfileTestKernel extends Kernel
         $routes->add(ChangePassword::ROUTE_NAME, ChangePassword::PATH);
         $routes->add(TwoFactorConfiguration::ROUTE_NAME, TwoFactorConfiguration::PATH);
         $routes->add(ResendVerificationEmail::ROUTE_NAME, ResendVerificationEmail::PATH);
+        $routes->add('_login_main', '/login');
+        $routes->add(RequestResetPassword::ROUTE_NAME, RequestResetPassword::PATH);
+        $routes->add(CheckResetPasswordEmail::ROUTE_NAME, CheckResetPasswordEmail::PATH);
+        $routes->add(ResetPassword::ROUTE_NAME, ResetPassword::PATH)
+            ->defaults([
+                'token' => null,
+            ]);
     }
 }

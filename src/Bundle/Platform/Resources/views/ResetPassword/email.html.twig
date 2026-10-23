@@ -1,0 +1,12 @@
+{##
+    The password reset email. Replace it with `platform.security.reset_password.email.template`.
+
+    Context: `user`, `resetUrl`, `expiresAtMessageKey` and `expiresAtMessageData`.
+##}
+<p>{{ 'We received a request to reset the password of your account.'|trans }}</p>
+
+<p><a href="{{ resetUrl }}">{{ 'Choose a new password'|trans }}</a></p>
+
+<p>{{ 'This link will expire in %count%.'|trans({'%count%': expiresAtMessageKey|trans(expiresAtMessageData, 'ResetPasswordBundle')}) }}</p>
+
+<p>{{ "If you didn't ask to reset your password, you can ignore this email. Your password will not change."|trans }}</p>

@@ -18,6 +18,9 @@ use Override;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\Login;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendTwoFactorCode;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendVerificationEmail;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResetPassword\CheckResetPasswordEmail;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResetPassword\RequestResetPassword;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResetPassword\ResetPassword;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\TwoFactorConfiguration;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\VerifyEmail;
 use Symfony\Component\Config\Loader\Loader;
@@ -46,12 +49,14 @@ class LoginPageRouteLoader extends Loader
      */
     public function __construct(
         private readonly iterable $authenticators,
-        // The email verification and 2FA routes only exist while the feature, and the bundle
-        // behind it, is on.
+        // The email verification, 2FA and password reset routes only exist while the feature,
+        // and the bundle behind it, is on.
         #[Autowire(param: 'solidworx_platform.security.email_verification.enabled')]
         private readonly bool $emailVerificationEnabled = false,
         #[Autowire(param: 'solidworx_platform.security.two_factor.enabled')]
         private readonly bool $twoFactorEnabled = false,
+        #[Autowire(param: 'solidworx_platform.security.reset_password.enabled')]
+        private readonly bool $resetPasswordEnabled = false,
         ?string $env = null,
     ) {
         parent::__construct($env);
@@ -149,6 +154,33 @@ class LoginPageRouteLoader extends Loader
                     '_controller' => TwoFactorConfiguration::class,
                 ],
                 methods: ['GET'],
+            ));
+        }
+
+        if ($this->resetPasswordEnabled) {
+            $collection->add(RequestResetPassword::ROUTE_NAME, new Route(
+                path: RequestResetPassword::PATH,
+                defaults: [
+                    '_controller' => RequestResetPassword::class,
+                ],
+                methods: ['GET', 'POST'],
+            ));
+
+            $collection->add(CheckResetPasswordEmail::ROUTE_NAME, new Route(
+                path: CheckResetPasswordEmail::PATH,
+                defaults: [
+                    '_controller' => CheckResetPasswordEmail::class,
+                ],
+                methods: ['GET'],
+            ));
+
+            $collection->add(ResetPassword::ROUTE_NAME, new Route(
+                path: ResetPassword::PATH,
+                defaults: [
+                    '_controller' => ResetPassword::class,
+                    'token' => null,
+                ],
+                methods: ['GET', 'POST'],
             ));
         }
 

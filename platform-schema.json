@@ -25,6 +25,7 @@
                                 "TENANT_CREATE": "unanimous"
                             }
                         },
+                        "base_url": null,
                         "two_factor": {
                             "enabled": false,
                             "base_template": null
@@ -37,6 +38,27 @@
                             "email": {
                                 "template": "@SolidWorxPlatform/EmailVerification/email.html.twig",
                                 "subject": "Please confirm your email address"
+                            }
+                        },
+                        "reset_password": {
+                            "enabled": false,
+                            "lifetime": 3600,
+                            "throttle_limit": 900,
+                            "enable_garbage_collection": true,
+                            "firewall": "main",
+                            "rate_limit": {
+                                "enabled": true,
+                                "limit": 5,
+                                "interval": "15 minutes"
+                            },
+                            "templates": {
+                                "request": "@SolidWorxPlatform/ResetPassword/request.html.twig",
+                                "check_email": "@SolidWorxPlatform/ResetPassword/check_email.html.twig",
+                                "reset": "@SolidWorxPlatform/ResetPassword/reset.html.twig"
+                            },
+                            "email": {
+                                "template": "@SolidWorxPlatform/ResetPassword/email.html.twig",
+                                "subject": "Reset your password"
                             }
                         }
                     },
@@ -62,6 +84,14 @@
                                 }
                             },
                             "additionalProperties": false
+                        },
+                        "base_url": {
+                            "description": "The URL emailed links (password reset, email verification) start with, e.g. https://app.example.com. Leave null to use the host of the request, which then has to be restricted with framework.trusted_hosts outside debug mode.",
+                            "default": null,
+                            "type": [
+                                "string",
+                                "null"
+                            ]
                         },
                         "two_factor": {
                             "default": {
@@ -134,6 +164,131 @@
                                         "subject": {
                                             "description": "The subject of the verification email (translated).",
                                             "default": "Please confirm your email address",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "additionalProperties": false
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "reset_password": {
+                            "default": {
+                                "enabled": false,
+                                "lifetime": 3600,
+                                "throttle_limit": 900,
+                                "enable_garbage_collection": true,
+                                "firewall": "main",
+                                "rate_limit": {
+                                    "enabled": true,
+                                    "limit": 5,
+                                    "interval": "15 minutes"
+                                },
+                                "templates": {
+                                    "request": "@SolidWorxPlatform/ResetPassword/request.html.twig",
+                                    "check_email": "@SolidWorxPlatform/ResetPassword/check_email.html.twig",
+                                    "reset": "@SolidWorxPlatform/ResetPassword/reset.html.twig"
+                                },
+                                "email": {
+                                    "template": "@SolidWorxPlatform/ResetPassword/email.html.twig",
+                                    "subject": "Reset your password"
+                                }
+                            },
+                            "type": "object",
+                            "properties": {
+                                "enabled": {
+                                    "description": "Let users who forgot their password reset it through a link sent to their email address. Needs the reset_password_request table.",
+                                    "default": false,
+                                    "type": "boolean"
+                                },
+                                "lifetime": {
+                                    "description": "How long, in seconds, a reset link stays valid. Defaults to 1 hour.",
+                                    "default": 3600,
+                                    "type": "integer"
+                                },
+                                "throttle_limit": {
+                                    "description": "How long, in seconds, a user has to wait before another reset link is sent to them. Defaults to 15 minutes.",
+                                    "default": 900,
+                                    "type": "integer"
+                                },
+                                "enable_garbage_collection": {
+                                    "description": "Delete expired reset requests whenever a new one is made. Turn off to clean up with the reset-password:remove-expired command instead.",
+                                    "default": true,
+                                    "type": "boolean"
+                                },
+                                "firewall": {
+                                    "description": "The firewall whose login page links to the reset form, and where the user lands after choosing a new password.",
+                                    "default": "main",
+                                    "type": "string"
+                                },
+                                "rate_limit": {
+                                    "description": "Limits how many reset links one IP address can ask for, whichever accounts they are for.",
+                                    "default": {
+                                        "enabled": true,
+                                        "limit": 5,
+                                        "interval": "15 minutes"
+                                    },
+                                    "type": "object",
+                                    "properties": {
+                                        "enabled": {
+                                            "default": true,
+                                            "type": "boolean"
+                                        },
+                                        "limit": {
+                                            "description": "Requests allowed per interval.",
+                                            "default": 5,
+                                            "type": "integer"
+                                        },
+                                        "interval": {
+                                            "description": "The window the limit applies to, as a relative date string.",
+                                            "default": "15 minutes",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "additionalProperties": false
+                                },
+                                "templates": {
+                                    "description": "Extend the defaults and override their blocks, or replace them outright.",
+                                    "default": {
+                                        "request": "@SolidWorxPlatform/ResetPassword/request.html.twig",
+                                        "check_email": "@SolidWorxPlatform/ResetPassword/check_email.html.twig",
+                                        "reset": "@SolidWorxPlatform/ResetPassword/reset.html.twig"
+                                    },
+                                    "type": "object",
+                                    "properties": {
+                                        "request": {
+                                            "description": "The page asking for the email address.",
+                                            "default": "@SolidWorxPlatform/ResetPassword/request.html.twig",
+                                            "type": "string"
+                                        },
+                                        "check_email": {
+                                            "description": "The page shown once the form is sent, whether or not the account exists.",
+                                            "default": "@SolidWorxPlatform/ResetPassword/check_email.html.twig",
+                                            "type": "string"
+                                        },
+                                        "reset": {
+                                            "description": "The page the link opens, where the new password is chosen.",
+                                            "default": "@SolidWorxPlatform/ResetPassword/reset.html.twig",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "additionalProperties": false
+                                },
+                                "email": {
+                                    "default": {
+                                        "template": "@SolidWorxPlatform/ResetPassword/email.html.twig",
+                                        "subject": "Reset your password"
+                                    },
+                                    "type": "object",
+                                    "properties": {
+                                        "template": {
+                                            "description": "The HTML template of the reset email.",
+                                            "default": "@SolidWorxPlatform/ResetPassword/email.html.twig",
+                                            "type": "string"
+                                        },
+                                        "subject": {
+                                            "description": "The subject of the reset email (translated).",
+                                            "default": "Reset your password",
                                             "type": "string"
                                         }
                                     },

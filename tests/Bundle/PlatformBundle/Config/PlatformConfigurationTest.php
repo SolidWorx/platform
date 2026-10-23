@@ -89,6 +89,60 @@ final class PlatformConfigurationTest extends TestCase
         self::assertFalse($result['security']['two_factor']['enabled']);
     }
 
+    public function testEmailedLinksUseTheRequestHostByDefault(): void
+    {
+        self::assertNull($this->process([])['security']['base_url']);
+    }
+
+    public function testResetPasswordIsOffByDefaultWithSafeDefaults(): void
+    {
+        $resetPassword = $this->process([])['security']['reset_password'];
+
+        self::assertFalse($resetPassword['enabled']);
+        self::assertSame(3600, $resetPassword['lifetime']);
+        self::assertSame(900, $resetPassword['throttle_limit']);
+        self::assertTrue($resetPassword['enable_garbage_collection']);
+        self::assertSame('main', $resetPassword['firewall']);
+        self::assertSame([
+            'enabled' => true,
+            'limit' => 5,
+            'interval' => '15 minutes',
+        ], $resetPassword['rate_limit']);
+        self::assertSame([
+            'request' => '@SolidWorxPlatform/ResetPassword/request.html.twig',
+            'check_email' => '@SolidWorxPlatform/ResetPassword/check_email.html.twig',
+            'reset' => '@SolidWorxPlatform/ResetPassword/reset.html.twig',
+        ], $resetPassword['templates']);
+        self::assertSame([
+            'template' => '@SolidWorxPlatform/ResetPassword/email.html.twig',
+            'subject' => 'Reset your password',
+        ], $resetPassword['email']);
+    }
+
+    public function testABaseUrlWithoutASchemeIsRejected(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+
+        $this->process([
+            'security' => [
+                'base_url' => 'app.example.com',
+            ],
+        ]);
+    }
+
+    public function testAResetLinkLifetimeUnderAMinuteIsRejected(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+
+        $this->process([
+            'security' => [
+                'reset_password' => [
+                    'lifetime' => 30,
+                ],
+            ],
+        ]);
+    }
+
     public function testDefaultBaseTemplateIsNull(): void
     {
         $result = $this->process([]);
@@ -342,11 +396,11 @@ final class PlatformConfigurationTest extends TestCase
     /**
      * @param array<string, mixed> $config
      *
-     * @return array{name: string, version: string, security: array{access_decision: array{strategies: array<string, string>}, two_factor: array{enabled: bool, base_template: string|null}}, doctrine: array{types: array{enable_utc_date: bool}}, models: array{user: string}, profile: ProfileConfig}
+     * @return array{name: string, version: string, security: array{base_url: string|null, access_decision: array{strategies: array<string, string>}, two_factor: array{enabled: bool, base_template: string|null}, reset_password: array{enabled: bool, lifetime: int, throttle_limit: int, enable_garbage_collection: bool, firewall: string, rate_limit: array{enabled: bool, limit: int, interval: string}, templates: array<string, string>, email: array<string, string>}}, doctrine: array{types: array{enable_utc_date: bool}}, models: array{user: string}, profile: ProfileConfig}
      */
     private function process(array $config): array
     {
-        /** @var array{name: string, version: string, security: array{access_decision: array{strategies: array<string, string>}, two_factor: array{enabled: bool, base_template: string|null}}, doctrine: array{types: array{enable_utc_date: bool}}, models: array{user: string}, profile: ProfileConfig} */
+        /** @var array{name: string, version: string, security: array{base_url: string|null, access_decision: array{strategies: array<string, string>}, two_factor: array{enabled: bool, base_template: string|null}, reset_password: array{enabled: bool, lifetime: int, throttle_limit: int, enable_garbage_collection: bool, firewall: string, rate_limit: array{enabled: bool, limit: int, interval: string}, templates: array<string, string>, email: array<string, string>}}, doctrine: array{types: array{enable_utc_date: bool}}, models: array{user: string}, profile: ProfileConfig} */
         return $this->processor->process($this->configuration->getTreeBuilder()->buildTree(), [$config]);
     }
 }

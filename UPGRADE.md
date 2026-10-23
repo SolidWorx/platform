@@ -2,6 +2,52 @@
 
 ## 0.2 → 0.3
 
+### Emailed links need a trusted host
+
+**Breaking (production only):** password reset and email verification links are built from the
+request's host. With nothing checking that host, anyone could trigger one of those emails to a
+victim with a forged `Host` header, and the genuine link inside would point at their site. Outside
+debug mode the platform now refuses to build such a link unless one of these is set:
+
+- `framework.trusted_hosts`: Symfony rejects requests for any other host. Use this with
+  domain-based multi-tenancy, so each tenant's links keep their own domain.
+- `platform.security.base_url` (new, for example `https://app.example.com`): every emailed link
+  starts with it, whatever the request said.
+
+Until one is set, verification emails are **not sent**: signing up still works, and a critical
+message is logged. The resend button reports that the email could not be sent, and the reset
+pages show an error naming both settings. Console commands and workers are unaffected; they use
+`framework.router.default_uri`.
+
+### Password reset
+
+The platform now ships a "forgot password" flow, built on `symfonycasts/reset-password-bundle`.
+It is **off by default**; nothing changes until you set
+`platform.security.reset_password.enabled: true`. Then:
+
+- The platform kernel registers `SymfonyCastsResetPasswordBundle`. If Composer's Flex recipe added
+  it to `config/bundles.php`, **remove that line and `config/packages/reset_password.yaml`**; the
+  platform registers and configures the bundle itself. (Left in place they are tolerated, but the
+  bundle then loads even while the feature is off.)
+- Create the new `reset_password_request` table with a migration.
+- Make sure your emails have a sender, for example `framework.mailer.headers.from`.
+- Set `framework.trusted_hosts`, or `platform.security.base_url`; see
+  [Emailed links](#emailed-links-need-a-trusted-host). Outside debug mode the reset pages refuse
+  to run until one is set.
+- The login page and the change-password page link to `/reset-password`, and
+  `LoginExtension::defaultFormLoginConfig()` makes `^/reset-password` public ahead of your own
+  access-control rules.
+
+See [the password reset guide](./docs/security/reset-password.md).
+
+`symfony/rate-limiter` moved from `require-dev` to `require`; the reset form is rate limited per IP.
+
+**Changed markup:** the login page is now built on the new `Ui:AuthCard` component, and its
+`social_login` block renders inside the card under the form. A template extending
+`@Ui/Security/login.html.twig` that overrides `social_login` keeps working. The password rules list
+on the change-password page is now the `Ui:PasswordRequirements` component; its
+`password_requirements` block still exists.
+
 ### Email verification
 
 The platform now owns email verification, built on `symfonycasts/verify-email-bundle`. The platform

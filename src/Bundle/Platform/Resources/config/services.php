@@ -43,7 +43,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         ->private()
     ;
 
-    $exclude = [dirname(__DIR__, 2) . '/{DependencyInjection,Entity,Resources,Tests,Tenant/Event,Doctrine/Filter,Messenger}'];
+    $exclude = [dirname(__DIR__, 2) . '/{DependencyInjection,Entity,Resources,Tests,Tenant/Event,Doctrine/Filter,Messenger,Security/ResetPassword}'];
 
     if (! interface_exists(ProcessorInterface::class)) {
         // Monolog is an optional integration. Without it the processor implements an interface that

@@ -57,29 +57,37 @@ final class PlatformConfigState
      */
     public static function isTwoFactorEnabled(): bool
     {
-        $config = self::$config;
+        return self::isSecurityFeatureEnabled('two_factor');
+    }
 
-        if ($config === null) {
-            return false;
-        }
-
-        $security = $config['security'] ?? null;
-
-        if (! is_array($security)) {
-            return false;
-        }
-
-        $twoFactor = $security['two_factor'] ?? null;
-
-        if (! is_array($twoFactor)) {
-            return false;
-        }
-
-        return ($twoFactor['enabled'] ?? false) === true;
+    /**
+     * Whether password reset is enabled in the platform configuration. False when no platform
+     * configuration has been published.
+     */
+    public static function isResetPasswordEnabled(): bool
+    {
+        return self::isSecurityFeatureEnabled('reset_password');
     }
 
     public static function clear(): void
     {
         self::$config = null;
+    }
+
+    private static function isSecurityFeatureEnabled(string $feature): bool
+    {
+        $security = self::$config['security'] ?? null;
+
+        if (! is_array($security)) {
+            return false;
+        }
+
+        $config = $security[$feature] ?? null;
+
+        if (! is_array($config)) {
+            return false;
+        }
+
+        return ($config['enabled'] ?? false) === true;
     }
 }

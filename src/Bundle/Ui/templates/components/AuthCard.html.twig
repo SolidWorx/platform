@@ -1,0 +1,44 @@
+{#
+    The card every signed-out screen is built around: the login page and the password reset pages.
+
+        <twig:Ui:AuthCard title="{{ 'Forgot password'|trans }}">
+            <form>…</form>
+
+            <twig:block name="aside">
+                <a href="{{ path('_login_main') }}">{{ 'Back to sign in'|trans }}</a>
+            </twig:block>
+        </twig:Ui:AuthCard>
+
+    `content` goes in the card body under the centred title, `footer` inside the card under the body
+    (social login buttons, for instance), and `aside` is the line of muted text below the card.
+
+    It exists so those screens share one markup rather than several that drift. See the UI
+    consistency rules in CLAUDE.md.
+#}
+
+{% props
+    title,
+    description = ''
+%}
+
+<div {{ attributes.without('class') }} class="{{ html_classes('card', 'card-md', attributes.render('class')|default('')) }}">
+    <div class="card-body">
+        <h2 class="h2 text-center mb-4">{{ title }}</h2>
+
+        {% if description is not empty %}
+            <p class="text-secondary mb-4">{{ description }}</p>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    {% if block('footer') is defined and block('footer') is not empty %}
+        {% block footer %}{% endblock %}
+    {% endif %}
+</div>
+
+{% if block('aside') is defined and block('aside') is not empty %}
+    <div class="text-center text-secondary mt-3">
+        {% block aside %}{% endblock %}
+    </div>
+{% endif %}

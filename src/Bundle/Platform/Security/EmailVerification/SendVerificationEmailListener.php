@@ -17,6 +17,7 @@ use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\PostPersistEventArgs;
 use Doctrine\ORM\Events;
 use Psr\Log\LoggerInterface;
+use SolidWorx\Platform\PlatformBundle\Exception\UntrustedLinkHostException;
 use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -25,7 +26,8 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
  * Sends the verification link to every new, unverified user as soon as they are saved.
  *
  * A failed send is logged rather than thrown: the account already exists, and the user can ask
- * for another link from the banner or their profile.
+ * for another link from the banner or their profile. So is a host that nothing restricts — no
+ * link is sent then, and signing up keeps working while the configuration is fixed.
  */
 #[AsDoctrineListener(event: Events::postPersist)]
 final readonly class SendVerificationEmailListener
@@ -51,6 +53,10 @@ final readonly class SendVerificationEmailListener
         } catch (TransportExceptionInterface $transportException) {
             $this->logger->error('Failed to send email confirmation', [
                 'exception' => $transportException,
+            ]);
+        } catch (UntrustedLinkHostException $untrustedLinkHostException) {
+            $this->logger->critical('Email confirmation not sent: the link would point at an unchecked host.', [
+                'exception' => $untrustedLinkHostException,
             ]);
         }
     }

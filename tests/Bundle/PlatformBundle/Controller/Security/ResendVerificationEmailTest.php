@@ -19,6 +19,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendVerificationEmail;
+use SolidWorx\Platform\PlatformBundle\Security\EmailLinkContext;
 use SolidWorx\Platform\PlatformBundle\Security\EmailVerification\EmailVerifier;
 use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\ProfileUser;
 use Symfony\Component\DependencyInjection\Container;
@@ -31,6 +32,8 @@ use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\Exception\TransportException;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\RawMessage;
+use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Csrf\CsrfToken;
@@ -42,6 +45,7 @@ use function time;
 
 #[CoversClass(ResendVerificationEmail::class)]
 #[UsesClass(EmailVerifier::class)]
+#[UsesClass(EmailLinkContext::class)]
 final class ResendVerificationEmailTest extends TestCase
 {
     private ProfileUser $user;
@@ -55,6 +59,8 @@ final class ResendVerificationEmailTest extends TestCase
 
     private bool $mailerFails = false;
 
+    private EmailLinkContext $linkContext;
+
     protected function setUp(): void
     {
         $this->user = new ProfileUser();
@@ -64,6 +70,8 @@ final class ResendVerificationEmailTest extends TestCase
             '_token' => 'valid',
         ]);
         $this->request->setSession(new Session(new MockArraySessionStorage()));
+
+        $this->linkContext = $this->linkContext(debug: true);
     }
 
     public function testSendsANewLinkToAnUnverifiedUser(): void
@@ -134,6 +142,20 @@ final class ResendVerificationEmailTest extends TestCase
         self::assertArrayHasKey('error', $this->flashes());
     }
 
+    /**
+     * With nothing restricting the host, the link could point at an attacker's site; better no
+     * email than that one.
+     */
+    public function testSendsNothingWhileTheLinkHostIsUnchecked(): void
+    {
+        $this->linkContext = $this->linkContext(debug: false);
+
+        $this->resend();
+
+        self::assertCount(0, $this->sent);
+        self::assertArrayHasKey('error', $this->flashes());
+    }
+
     public function testReturnsToThePageTheButtonWasOn(): void
     {
         $this->request->headers->set('referer', 'https://app.example.com/invoices/1');
@@ -167,6 +189,17 @@ final class ResendVerificationEmailTest extends TestCase
         return $controller($this->request)->getTargetUrl();
     }
 
+    private function linkContext(bool $debug): EmailLinkContext
+    {
+        $router = self::createStub(RouterInterface::class);
+        $router->method('getContext')->willReturn(new RequestContext());
+
+        $requestStack = new RequestStack();
+        $requestStack->push($this->request);
+
+        return new EmailLinkContext($router, $requestStack, null, $debug);
+    }
+
     private function csrfTokenManager(): CsrfTokenManagerInterface
     {
         $manager = self::createStub(CsrfTokenManagerInterface::class);
@@ -196,7 +229,7 @@ final class ResendVerificationEmailTest extends TestCase
             }
         };
 
-        return new EmailVerifier($helper, $mailer, self::createStub(EntityManagerInterface::class), new IdentityTranslator(), 'email.html.twig', 'Confirm');
+        return new EmailVerifier($helper, $mailer, self::createStub(EntityManagerInterface::class), new IdentityTranslator(), 'email.html.twig', 'Confirm', $this->linkContext);
     }
 
     public function record(RawMessage $message): void

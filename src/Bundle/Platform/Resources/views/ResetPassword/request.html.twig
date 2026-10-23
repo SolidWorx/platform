@@ -1,0 +1,52 @@
+{##
+    The "forgot password" page, linked to from the login page.
+
+    Point `platform.security.reset_password.templates.request` at a template extending this one to
+    redefine a block, or replace it outright. It is rendered with `form` and `login_route`.
+##}
+
+{% extends '@Ui/Layout/security.html.twig' %}
+
+{% types {
+    ## The form asking for the email address of the account.
+    form: 'object',
+    ## The route of the login page the user came from.
+    login_route: 'string',
+} %}
+
+{% form_theme form '@SolidWorxPlatform/Form/theme.html.twig' %}
+
+{## The sentence under the title. ##}
+{% block reset_request_description %}{{ "Enter the email address of your account and we'll send you a link to choose a new password."|trans }}{% endblock %}
+
+{## The line under the card. ##}
+{% block reset_request_aside %}
+    {{ 'Remembered it?'|trans }}
+    <a href="{{ path(login_route) }}">{{ 'Back to sign in'|trans }}</a>
+{% endblock %}
+
+{% block content %}
+    {# Rendered out here rather than inside the card: a component slot is compiled as an embed, so
+       `block()` inside one looks the block up in the component, not in this page. #}
+    {% set description = block('reset_request_description') %}
+    {% set aside = block('reset_request_aside') %}
+
+    <twig:Ui:AuthCard title="{{ 'Forgot your password?'|trans }}" description="{{ description|trim }}">
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+
+            {{ form_row(form.email) }}
+
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary w-100">
+                    {{ ux_icon('tabler:mail', {class: 'icon'}) }}
+                    {{ 'Send me a reset link'|trans }}
+                </button>
+            </div>
+        {{ form_end(form) }}
+
+        <twig:block name="aside">
+            {{ aside|raw }}
+        </twig:block>
+    </twig:Ui:AuthCard>
+{% endblock %}

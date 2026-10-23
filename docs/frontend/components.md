@@ -127,6 +127,63 @@ the login page does.
 
 ---
 
+## `Ui:AuthCard`
+
+The card every signed-out screen is built around: the login page and the password reset pages.
+`content` goes in the card body under a centred title, `footer` inside the card under the body,
+and `aside` is the line of muted text below the card.
+
+```twig
+<twig:Ui:AuthCard title="{{ 'Forgot your password?'|trans }}" description="{{ 'We will email you a link.'|trans }}">
+    <form>…</form>
+
+    <twig:block name="aside">
+        <a href="{{ path('_login_main') }}">{{ 'Back to sign in'|trans }}</a>
+    </twig:block>
+</twig:Ui:AuthCard>
+```
+
+| Prop | Default | Description |
+|------|---------|-------------|
+| `title` | — | The heading, centred at the top of the card. |
+| `description` | `''` | A muted sentence under the title. |
+
+Use it for any page a signed-out user reaches (registration, an invitation, a magic link) so it
+looks like the login page.
+
+---
+
+## `Ui:ForgotPasswordLink`
+
+The **Forgot password?** link that sits in a password field's label. It renders nothing while
+`platform.security.reset_password` is disabled, so you can place it unconditionally:
+
+```twig
+<label class="form-label">
+    {{ 'Password'|trans }}
+    <twig:Ui:ForgotPasswordLink />
+</label>
+```
+
+The login page and the change-password page both use it. See
+[Password Reset](../security/reset-password.md).
+
+---
+
+## `Ui:PasswordRequirements`
+
+The rules a new password has to satisfy, as a checklist in an info alert. Pass the sentences from
+`PasswordPolicyInterface::requirements()`, so the list shown is the list validated. Renders nothing
+for an empty list.
+
+```twig
+<twig:Ui:PasswordRequirements :requirements="password_requirements" class="mb-3" />
+```
+
+The change-password and reset-password pages both use it.
+
+---
+
 ## `Ui:Alert` and `Ui:Modal`
 
 Tabler alerts and modals. `Ui:Alert` takes `type`, `title`, `icon`, `avatar`, `dismissible`,

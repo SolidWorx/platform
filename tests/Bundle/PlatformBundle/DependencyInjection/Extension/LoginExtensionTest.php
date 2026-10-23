@@ -83,6 +83,53 @@ final class LoginExtensionTest extends TestCase
         );
     }
 
+    /**
+     * Someone who forgot their password is signed out, so the reset pages have to stay reachable
+     * past an application's catch-all `^/` rule — which lands after this one.
+     */
+    public function testTheResetPagesArePublicWhenResetPasswordIsEnabled(): void
+    {
+        PlatformConfigState::set([
+            'security' => [
+                'reset_password' => [
+                    'enabled' => true,
+                ],
+                'two_factor' => [
+                    'enabled' => true,
+                ],
+            ],
+        ]);
+
+        self::assertSame(
+            [
+                [
+                    'path' => '^/reset-password',
+                    'roles' => ['PUBLIC_ACCESS'],
+                ],
+                [
+                    'path' => '^/2fa/resend',
+                    'roles' => ['IS_AUTHENTICATED_2FA_IN_PROGRESS'],
+                ],
+                [
+                    'path' => '^/2fa',
+                    'roles' => ['IS_AUTHENTICATED_2FA_IN_PROGRESS'],
+                ],
+                [
+                    'path' => '^/',
+                    'roles' => ['ROLE_USER'],
+                ],
+            ],
+            LoginExtension::defaultFormLoginConfig([
+                'access_control' => [
+                    [
+                        'path' => '^/',
+                        'roles' => ['ROLE_USER'],
+                    ],
+                ],
+            ])['security']['access_control'],
+        );
+    }
+
     public function testTwoFactorIsAutoDetectedFromPlatformConfig(): void
     {
         PlatformConfigState::set([

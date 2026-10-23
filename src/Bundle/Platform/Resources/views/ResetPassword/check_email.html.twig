@@ -1,0 +1,57 @@
+{##
+    Shown after the reset form is sent. It reads the same whether or not an account exists for the
+    address, so the form cannot be used to find out who has one.
+
+    Point `platform.security.reset_password.templates.check_email` at a template extending this one
+    to redefine a block. It is rendered with `reset_token` (for the expiry) and `login_route`.
+##}
+
+{% extends '@Ui/Layout/security.html.twig' %}
+
+{% types {
+    ## The reset token, with its secret cleared; only its expiry is read.
+    reset_token: 'object',
+    ## The route of the login page.
+    login_route: 'string',
+} %}
+
+{## The text in the card. ##}
+{% block check_email_message %}
+    <p>{{ "If an account exists for the email address you entered, we've sent it a link to choose a new password."|trans }}</p>
+
+    <p>{{ 'The link expires in %expires%.'|trans({'%expires%': reset_token.expirationMessageKey|trans(reset_token.expirationMessageData, 'ResetPasswordBundle')}) }}</p>
+
+    <p class="text-secondary mb-0">{{ "Didn't get it? Check your spam folder, or ask for a new link."|trans }}</p>
+{% endblock %}
+
+{## The buttons under the text. ##}
+{% block check_email_actions %}
+    <div class="form-footer">
+        <a href="{{ path(login_route) }}" class="btn btn-primary w-100">
+            {{ ux_icon('tabler:login', {class: 'icon'}) }}
+            {{ 'Back to sign in'|trans }}
+        </a>
+    </div>
+{% endblock %}
+
+{## The line under the card. ##}
+{% block check_email_aside %}
+    <a href="{{ path('_solidworx_platform_reset_password_request') }}">{{ 'Ask for a new link'|trans }}</a>
+{% endblock %}
+
+{% block content %}
+    {# Rendered out here rather than inside the card: a component slot is compiled as an embed, so
+       `block()` inside one looks the block up in the component, not in this page. #}
+    {% set message = block('check_email_message') %}
+    {% set actions = block('check_email_actions') %}
+    {% set aside = block('check_email_aside') %}
+
+    <twig:Ui:AuthCard title="{{ 'Check your email'|trans }}">
+        {{ message|raw }}
+        {{ actions|raw }}
+
+        <twig:block name="aside">
+            {{ aside|raw }}
+        </twig:block>
+    </twig:Ui:AuthCard>
+{% endblock %}

@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle\DependencyInjection\Extension;
 
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfigState;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResetPassword\RequestResetPassword;
 use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Util\Time;
 use Symfony\Component\RateLimiter\RateLimit;
@@ -110,10 +111,18 @@ final class LoginExtension
 
         $accessControl = [];
 
+        if (PlatformConfigState::isResetPasswordEnabled()) {
+            // Someone who forgot their password is not signed in, whatever the app's own rules say.
+            $accessControl[] = [
+                'path' => '^' . RequestResetPassword::PATH,
+                'roles' => ['PUBLIC_ACCESS'],
+            ];
+        }
+
         if (PlatformConfigState::isTwoFactorEnabled()) {
             $twoFactor = TwoFactorExtension::securityConfig();
             $main['two_factor'] = $twoFactor['firewall'];
-            $accessControl = $twoFactor['access_control'];
+            $accessControl = [...$accessControl, ...$twoFactor['access_control']];
         }
 
         $security = [

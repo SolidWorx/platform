@@ -24,6 +24,7 @@ use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\AccessDec
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\AuthenticationCompilerPass;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\ClearPlatformConfigStatePass;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\MenuCompilerPass;
+use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\ResetPasswordRepositoryPass;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Type\UTCDateTimeType;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -68,6 +69,7 @@ final class SolidWorxPlatformBundle extends Bundle implements PlatformConfigSect
         $container->addCompilerPass(new MenuCompilerPass());
         $container->addCompilerPass(new AccessDecisionCompilerPass());
         $container->addCompilerPass(new AuthenticationCompilerPass());
+        $container->addCompilerPass(new ResetPasswordRepositoryPass());
         $container->addCompilerPass(new ClearPlatformConfigStatePass(), PassConfig::TYPE_AFTER_REMOVING);
     }
 

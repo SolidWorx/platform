@@ -16,8 +16,14 @@ namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\DependencyInjection;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfiguration;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResetPassword\CheckResetPasswordEmail;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResetPassword\RequestResetPassword;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResetPassword\ResetPassword;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\SolidWorxPlatformExtension;
+use SolidWorx\Platform\PlatformBundle\Repository\ResetPasswordRequestRepository;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\DependencyInjection\Reference;
 
 #[CoversClass(SolidWorxPlatformExtension::class)]
 final class SolidWorxPlatformExtensionTest extends TestCase
@@ -74,6 +80,132 @@ final class SolidWorxPlatformExtensionTest extends TestCase
             PlatformConfiguration::PLATFORM_ACCESS_DECISION_STRATEGIES,
             $container->getParameter(self::PARAMETER),
         );
+    }
+
+    public function testWithResetPasswordDisabledNothingBehindItIsRegistered(): void
+    {
+        $container = $this->load([]);
+
+        self::assertFalse($container->getParameter('solidworx_platform.security.reset_password.enabled'));
+        self::assertFalse($container->hasDefinition(RequestResetPassword::class));
+        self::assertFalse($container->hasDefinition(CheckResetPasswordEmail::class));
+        self::assertFalse($container->hasDefinition(ResetPassword::class));
+        self::assertFalse($container->hasDefinition(ResetPasswordRequestRepository::class));
+    }
+
+    public function testWithResetPasswordEnabledTheRequestFormIsRateLimited(): void
+    {
+        $container = $this->load([
+            'security' => [
+                'reset_password' => [
+                    'enabled' => true,
+                ],
+            ],
+        ]);
+
+        self::assertTrue($container->hasDefinition(ResetPassword::class));
+        self::assertEquals(
+            new Reference('limiter.solidworx_platform_reset_password'),
+            $container->getDefinition(RequestResetPassword::class)->getArgument('$limiter'),
+        );
+    }
+
+    public function testTheRateLimitCanBeTurnedOff(): void
+    {
+        $container = $this->load([
+            'security' => [
+                'reset_password' => [
+                    'enabled' => true,
+                    'rate_limit' => [
+                        'enabled' => false,
+                    ],
+                ],
+            ],
+        ]);
+
+        self::assertArrayNotHasKey('$limiter', $container->getDefinition(RequestResetPassword::class)->getArguments());
+    }
+
+    /**
+     * The bundle, the limiter and the entity mapping are configured from the platform section, so
+     * an application only has to switch the feature on.
+     */
+    public function testEnablingResetPasswordConfiguresTheBundleTheLimiterAndTheMapping(): void
+    {
+        $config = [
+            'security' => [
+                'reset_password' => [
+                    'enabled' => true,
+                    'lifetime' => 1800,
+                    'throttle_limit' => 600,
+                ],
+            ],
+        ];
+
+        $container = $this->prepend($config, ['symfonycasts_reset_password', 'doctrine', 'framework']);
+
+        self::assertSame([[
+            'request_password_repository' => ResetPasswordRequestRepository::class,
+            'lifetime' => 1800,
+            'throttle_limit' => 600,
+            'enable_garbage_collection' => true,
+        ]], $container->getExtensionConfig('symfonycasts_reset_password'));
+
+        self::assertSame([[
+            'rate_limiter' => [
+                'solidworx_platform_reset_password' => [
+                    'policy' => 'sliding_window',
+                    'limit' => 5,
+                    'interval' => '15 minutes',
+                ],
+            ],
+        ]], $container->getExtensionConfig('framework'));
+
+        /** @var array{orm: array{mappings: array<string, array<string, mixed>>}} $doctrine */
+        $doctrine = $container->getExtensionConfig('doctrine')[0];
+        self::assertArrayHasKey('SolidWorxPlatformResetPassword', $doctrine['orm']['mappings']);
+    }
+
+    public function testWithResetPasswordDisabledTheEntityIsNotMapped(): void
+    {
+        $container = $this->prepend([], ['doctrine', 'framework']);
+
+        /** @var array{orm: array{mappings: array<string, array<string, mixed>>}} $doctrine */
+        $doctrine = $container->getExtensionConfig('doctrine')[0];
+        self::assertArrayNotHasKey('SolidWorxPlatformResetPassword', $doctrine['orm']['mappings']);
+        self::assertSame([], $container->getExtensionConfig('framework'));
+    }
+
+    /**
+     * @param array<string, mixed> $config
+     * @param list<string> $extensions
+     */
+    private function prepend(array $config, array $extensions): ContainerBuilder
+    {
+        $container = new ContainerBuilder();
+        $container->setParameter('kernel.bundles_metadata', []);
+
+        foreach ($extensions as $alias) {
+            $container->registerExtension(new class($alias) extends Extension {
+                public function __construct(
+                    private readonly string $alias,
+                ) {
+                }
+
+                public function load(array $configs, ContainerBuilder $container): void
+                {
+                }
+
+                public function getAlias(): string
+                {
+                    return $this->alias;
+                }
+            });
+        }
+
+        new SolidWorxPlatformExtension($config)->prepend($container);
+
+        return $container;
     }
 
     /**

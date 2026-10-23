@@ -34,6 +34,9 @@ firewall plus its supporting config:
 - **Remember-me** cookies (7-day lifetime).
 - **Logout** at `/logout`, clearing site data and invalidating the session.
 - **Login throttling** — 5 attempts per 15 minutes, out of the box.
+- **Password reset**: a "Forgot password?" link on the login page and an emailed,
+  single-use reset link, switched on with `platform.security.reset_password.enabled`.
+  See [Password Reset](./reset-password.md).
 - **Two-factor authentication** (TOTP, email, backup codes, trusted devices),
   switched on **automatically** when `platform.security.two_factor.enabled` is true in
   `platform.yaml` — nothing extra in `security.php`. See
@@ -312,6 +315,8 @@ final class LoginExtension
 
 ## See also
 
+- [Password Reset](./reset-password.md): the "forgot password" flow, its rate limits and
+  how to customise its pages.
 - [Two-Factor Authentication](./two-factor.md) — TOTP, email codes, backup codes and
   trusted devices.
 - [Per-Attribute Access Decision Strategies](./access-decision.md) — decide chosen

@@ -36,6 +36,22 @@ final class PlatformConfigStateTest extends TestCase
         self::assertFalse(PlatformConfigState::isTwoFactorEnabled());
     }
 
+    public function testResetPasswordFollowsThePublishedConfig(): void
+    {
+        self::assertFalse(PlatformConfigState::isResetPasswordEnabled());
+
+        PlatformConfigState::set([
+            'security' => [
+                'reset_password' => [
+                    'enabled' => true,
+                ],
+            ],
+        ]);
+
+        self::assertTrue(PlatformConfigState::isResetPasswordEnabled());
+        self::assertFalse(PlatformConfigState::isTwoFactorEnabled());
+    }
+
     public function testSetAndGetRoundTrip(): void
     {
         $config = [

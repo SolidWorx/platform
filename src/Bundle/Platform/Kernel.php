@@ -31,6 +31,7 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Yaml\Yaml;
+use SymfonyCasts\Bundle\ResetPassword\SymfonyCastsResetPasswordBundle;
 use SymfonyCasts\Bundle\VerifyEmail\SymfonyCastsVerifyEmailBundle;
 use function defined;
 use function file_exists;
@@ -79,20 +80,38 @@ abstract class Kernel extends BaseKernel
     #[Override]
     public function registerBundles(): iterable
     {
+        $registered = [];
+        $bundles = [];
+
         foreach (parent::registerBundles() as $bundle) {
+            $registered[$bundle::class] = true;
+
             yield $bundle;
         }
 
         // Signs and checks the email verification links.
         if ($this->isSecurityFeatureEnabled('email_verification', default: true)) {
-            yield new SymfonyCastsVerifyEmailBundle();
+            $bundles[] = SymfonyCastsVerifyEmailBundle::class;
+        }
+
+        // Issues and checks the password reset tokens.
+        if ($this->isSecurityFeatureEnabled('reset_password', default: false)) {
+            $bundles[] = SymfonyCastsResetPasswordBundle::class;
         }
 
         if ($this->isSecurityFeatureEnabled('two_factor', default: false)) {
-            yield new SchebTwoFactorBundle();
+            $bundles[] = SchebTwoFactorBundle::class;
         }
 
-        yield new SolidWorxPlatformBundle();
+        $bundles[] = SolidWorxPlatformBundle::class;
+
+        // Symfony Flex adds a bundle to bundles.php when its recipe runs, even for a bundle that
+        // only came in as a platform dependency; registering it a second time would fail.
+        foreach ($bundles as $class) {
+            if (! isset($registered[$class])) {
+                yield new $class();
+            }
+        }
     }
 
     #[Override]

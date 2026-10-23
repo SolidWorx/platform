@@ -1,0 +1,55 @@
+{##
+    The page the emailed link opens, where the new password is chosen.
+
+    `password_requirements` comes from the same PasswordPolicy that validates the submission, and
+    the change-password page uses, so the rules read the same everywhere.
+
+    Point `platform.security.reset_password.templates.reset` at a template extending this one to
+    redefine a block. It is rendered with `form`, `password_requirements` and `login_route`.
+##}
+
+{% extends '@Ui/Layout/security.html.twig' %}
+
+{% types {
+    ## The new password, twice.
+    form: 'object',
+    ## The password rules as short sentences, from PasswordPolicy::requirements().
+    password_requirements: 'iterable',
+    ## The route of the login page.
+    login_route: 'string',
+} %}
+
+{% form_theme form '@SolidWorxPlatform/Form/theme.html.twig' %}
+
+{## The line under the card. ##}
+{% block reset_aside %}
+    <a href="{{ path(login_route) }}">{{ 'Back to sign in'|trans }}</a>
+{% endblock %}
+
+{% block content %}
+    {# Rendered out here rather than inside the card: a component slot is compiled as an embed, so
+       `block()` inside one looks the block up in the component, not in this page. #}
+    {% set aside = block('reset_aside') %}
+
+    <twig:Ui:AuthCard title="{{ 'Choose a new password'|trans }}">
+        {{ form_start(form) }}
+            {{ form_errors(form) }}
+
+            <twig:Ui:PasswordRequirements :requirements="password_requirements" class="mb-3" />
+
+            {{ form_row(form.newPassword.first) }}
+            {{ form_row(form.newPassword.second) }}
+
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary w-100">
+                    {{ ux_icon('tabler:lock', {class: 'icon'}) }}
+                    {{ 'Reset password'|trans }}
+                </button>
+            </div>
+        {{ form_end(form) }}
+
+        <twig:block name="aside">
+            {{ aside|raw }}
+        </twig:block>
+    </twig:Ui:AuthCard>
+{% endblock %}

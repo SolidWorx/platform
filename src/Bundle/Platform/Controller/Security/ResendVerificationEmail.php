@@ -17,6 +17,7 @@ use Carbon\Carbon;
 use SolidWorx\Platform\PlatformBundle\Attributes\WithoutTenant;
 use SolidWorx\Platform\PlatformBundle\Controller\BaseController;
 use SolidWorx\Platform\PlatformBundle\Enum\Flash;
+use SolidWorx\Platform\PlatformBundle\Exception\UntrustedLinkHostException;
 use SolidWorx\Platform\PlatformBundle\Response\RedirectResponse;
 use SolidWorx\Platform\PlatformBundle\Security\EmailVerification\EmailVerifier;
 use Symfony\Component\HttpFoundation\Request;
@@ -74,7 +75,7 @@ final class ResendVerificationEmail extends BaseController
                 $this->emailVerifier->sendEmailConfirmation($user);
                 $session->set(self::SESSION_KEY, Carbon::now()->getTimestamp());
                 $this->addFlash(Flash::Success->value, 'A new verification email has been sent. Please check your inbox.');
-            } catch (TransportExceptionInterface) {
+            } catch (TransportExceptionInterface | UntrustedLinkHostException) {
                 $this->addFlash(Flash::Error->value, 'The verification email could not be sent. Please try again later.');
             }
         }

@@ -137,7 +137,12 @@ than mechanism:
 ## Password rules
 
 The rules live in one place and are used twice: to validate the submission, and to render the
-bullet list of requirements on the page. They cannot drift apart.
+bullet list of requirements on the page. They cannot drift apart. The
+[password reset](./reset-password.md) page uses the same rules, so a reset cannot be used to
+get around them.
+
+While password reset is enabled, the change-password page shows **Forgot password?** in the
+current-password label, for a user who is signed in but no longer knows their password.
 
 ```yaml
 # platform.yaml

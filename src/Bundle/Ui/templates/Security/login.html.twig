@@ -1,6 +1,13 @@
 {% extends '@Ui/Layout/security.html.twig' %}
 
+{## Inside the card, under the form. Empty by default; override it to add social login buttons. ##}
+{% block social_login %}{% endblock social_login %}
+
 {% block content %}
+    {# Rendered out here rather than inside the card: a component slot is compiled as an embed, so
+       `block()` inside one looks the block up in the component, not in this page. #}
+    {% set social_login = block('social_login') %}
+
     {% if error %}
         <div class="alert alert-danger alert-dismissible" role="alert">
             <div class="alert-icon">
@@ -11,75 +18,67 @@
         </div>
     {% endif %}
 
-    <div class="card card-md" {{ stimulus_controller('@solidworx/platform/loading') }}>
-        <div class="card-body">
-            <h2 class="h2 text-center mb-4">
-                {{ 'Login to your account'|trans }}
-            </h2>
+    <twig:Ui:AuthCard title="{{ 'Login to your account'|trans }}" {{ ...stimulus_controller('@solidworx/platform/loading').toArray() }}>
+        <form action="{{ options.check_path starts with '/' ? options.check_path : url(options.check_path) }}" method="post" {{ stimulus_action('@solidworx/platform/loading', 'onSubmit', 'submit') }} role="form">
+            <div class="mb-3">
 
-            <form action="{{ options.check_path starts with '/' ? options.check_path : url(options.check_path) }}" method="post" {{ stimulus_action('@solidworx/platform/loading', 'onSubmit', 'submit') }} role="form">
-                <div class="mb-3">
-
-                    <label class="form-label">{{ 'Email address'|trans }}</label>
-                    <div class="input-group input-group-flat">
-                        <div class="input-group-text">
-                            {{ ux_icon('tabler:mail', {width: 24, height: 24}) }}
-                        </div>
-                        <input
-                                type="email"
-                                class="form-control"
-                                placeholder="your@email.com"
-                                autocomplete="username"
-                                required
-                                autofocus
-                                value="{{ last_username }}"
-                                name="{{ options.username_parameter }}"
-                        />
+                <label class="form-label">{{ 'Email address'|trans }}</label>
+                <div class="input-group input-group-flat">
+                    <div class="input-group-text">
+                        {{ ux_icon('tabler:mail', {width: 24, height: 24}) }}
                     </div>
+                    <input
+                            type="email"
+                            class="form-control"
+                            placeholder="your@email.com"
+                            autocomplete="username"
+                            required
+                            autofocus
+                            value="{{ last_username }}"
+                            name="{{ options.username_parameter }}"
+                    />
                 </div>
+            </div>
+            <div class="mb-2">
+                <label class="form-label">
+                    {{ 'Password'|trans }}
+                    <twig:Ui:ForgotPasswordLink />
+                </label>
+                <twig:Ui:PasswordField>
+                    <input
+                            type="password"
+                            class="form-control"
+                            placeholder="Your password"
+                            autocomplete="current-password"
+                            required
+                            name="{{ options.password_parameter }}"
+                            {{ stimulus_target('password-visibility', 'input') }}
+                    />
+                </twig:Ui:PasswordField>
+            </div>
+            {% if options.always_remember_me is same as(false) and options.remember_me_parameter is not empty %}
                 <div class="mb-2">
-                    <label class="form-label">
-                        {{ 'Password'|trans }}
-                        {#<span class="form-label-description">
-                            <a href="./forgot-password.html">Forgot password</a>
-                        </span>#}
+                    <label class="form-check">
+                        <input type="checkbox" class="form-check-input" name="{{ options.remember_me_parameter }}" />
+                        <span class="form-check-label">{{ 'Remember me on this device'|trans }}</span>
                     </label>
-                    <twig:Ui:PasswordField>
-                        <input
-                                type="password"
-                                class="form-control"
-                                placeholder="Your password"
-                                autocomplete="current-password"
-                                required
-                                name="{{ options.password_parameter }}"
-                                {{ stimulus_target('password-visibility', 'input') }}
-                        />
-                    </twig:Ui:PasswordField>
                 </div>
-                {% if options.always_remember_me is same as(false) and options.remember_me_parameter is not empty %}
-                    <div class="mb-2">
-                        <label class="form-check">
-                            <input type="checkbox" class="form-check-input" name="{{ options.remember_me_parameter }}" />
-                            <span class="form-check-label">{{ 'Remember me on this device'|trans }}</span>
-                        </label>
-                    </div>
-                {% endif %}
+            {% endif %}
 
-                {% if options.enable_csrf %}
-                    <input type="hidden" {{ stimulus_controller('csrf-protection') }} name="{{ options.csrf_parameter }}" value="{{ csrf_token(options.csrf_token_id) }}"/>
-                {% endif %}
+            {% if options.enable_csrf %}
+                <input type="hidden" {{ stimulus_controller('csrf-protection') }} name="{{ options.csrf_parameter }}" value="{{ csrf_token(options.csrf_token_id) }}"/>
+            {% endif %}
 
-                <div class="form-footer">
-                    <button type="submit" class="btn btn-primary w-100">
-                        {{ 'Sign in'|trans }}
-                    </button>
-                </div>
-            </form>
-        </div>
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary w-100">
+                    {{ 'Sign in'|trans }}
+                </button>
+            </div>
+        </form>
 
-        {% block social_login %}
-            {# TODO: Add Social Auth Integration #}
-        {% endblock social_login %}
-    </div>
+        <twig:block name="footer">
+            {{ social_login|raw }}
+        </twig:block>
+    </twig:Ui:AuthCard>
 {% endblock content %}
 

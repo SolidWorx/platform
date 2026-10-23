@@ -98,6 +98,13 @@ platform:
 ```yaml
 platform:
   security:
+    # The URL emailed links (password reset, email verification) start with, for example
+    # https://app.example.com. When null, links use the host of the request, and outside
+    # debug mode `framework.trusted_hosts` must be set; otherwise no link is sent, so a
+    # forged Host header cannot point one at another site.
+    # Default: null
+    base_url: null
+
     two_factor:
       # Whether to enable two-factor authentication.
       # When true, the SchebTwoFactorBundle is registered automatically
@@ -129,6 +136,36 @@ When 2FA is enabled the platform automatically:
 - Registers the 2FA routes
 - Wires the `two_factor` firewall block and 2FA access-control rules into the security
   config produced by `LoginExtension::defaultFormLoginConfig()`
+
+#### Password reset (`platform.security.reset_password`)
+
+```yaml
+platform:
+  security:
+    reset_password:
+      # Off by default. When true, the platform registers SymfonyCastsResetPasswordBundle,
+      # maps the reset_password_request table, adds the /reset-password routes and links
+      # to them from the login and change-password pages.
+      enabled: false
+      lifetime: 3600          # seconds a reset link stays valid
+      throttle_limit: 900     # seconds before another link is sent to the same user
+      enable_garbage_collection: true
+      firewall: main
+      rate_limit:             # per IP address, on the request form
+        enabled: true
+        limit: 5
+        interval: '15 minutes'
+      templates:
+        request: '@SolidWorxPlatform/ResetPassword/request.html.twig'
+        check_email: '@SolidWorxPlatform/ResetPassword/check_email.html.twig'
+        reset: '@SolidWorxPlatform/ResetPassword/reset.html.twig'
+      email:
+        template: '@SolidWorxPlatform/ResetPassword/email.html.twig'
+        subject: 'Reset your password'
+```
+
+See [Password Reset](../security/reset-password.md) for the flow, the table to migrate and the
+sender address the email needs.
 
 > This flag is the **only** switch — you don't touch `security.php` for 2FA. As long as
 > your security config is built from `App::config(LoginExtension::defaultFormLoginConfig())`,

@@ -15,7 +15,9 @@ namespace SolidWorx\Platform\PlatformBundle\Security\EmailVerification;
 
 use Doctrine\ORM\EntityManagerInterface;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\VerifyEmail;
+use SolidWorx\Platform\PlatformBundle\Exception\UntrustedLinkHostException;
 use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
+use SolidWorx\Platform\PlatformBundle\Security\EmailLinkContext;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,6 +25,7 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
+use SymfonyCasts\Bundle\VerifyEmail\Model\VerifyEmailSignatureComponents;
 use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
 
 /**
@@ -42,22 +45,24 @@ final readonly class EmailVerifier
         private string $template,
         #[Autowire(param: 'solidworx_platform.security.email_verification.email.subject')]
         private string $subject,
+        private EmailLinkContext $linkContext,
     ) {
     }
 
     /**
      * @throws TransportExceptionInterface
+     * @throws UntrustedLinkHostException when the link would be built on a host nothing restricts
      */
     public function sendEmailConfirmation(UserInterface $user): void
     {
-        $signature = $this->verifyEmailHelper->generateSignature(
+        $signature = $this->linkContext->build(fn (): VerifyEmailSignatureComponents => $this->verifyEmailHelper->generateSignature(
             VerifyEmail::ROUTE_NAME,
             $user->getId()->toString(),
             (string) $user->getEmail(),
             [
                 'id' => $user->getId()->toBase58(),
             ],
-        );
+        ));
 
         $email = new TemplatedEmail()
             ->to((string) $user->getEmail())

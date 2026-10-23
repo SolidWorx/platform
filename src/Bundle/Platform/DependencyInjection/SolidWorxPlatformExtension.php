@@ -21,6 +21,9 @@ use SolidWorx\Platform\PlatformBundle\Attributes\Menu\MenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Config\PlatformConfiguration;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendTwoFactorCode;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendVerificationEmail;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResetPassword\CheckResetPasswordEmail;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResetPassword\RequestResetPassword;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResetPassword\ResetPassword;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\TwoFactorConfiguration;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\VerifyEmail;
 use SolidWorx\Platform\PlatformBundle\Controller\Tenant\OnboardTenant;
@@ -41,6 +44,7 @@ use SolidWorx\Platform\PlatformBundle\Messenger\TenantMiddleware;
 use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
 use SolidWorx\Platform\PlatformBundle\Model\UserInterface;
 use SolidWorx\Platform\PlatformBundle\Model\UserTenantInterface;
+use SolidWorx\Platform\PlatformBundle\Repository\ResetPasswordRequestRepository;
 use SolidWorx\Platform\PlatformBundle\Repository\TenantRepository;
 use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
 use SolidWorx\Platform\PlatformBundle\Security\EmailVerification\EmailVerifier;
@@ -73,6 +77,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
 use Webmozart\Assert\Assert;
 use function interface_exists;
@@ -105,13 +110,26 @@ use function interface_exists;
  *   email: array{template: string, subject: string}
  * }
  *
+ * @phpstan-type ResetPasswordConfig array{
+ *   enabled: bool,
+ *   lifetime: int,
+ *   throttle_limit: int,
+ *   enable_garbage_collection: bool,
+ *   firewall: string,
+ *   rate_limit: array{enabled: bool, limit: int, interval: string},
+ *   templates: array{request: string, check_email: string, reset: string},
+ *   email: array{template: string, subject: string}
+ * }
+ *
  * @phpstan-type PlatformConfig array{
  *   name: string,
  *   version: string,
  *   security: array{
+ *     base_url: string|null,
  *     access_decision: array{strategies: array<string, string>},
  *     two_factor: array{enabled: bool, base_template: string|null},
- *     email_verification: EmailVerificationConfig
+ *     email_verification: EmailVerificationConfig,
+ *     reset_password: ResetPasswordConfig
  *   },
  *   doctrine: array{types: array{enable_utc_date: bool}},
  *   models: array{user: string},
@@ -156,6 +174,11 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         DefaultTenantOnboarder::class,
         Switcher::class,
     ];
+
+    /**
+     * The rate limiter guarding the reset-password request form, per IP address.
+     */
+    private const string RESET_PASSWORD_LIMITER = 'solidworx_platform_reset_password';
 
     /**
      * @var PlatformConfig|null
@@ -207,6 +230,8 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
             PlatformConfiguration::PLATFORM_ACCESS_DECISION_STRATEGIES + $config['security']['access_decision']['strategies'],
         );
 
+        $container->setParameter('solidworx_platform.security.base_url', $config['security']['base_url']);
+
         $this->loadProfile($container, $config['profile']);
 
         $container->setParameter('solidworx_platform.security.two_factor.enabled', $config['security']['two_factor']['enabled']);
@@ -222,6 +247,8 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         }
 
         $this->loadEmailVerification($container, $config['security']['email_verification']);
+
+        $this->loadResetPassword($container, $config['security']['reset_password']);
 
         $this->loadMultiTenancy($container, $config['multi_tenancy']);
     }
@@ -246,6 +273,37 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
             $container->removeDefinition(SendVerificationEmailListener::class);
             $container->removeDefinition(VerifyEmail::class);
             $container->removeDefinition(ResendVerificationEmail::class);
+        }
+    }
+
+    /**
+     * With reset disabled the kernel does not register SymfonyCastsResetPasswordBundle and the
+     * request entity is not mapped, so everything built on them goes too.
+     *
+     * @param ResetPasswordConfig $config
+     */
+    private function loadResetPassword(ContainerBuilder $container, array $config): void
+    {
+        $container->setParameter('solidworx_platform.security.reset_password.enabled', $config['enabled']);
+        $container->setParameter('solidworx_platform.security.reset_password.firewall', $config['firewall']);
+        $container->setParameter('solidworx_platform.security.reset_password.templates.request', $config['templates']['request']);
+        $container->setParameter('solidworx_platform.security.reset_password.templates.check_email', $config['templates']['check_email']);
+        $container->setParameter('solidworx_platform.security.reset_password.templates.reset', $config['templates']['reset']);
+        $container->setParameter('solidworx_platform.security.reset_password.email.template', $config['email']['template']);
+        $container->setParameter('solidworx_platform.security.reset_password.email.subject', $config['email']['subject']);
+
+        if (! $config['enabled']) {
+            $container->removeDefinition(RequestResetPassword::class);
+            $container->removeDefinition(CheckResetPasswordEmail::class);
+            $container->removeDefinition(ResetPassword::class);
+            $container->removeDefinition(ResetPasswordRequestRepository::class);
+
+            return;
+        }
+
+        if ($config['rate_limit']['enabled']) {
+            $container->getDefinition(RequestResetPassword::class)
+                ->setArgument('$limiter', new Reference('limiter.' . self::RESET_PASSWORD_LIMITER));
         }
     }
 
@@ -361,6 +419,16 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
                 ],
             ];
 
+            if ($config['security']['reset_password']['enabled']) {
+                $orm['mappings']['SolidWorxPlatformResetPassword'] = [
+                    'is_bundle' => false,
+                    'type' => 'attribute',
+                    'dir' => __DIR__ . '/../Security/ResetPassword',
+                    'prefix' => 'SolidWorx\Platform\PlatformBundle\Security\ResetPassword',
+                    'alias' => 'PlatformResetPassword',
+                ];
+            }
+
             if ($config['multi_tenancy']['enabled']) {
                 $orm['mappings']['SolidWorxPlatformBundle'] = [
                     'is_bundle' => false,
@@ -404,6 +472,9 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
                         // Lets shared layouts reference tenancy-only components without exploding
                         // when multi-tenancy is switched off and those services are gone.
                         'platform_multi_tenancy_enabled' => $config['multi_tenancy']['enabled'],
+                        // Lets the login and change-password pages link to the reset form only
+                        // when its route exists.
+                        'platform_reset_password_enabled' => $config['security']['reset_password']['enabled'],
                     ],
                 ]
             );
@@ -450,11 +521,27 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
             ]);
         }
 
+        $resetPassword = $config['security']['reset_password'];
+
         if ($container->hasExtension('symfonycasts_reset_password')) {
-            $container->prependExtensionConfig(
-                'symfonycasts_reset_password',
-                [],
-            );
+            $container->prependExtensionConfig('symfonycasts_reset_password', [
+                'request_password_repository' => ResetPasswordRequestRepository::class,
+                'lifetime' => $resetPassword['lifetime'],
+                'throttle_limit' => $resetPassword['throttle_limit'],
+                'enable_garbage_collection' => $resetPassword['enable_garbage_collection'],
+            ]);
+        }
+
+        if ($resetPassword['enabled'] && $resetPassword['rate_limit']['enabled']) {
+            $container->prependExtensionConfig('framework', [
+                'rate_limiter' => [
+                    self::RESET_PASSWORD_LIMITER => [
+                        'policy' => 'sliding_window',
+                        'limit' => $resetPassword['rate_limit']['limit'],
+                        'interval' => $resetPassword['rate_limit']['interval'],
+                    ],
+                ],
+            ]);
         }
 
         $container->prependExtensionConfig(

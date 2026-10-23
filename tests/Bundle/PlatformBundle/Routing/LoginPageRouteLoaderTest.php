@@ -17,6 +17,9 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendTwoFactorCode;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\ResendVerificationEmail;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResetPassword\CheckResetPasswordEmail;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResetPassword\RequestResetPassword;
+use SolidWorx\Platform\PlatformBundle\Controller\Security\ResetPassword\ResetPassword;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\TwoFactorConfiguration;
 use SolidWorx\Platform\PlatformBundle\Controller\Security\VerifyEmail;
 use SolidWorx\Platform\PlatformBundle\Routing\LoginPageRouteLoader;
@@ -67,9 +70,42 @@ final class LoginPageRouteLoaderTest extends TestCase
         $this->assertNull($routes->get(TwoFactorConfiguration::ROUTE_NAME));
     }
 
-    private function load(bool $emailVerificationEnabled = false, bool $twoFactorEnabled = false): RouteCollection
+    public function testResetPasswordRoutesAreAddedWhenEnabled(): void
     {
-        $routes = new LoginPageRouteLoader([], $emailVerificationEnabled, $twoFactorEnabled)->load('.', '_solidworx_platform_auth_routes');
+        $routes = $this->load(resetPasswordEnabled: true);
+
+        $this->assertSame(RequestResetPassword::PATH, $routes->get(RequestResetPassword::ROUTE_NAME)?->getPath());
+        $this->assertSame(['GET', 'POST'], $routes->get(RequestResetPassword::ROUTE_NAME)->getMethods());
+        $this->assertSame(CheckResetPasswordEmail::PATH, $routes->get(CheckResetPasswordEmail::ROUTE_NAME)?->getPath());
+        $this->assertSame(['GET'], $routes->get(CheckResetPasswordEmail::ROUTE_NAME)->getMethods());
+        $this->assertSame(ResetPassword::PATH, $routes->get(ResetPassword::ROUTE_NAME)?->getPath());
+        $this->assertSame(ResetPassword::class, $routes->get(ResetPassword::ROUTE_NAME)->getDefault('_controller'));
+    }
+
+    /**
+     * The token is optional so the page can be served again once it has been moved into the session.
+     */
+    public function testTheResetRouteWorksWithoutAToken(): void
+    {
+        $route = $this->load(resetPasswordEnabled: true)->get(ResetPassword::ROUTE_NAME);
+
+        $this->assertNotNull($route);
+        $this->assertTrue($route->hasDefault('token'));
+        $this->assertNull($route->getDefault('token'));
+    }
+
+    public function testResetPasswordRoutesAreOmittedWhenDisabled(): void
+    {
+        $routes = $this->load(resetPasswordEnabled: false);
+
+        $this->assertNull($routes->get(RequestResetPassword::ROUTE_NAME));
+        $this->assertNull($routes->get(CheckResetPasswordEmail::ROUTE_NAME));
+        $this->assertNull($routes->get(ResetPassword::ROUTE_NAME));
+    }
+
+    private function load(bool $emailVerificationEnabled = false, bool $twoFactorEnabled = false, bool $resetPasswordEnabled = false): RouteCollection
+    {
+        $routes = new LoginPageRouteLoader([], $emailVerificationEnabled, $twoFactorEnabled, $resetPasswordEnabled)->load('.', '_solidworx_platform_auth_routes');
         $this->assertInstanceOf(RouteCollection::class, $routes);
 
         return $routes;
