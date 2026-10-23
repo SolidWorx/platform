@@ -39,7 +39,7 @@
         "symfony/twig-bridge": "^8.1",
         "symfony/uid": "^8.1",
         "symfony/ux-icons": "^3.0",
-        "symfony/ux-live-component": "^3.0",
+        "symfony/ux-live-component": "^3.5",
         "symfony/validator": "^8.1",
         "symfony/webhook": "^8.1",
         "symfony/webpack-encore-bundle": "^2.3",
