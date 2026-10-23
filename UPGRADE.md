@@ -2,6 +2,16 @@
 
 ## 0.2 → 0.3
 
+### Disabled users
+
+A disabled user (`enabled = false`) used to get "Invalid credentials." at sign-in, and kept any
+session already open. They now get a message saying the account is disabled (only after a correct
+password), and are logged out of open sessions on their next request.
+
+`UserRepository::loadUserByIdentifier()` now returns disabled users too; the sign-in check moved
+to `DisabledUserLoginListener`. If you call it yourself, check `isEnabled()`. `refreshUser()` now
+reloads by id instead of by email.
+
 ### Emailed links need a trusted host
 
 **Breaking (production only):** password reset and email verification links are built from the

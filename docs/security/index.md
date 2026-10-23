@@ -198,6 +198,17 @@ Because the routes are derived from the firewall config, changing `login_path` /
 `check_path` (see below) automatically moves the generated routes — there is nothing
 else to keep in sync.
 
+### Disabled accounts
+
+A user whose `enabled` flag is false cannot sign in, by any authenticator on any firewall (form
+login, remember-me, API tokens). Once their password checks out they see "Your account has been
+disabled. Please contact support if you believe this is a mistake."; a wrong password still gets
+the generic "Invalid credentials.", so the form cannot be used to find disabled accounts. Disabling
+a signed-in user logs them out on their next request.
+
+New users start disabled (`User::$enabled` defaults to `false`): call `setEnabled(true)` when you
+create an account.
+
 ---
 
 ## Customising
