@@ -68,7 +68,7 @@
   },
   "peerDependencies": {
     "@hotwired/stimulus": "^3.2.2",
-    "@tabler/core": "^1.5.1",
+    "@tabler/core": "^1.7.0",
     "@symfony/webpack-encore": "^5.2.0 || ^6.0.0 || ^7.0.0"
   },
   "dependencies": {
@@ -80,7 +80,7 @@
     "@symfony/ux-live-component": "^3.5.1",
     "@symfony/ux-chartjs": "^3.5.1",
     "@symfony/ux-autocomplete": "^3.5.1",
-    "@tabler/core": "^1.5.1",
+    "@tabler/core": "^1.7.0",
     "@tiptap/core": "^3.31.3",
     "@tiptap/extension-link": "^3.31.3",
     "@tiptap/extension-placeholder": "^3.31.3",
