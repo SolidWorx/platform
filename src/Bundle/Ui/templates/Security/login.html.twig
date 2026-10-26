@@ -14,7 +14,7 @@
                 {{ ux_icon('tabler:alert-circle') }}
             </div>
             {{ error.messageKey|trans(error.messageData, 'security') }}
-            <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+            <a class="btn-close" data-bs-dismiss="alert" aria-label="{{ 'Close'|trans }}"></a>
         </div>
     {% endif %}
 
@@ -30,7 +30,7 @@
                     <input
                             type="email"
                             class="form-control"
-                            placeholder="your@email.com"
+                            placeholder="{{ 'your@email.com'|trans }}"
                             autocomplete="username"
                             required
                             autofocus
@@ -48,7 +48,7 @@
                     <input
                             type="password"
                             class="form-control"
-                            placeholder="Your password"
+                            placeholder="{{ 'Your password'|trans }}"
                             autocomplete="current-password"
                             required
                             name="{{ options.password_parameter }}"

@@ -120,7 +120,7 @@
             height: editor_height,
         }) }}
     >
-        <div class="swp-text-editor__toolbar btn-toolbar" role="toolbar" aria-label="Formatting"
+        <div class="swp-text-editor__toolbar btn-toolbar" role="toolbar" aria-label="{{ 'Formatting'|trans }}"
             {{ stimulus_target(editor_controller, 'toolbar') }}
         >
             {%- for feature in toolbar -%}
@@ -128,8 +128,8 @@
                 {%- if button is not null -%}
                     <button type="button" class="btn btn-sm btn-icon swp-text-editor__button"
                         data-editor-command="{{ feature }}"
-                        title="{{ button.label }}"
-                        aria-label="{{ button.label }}"
+                        title="{{ button.label|trans }}"
+                        aria-label="{{ button.label|trans }}"
                         {{ stimulus_action(editor_controller, 'run') }}
                     >{{ ux_icon(button.icon) }}</button>
                 {%- endif -%}
