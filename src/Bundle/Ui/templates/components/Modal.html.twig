@@ -37,7 +37,7 @@
     {% set headerBlock %}
         <h5 class="modal-title">{{ title|trans }}</h5>
         {% if closeable %}
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ 'Close'|trans }}"></button>
         {% endif %}
     {% endset %}
 {% endif %}

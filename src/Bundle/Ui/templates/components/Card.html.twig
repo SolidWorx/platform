@@ -127,7 +127,7 @@
         {% if progress is not null %}
             <div class="progress progress-sm card-progress">
                 <div class="progress-bar bg-{{ progressColor }}" style="width: {{ progress }}%" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100">
-                    <span class="visually-hidden">{{ progress }}% Complete</span>
+                    <span class="visually-hidden">{{ '%progress%% Complete'|trans({'%progress%': progress}) }}</span>
                 </div>
             </div>
         {% endif %}
