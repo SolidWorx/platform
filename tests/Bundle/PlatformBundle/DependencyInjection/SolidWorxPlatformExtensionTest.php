@@ -21,6 +21,7 @@ use SolidWorx\Platform\PlatformBundle\Controller\Security\ResetPassword\RequestR
 use SolidWorx\Platform\PlatformBundle\Controller\Security\ResetPassword\ResetPassword;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\SolidWorxPlatformExtension;
 use SolidWorx\Platform\PlatformBundle\Repository\ResetPasswordRequestRepository;
+use SolidWorx\Platform\PlatformBundle\Security\ResetPassword\ResetPasswordMailer;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Reference;
@@ -90,6 +91,7 @@ final class SolidWorxPlatformExtensionTest extends TestCase
         self::assertFalse($container->hasDefinition(RequestResetPassword::class));
         self::assertFalse($container->hasDefinition(CheckResetPasswordEmail::class));
         self::assertFalse($container->hasDefinition(ResetPassword::class));
+        self::assertFalse($container->hasDefinition(ResetPasswordMailer::class));
         self::assertFalse($container->hasDefinition(ResetPasswordRequestRepository::class));
     }
 
@@ -104,6 +106,7 @@ final class SolidWorxPlatformExtensionTest extends TestCase
         ]);
 
         self::assertTrue($container->hasDefinition(ResetPassword::class));
+        self::assertTrue($container->getDefinition(ResetPasswordMailer::class)->isAutowired());
         self::assertEquals(
             new Reference('limiter.solidworx_platform_reset_password'),
             $container->getDefinition(RequestResetPassword::class)->getArgument('$limiter'),

@@ -282,6 +282,24 @@ link to the `_solidworx_platform_reset_password_request` route.
 
 ---
 
+## Sending the email from your own code
+
+Non-form callers (an API, a console command) can send exactly the same email through
+`ResetPasswordMailer`, registered while reset password is enabled:
+
+```php
+use SolidWorx\Platform\PlatformBundle\Security\ResetPassword\ResetPasswordMailer;
+
+$token = $resetPasswordMailer->send('ada@example.com'); // ?ResetPasswordToken
+```
+
+It returns the token mailed, or `null` when nothing was sent: an unknown or disabled address, a
+link sent too recently, or a mail failure (logged). Treat both the same towards the caller, so
+the response does not reveal which addresses have an account. The per-IP rate limit belongs to
+the form, so apply your own limits to your endpoint.
+
+---
+
 ## See also
 
 - [Authentication & Security](./index.md): the login firewall this builds on.
