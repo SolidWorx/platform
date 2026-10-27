@@ -34,7 +34,7 @@
         "@symfony/ux-chartjs": "^3.5.1",
         "@symfony/ux-live-component": "^3.5.1",
         "@symfony/ux-turbo": "^3.5.1",
-        "@tabler/core": "^1.5.1",
+        "@tabler/core": "^1.7.1",
         "@tiptap/core": "^3.31.3",
         "@tiptap/extension-link": "^3.31.3",
         "@tiptap/extension-placeholder": "^3.31.3",
@@ -62,7 +62,7 @@
       "peerDependencies": {
         "@hotwired/stimulus": "^3.2.2",
         "@symfony/webpack-encore": "^5.2.0 || ^6.0.0 || ^7.0.0",
-        "@tabler/core": "^1.5.1",
+        "@tabler/core": "^1.7.1",
       },
     },
   },
@@ -353,7 +353,7 @@
 
     "@symfony/webpack-encore": ["@symfony/webpack-encore@7.2.0", "", { "dependencies": { "@kocal/friendly-errors-webpack-plugin": "^3.0.0", "babel-loader": "^10.0.0", "css-loader": "^7.1.0", "fastest-levenshtein": "^1.0.16", "mini-css-extract-plugin": "^2.6.0", "minimizer-webpack-plugin": "^5.6.1", "picocolors": "^1.1.0", "pretty-error": "^4.0.0", "resolve-url-loader": "^5.0.0", "semver": "^7.3.2", "style-loader": "^4.0.0", "tapable": "^2.2.1", "tmp": "^0.2.7", "webpack-manifest-plugin": "^6.0.1", "yargs-parser": "^21.0.0" }, "peerDependencies": { "@babel/core": "^8.0.0", "@babel/plugin-transform-react-jsx": "^8.0.0", "@babel/preset-env": "^8.0.0", "@babel/preset-react": "^8.0.0", "@babel/preset-typescript": "^8.0.0", "@swc/core": "*", "@swc/css": "*", "@symfony/stimulus-bridge": "^3.0.0 || ^4.0.0", "@vue/babel-plugin-jsx": "^3.0.0", "@vue/compiler-sfc": "^3.2.14", "clean-css": "*", "cssnano": "*", "csso": "*", "esbuild": "*", "fork-ts-checker-webpack-plugin": "^7.0.0 || ^8.0.0 || ^9.0.0", "handlebars": "^4.7.7", "handlebars-loader": "^1.7.0", "less": "^4.0.0", "less-loader": "^12.2.0", "lightningcss": "*", "postcss": "^8.3.0", "postcss-loader": "^8.1.1", "sass": "^1.17.0", "sass-loader": "^16.0.1 || ^17.0.0", "stylus-loader": "^8.1.0", "svelte": "^3.50.0 || ^4.2.2 || ^5.0.0", "svelte-loader": "^3.1.0", "ts-loader": "^9.0.0", "typescript": "^5.0.0 || ^6.0.0", "uglify-js": "*", "vue": "^3.2.14", "vue-loader": "^17.0.0", "webpack": "^5.82", "webpack-cli": "^6.0.0 || ^7.0.0", "webpack-dev-server": "^5.1.0 || ^6.0.0", "webpack-notifier": "^1.15.0" }, "optionalPeers": ["@babel/plugin-transform-react-jsx", "@babel/preset-react", "@babel/preset-typescript", "@swc/core", "@swc/css", "@symfony/stimulus-bridge", "@vue/babel-plugin-jsx", "@vue/compiler-sfc", "clean-css", "cssnano", "csso", "esbuild", "fork-ts-checker-webpack-plugin", "handlebars", "handlebars-loader", "less", "less-loader", "lightningcss", "postcss", "postcss-loader", "sass", "sass-loader", "stylus-loader", "svelte", "svelte-loader", "ts-loader", "typescript", "uglify-js", "vue", "vue-loader", "webpack-dev-server", "webpack-notifier"], "bin": { "encore": "dist/bin/encore.js" } }, "sha512-rICgGPCGkuZmySw8av72/tvJg8HTs+f49m75fgv8/Rr6SRBHqVUPy8PPPfY7WmDyLIwXhRhDK9wwpb+db224zg=="],
 
-    "@tabler/core": ["@tabler/core@1.5.1", "", { "dependencies": { "@popperjs/core": "^2.11.8" } }, "sha512-PI9rJq4H4lBh53YP/J+m5Uz6lqVQbsGPmWCMN34IP4KQQ/wy28YMO6a3Eiz1cQHdFFr+3MlU3yYhXdzvFGJfqw=="],
+    "@tabler/core": ["@tabler/core@1.7.1", "", { "dependencies": { "@popperjs/core": "^2.11.8" }, "peerDependencies": { "vanilla-calendar-pro": "^3.3.2" }, "optionalPeers": ["vanilla-calendar-pro"] }, "sha512-sC42sr/uslr7kIZwyBPESWJKRm1E4hYAMMZyLDoyG0ZlEOlglRW0L5c1gf8x6i+QApT+AtHm10fDP1j2WgQJpg=="],
 
     "@tiptap/core": ["@tiptap/core@3.32.0", "", { "peerDependencies": { "@tiptap/pm": "3.32.0" } }, "sha512-Ghh2h02GKSqzytQGcLV4espYOG4EHxjj0MsrUB2Vnr47xmlZYRf6r7k2J09H+JpBdaGrWwrTkyBEi5i3c3yy2Q=="],
 
