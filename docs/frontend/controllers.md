@@ -144,6 +144,16 @@ You can also provide a custom overlay element by adding `data-loading-target="ov
 
 ---
 
+## country-select
+
+**File:** `controllers/country_select_controller.js`
+
+Powers the extended [`CountryType`](../form-types/country.md). Mounts [tom-select](https://tom-select.js.org/) over the country `<select>` so users can type to filter, and renders a [Tabler flag](https://docs.tabler.io/ui/plugins/flags) next to every option.
+
+> This controller is wired automatically onto every `CountryType` field — you do not need to add it to your markup manually.
+
+---
+
 ## text-editor
 
 **File:** `controllers/text_editor_controller.js`

@@ -42,6 +42,12 @@
         "fetch": "lazy",
         "enabled": true
       },
+      "country-select": {
+        "main": "controllers/country_select_controller.js",
+        "webpackMode": "lazy",
+        "fetch": "lazy",
+        "enabled": true
+      },
       "loading": {
         "main": "controllers/loading.js",
         "webpackMode": "lazy",
@@ -87,7 +93,8 @@
     "@tiptap/starter-kit": "^3.31.4",
     "postcss": "^8.4.0",
     "postcss-loader": "^8.1.0",
-    "postcss-prefix-custom-properties": "^0.1.0"
+    "postcss-prefix-custom-properties": "^0.1.0",
+    "tom-select": "^2.6.2"
   },
   "devDependencies": {
     "@babel/core": "^8.0.5",
