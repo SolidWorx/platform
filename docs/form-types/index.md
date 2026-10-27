@@ -5,6 +5,7 @@ The platform ships a small set of opinionated, reusable Symfony form types that 
 ## Contents
 
 - [TextEditorType](./text-editor.md) — a Tiptap-powered rich text editor with server-side HTML sanitization.
+- [CountryType](./country.md) — Symfony's country field, extended into a searchable dropdown with Tabler flags.
 
 ## Form extensions
 

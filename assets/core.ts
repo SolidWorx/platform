@@ -1,4 +1,5 @@
 import './scss/platform.scss';
+import '@tabler/core/dist/css/tabler-flags.css';
 
 import '@tabler/core';
 
