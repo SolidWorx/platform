@@ -50,6 +50,7 @@ use SolidWorx\Platform\PlatformBundle\Repository\UserTenantRepository;
 use SolidWorx\Platform\PlatformBundle\Security\EmailVerification\EmailVerifier;
 use SolidWorx\Platform\PlatformBundle\Security\EmailVerification\SendVerificationEmailListener;
 use SolidWorx\Platform\PlatformBundle\Security\EventListener\TenantDomainLoginListener;
+use SolidWorx\Platform\PlatformBundle\Security\ResetPassword\ResetPasswordMailer;
 use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantCreationVoter;
 use SolidWorx\Platform\PlatformBundle\Security\Voter\TenantVoter;
 use SolidWorx\Platform\PlatformBundle\Tenant\Onboarding\DefaultTenantOnboarder;
@@ -303,6 +304,12 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
 
             return;
         }
+
+        // Security/ResetPassword is kept out of the resource loader for its entity, so the mailer
+        // is registered here, and only while reset password is enabled.
+        $container->register(ResetPasswordMailer::class)
+            ->setAutowired(autowired: true)
+            ->setAutoconfigured(autoconfigured: true);
 
         if ($config['rate_limit']['enabled']) {
             $container->getDefinition(RequestResetPassword::class)

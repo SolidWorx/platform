@@ -23,6 +23,7 @@ use SolidWorx\Platform\PlatformBundle\Controller\Security\ResetPassword\RequestR
 use SolidWorx\Platform\PlatformBundle\Exception\UntrustedLinkHostException;
 use SolidWorx\Platform\PlatformBundle\Form\Type\Security\ResetPasswordRequestType;
 use SolidWorx\Platform\PlatformBundle\Security\EmailLinkContext;
+use SolidWorx\Platform\PlatformBundle\Security\ResetPassword\ResetPasswordMailer;
 use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\FakeResetPasswordHelper;
 use Stringable;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -314,21 +315,28 @@ final class RequestResetPasswordTest extends ResetPasswordTestCase
             }
         };
 
+        $linkContext = new EmailLinkContext(
+            $this->service('router', RouterInterface::class),
+            $this->service('request_stack', RequestStack::class),
+            $this->baseUrl,
+            $this->debug,
+        );
+
         $controller = new RequestResetPassword(
             $this->helper,
-            $entityManager,
-            $mailer,
-            new IdentityTranslator(),
-            $logger,
-            new EmailLinkContext(
+            new ResetPasswordMailer(
+                $this->helper,
+                $entityManager,
+                $mailer,
+                new IdentityTranslator(),
+                $logger,
+                $linkContext,
                 $this->service('router', RouterInterface::class),
-                $this->service('request_stack', RequestStack::class),
-                $this->baseUrl,
-                $this->debug,
+                '@SolidWorxPlatform/ResetPassword/email.html.twig',
+                'Reset your password',
             ),
+            $linkContext,
             '@SolidWorxPlatform/ResetPassword/request.html.twig',
-            '@SolidWorxPlatform/ResetPassword/email.html.twig',
-            'Reset your password',
             'main',
             limiter: $limiter,
         );
