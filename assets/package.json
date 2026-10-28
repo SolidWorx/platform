@@ -109,7 +109,7 @@
     "typescript": "^7.0.2",
     "webpack": "^5.102.1",
     "webpack-cli": "^7.2.3",
-    "webpack-notifier": "^1.15.0"
+    "webpack-notifier": "^1.17.0"
   },
   "peerDependenciesMeta": {
     "@tabler/core": {

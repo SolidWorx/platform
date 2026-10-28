@@ -57,7 +57,7 @@
         "typescript": "^7.0.2",
         "webpack": "^5.102.1",
         "webpack-cli": "^7.2.3",
-        "webpack-notifier": "^1.15.0",
+        "webpack-notifier": "^1.17.0",
       },
       "peerDependencies": {
         "@hotwired/stimulus": "^3.2.2",
@@ -426,6 +426,8 @@
     "@types/json-schema": ["@types/json-schema@7.0.15", "", {}, "sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA=="],
 
     "@types/node": ["@types/node@24.7.0", "", { "dependencies": { "undici-types": "~7.14.0" } }, "sha512-IbKooQVqUBrlzWTi79E8Fw78l8k1RNtlDDNWsFZs7XonuQSJ8oNYfEeclhprUldXISRMLzBpILuKgPlIxm+/Yw=="],
+
+    "@types/node-notifier": ["@types/node-notifier@8.0.5", "", { "dependencies": { "@types/node": "*" } }, "sha512-LX7+8MtTsv6szumAp6WOy87nqMEdGhhry/Qfprjm1Ma6REjVzeF7SCyvPtp5RaF6IkXCS9V4ra8g5fwvf2ZAYg=="],
 
     "@types/webpack-env": ["@types/webpack-env@1.18.8", "", {}, "sha512-G9eAoJRMLjcvN4I08wB5I7YofOb/kaJNd5uoCMX+LbKXTPCF+ZIHuqTnFaK9Jz1rgs035f9JUPUhNFtqgucy/A=="],
 
@@ -1003,7 +1005,7 @@
 
     "webpack-merge": ["webpack-merge@6.0.1", "", { "dependencies": { "clone-deep": "^4.0.1", "flat": "^5.0.2", "wildcard": "^2.0.1" } }, "sha512-hXXvrjtx2PLYx4qruKl+kyRSLc52V+cCvMxRjmKwoA+CBbbF5GfIBtR6kCvl0fYGqTUPKB+1ktVmTHqMOzgCBg=="],
 
-    "webpack-notifier": ["webpack-notifier@1.15.0", "", { "dependencies": { "node-notifier": "^9.0.0", "strip-ansi": "^6.0.0" }, "peerDependencies": { "@types/webpack": ">4.41.31" }, "optionalPeers": ["@types/webpack"] }, "sha512-N2V8UMgRB5komdXQRavBsRpw0hPhJq2/SWNOGuhrXpIgRhcMexzkGQysUyGStHLV5hkUlgpRiF7IUXoBqyMmzQ=="],
+    "webpack-notifier": ["webpack-notifier@1.17.0", "", { "dependencies": { "@types/node-notifier": "^8.0.1", "node-notifier": "^9.0.0", "strip-ansi": "^6.0.0" }, "peerDependencies": { "@types/webpack": ">4.41.31" }, "optionalPeers": ["@types/webpack"] }, "sha512-N8ZhVsi7Jd4sRfVmzT4I6zV7eKtkdQ2F3EypoRI7KRYf5d6hABEMdmTUlu50QlcGHT6PaeYSkQ0b5NVPK0NxKA=="],
 
     "webpack-sources": ["webpack-sources@3.5.1", "", {}, "sha512-jyuiGJdtvY434z5bUZrjz67v76/ePNvFZTp9Mdz29IlH4+GPsgyGjiv0fKI+M7BdkU6ADjulUcKAd3tUK3WlEw=="],
 
