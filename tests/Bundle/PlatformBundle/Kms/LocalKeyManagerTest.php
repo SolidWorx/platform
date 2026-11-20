@@ -43,12 +43,12 @@ final class LocalKeyManagerTest extends TestCase
     #[Override]
     protected function setUp(): void
     {
+        // A directory that does not exist yet, so generating has to create it.
+        $this->dir = sys_get_temp_dir() . '/platform-kms-' . bin2hex(random_bytes(6)) . '/keys';
+
         if (! class_exists(Encrypted::class)) {
             self::markTestSkipped('symfony/doctrine-orm-key-management is not installed.');
         }
-
-        // A directory that does not exist yet, so generating has to create it.
-        $this->dir = sys_get_temp_dir() . '/platform-kms-' . bin2hex(random_bytes(6)) . '/keys';
     }
 
     #[Override]

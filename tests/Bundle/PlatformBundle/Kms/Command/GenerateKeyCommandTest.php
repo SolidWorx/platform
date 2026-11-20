@@ -50,11 +50,12 @@ final class GenerateKeyCommandTest extends TestCase
     #[Override]
     protected function setUp(): void
     {
+        $this->dir = sys_get_temp_dir() . '/platform-kms-' . bin2hex(random_bytes(6));
+
         if (! class_exists(Encrypted::class)) {
             self::markTestSkipped('symfony/doctrine-orm-key-management is not installed.');
         }
 
-        $this->dir = sys_get_temp_dir() . '/platform-kms-' . bin2hex(random_bytes(6));
         $this->output = new BufferedOutput();
     }
 
