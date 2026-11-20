@@ -17,12 +17,18 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\SolidWorxPlatformExtension;
+use SolidWorx\Platform\PlatformBundle\Kms\Command\GenerateKeyCommand;
+use SolidWorx\Platform\PlatformBundle\Kms\KmsCacheWarmer;
 use SolidWorx\Platform\PlatformBundle\Kms\KmsSupport;
+use SolidWorx\Platform\PlatformBundle\Kms\LocalKeyGuardEnvelopeEncrypter;
+use SolidWorx\Platform\PlatformBundle\Kms\LocalKeyManager;
 use SolidWorx\Platform\PlatformBundle\Kms\TenantEnvelopeEncrypter;
 use SolidWorx\Platform\PlatformBundle\Kms\TenantScopeRegistry;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\KeyManagement\Bridge\DoctrineOrm\Attribute\Encrypted;
@@ -174,6 +180,53 @@ final class KmsConfigurationTest extends TestCase
         ]);
 
         $this->assertFalse($container->hasDefinition(TenantEnvelopeEncrypter::class));
+    }
+
+    public function testLocalKeyManagerIsWired(): void
+    {
+        $definition = $this->load([])->getDefinition(LocalKeyManager::class);
+
+        $this->assertEquals([
+            '%solidworx_platform.kms.dsn%',
+            '%solidworx_platform.kms.key_id%',
+            '%kernel.environment%',
+            '%solidworx_platform.kms.allow_local_key_in_prod%',
+            new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+            '%env(default::KMS_STORE_SECRET)%',
+        ], $definition->getArguments());
+    }
+
+    public function testLocalKeyGuardDecoratesTheStoredEncrypterWithoutMultiTenancy(): void
+    {
+        $definition = $this->load([])->getDefinition(LocalKeyGuardEnvelopeEncrypter::class);
+
+        // Between the traceable wrapper (0) and the tenant decorator (10).
+        $this->assertSame(['key_management.stored_envelope_encrypter', null, 5], $definition->getDecoratedService());
+        $this->assertEquals([new Reference('.inner'), new Reference(LocalKeyManager::class)], $definition->getArguments());
+    }
+
+    public function testCacheWarmerResolvesTheManagerLazily(): void
+    {
+        $definition = $this->load([])->getDefinition(KmsCacheWarmer::class);
+
+        $this->assertEquals([
+            '%kernel.environment%',
+            new ServiceClosureArgument(new Reference(LocalKeyManager::class)),
+        ], $definition->getArguments());
+    }
+
+    public function testLocalKeyServicesAreRemovedWhenKmsIsDisabled(): void
+    {
+        $container = $this->load([
+            'kms' => [
+                'enabled' => false,
+            ],
+        ]);
+
+        $this->assertFalse($container->hasDefinition(LocalKeyManager::class));
+        $this->assertFalse($container->hasDefinition(LocalKeyGuardEnvelopeEncrypter::class));
+        $this->assertFalse($container->hasDefinition(KmsCacheWarmer::class));
+        $this->assertFalse($container->hasDefinition(GenerateKeyCommand::class));
     }
 
     public function testEnabledTrueWithoutBridgeThrows(): void

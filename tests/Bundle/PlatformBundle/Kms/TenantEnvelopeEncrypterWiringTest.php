@@ -18,6 +18,8 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\SolidWorxPlatformExtension;
+use SolidWorx\Platform\PlatformBundle\Kms\LocalKeyGuardEnvelopeEncrypter;
+use SolidWorx\Platform\PlatformBundle\Kms\LocalKeyManager;
 use SolidWorx\Platform\PlatformBundle\Kms\TenantEnvelopeEncrypter;
 use SolidWorx\Platform\PlatformBundle\Kms\TenantScopeRegistry;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
@@ -50,27 +52,34 @@ final class TenantEnvelopeEncrypterWiringTest extends TestCase
     {
         $chain = $this->decorationChain(debug: true);
 
-        $this->assertSame([TraceableEnvelopeEncrypter::class, TenantEnvelopeEncrypter::class, StoredEnvelopeEncrypter::class], $chain);
+        $this->assertSame([TraceableEnvelopeEncrypter::class, LocalKeyGuardEnvelopeEncrypter::class, TenantEnvelopeEncrypter::class, StoredEnvelopeEncrypter::class], $chain);
     }
 
     public function testDecoratorWrapsTheStoredEncrypterWithoutDebug(): void
     {
         $chain = $this->decorationChain(debug: false);
 
-        $this->assertSame([TenantEnvelopeEncrypter::class, StoredEnvelopeEncrypter::class], $chain);
+        $this->assertSame([LocalKeyGuardEnvelopeEncrypter::class, TenantEnvelopeEncrypter::class, StoredEnvelopeEncrypter::class], $chain);
+    }
+
+    public function testGuardWrapsTheStoredEncrypterWithoutMultiTenancy(): void
+    {
+        $chain = $this->decorationChain(debug: true, multiTenancy: false);
+
+        $this->assertSame([TraceableEnvelopeEncrypter::class, LocalKeyGuardEnvelopeEncrypter::class, StoredEnvelopeEncrypter::class], $chain);
     }
 
     /**
      * @return list<string|null>
      */
-    private function decorationChain(bool $debug): array
+    private function decorationChain(bool $debug, bool $multiTenancy = true): array
     {
         $platform = new ContainerBuilder();
         $platform->setParameter('kernel.debug', $debug);
         $platform->setParameter('kernel.environment', 'test');
         new SolidWorxPlatformExtension([
             'multi_tenancy' => [
-                'enabled' => true,
+                'enabled' => $multiTenancy,
             ],
         ])->load([[]], $platform);
 
@@ -102,7 +111,12 @@ final class TenantEnvelopeEncrypterWiringTest extends TestCase
         $container->register('doctrine.dbal.default_connection', Connection::class)->setSynthetic(true);
         $container->register(TenantScopeRegistry::class, TenantScopeRegistry::class)->setSynthetic(true);
         $container->register(TenantContext::class, TenantContext::class)->setSynthetic(true);
-        $container->setDefinition(TenantEnvelopeEncrypter::class, $platform->getDefinition(TenantEnvelopeEncrypter::class));
+        $container->register(LocalKeyManager::class, LocalKeyManager::class)->setSynthetic(true);
+        $container->setDefinition(LocalKeyGuardEnvelopeEncrypter::class, $platform->getDefinition(LocalKeyGuardEnvelopeEncrypter::class));
+
+        if ($multiTenancy) {
+            $container->setDefinition(TenantEnvelopeEncrypter::class, $platform->getDefinition(TenantEnvelopeEncrypter::class));
+        }
         $container->setAlias('test.stored_envelope_encrypter', 'key_management.stored_envelope_encrypter')->setPublic(true);
 
         $container->compile();

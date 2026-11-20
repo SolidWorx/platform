@@ -38,7 +38,11 @@ use SolidWorx\Platform\PlatformBundle\Doctrine\Filter\TenantFilter;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Type\URLType;
 use SolidWorx\Platform\PlatformBundle\Enum\PasswordStrengthLevel;
 use SolidWorx\Platform\PlatformBundle\Form\Type\Tenant\TenantOnboardingType;
+use SolidWorx\Platform\PlatformBundle\Kms\Command\GenerateKeyCommand;
+use SolidWorx\Platform\PlatformBundle\Kms\KmsCacheWarmer;
 use SolidWorx\Platform\PlatformBundle\Kms\KmsSupport;
+use SolidWorx\Platform\PlatformBundle\Kms\LocalKeyGuardEnvelopeEncrypter;
+use SolidWorx\Platform\PlatformBundle\Kms\LocalKeyManager;
 use SolidWorx\Platform\PlatformBundle\Kms\TenantEnvelopeEncrypter;
 use SolidWorx\Platform\PlatformBundle\Kms\TenantScopeRegistry;
 use SolidWorx\Platform\PlatformBundle\Logger\Processor\TenantLoggingProcessor;
@@ -77,8 +81,10 @@ use Symfony\Component\AssetMapper\AssetMapperInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
@@ -269,6 +275,38 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         $container->setParameter('solidworx_platform.kms.dsn', $config['kms']['dsn']);
         $container->setParameter('solidworx_platform.kms.key_id', $config['kms']['key_id']);
         $container->setParameter('solidworx_platform.kms.allow_local_key_in_prod', $config['kms']['allow_local_key_in_prod']);
+
+        if ($kmsEnabled) {
+            $container->getDefinition(LocalKeyManager::class)
+                ->setArguments([
+                    '%solidworx_platform.kms.dsn%',
+                    '%solidworx_platform.kms.key_id%',
+                    '%kernel.environment%',
+                    '%solidworx_platform.kms.allow_local_key_in_prod%',
+                    new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+                    '%env(default::KMS_STORE_SECRET)%',
+                ]);
+
+            // Lazy: building the manager resolves KMS_DSN, which a production warm-up may not have.
+            $container->getDefinition(KmsCacheWarmer::class)
+                ->setArguments([
+                    '%kernel.environment%',
+                    new ServiceClosureArgument(new Reference(LocalKeyManager::class)),
+                ]);
+
+            // Priority 5: inside the traceable wrapper (0), outside the tenant decorator (10).
+            $container->getDefinition(LocalKeyGuardEnvelopeEncrypter::class)
+                ->setDecoratedService('key_management.stored_envelope_encrypter', priority: 5)
+                ->setArguments([
+                    new Reference('.inner'),
+                    new Reference(LocalKeyManager::class),
+                ]);
+        } else {
+            $container->removeDefinition(LocalKeyManager::class);
+            $container->removeDefinition(KmsCacheWarmer::class);
+            $container->removeDefinition(LocalKeyGuardEnvelopeEncrypter::class);
+            $container->removeDefinition(GenerateKeyCommand::class);
+        }
 
         if ($kmsEnabled && $config['multi_tenancy']['enabled']) {
             $container->getDefinition(TenantScopeRegistry::class)
