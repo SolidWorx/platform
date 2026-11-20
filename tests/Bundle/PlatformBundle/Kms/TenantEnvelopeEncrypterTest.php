@@ -64,7 +64,7 @@ final class TenantEnvelopeEncrypterTest extends TestCase
 
         // The registry's cache stands in for ORM metadata: these two scopes are tenant-aware columns.
         $cache = new ArrayAdapter();
-        $cache->save($cache->getItem('platform_kms_tenant_scopes')->set([
+        $cache->save($cache->getItem('platform_kms_tenant_scopes.build')->set([
             'orm:invoice.notes' => true,
             'orm:invoice.total' => true,
         ]));
@@ -72,7 +72,7 @@ final class TenantEnvelopeEncrypterTest extends TestCase
         $this->tenantContext = new TenantContext(new EventDispatcher());
         $this->encrypter = new TenantEnvelopeEncrypter(
             $this->inner,
-            new TenantScopeRegistry(self::createStub(ManagerRegistry::class), $cache),
+            new TenantScopeRegistry(self::createStub(ManagerRegistry::class), $cache, 'build'),
             $this->tenantContext,
         );
     }

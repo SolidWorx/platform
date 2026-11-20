@@ -90,6 +90,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
 use Webmozart\Assert\Assert;
@@ -322,11 +323,13 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         }
 
         if ($kmsEnabled && $config['multi_tenancy']['enabled']) {
+            // In debug a newly encrypted column must count at once, not after a cache clear.
             $container->getDefinition(TenantScopeRegistry::class)
-                ->setArguments([
+                ->setArguments($container->getParameter('kernel.debug') === true ? [new Reference('doctrine'), null] : [
                     new Reference('doctrine'),
-                    // In debug a newly encrypted column must count at once, not after a cache clear.
-                    $container->getParameter('kernel.debug') === true ? null : new Reference('cache.system'),
+                    new Reference('cache.system'),
+                    // Set by the dumped container, as for cache.system's own namespace.
+                    new Parameter('container.build_id'),
                 ]);
 
             // Priority 10 runs before KeyManagementPass's traceable decorator (priority 0), which

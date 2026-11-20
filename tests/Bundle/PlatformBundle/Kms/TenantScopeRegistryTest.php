@@ -165,16 +165,33 @@ final class TenantScopeRegistryTest extends KmsOrmTestCase
         $entityManager = $this->createKmsEntityManager(self::ENTITY_DIR);
         $pool = new ArrayAdapter();
 
-        $this->assertTrue(new TenantScopeRegistry($this->managerRegistry($entityManager), $pool)->isTenantScope('tenant.secret'));
-        $this->assertTrue($pool->getItem('platform_kms_tenant_scopes')->isHit());
+        $this->assertTrue(new TenantScopeRegistry($this->managerRegistry($entityManager), $pool, 'build1')->isTenantScope('tenant.secret'));
+        $this->assertTrue($pool->getItem('platform_kms_tenant_scopes.build1')->isHit());
 
         $failing = self::createStub(ManagerRegistry::class);
         $failing->method('getManagers')->willThrowException(new LogicException('Metadata must not be loaded on a cache hit.'));
 
-        $registry = new TenantScopeRegistry($failing, $pool);
+        $registry = new TenantScopeRegistry($failing, $pool, 'build1');
 
         $this->assertTrue($registry->isTenantScope('tenant.secret'));
         $this->assertFalse($registry->isTenantScope('unknown'));
+    }
+
+    /**
+     * A pool kept across deploys must not serve the scopes of a previous build, which may predate a
+     * newly encrypted tenant column and would encrypt it under a shared key.
+     */
+    public function testCacheIsKeyedByContainerBuild(): void
+    {
+        $pool = new ArrayAdapter();
+        // The previous build had no encrypted tenant column.
+        $previous = self::createStub(ManagerRegistry::class);
+        $previous->method('getManagers')->willReturn([]);
+        $this->assertFalse(new TenantScopeRegistry($previous, $pool, 'old')->isTenantScope('tenant.secret'));
+
+        $entityManager = $this->createKmsEntityManager(self::ENTITY_DIR);
+
+        $this->assertTrue(new TenantScopeRegistry($this->managerRegistry($entityManager), $pool, 'new')->isTenantScope('tenant.secret'));
     }
 
     private function registry(EntityManagerInterface $entityManager): TenantScopeRegistry

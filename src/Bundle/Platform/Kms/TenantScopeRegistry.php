@@ -48,10 +48,12 @@ final class TenantScopeRegistry
 
     /**
      * @param CacheItemPoolInterface|null $cache Null in debug, where a mapping change must show up without a cache clear
+     * @param string $cacheVersion The container build id, so a pool kept across deploys never serves the scopes of an older mapping
      */
     public function __construct(
         private readonly ManagerRegistry $doctrine,
         private readonly ?CacheItemPoolInterface $cache = null,
+        private readonly string $cacheVersion = '',
     ) {
     }
 
@@ -74,7 +76,7 @@ final class TenantScopeRegistry
             return $this->resolve();
         }
 
-        $item = $this->cache->getItem(self::CACHE_KEY);
+        $item = $this->cache->getItem(self::CACHE_KEY . '.' . $this->cacheVersion);
 
         if ($item->isHit()) {
             $scopes = $item->get();

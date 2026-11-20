@@ -33,6 +33,7 @@ use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\KeyManagement\Bridge\DoctrineOrm\Attribute\Encrypted;
 
@@ -117,7 +118,7 @@ final class KmsConfigurationTest extends TestCase
             ],
         ])->getDefinition(TenantScopeRegistry::class);
 
-        $this->assertEquals([new Reference('doctrine'), new Reference('cache.system')], $definition->getArguments());
+        $this->assertEquals([new Reference('doctrine'), new Reference('cache.system'), new Parameter('container.build_id')], $definition->getArguments());
     }
 
     public function testTenantScopeRegistryIsNotCachedInDebug(): void
