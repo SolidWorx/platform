@@ -18,6 +18,7 @@ use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\SolidWorxPlatformExtension;
 use SolidWorx\Platform\PlatformBundle\Kms\Command\GenerateKeyCommand;
+use SolidWorx\Platform\PlatformBundle\Kms\Command\RotateTenantKeyCommand;
 use SolidWorx\Platform\PlatformBundle\Kms\KmsCacheWarmer;
 use SolidWorx\Platform\PlatformBundle\Kms\KmsSupport;
 use SolidWorx\Platform\PlatformBundle\Kms\LocalKeyGuardEnvelopeEncrypter;
@@ -180,6 +181,36 @@ final class KmsConfigurationTest extends TestCase
         ]);
 
         $this->assertFalse($container->hasDefinition(TenantEnvelopeEncrypter::class));
+    }
+
+    public function testRotateTenantKeyCommandIsRegisteredWithKmsAndMultiTenancy(): void
+    {
+        $container = $this->load([
+            'multi_tenancy' => [
+                'enabled' => true,
+            ],
+        ]);
+
+        $this->assertTrue($container->hasDefinition(RotateTenantKeyCommand::class));
+    }
+
+    public function testRotateTenantKeyCommandIsRemovedWithoutMultiTenancy(): void
+    {
+        $this->assertFalse($this->load([])->hasDefinition(RotateTenantKeyCommand::class));
+    }
+
+    public function testRotateTenantKeyCommandIsRemovedWhenKmsIsDisabled(): void
+    {
+        $container = $this->load([
+            'multi_tenancy' => [
+                'enabled' => true,
+            ],
+            'kms' => [
+                'enabled' => false,
+            ],
+        ]);
+
+        $this->assertFalse($container->hasDefinition(RotateTenantKeyCommand::class));
     }
 
     public function testLocalKeyManagerIsWired(): void

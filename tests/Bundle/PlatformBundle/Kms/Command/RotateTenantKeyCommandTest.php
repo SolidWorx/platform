@@ -17,21 +17,24 @@ use Override;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\Attributes\UsesClass;
-use PHPUnit\Framework\TestCase;
+use ReflectionProperty;
 use SolidWorx\Platform\PlatformBundle\Console\IO;
 use SolidWorx\Platform\PlatformBundle\Kms\Command\RotateTenantKeyCommand;
 use SolidWorx\Platform\PlatformBundle\Kms\TenantEnvelopeEncrypter;
+use SolidWorx\Platform\PlatformBundle\Kms\TenantScopeRegistry;
 use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
 use SolidWorx\Platform\PlatformBundle\Repository\TenantRepository;
+use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
+use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\Kms\Entity\EncryptedTenantNote;
+use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\Kms\KmsOrmTestCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\KeyManagement\Bridge\DoctrineOrm\Attribute\Encrypted;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\KeyManagement\RewrappableDataKeyStoreInterface;
 use Symfony\Component\KeyManagement\StoredEnvelopeEncrypter;
 use Symfony\Component\KeyManagement\Test\InMemoryDataKeyStore;
 use Symfony\Component\Uid\Ulid;
-use function class_exists;
 use function strlen;
 use function substr;
 
@@ -39,16 +42,15 @@ use function substr;
 #[UsesClass(IO::class)]
 #[UsesClass(TenantEnvelopeEncrypter::class)]
 #[RequiresPhpExtension('sodium')]
-final class RotateTenantKeyCommandTest extends TestCase
+#[RequiresPhpExtension('openssl')]
+final class RotateTenantKeyCommandTest extends KmsOrmTestCase
 {
     private BufferedOutput $output;
 
     #[Override]
     protected function setUp(): void
     {
-        if (! class_exists(Encrypted::class)) {
-            self::markTestSkipped('symfony/doctrine-orm-key-management is not installed.');
-        }
+        parent::setUp();
 
         $this->output = new BufferedOutput();
     }
@@ -147,6 +149,37 @@ final class RotateTenantKeyCommandTest extends TestCase
         self::assertNotSame($before->reference, $after->reference);
         self::assertSame('old secret', $encrypter->decrypt($before));
         self::assertSame('new secret', $encrypter->decrypt($after));
+    }
+
+    public function testRotatesTheScopeTheTenantEncrypterUses(): void
+    {
+        $context = new TenantContext(new EventDispatcher());
+        $em = $this->createKmsEntityManager(
+            __DIR__ . '/../../Fixtures/Kms/Entity',
+            decorate: fn (StoredEnvelopeEncrypter $inner): TenantEnvelopeEncrypter => new TenantEnvelopeEncrypter(
+                $inner,
+                new TenantScopeRegistry($this->managerRegistry()),
+                $context,
+            ),
+        );
+        $tenant = new Ulid();
+        $context->setTenant($tenant);
+        $em->persist($note = new EncryptedTenantNote('secret'));
+        $note->setTenantId($tenant);
+        $em->flush();
+
+        $store = new ReflectionProperty(StoredEnvelopeEncrypter::class, 'store')->getValue($this->encrypter);
+        self::assertInstanceOf(InMemoryDataKeyStore::class, $store);
+        self::assertSame([
+            $tenant->toBase32() => 1,
+        ], $this->keysPerTenant($store));
+
+        self::assertSame(Command::SUCCESS, $this->execute($store, [$this->tenant($tenant)], [
+            'tenant' => (string) $tenant,
+        ]));
+        self::assertSame([
+            $tenant->toBase32() => 2,
+        ], $this->keysPerTenant($store));
     }
 
     private function seededStore(Ulid ...$tenants): InMemoryDataKeyStore
