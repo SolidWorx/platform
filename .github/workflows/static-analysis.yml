@@ -28,7 +28,7 @@ jobs:
       - name: Install Symfony 8.2 beta and KMS packages
         run: |
           composer config minimum-stability beta
-          composer require --dev --no-update "symfony/key-management:^8.2@beta" "symfony/doctrine-dbal-key-management:^8.2@beta" "symfony/doctrine-orm-key-management:^8.2@beta"
+          composer require --dev --no-update "symfony/key-management:^8.2@beta" "symfony/doctrine-dbal-key-management:^8.2@beta" "symfony/doctrine-orm-key-management:^8.2@beta" "symfony/framework-bundle:^8.2@beta"
           composer update "symfony/*" "doctrine/*" -W --no-interaction
 
       - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
