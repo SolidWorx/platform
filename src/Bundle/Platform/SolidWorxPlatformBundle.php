@@ -25,6 +25,7 @@ use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\Authentic
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\ClearPlatformConfigStatePass;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\MenuCompilerPass;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\ResetPasswordRepositoryPass;
+use SolidWorx\Platform\PlatformBundle\DependencyInjection\CompilerPass\TenantEncryptionGuardPass;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Type\UTCDateTimeType;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -71,6 +72,8 @@ final class SolidWorxPlatformBundle extends Bundle implements PlatformConfigSect
         $container->addCompilerPass(new AuthenticationCompilerPass());
         $container->addCompilerPass(new ResetPasswordRepositoryPass());
         $container->addCompilerPass(new ClearPlatformConfigStatePass(), PassConfig::TYPE_AFTER_REMOVING);
+        // After KeyManagementBundle's RegisterEncryptedColumnsPass (priority 0), before decorators are applied.
+        $container->addCompilerPass(new TenantEncryptionGuardPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, -32);
     }
 
     /**
