@@ -29,13 +29,16 @@ use SolidWorx\Platform\PlatformBundle\Kms\TenantEnvelopeEncrypter;
 use SolidWorx\Platform\PlatformBundle\Kms\TenantScopeRegistry;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Extension\ConfigurationExtensionInterface;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\KeyManagement\Bridge\DoctrineOrm\Attribute\Encrypted;
+use Symfony\Component\KeyManagement\KeyManagementBundle;
 
 #[CoversClass(SolidWorxPlatformExtension::class)]
 #[CoversClass(KmsSupport::class)]
@@ -83,6 +86,32 @@ final class KmsConfigurationTest extends TestCase
                 'key_id' => 'other',
             ],
         ], $configs[1]);
+    }
+
+    /**
+     * Rotating KMS_STORE_SECRET relies on the application's list replacing the platform's single secret.
+     */
+    public function testAppSecretListReplacesThePrependedSecret(): void
+    {
+        $extension = new KeyManagementBundle()->getContainerExtension();
+        self::assertInstanceOf(ConfigurationExtensionInterface::class, $extension);
+
+        $container = new ContainerBuilder();
+        $container->setParameter('kernel.bundles_metadata', []);
+        $container->registerExtension($extension);
+        $container->loadFromExtension('key_management', [
+            'store' => [
+                'secret' => ['%env(KMS_STORE_SECRET)%', '%env(KMS_STORE_SECRET_OLD)%'],
+            ],
+        ]);
+        new SolidWorxPlatformExtension([])->prepend($container);
+
+        $configuration = $extension->getConfiguration([], $container);
+        self::assertNotNull($configuration);
+        /** @var array{store: array{secret: list<string>}} $config */
+        $config = new Processor()->processConfiguration($configuration, $container->getExtensionConfig('key_management'));
+
+        $this->assertSame(['%env(KMS_STORE_SECRET)%', '%env(KMS_STORE_SECRET_OLD)%'], $config['store']['secret']);
     }
 
     public function testDisabledPrependsNothing(): void
