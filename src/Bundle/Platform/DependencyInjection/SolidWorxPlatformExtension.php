@@ -39,6 +39,7 @@ use SolidWorx\Platform\PlatformBundle\Doctrine\Type\URLType;
 use SolidWorx\Platform\PlatformBundle\Enum\PasswordStrengthLevel;
 use SolidWorx\Platform\PlatformBundle\Form\Type\Tenant\TenantOnboardingType;
 use SolidWorx\Platform\PlatformBundle\Kms\KmsSupport;
+use SolidWorx\Platform\PlatformBundle\Kms\TenantEnvelopeEncrypter;
 use SolidWorx\Platform\PlatformBundle\Kms\TenantScopeRegistry;
 use SolidWorx\Platform\PlatformBundle\Logger\Processor\TenantLoggingProcessor;
 use SolidWorx\Platform\PlatformBundle\Menu\TwoFactorMenuBuilder;
@@ -276,8 +277,19 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
                     // In debug a newly encrypted column must count at once, not after a cache clear.
                     $container->getParameter('kernel.debug') === true ? null : new Reference('cache.system'),
                 ]);
+
+            // Priority 10 runs before KeyManagementPass's traceable decorator (priority 0), which
+            // therefore wraps this one in debug, so the profiler still sees every call.
+            $container->getDefinition(TenantEnvelopeEncrypter::class)
+                ->setDecoratedService('key_management.stored_envelope_encrypter', priority: 10)
+                ->setArguments([
+                    new Reference('.inner'),
+                    new Reference(TenantScopeRegistry::class),
+                    new Reference(TenantContext::class),
+                ]);
         } else {
             $container->removeDefinition(TenantScopeRegistry::class);
+            $container->removeDefinition(TenantEnvelopeEncrypter::class);
         }
     }
 

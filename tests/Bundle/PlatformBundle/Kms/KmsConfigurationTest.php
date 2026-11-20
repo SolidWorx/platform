@@ -18,7 +18,9 @@ use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\SolidWorxPlatformExtension;
 use SolidWorx\Platform\PlatformBundle\Kms\KmsSupport;
+use SolidWorx\Platform\PlatformBundle\Kms\TenantEnvelopeEncrypter;
 use SolidWorx\Platform\PlatformBundle\Kms\TenantScopeRegistry;
+use SolidWorx\Platform\PlatformBundle\Tenant\TenantContext;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -137,6 +139,41 @@ final class KmsConfigurationTest extends TestCase
         ]);
 
         $this->assertFalse($container->hasDefinition(TenantScopeRegistry::class));
+    }
+
+    public function testTenantEnvelopeEncrypterDecoratesTheStoredEncrypter(): void
+    {
+        $definition = $this->load([
+            'multi_tenancy' => [
+                'enabled' => true,
+            ],
+        ])->getDefinition(TenantEnvelopeEncrypter::class);
+
+        $this->assertSame(['key_management.stored_envelope_encrypter', null, 10], $definition->getDecoratedService());
+        $this->assertEquals([
+            new Reference('.inner'),
+            new Reference(TenantScopeRegistry::class),
+            new Reference(TenantContext::class),
+        ], $definition->getArguments());
+    }
+
+    public function testTenantEnvelopeEncrypterIsRemovedWithoutMultiTenancy(): void
+    {
+        $this->assertFalse($this->load([])->hasDefinition(TenantEnvelopeEncrypter::class));
+    }
+
+    public function testTenantEnvelopeEncrypterIsRemovedWhenKmsIsDisabled(): void
+    {
+        $container = $this->load([
+            'multi_tenancy' => [
+                'enabled' => true,
+            ],
+            'kms' => [
+                'enabled' => false,
+            ],
+        ]);
+
+        $this->assertFalse($container->hasDefinition(TenantEnvelopeEncrypter::class));
     }
 
     public function testEnabledTrueWithoutBridgeThrows(): void
