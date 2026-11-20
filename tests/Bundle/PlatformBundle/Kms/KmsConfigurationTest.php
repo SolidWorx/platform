@@ -109,6 +109,17 @@ final class KmsConfigurationTest extends TestCase
         $this->assertEquals([new Reference('doctrine'), new Reference('cache.system')], $definition->getArguments());
     }
 
+    public function testTenantScopeRegistryIsNotCachedInDebug(): void
+    {
+        $definition = $this->load([
+            'multi_tenancy' => [
+                'enabled' => true,
+            ],
+        ], debug: true)->getDefinition(TenantScopeRegistry::class);
+
+        $this->assertEquals([new Reference('doctrine'), null], $definition->getArguments());
+    }
+
     public function testTenantScopeRegistryIsRemovedWithoutMultiTenancy(): void
     {
         $this->assertFalse($this->load([])->hasDefinition(TenantScopeRegistry::class));
@@ -150,10 +161,10 @@ final class KmsConfigurationTest extends TestCase
     /**
      * @param array<string, mixed> $config
      */
-    private function load(array $config): ContainerBuilder
+    private function load(array $config, bool $debug = false): ContainerBuilder
     {
         $container = new ContainerBuilder();
-        $container->setParameter('kernel.debug', value: false);
+        $container->setParameter('kernel.debug', $debug);
         $container->setParameter('kernel.environment', 'test');
         new SolidWorxPlatformExtension($config)->load([[]], $container);
 

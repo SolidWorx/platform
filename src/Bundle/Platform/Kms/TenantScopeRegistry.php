@@ -13,17 +13,25 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Kms;
 
+use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\TypeProvider;
+use Doctrine\DBAL\Types\TypeRegistry;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Persistence\ManagerRegistry;
+use LogicException;
 use Psr\Cache\CacheItemPoolInterface;
 use ReflectionProperty;
 use SolidWorx\Platform\PlatformBundle\Kms\Exception\ConflictingEncryptionScopeException;
 use SolidWorx\Platform\PlatformBundle\Tenant\TenantAwareInterface;
+use Symfony\Component\KeyManagement\Bridge\DoctrineDbal\EncryptedType;
 use Symfony\Component\KeyManagement\Bridge\DoctrineOrm\Attribute\Encrypted;
+use function array_map;
 use function hash;
 use function is_array;
+use function method_exists;
 use function serialize;
+use function sprintf;
 
 /**
  * Tells whether an encryption scope belongs to a column of a {@see TenantAwareInterface} entity.
@@ -42,9 +50,12 @@ final class TenantScopeRegistry
      */
     private ?array $tenantScopes = null;
 
+    /**
+     * @param CacheItemPoolInterface|null $cache Null in debug, where a mapping change must show up without a cache clear
+     */
     public function __construct(
         private readonly ManagerRegistry $doctrine,
-        private readonly CacheItemPoolInterface $cache,
+        private readonly ?CacheItemPoolInterface $cache = null,
     ) {
     }
 
@@ -63,6 +74,10 @@ final class TenantScopeRegistry
      */
     private function load(): array
     {
+        if (! $this->cache instanceof CacheItemPoolInterface) {
+            return $this->resolve();
+        }
+
         $item = $this->cache->getItem(self::CACHE_KEY);
 
         if ($item->isHit()) {
@@ -78,6 +93,23 @@ final class TenantScopeRegistry
         $this->cache->save($item->set($scopes));
 
         return $scopes;
+    }
+
+    /**
+     * The registry EncryptedTypes::register() declares the types on.
+     */
+    private function typeProvider(EntityManagerInterface $manager): TypeProvider | TypeRegistry
+    {
+        $configuration = $manager->getConnection()->getConfiguration();
+
+        // Configuration::getTypeProvider() arrived in DBAL 4.6; the bridge supports DBAL 4.3 and up.
+        // @phpstan-ignore function.alreadyNarrowedType (DBAL < 4.6 compatibility)
+        if (method_exists($configuration, 'getTypeProvider')) {
+            return $configuration->getTypeProvider();
+        }
+
+        /** @phpstan-ignore staticMethod.deprecated (DBAL < 4.6 compatibility) */
+        return Type::getTypeRegistry();
     }
 
     /**
@@ -102,7 +134,7 @@ final class TenantScopeRegistry
 
                 $isTenantAware = $metadata->getReflectionClass()->implementsInterface(TenantAwareInterface::class);
 
-                foreach ($this->scopes($metadata, $manager) as $scope) {
+                foreach ($this->scopes($metadata, $manager, $isTenantAware) as $scope) {
                     if ($isTenantAware) {
                         $tenant[$scope] ??= $metadata->getName();
                     } else {
@@ -124,13 +156,17 @@ final class TenantScopeRegistry
     /**
      * Mirrors EncryptedColumnListener::automaticTypes() for omitted keys.
      *
+     * A tenant-aware column typed directly with an encrypted type, without #[Encrypted], is refused:
+     * its key cannot be told apart from a shared one, and it would silently be encrypted as shared.
+     *
      * @param ClassMetadata<object> $metadata
      *
      * @return list<string>
      */
-    private function scopes(ClassMetadata $metadata, EntityManagerInterface $manager): array
+    private function scopes(ClassMetadata $metadata, EntityManagerInterface $manager, bool $isTenantAware): array
     {
         $scopes = [];
+        $types = null;
 
         foreach ($metadata->fieldMappings as $mapping) {
             /** @var class-string $class */
@@ -139,6 +175,14 @@ final class TenantScopeRegistry
             $attribute = $property->getAttributes(Encrypted::class)[0] ?? null;
 
             if ($attribute === null) {
+                if ($isTenantAware) {
+                    $types ??= $this->typeProvider($manager);
+
+                    if ($types->has($mapping->type) && $types->get($mapping->type) instanceof EncryptedType) {
+                        throw new LogicException(sprintf('The column "%s::$%s" of a tenant-aware entity uses the encrypted type "%s" directly. Use the #[%s] attribute instead, so the column is encrypted with the key of its tenant.', $metadata->getName(), $mapping->fieldName, $mapping->type, Encrypted::class));
+                    }
+                }
+
                 continue;
             }
 

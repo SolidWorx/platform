@@ -32,6 +32,7 @@ use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\Kms\Entity\Encrypted
 use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\Kms\KmsOrmTestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\KeyManagement\Bridge\DoctrineDbal\EncryptedType;
+use Symfony\Component\KeyManagement\StoredEnvelopeEncrypter;
 use function hash;
 use function serialize;
 
@@ -120,6 +121,43 @@ final class TenantScopeRegistryTest extends KmsOrmTestCase
         $this->expectException(ConflictingEncryptionScopeException::class);
 
         $registry->isTenantScope('anything');
+    }
+
+    public function testTenantAwareColumnWithEncryptedTypeButNoAttributeThrows(): void
+    {
+        $registry = $this->registry($this->createKmsEntityManager(__DIR__ . '/../Fixtures/Kms/DirectEncryptedType', configuredTypes: [
+            'app_tenant_token' => [
+                'type' => 'string',
+                'key' => 'tenant.token',
+            ],
+        ]));
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessageIsOrContains('Encrypted');
+
+        $registry->isTenantScope('tenant.token');
+    }
+
+    public function testRegistryCanBeBuiltBeforeItsManager(): void
+    {
+        // How a decorator holding a registry over the very manager it encrypts for is built (Task 5).
+        $registry = null;
+        $entityManager = $this->createKmsEntityManager(self::ENTITY_DIR, decorate: function (StoredEnvelopeEncrypter $inner) use (&$registry): StoredEnvelopeEncrypter {
+            $registry = new TenantScopeRegistry($this->managerRegistry());
+
+            return $inner;
+        });
+
+        $this->assertInstanceOf(TenantScopeRegistry::class, $registry);
+        $this->assertTrue($registry->isTenantScope('tenant.secret'));
+        $this->assertTrue($registry->isTenantScope($this->encryptedTypeKey($entityManager, EncryptedTenantNote::class, 'body')));
+    }
+
+    public function testWithoutCacheResolvesEachInstance(): void
+    {
+        $this->createKmsEntityManager(self::ENTITY_DIR);
+
+        $this->assertTrue(new TenantScopeRegistry($this->managerRegistry())->isTenantScope('tenant.secret'));
     }
 
     public function testResultIsCached(): void

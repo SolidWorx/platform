@@ -25,6 +25,7 @@ use Doctrine\ORM\Mapping\NamingStrategy;
 use Doctrine\ORM\ORMSetup;
 use Doctrine\ORM\Tools\SchemaTool;
 use Doctrine\Persistence\ManagerRegistry;
+use LogicException;
 use ReflectionClass;
 use SolidWorx\Platform\Tests\Bundle\PlatformBundle\Fixtures\TenantOrmTestCase;
 use Symfony\Bridge\Doctrine\Types\UlidType;
@@ -56,8 +57,14 @@ abstract class KmsOrmTestCase extends TenantOrmTestCase
 {
     /**
      * The store-backed encrypter of the last manager created, before any decoration.
+     * Uninitialized until createKmsEntityManager() runs.
      */
     protected StoredEnvelopeEncrypter $encrypter;
+
+    /**
+     * The last manager created; null until createKmsEntityManager() returns.
+     */
+    protected ?EntityManagerInterface $entityManager = null;
 
     protected function setUp(): void
     {
@@ -69,10 +76,15 @@ abstract class KmsOrmTestCase extends TenantOrmTestCase
     /**
      * @param string $entityDir Directory of the entities to map
      * @param (Closure(StoredEnvelopeEncrypter): (EnvelopeEncrypterInterface&EnvelopeDecrypterInterface))|null $decorate
-     *        Wraps the store-backed encrypter; what it returns encrypts every column, explicit and implicit
+     *        Wraps the store-backed encrypter; what it returns encrypts every column, explicit and implicit.
+     *        It runs before the manager exists: use managerRegistry() without an argument to reach it lazily.
+     * @param array<string, array{type: string, key: string}> $configuredTypes Encrypted types declared by name, as in
+     *        "key_management.doctrine_dbal.types", for columns mapped to them without #[Encrypted]
      */
-    protected function createKmsEntityManager(string $entityDir, ?NamingStrategy $namingStrategy = null, ?Closure $decorate = null): EntityManagerInterface
+    protected function createKmsEntityManager(string $entityDir, ?NamingStrategy $namingStrategy = null, ?Closure $decorate = null, array $configuredTypes = []): EntityManagerInterface
     {
+        $this->entityManager = null;
+
         $config = ORMSetup::createAttributeMetadataConfiguration([$entityDir], true);
         // A registry of its own, so the encrypted types of one test never leak into another.
         $config->setTypeProvider(new TypeRegistry([
@@ -93,7 +105,12 @@ abstract class KmsOrmTestCase extends TenantOrmTestCase
 
         // Explicit keys: collected exactly as RegisterEncryptedColumnsPass does at compile time.
         $names = [];
-        $types = [];
+        $types = $configuredTypes;
+
+        foreach ($configuredTypes as $name => $configured) {
+            $names[$configured['key']][$configured['type']] ??= $name;
+        }
+
         $driver = $config->getMetadataDriverImpl();
         self::assertNotNull($driver);
 
@@ -107,6 +124,10 @@ abstract class KmsOrmTestCase extends TenantOrmTestCase
 
                 // A null key is an implicit scope, left to the listener.
                 if (! is_string($key) || ! is_string($type)) {
+                    continue;
+                }
+
+                if (isset($names[$key][$type])) {
                     continue;
                 }
 
@@ -135,14 +156,18 @@ abstract class KmsOrmTestCase extends TenantOrmTestCase
 
         new SchemaTool($entityManager)->createSchema($entityManager->getMetadataFactory()->getAllMetadata());
 
-        return $entityManager;
+        return $this->entityManager = $entityManager;
     }
 
-    protected function managerRegistry(EntityManagerInterface $entityManager): ManagerRegistry
+    /**
+     * A registry over the given manager, or, without one, over the last manager created, resolved on
+     * each call: it can be built inside the $decorate closure, before that manager exists.
+     */
+    protected function managerRegistry(?EntityManagerInterface $entityManager = null): ManagerRegistry
     {
         $registry = self::createStub(ManagerRegistry::class);
-        $registry->method('getManagers')->willReturn([
-            'default' => $entityManager,
+        $registry->method('getManagers')->willReturnCallback(fn (): array => [
+            'default' => $entityManager ?? $this->entityManager ?? throw new LogicException('No entity manager has been created yet.'),
         ]);
 
         return $registry;

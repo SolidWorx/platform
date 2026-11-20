@@ -271,7 +271,11 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
 
         if ($kmsEnabled && $config['multi_tenancy']['enabled']) {
             $container->getDefinition(TenantScopeRegistry::class)
-                ->setArguments([new Reference('doctrine'), new Reference('cache.system')]);
+                ->setArguments([
+                    new Reference('doctrine'),
+                    // In debug a newly encrypted column must count at once, not after a cache clear.
+                    $container->getParameter('kernel.debug') === true ? null : new Reference('cache.system'),
+                ]);
         } else {
             $container->removeDefinition(TenantScopeRegistry::class);
         }
