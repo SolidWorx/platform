@@ -15,7 +15,6 @@ namespace SolidWorx\Platform\SaasBundle\EventSubscriber;
 
 use DateTimeInterface;
 use LogicException;
-use Override;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Enum\LemonSqueezy\SubscriptionStatus;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionCreatedEvent;
@@ -24,10 +23,10 @@ use SolidWorx\Platform\SaasBundle\Event\SubscriptionUpdatedEvent;
 use SolidWorx\Platform\SaasBundle\Exception\InvalidSubscriptionException;
 use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepository;
 use SolidWorx\Platform\SaasBundle\Subscription\SubscriptionManager;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use UnexpectedValueException;
 
-readonly class SubscriptionEventSubscriber implements EventSubscriberInterface
+readonly class SubscriptionEventSubscriber
 {
     public function __construct(
         private SubscriptionRepository $subscriptionRepository,
@@ -35,16 +34,7 @@ readonly class SubscriptionEventSubscriber implements EventSubscriberInterface
     ) {
     }
 
-    #[Override]
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            SubscriptionCreatedEvent::class => ['onSubscriptionCreated'],
-            SubscriptionUpdatedEvent::class => ['onSubscriptionUpdated'],
-            SubscriptionExpiredEvent::class => ['onSubscriptionExpired'],
-        ];
-    }
-
+    #[AsEventListener(event: SubscriptionExpiredEvent::class)]
     public function onSubscriptionExpired(SubscriptionExpiredEvent $event): void
     {
         $subscription = $this->subscriptionRepository->find($event->subscriptionId);
@@ -62,6 +52,7 @@ readonly class SubscriptionEventSubscriber implements EventSubscriberInterface
         $this->subscriptionManager->expireSubscription($subscription);
     }
 
+    #[AsEventListener(event: SubscriptionUpdatedEvent::class)]
     public function onSubscriptionUpdated(SubscriptionUpdatedEvent $event): void
     {
         $subscription = $this->subscriptionRepository->find($event->subscriptionId);
@@ -73,6 +64,7 @@ readonly class SubscriptionEventSubscriber implements EventSubscriberInterface
         $this->handleSubscriptionStatus($event, $subscription);
     }
 
+    #[AsEventListener(event: SubscriptionCreatedEvent::class)]
     public function onSubscriptionCreated(SubscriptionCreatedEvent $event): void
     {
         $subscription = $this->subscriptionRepository->find($event->subscriptionId);

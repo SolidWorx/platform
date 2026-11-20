@@ -31,14 +31,6 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 #[UsesClass(RedirectResponse::class)]
 final class FlashResponseSubscriberTest extends TestCase
 {
-    public function testSubscribesToResponseEvent(): void
-    {
-        $events = FlashResponseSubscriber::getSubscribedEvents();
-
-        self::assertArrayHasKey(ResponseEvent::class, $events);
-        self::assertSame('onKernelResponse', $events[ResponseEvent::class]);
-    }
-
     public function testIgnoresSubRequests(): void
     {
         $kernel = self::createStub(HttpKernelInterface::class);

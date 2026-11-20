@@ -51,10 +51,8 @@ readonly class PlanFeatureManager implements ResetInterface
      */
     public function getFeature(Plan $plan, string $featureKey): FeatureValue
     {
-        $cacheKey = sprintf('feature_%s_%s', $plan->getId()->toBase58(), $featureKey);
-
         try {
-            return $this->cache->get($cacheKey, function () use ($plan, $featureKey): FeatureValue {
+            return $this->cache->get($this->cacheKey($plan, $featureKey), function () use ($plan, $featureKey): FeatureValue {
                 if (! $this->configRegistry->has($featureKey)) {
                     throw new UndefinedFeatureException($featureKey);
                 }
@@ -176,7 +174,7 @@ readonly class PlanFeatureManager implements ResetInterface
         $planFeature->setDescription($config->description);
 
         $this->planFeatureRepository->save($planFeature);
-        $this->invalidateCache($plan);
+        $this->invalidateCache($plan, $featureKey);
     }
 
     /**
@@ -188,7 +186,7 @@ readonly class PlanFeatureManager implements ResetInterface
 
         if ($planFeature instanceof PlanFeature) {
             $this->planFeatureRepository->remove($planFeature);
-            $this->invalidateCache($plan);
+            $this->invalidateCache($plan, $featureKey);
         }
     }
 
@@ -269,11 +267,21 @@ readonly class PlanFeatureManager implements ResetInterface
         }
     }
 
-    private function invalidateCache(Plan $plan): void
+    private function cacheKey(Plan $plan, string $featureKey): string
+    {
+        return sprintf('feature_%s_%s', $plan->getId()->toBase58(), $featureKey);
+    }
+
+    /**
+     * Each feature is cached under its own key; cache pools do not expand wildcards, so the
+     * exact key has to be deleted.
+     */
+    private function invalidateCache(Plan $plan, string $featureKey): void
     {
         try {
-            $this->cache->delete(sprintf('feature_%s_', $plan->getId()->toBase58()) . '*');
+            $this->cache->delete($this->cacheKey($plan, $featureKey));
         } catch (\Psr\Cache\InvalidArgumentException) {
+            // A key the pool rejects was never cached: getFeature() fails on it the same way.
         }
     }
 

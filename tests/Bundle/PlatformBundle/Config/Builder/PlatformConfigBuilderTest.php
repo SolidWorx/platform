@@ -83,7 +83,7 @@ final class PlatformConfigBuilderTest extends TestCase
         self::assertArrayNotHasKey('doctrine', self::section($result, 'platform'));
     }
 
-    public function testWithSaasConfigInjectsUnderSaasKey(): void
+    public function testWithSaasConfigIsARootLevelSection(): void
     {
         $saas = [
             'doctrine' => [
@@ -94,28 +94,32 @@ final class PlatformConfigBuilderTest extends TestCase
         ];
         $result = PlatformConfigBuilder::create()->withSaasConfig($saas)->build();
 
-        self::assertSame($saas, self::section($result, 'platform')['saas']);
+        self::assertSame($saas, self::section($result, 'saas'));
+        self::assertArrayNotHasKey('saas', self::section($result, 'platform'));
     }
 
     public function testSaasAbsentWhenNotSet(): void
     {
         $result = PlatformConfigBuilder::create()->build();
+        self::assertArrayNotHasKey('saas', $result);
         self::assertArrayNotHasKey('saas', self::section($result, 'platform'));
     }
 
-    public function testWithUiConfigInjectsUnderUiKey(): void
+    public function testWithUiConfigIsARootLevelSection(): void
     {
         $ui = [
             'icon_pack' => 'tabler',
         ];
         $result = PlatformConfigBuilder::create()->withUiConfig($ui)->build();
 
-        self::assertSame($ui, self::section($result, 'platform')['ui']);
+        self::assertSame($ui, self::section($result, 'ui'));
+        self::assertArrayNotHasKey('ui', self::section($result, 'platform'));
     }
 
     public function testUiAbsentWhenNotSet(): void
     {
         $result = PlatformConfigBuilder::create()->build();
+        self::assertArrayNotHasKey('ui', $result);
         self::assertArrayNotHasKey('ui', self::section($result, 'platform'));
     }
 

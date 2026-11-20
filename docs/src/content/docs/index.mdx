@@ -1,0 +1,55 @@
+---
+title: SolidWorx Platform
+description: Symfony bundles that give a SaaS application its login, two-factor authentication, user profile, multi-tenancy, subscriptions and a Tabler UI.
+template: splash
+hero:
+  tagline: The foundations every SaaS application rebuilds — login, 2FA, profiles, tenants, plans and a consistent UI — as Symfony bundles you configure from one file.
+  actions:
+    - text: Install the platform
+      link: /getting-started/installation/
+      icon: right-arrow
+    - text: View on GitHub
+      link: https://github.com/SolidWorx/platform
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## What you get
+
+<CardGrid>
+  <Card title="Authentication" icon="seti:lock">
+    Form login, remember-me, throttling, logout and a ready-made login page from one helper call.
+    [Read more](/security/)
+  </Card>
+  <Card title="Two-factor & password reset" icon="approve-check">
+    TOTP, email codes, backup codes, trusted devices and an emailed reset link — each switched on
+    with one line in `platform.yaml`. [Two-factor](/security/two-factor/) · [Password reset](/security/reset-password/)
+  </Card>
+  <Card title="Multi-tenancy" icon="puzzle">
+    Opt-in tenant scoping for queries, writes and membership checks.
+    [Read more](/multi-tenancy/)
+  </Card>
+  <Card title="Subscriptions" icon="star">
+    Plans, feature flags, usage limits and LemonSqueezy webhooks.
+    [Read more](/saas/plan-features/)
+  </Card>
+  <Card title="Tabler UI" icon="laptop">
+    Layouts, Twig components and Stimulus controllers so the same thing looks the same everywhere.
+    [Read more](/frontend/layouts/)
+  </Card>
+  <Card title="One config file" icon="setting">
+    Every option lives under `platform:` in `platform.yaml`, with a JSON schema for editor autocompletion.
+    [Read more](/configuration/)
+  </Card>
+</CardGrid>
+
+## Where to start
+
+<CardGrid>
+  <LinkCard title="Installation" href="/getting-started/installation/" description="Requirements, Composer and npm packages, and registering the bundles." />
+  <LinkCard title="Quick start" href="/getting-started/quick-start/" description="From a fresh Symfony app to a signed-in user in five steps." />
+  <LinkCard title="Configuration reference" href="/configuration/" description="Every platform.yaml option and its default." />
+  <LinkCard title="Upgrade guide" href="/upgrade/" description="What changed between versions and how to migrate." />
+</CardGrid>

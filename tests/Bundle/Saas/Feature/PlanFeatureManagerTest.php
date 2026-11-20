@@ -96,6 +96,29 @@ final class PlanFeatureManagerTest extends TestCase
         self::assertSame(50, $feature->value);
     }
 
+    public function testSetFeatureReplacesACachedValue(): void
+    {
+        $manager = $this->createManager();
+
+        self::assertSame(10, $manager->getFeature($this->plan, 'max_users')->value);
+
+        $manager->setFeature($this->plan, 'max_users', 50);
+
+        self::assertSame(50, $manager->getFeature($this->plan, 'max_users')->value);
+    }
+
+    public function testRemoveFeatureRevertsACachedOverrideToTheDefault(): void
+    {
+        $manager = $this->createManager();
+        $manager->setFeature($this->plan, 'max_users', 50);
+
+        self::assertSame(50, $manager->getFeature($this->plan, 'max_users')->value);
+
+        $manager->removeFeature($this->plan, 'max_users');
+
+        self::assertSame(10, $manager->getFeature($this->plan, 'max_users')->value);
+    }
+
     public function testGetFeatureThrowsForUndefinedFeature(): void
     {
         $manager = $this->createManager();
@@ -231,7 +254,7 @@ final class PlanFeatureManagerTest extends TestCase
              * @param array<PlanFeature> $planFeatures
              */
             public function __construct(
-                private readonly array $planFeatures,
+                private array $planFeatures,
             ) {
             }
 
@@ -266,10 +289,14 @@ final class PlanFeatureManagerTest extends TestCase
 
             public function save(PlanFeature $entity, bool $flush = true): void
             {
+                if (! in_array($entity, $this->planFeatures, true)) {
+                    $this->planFeatures[] = $entity;
+                }
             }
 
             public function remove(PlanFeature $entity, bool $flush = true): void
             {
+                $this->planFeatures = array_values(array_filter($this->planFeatures, static fn (PlanFeature $f): bool => $f !== $entity));
             }
         };
 
