@@ -31,7 +31,6 @@ use function mkdir;
 use function random_bytes;
 use function rename;
 use function rtrim;
-use function sodium_crypto_aead_xchacha20poly1305_ietf_keygen;
 use function sprintf;
 use function str_ends_with;
 use function tempnam;
@@ -108,9 +107,9 @@ final readonly class LocalKeyManager
     public function generate(bool $overwrite = false): string
     {
         $scheme = $this->dsn()->scheme;
+        // Both are 32 random bytes; sodium's keygen is exactly that, and needs ext-sodium to call.
         $key = match ($scheme) {
-            'sodium+dir' => sodium_crypto_aead_xchacha20poly1305_ietf_keygen(),
-            'openssl+dir' => random_bytes(32),
+            'sodium+dir', 'openssl+dir' => random_bytes(32),
             default => throw new RuntimeException(sprintf('Only sodium+dir:// and openssl+dir:// master keys can be generated; the KMS DSN uses "%s://". Configure the master key via KMS_DSN or platform.kms.dsn.', $scheme)),
         };
 
