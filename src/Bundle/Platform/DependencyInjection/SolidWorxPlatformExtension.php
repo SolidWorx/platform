@@ -39,6 +39,7 @@ use SolidWorx\Platform\PlatformBundle\Doctrine\Type\URLType;
 use SolidWorx\Platform\PlatformBundle\Enum\PasswordStrengthLevel;
 use SolidWorx\Platform\PlatformBundle\Form\Type\Tenant\TenantOnboardingType;
 use SolidWorx\Platform\PlatformBundle\Kms\Command\GenerateKeyCommand;
+use SolidWorx\Platform\PlatformBundle\Kms\Command\RotateTenantKeyCommand;
 use SolidWorx\Platform\PlatformBundle\Kms\KmsCacheWarmer;
 use SolidWorx\Platform\PlatformBundle\Kms\KmsSupport;
 use SolidWorx\Platform\PlatformBundle\Kms\LocalKeyGuardEnvelopeEncrypter;
@@ -328,6 +329,7 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         } else {
             $container->removeDefinition(TenantScopeRegistry::class);
             $container->removeDefinition(TenantEnvelopeEncrypter::class);
+            $container->removeDefinition(RotateTenantKeyCommand::class);
         }
     }
 
