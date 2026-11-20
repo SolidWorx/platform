@@ -13,7 +13,9 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\Tests\Bundle\PlatformBundle\Kms;
 
+use LogicException;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\SolidWorxPlatformExtension;
@@ -277,6 +279,69 @@ final class KmsConfigurationTest extends TestCase
         $container = $this->prepend([], kmsAvailable: false);
 
         $this->assertSame([], $container->getExtensionConfig('key_management'));
+    }
+
+    /**
+     * @return iterable<string, array{bool|null}>
+     */
+    public static function enabledModes(): iterable
+    {
+        yield 'auto' => [null];
+        yield 'enabled' => [true];
+    }
+
+    #[DataProvider('enabledModes')]
+    public function testMissingKeyManagementBundleThrows(?bool $enabled): void
+    {
+        $extension = new SolidWorxPlatformExtension([
+            'kms' => [
+                'enabled' => $enabled,
+            ],
+        ], kmsAvailable: true);
+        $container = new ContainerBuilder();
+        $container->setParameter('kernel.bundles_metadata', []);
+        $extension->prepend($container);
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessageIsOrContains('KeyManagementBundle is not registered');
+
+        $extension->load([[]], $this->kernelContainer());
+    }
+
+    public function testMissingKeyManagementBundleIsFineWhenKmsIsDisabled(): void
+    {
+        $extension = new SolidWorxPlatformExtension([
+            'kms' => [
+                'enabled' => false,
+            ],
+        ], kmsAvailable: true);
+        $container = new ContainerBuilder();
+        $container->setParameter('kernel.bundles_metadata', []);
+        $extension->prepend($container);
+        $extension->load([[]], $loaded = $this->kernelContainer());
+
+        $this->assertFalse($loaded->getParameter('solidworx_platform.kms.enabled'));
+    }
+
+    public function testRegisteredKeyManagementBundleLoads(): void
+    {
+        $extension = new SolidWorxPlatformExtension([], kmsAvailable: true);
+        $container = new ContainerBuilder();
+        $container->setParameter('kernel.bundles_metadata', []);
+        $container->registerExtension($this->keyManagementExtension());
+        $extension->prepend($container);
+        $extension->load([[]], $loaded = $this->kernelContainer());
+
+        $this->assertTrue($loaded->getParameter('solidworx_platform.kms.enabled'));
+    }
+
+    private function kernelContainer(bool $debug = false): ContainerBuilder
+    {
+        $container = new ContainerBuilder();
+        $container->setParameter('kernel.debug', $debug);
+        $container->setParameter('kernel.environment', 'test');
+
+        return $container;
     }
 
     /**

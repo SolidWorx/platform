@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle\DependencyInjection;
 
 use Knp\Menu\Provider\MenuProviderInterface;
+use LogicException;
 use Override;
 use ReflectionMethod;
 use Reflector;
@@ -199,6 +200,11 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
     private ?array $config = null;
 
     /**
+     * Whether prepend() saw KeyManagementBundle; null until it runs.
+     */
+    private ?bool $keyManagementRegistered = null;
+
+    /**
      * @param array<string, mixed> $rawSection The raw (unvalidated) `platform:` config section.
      * @param bool|null $kmsAvailable Overrides KmsSupport::isAvailable(); a test seam.
      */
@@ -276,6 +282,12 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         $container->setParameter('solidworx_platform.kms.dsn', $config['kms']['dsn']);
         $container->setParameter('solidworx_platform.kms.key_id', $config['kms']['key_id']);
         $container->setParameter('solidworx_platform.kms.allow_local_key_in_prod', $config['kms']['allow_local_key_in_prod']);
+
+        if ($kmsEnabled && $this->keyManagementRegistered === false) {
+            // Without the bundle there is no stored encrypter to guard or scope per tenant; refuse
+            // loudly instead of failing later on a missing service, or silently encrypting nothing.
+            throw new LogicException('Encrypted columns are enabled, but KeyManagementBundle is not registered: require symfony/framework-bundle ^8.2 (which registers it) or register Symfony\Component\KeyManagement\KeyManagementBundle in your kernel, or set platform.kms.enabled: false.');
+        }
 
         if ($kmsEnabled) {
             $container->getDefinition(LocalKeyManager::class)
@@ -491,6 +503,7 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
     public function prepend(ContainerBuilder $container): void
     {
         $config = $this->getConfig();
+        $this->keyManagementRegistered = $container->hasExtension('key_management');
 
         if ($container->hasExtension('doctrine')) {
             $orm = [
