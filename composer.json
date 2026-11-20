@@ -72,6 +72,9 @@
         "symfony/messenger": "^8.1",
         "symplify/easy-coding-standard": "^13.3"
     },
+    "suggest": {
+        "symfony/doctrine-orm-key-management": "Encrypt Doctrine columns with #[Encrypted] (per-tenant keys for tenant-aware entities)"
+    },
     "minimum-stability": "stable",
     "prefer-stable": true,
     "autoload": {
