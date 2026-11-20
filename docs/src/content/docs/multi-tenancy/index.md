@@ -442,6 +442,13 @@ own payload by implementing `TenantAwareMessageInterface` (use `TenantAwareMessa
 `SolidWorx\Platform\Test\Traits\InteractsWithTenantsTrait` provides helpers (`createTenantContext()`,
 `createTenant()`, `setCurrentTenant()`, `runAsTenant()`) for driving the tenant in scope from tests.
 
+## Encrypted columns
+
+Tenant-aware entities can use `#[Encrypted]` columns, encrypted with one data key per tenant. Such
+columns are only readable inside a tenant context (`runAs($tenant)` or a request with a tenant in
+scope). `runWithoutFilter()` and cross-tenant reads throw, and there is no bypass. See
+[Encrypted columns](../encryption/index.md).
+
 ## Caveats
 
 - **Native / raw DBAL queries are not filtered.** ORM SQL filters only apply to DQL/QueryBuilder.

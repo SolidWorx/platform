@@ -105,6 +105,9 @@ final readonly class TenantManager
      * Runs the callback with the tenant filter suspended, restoring it (with its bound tenant)
      * afterwards. Use for deliberate cross-tenant reads.
      *
+     * Encrypted (#[Encrypted]) tenant-aware columns cannot be read here: they are only readable
+     * inside a tenant context (runAs()), and there is no bypass.
+     *
      * @template T
      *
      * @param callable(): T $callback

@@ -35,6 +35,7 @@ export default defineConfig({
                         'security/reset-password',
                         'security/profile',
                         'security/access-decision',
+                        { label: 'Encrypted columns', slug: 'encryption' },
                     ],
                 },
                 {
