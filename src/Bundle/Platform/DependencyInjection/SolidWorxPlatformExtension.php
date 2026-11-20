@@ -38,6 +38,7 @@ use SolidWorx\Platform\PlatformBundle\Doctrine\Filter\TenantFilter;
 use SolidWorx\Platform\PlatformBundle\Doctrine\Type\URLType;
 use SolidWorx\Platform\PlatformBundle\Enum\PasswordStrengthLevel;
 use SolidWorx\Platform\PlatformBundle\Form\Type\Tenant\TenantOnboardingType;
+use SolidWorx\Platform\PlatformBundle\Kms\KmsSupport;
 use SolidWorx\Platform\PlatformBundle\Logger\Processor\TenantLoggingProcessor;
 use SolidWorx\Platform\PlatformBundle\Menu\TwoFactorMenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Messenger\TenantMiddleware;
@@ -71,6 +72,7 @@ use SolidWorx\Platform\PlatformBundle\Twig\Components\Security\TwoFactor;
 use SolidWorx\Platform\PlatformBundle\Twig\Components\Tenant\Switcher;
 use SolidWorx\Platform\PlatformBundle\Validator\Constraint\TwoFactorCodeValidator;
 use Symfony\Component\AssetMapper\AssetMapperInterface;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
@@ -135,6 +137,7 @@ use function interface_exists;
  *   doctrine: array{types: array{enable_utc_date: bool}},
  *   models: array{user: string},
  *   profile: ProfileConfig,
+ *   kms: array{enabled: bool|null, dsn: string, key_id: string, allow_local_key_in_prod: bool},
  *   multi_tenancy: MultiTenancyConfig
  * }
  */
@@ -188,9 +191,11 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
 
     /**
      * @param array<string, mixed> $rawSection The raw (unvalidated) `platform:` config section.
+     * @param bool|null $kmsAvailable Overrides KmsSupport::isAvailable(); a test seam.
      */
     public function __construct(
-        private readonly array $rawSection
+        private readonly array $rawSection,
+        private readonly ?bool $kmsAvailable = null,
     ) {
         Assert::allString(array_keys($rawSection));
     }
@@ -255,6 +260,24 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         $this->loadResetPassword($container, $config['security']['reset_password']);
 
         $this->loadMultiTenancy($container, $config['multi_tenancy']);
+
+        $container->setParameter('solidworx_platform.kms.default_dsn', 'sodium+dir://%kernel.project_dir%/config/kms?ext=.key');
+        $container->setParameter('solidworx_platform.kms.enabled', $this->isKmsEnabled());
+        $container->setParameter('solidworx_platform.kms.dsn', $config['kms']['dsn']);
+        $container->setParameter('solidworx_platform.kms.key_id', $config['kms']['key_id']);
+        $container->setParameter('solidworx_platform.kms.allow_local_key_in_prod', $config['kms']['allow_local_key_in_prod']);
+    }
+
+    private function isKmsEnabled(): bool
+    {
+        $available = $this->kmsAvailable ?? KmsSupport::isAvailable();
+        $enabled = $this->getConfig()['kms']['enabled'];
+
+        if ($enabled === true && ! $available) {
+            throw new InvalidConfigurationException('platform.kms.enabled is true, but encrypted columns need symfony/doctrine-orm-key-management installed, doctrine/orm ^3 and doctrine/dbal ^4.3.');
+        }
+
+        return $enabled ?? $available;
     }
 
     /**
@@ -550,6 +573,20 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
                         'limit' => $resetPassword['rate_limit']['limit'],
                         'interval' => $resetPassword['rate_limit']['interval'],
                     ],
+                ],
+            ]);
+        }
+
+        if ($container->hasExtension('key_management') && $this->isKmsEnabled()) {
+            $container->prependExtensionConfig('key_management', [
+                'clients' => [
+                    'platform' => $config['kms']['dsn'],
+                ],
+                'default_client' => 'platform',
+                'store' => [
+                    'key_id' => $config['kms']['key_id'],
+                    'client' => 'platform',
+                    'secret' => '%env(default:kernel.secret:KMS_STORE_SECRET)%',
                 ],
             ]);
         }
