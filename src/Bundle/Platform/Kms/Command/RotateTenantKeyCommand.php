@@ -14,7 +14,9 @@ declare(strict_types=1);
 namespace SolidWorx\Platform\PlatformBundle\Kms\Command;
 
 use Override;
+use RuntimeException;
 use SolidWorx\Platform\PlatformBundle\Console\Command;
+use SolidWorx\Platform\PlatformBundle\Kms\LocalKeyManager;
 use SolidWorx\Platform\PlatformBundle\Kms\TenantEnvelopeEncrypter;
 use SolidWorx\Platform\PlatformBundle\Repository\TenantRepository;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -38,6 +40,7 @@ final class RotateTenantKeyCommand extends Command
         #[Autowire(service: 'key_management.store')]
         private readonly RewrappableDataKeyStoreInterface $store,
         private readonly TenantRepository $tenants,
+        private readonly LocalKeyManager $localKeys,
     ) {
         parent::__construct();
     }
@@ -52,6 +55,15 @@ final class RotateTenantKeyCommand extends Command
     #[Override]
     protected function handle(): int
     {
+        // The raw store skips the guard on the stored encrypter, so apply it here.
+        try {
+            $this->localKeys->check();
+        } catch (RuntimeException $runtimeException) {
+            $this->io->error($runtimeException->getMessage());
+
+            return self::FAILURE;
+        }
+
         $tenant = $this->io->getArgument('tenant');
         $all = $this->io->getOption('all') === true;
 

@@ -20,6 +20,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use ReflectionProperty;
 use SolidWorx\Platform\PlatformBundle\Console\IO;
 use SolidWorx\Platform\PlatformBundle\Kms\Command\RotateTenantKeyCommand;
+use SolidWorx\Platform\PlatformBundle\Kms\LocalKeyManager;
 use SolidWorx\Platform\PlatformBundle\Kms\TenantEnvelopeEncrypter;
 use SolidWorx\Platform\PlatformBundle\Kms\TenantScopeRegistry;
 use SolidWorx\Platform\PlatformBundle\Model\TenantInterface;
@@ -41,6 +42,7 @@ use function substr;
 #[CoversClass(RotateTenantKeyCommand::class)]
 #[UsesClass(IO::class)]
 #[UsesClass(TenantEnvelopeEncrypter::class)]
+#[UsesClass(LocalKeyManager::class)]
 #[RequiresPhpExtension('sodium')]
 #[RequiresPhpExtension('openssl')]
 final class RotateTenantKeyCommandTest extends KmsOrmTestCase
@@ -182,6 +184,20 @@ final class RotateTenantKeyCommandTest extends KmsOrmTestCase
         ], $this->keysPerTenant($store));
     }
 
+    public function testRefusesALocalKeyOutsideDevAndTest(): void
+    {
+        $tenant = new Ulid();
+        $store = $this->seededStore($tenant);
+
+        self::assertSame(Command::FAILURE, $this->execute($store, [$this->tenant($tenant)], [
+            'tenant' => (string) $tenant,
+        ], new LocalKeyManager('sodium+dir:///nonexistent?ext=.key', 'platform', 'prod', false, null, 'secret')));
+        self::assertSame([
+            $tenant->toBase32() => 1,
+        ], $this->keysPerTenant($store));
+        self::assertStringContainsString('Refusing a local master key', $this->output->fetch());
+    }
+
     private function seededStore(Ulid ...$tenants): InMemoryDataKeyStore
     {
         $store = new InMemoryDataKeyStore();
@@ -210,8 +226,11 @@ final class RotateTenantKeyCommandTest extends KmsOrmTestCase
      * @param list<TenantInterface> $tenants
      * @param array<string, mixed> $parameters
      */
-    private function execute(RewrappableDataKeyStoreInterface $store, array $tenants, array $parameters): int
+    private function execute(RewrappableDataKeyStoreInterface $store, array $tenants, array $parameters, ?LocalKeyManager $localKeys = null): int
     {
+        // Allowed: the guard is exercised on its own above.
+        $localKeys ??= new LocalKeyManager('sodium+dir:///nonexistent?ext=.key', 'platform', 'prod', true, null, 'secret');
+
         $repository = self::createStub(TenantRepository::class);
         $repository->method('findAll')->willReturn($tenants);
         $repository->method('find')->willReturnCallback(
@@ -226,7 +245,7 @@ final class RotateTenantKeyCommandTest extends KmsOrmTestCase
             },
         );
 
-        $command = new RotateTenantKeyCommand($store, $repository);
+        $command = new RotateTenantKeyCommand($store, $repository, $localKeys);
         $input = new ArrayInput($parameters, $command->getDefinition());
         $command->setIo(new IO($input, $this->output));
 
