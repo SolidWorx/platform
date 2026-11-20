@@ -13,9 +13,6 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\Kms;
 
-use Doctrine\DBAL\Types\Type;
-use Doctrine\DBAL\Types\TypeProvider;
-use Doctrine\DBAL\Types\TypeRegistry;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Persistence\ManagerRegistry;
@@ -29,7 +26,6 @@ use Symfony\Component\KeyManagement\Bridge\DoctrineOrm\Attribute\Encrypted;
 use function array_map;
 use function hash;
 use function is_array;
-use function method_exists;
 use function serialize;
 use function sprintf;
 
@@ -96,23 +92,6 @@ final class TenantScopeRegistry
     }
 
     /**
-     * The registry EncryptedTypes::register() declares the types on.
-     */
-    private function typeProvider(EntityManagerInterface $manager): TypeProvider | TypeRegistry
-    {
-        $configuration = $manager->getConnection()->getConfiguration();
-
-        // Configuration::getTypeProvider() arrived in DBAL 4.6; the bridge supports DBAL 4.3 and up.
-        // @phpstan-ignore function.alreadyNarrowedType (DBAL < 4.6 compatibility)
-        if (method_exists($configuration, 'getTypeProvider')) {
-            return $configuration->getTypeProvider();
-        }
-
-        /** @phpstan-ignore staticMethod.deprecated (DBAL < 4.6 compatibility) */
-        return Type::getTypeRegistry();
-    }
-
-    /**
      * @return array<string, true>
      */
     private function resolve(): array
@@ -176,7 +155,7 @@ final class TenantScopeRegistry
 
             if ($attribute === null) {
                 if ($isTenantAware) {
-                    $types ??= $this->typeProvider($manager);
+                    $types ??= $manager->getConnection()->getConfiguration()->getTypeProvider();
 
                     if ($types->has($mapping->type) && $types->get($mapping->type) instanceof EncryptedType) {
                         throw new LogicException(sprintf('The column "%s::$%s" of a tenant-aware entity uses the encrypted type "%s" directly. Use the #[%s] attribute instead, so the column is encrypted with the key of its tenant.', $metadata->getName(), $mapping->fieldName, $mapping->type, Encrypted::class));

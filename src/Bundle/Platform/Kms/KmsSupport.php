@@ -22,7 +22,7 @@ final class KmsSupport
 {
     /**
      * Whether encrypted columns can work here: the Doctrine ORM bridge is installed, on top of
-     * doctrine/orm ^3 and doctrine/dbal ^4.3 (what the bridge needs).
+     * doctrine/orm ^3 and doctrine/dbal ^4.6 (the bridge needs 4.3; tenant scopes need the 4.6 type provider).
      *
      * Compared with version_compare() rather than InstalledVersions::satisfies(), which needs
      * composer/semver, a package an application does not necessarily have.
@@ -31,7 +31,7 @@ final class KmsSupport
     {
         return class_exists(Encrypted::class)
             && self::inRange('doctrine/orm', '3.0.0', '4.0.0')
-            && self::inRange('doctrine/dbal', '4.3.0', '5.0.0');
+            && self::inRange('doctrine/dbal', '4.6.0', '5.0.0');
     }
 
     private static function inRange(string $package, string $min, string $max): bool

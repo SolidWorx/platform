@@ -287,7 +287,7 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         $enabled = $this->getConfig()['kms']['enabled'];
 
         if ($enabled === true && ! $available) {
-            throw new InvalidConfigurationException('platform.kms.enabled is true, but encrypted columns need symfony/doctrine-orm-key-management installed, doctrine/orm ^3 and doctrine/dbal ^4.3.');
+            throw new InvalidConfigurationException('platform.kms.enabled is true, but encrypted columns need symfony/doctrine-orm-key-management installed, doctrine/orm ^3 and doctrine/dbal ^4.6.');
         }
 
         return $enabled ?? $available;
