@@ -138,10 +138,13 @@ final class KmsTestKernel extends Kernel
         return sys_get_temp_dir() . '/solidworx_kms_kernel_test/log';
     }
 
+    /**
+     * The default DSN keeps the local master key under the project, which the cache warmer generates.
+     */
     #[Override]
     public function getProjectDir(): string
     {
-        return dirname(__DIR__, 5);
+        return sys_get_temp_dir() . '/solidworx_kms_kernel_test/project';
     }
 
     protected function configureContainer(ContainerConfigurator $container): void
