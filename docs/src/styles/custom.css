@@ -1,0 +1,11 @@
+/* Tabler's primary blue, so the docs read as the same product as the UI they document. */
+:root {
+    --sl-color-accent-low: #0c2541;
+    --sl-color-accent: #066fd1;
+    --sl-color-accent-high: #b9d7f5;
+}
+:root[data-theme='light'] {
+    --sl-color-accent-low: #d6e7f8;
+    --sl-color-accent: #066fd1;
+    --sl-color-accent-high: #04386a;
+}

@@ -15,17 +15,16 @@ namespace SolidWorx\Platform\SaasBundle\EventSubscriber;
 
 use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
-use Override;
 use SolidWorx\Platform\SaasBundle\Entity\WebhookEventLog;
 use SolidWorx\Platform\SaasBundle\Enum\WebhookEventStatus;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Throwable;
 
-final readonly class WebhookRequestLogSubscriber implements EventSubscriberInterface
+final readonly class WebhookRequestLogSubscriber
 {
     private const string REDACTED_VALUE = '[REDACTED]';
 
@@ -47,16 +46,7 @@ final readonly class WebhookRequestLogSubscriber implements EventSubscriberInter
     ) {
     }
 
-    #[Override]
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            KernelEvents::REQUEST => ['onKernelRequest', 0],
-            KernelEvents::RESPONSE => ['onKernelResponse', -1024],
-            KernelEvents::EXCEPTION => ['onKernelException', -1024],
-        ];
-    }
-
+    #[AsEventListener(event: KernelEvents::REQUEST, priority: 0)]
     public function onKernelRequest(RequestEvent $event): void
     {
         if (! $event->isMainRequest()) {
@@ -80,6 +70,7 @@ final readonly class WebhookRequestLogSubscriber implements EventSubscriberInter
             $headers[$name] = $this->isSensitiveHeader($name) ? self::REDACTED_VALUE : implode(', ', $values);
         }
 
+        /** @var array<string, string> $headers */
         $log = new WebhookEventLog();
         $log->setGateway($gateway);
         $log->setPayload($payload);
@@ -92,6 +83,7 @@ final readonly class WebhookRequestLogSubscriber implements EventSubscriberInter
         $request->attributes->set('_webhook_event_log', $log);
     }
 
+    #[AsEventListener(event: KernelEvents::RESPONSE, priority: -1024)]
     public function onKernelResponse(ResponseEvent $event): void
     {
         if (! $event->isMainRequest()) {
@@ -110,6 +102,7 @@ final readonly class WebhookRequestLogSubscriber implements EventSubscriberInter
         $this->entityManager->flush();
     }
 
+    #[AsEventListener(event: KernelEvents::EXCEPTION, priority: -1024)]
     public function onKernelException(ExceptionEvent $event): void
     {
         if (! $event->isMainRequest()) {

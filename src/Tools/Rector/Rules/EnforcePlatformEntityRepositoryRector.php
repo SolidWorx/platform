@@ -141,7 +141,9 @@ final class EnforcePlatformEntityRepositoryRector extends AbstractRector
                     continue;
                 }
 
-                $typeName = $value->type->type->name;
+                /** @var IdentifierTypeNode $type */
+                $type = $value->type->type;
+                $typeName = $type->name;
                 if (! \in_array($typeName, self::DOCTRINE_SHORT_NAMES, strict: true)) {
                     continue;
                 }

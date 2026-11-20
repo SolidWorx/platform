@@ -104,6 +104,7 @@ final class PlatformConfigBuilder
 
     /**
      * Allows embedding a raw saas config sub-array (e.g. from SaasConfigBuilder::build()).
+     * It is emitted as the root-level `saas` section, next to `platform`.
      *
      * @param array<string, mixed> $saasConfig
      */
@@ -116,6 +117,7 @@ final class PlatformConfigBuilder
 
     /**
      * Allows embedding a raw ui config sub-array (e.g. from UiConfigBuilder::build()).
+     * It is emitted as the root-level `ui` section, next to `platform`.
      *
      * @param array<string, mixed> $uiConfig
      */
@@ -159,16 +161,20 @@ final class PlatformConfigBuilder
             $platform['models'] = $this->models;
         }
 
+        $config = [
+            'platform' => $platform,
+        ];
+
+        // Bundles with their own section key own a root-level sibling of `platform`, which is
+        // where the kernel reads them from (see PlatformConfigSectionInterface).
         if ($this->saas !== null) {
-            $platform['saas'] = $this->saas;
+            $config['saas'] = $this->saas;
         }
 
         if ($this->ui !== null) {
-            $platform['ui'] = $this->ui;
+            $config['ui'] = $this->ui;
         }
 
-        return [
-            'platform' => $platform,
-        ];
+        return $config;
     }
 }

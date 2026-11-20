@@ -52,7 +52,7 @@ It is **off by default**; nothing changes until you set
   `LoginExtension::defaultFormLoginConfig()` makes `^/reset-password` public ahead of your own
   access-control rules.
 
-See [the password reset guide](./docs/security/reset-password.md).
+See [the password reset guide](./docs/src/content/docs/security/reset-password.md).
 
 `symfony/rate-limiter` moved from `require-dev` to `require`; the reset form is rate limited per IP.
 
@@ -100,7 +100,7 @@ your routing config; with 2FA disabled the routes simply no longer exist.
 Every signed-in user now gets a profile section — `/profile`, `/profile/edit`, `/profile/password`
 and, when 2FA is enabled, `/profile/two-factor` — with a navigation column listing its pages, and
 a **Profile** entry leading the user dropdown. See
-[the profile guide](./docs/security/profile.md).
+[the profile guide](./docs/src/content/docs/security/profile.md).
 
 Nothing is required to upgrade, but these changed shape:
 
@@ -117,7 +117,7 @@ Nothing is required to upgrade, but these changed shape:
 - **`show.html.twig` no longer exports the `security_item()` macro.** Security rows are now
   `<twig:Ui:SettingRow>`, the shared component the two-factor page uses as well, so a setting reads
   the same wherever it appears. Replace `{{ profile.security_item(…) }}` calls with the component —
-  see [the profile guide](./docs/security/profile.md#overriding-blocks). The `detail()` macro is
+  see [the profile guide](./docs/src/content/docs/security/profile.md#overriding-blocks). The `detail()` macro is
   unchanged.
 - **`show.html.twig` no longer defines `page_title_actions`.** The "Update profile" button lives in
   the details card footer. Override the block yourself if you want a header action back.
@@ -144,7 +144,7 @@ your editor.
 
 The UI bundle also gained three shared Twig components — `Ui:SettingRow`, `Ui:SettingsNav` and
 `Ui:PasswordField` — and `Ui:Card` gained `icon` and `iconColor` props. See
-[UI Components](./docs/frontend/components.md). `Ui:Card` now wraps its title and subtitle in a
+[UI Components](./docs/src/content/docs/frontend/components/index.md). `Ui:Card` now wraps its title and subtitle in a
 `<div>` so the subtitle sits under the title rather than beside it; a stylesheet targeting
 `.card-header > .card-title` directly may need adjusting.
 
@@ -152,7 +152,7 @@ The UI bundle also gained three shared Twig components — `Ui:SettingRow`, `Ui:
 
 The UI bundle now ships three layouts — `ui_layout_app` (sidebar + top navbar),
 `ui_layout_condensed` (top navbar only) and `ui_layout_clean` (no navigation) — all extending the
-existing `@Ui/Layout/base.html.twig`. See [the layouts guide](./docs/frontend/layouts.md).
+existing `@Ui/Layout/base.html.twig`. See [the layouts guide](./docs/src/content/docs/frontend/layouts.md).
 
 Nothing is required to upgrade, but a few things changed shape:
 

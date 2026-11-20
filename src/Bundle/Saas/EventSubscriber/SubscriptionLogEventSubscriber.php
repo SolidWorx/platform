@@ -15,7 +15,6 @@ namespace SolidWorx\Platform\SaasBundle\EventSubscriber;
 
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Override;
 use SolidWorx\Platform\SaasBundle\Dto\LemonSqueezy\SubscriptionInvoice;
 use SolidWorx\Platform\SaasBundle\Entity\Subscription;
 use SolidWorx\Platform\SaasBundle\Entity\SubscriptionLog;
@@ -35,11 +34,11 @@ use SolidWorx\Platform\SaasBundle\Event\SubscriptionUnpausedEvent;
 use SolidWorx\Platform\SaasBundle\Event\SubscriptionUpdatedEvent;
 use SolidWorx\Platform\SaasBundle\Exception\InvalidSubscriptionException;
 use SolidWorx\Platform\SaasBundle\Repository\SubscriptionRepository;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Uid\Ulid;
 
-final readonly class SubscriptionLogEventSubscriber implements EventSubscriberInterface
+final readonly class SubscriptionLogEventSubscriber
 {
     public function __construct(
         private SubscriptionRepository $subscriptionRepository,
@@ -48,24 +47,7 @@ final readonly class SubscriptionLogEventSubscriber implements EventSubscriberIn
     ) {
     }
 
-    #[Override]
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            SubscriptionCreatedEvent::class => ['onSubscriptionCreated'],
-            SubscriptionUpdatedEvent::class => ['onSubscriptionUpdated'],
-            SubscriptionCancelledEvent::class => ['onSubscriptionCancelled'],
-            SubscriptionExpiredEvent::class => ['onSubscriptionExpired'],
-            SubscriptionPausedEvent::class => ['onSubscriptionPaused'],
-            SubscriptionUnpausedEvent::class => ['onSubscriptionUnpaused'],
-            SubscriptionResumedEvent::class => ['onSubscriptionResumed'],
-            SubscriptionPaymentPaidEvent::class => ['onSubscriptionPaymentPaid'],
-            SubscriptionPaymentFailedEvent::class => ['onSubscriptionPaymentFailed'],
-            SubscriptionPaymentRecoveredEvent::class => ['onSubscriptionPaymentRecovered'],
-            SubscriptionPaymentRefundedEvent::class => ['onSubscriptionPaymentRefunded'],
-        ];
-    }
-
+    #[AsEventListener(event: SubscriptionCreatedEvent::class)]
     public function onSubscriptionCreated(SubscriptionCreatedEvent $event): void
     {
         $subscription = $this->findSubscription($event->subscriptionId);
@@ -83,6 +65,7 @@ final readonly class SubscriptionLogEventSubscriber implements EventSubscriberIn
         $this->createLog($subscription, SubscriptionLogType::CREATED, $metadata);
     }
 
+    #[AsEventListener(event: SubscriptionUpdatedEvent::class)]
     public function onSubscriptionUpdated(SubscriptionUpdatedEvent $event): void
     {
         $subscription = $this->findSubscription($event->subscriptionId);
@@ -109,6 +92,7 @@ final readonly class SubscriptionLogEventSubscriber implements EventSubscriberIn
         $this->createLog($subscription, $logType, $metadata);
     }
 
+    #[AsEventListener(event: SubscriptionCancelledEvent::class)]
     public function onSubscriptionCancelled(SubscriptionCancelledEvent $event): void
     {
         $subscription = $this->findSubscription($event->subscriptionId);
@@ -124,6 +108,7 @@ final readonly class SubscriptionLogEventSubscriber implements EventSubscriberIn
         $this->createLog($subscription, SubscriptionLogType::CANCELLED, $metadata);
     }
 
+    #[AsEventListener(event: SubscriptionExpiredEvent::class)]
     public function onSubscriptionExpired(SubscriptionExpiredEvent $event): void
     {
         $subscription = $this->findSubscription($event->subscriptionId);
@@ -131,6 +116,7 @@ final readonly class SubscriptionLogEventSubscriber implements EventSubscriberIn
         $this->createLog($subscription, SubscriptionLogType::EXPIRED);
     }
 
+    #[AsEventListener(event: SubscriptionPausedEvent::class)]
     public function onSubscriptionPaused(SubscriptionPausedEvent $event): void
     {
         $subscription = $this->findSubscription($event->subscriptionId);
@@ -138,6 +124,7 @@ final readonly class SubscriptionLogEventSubscriber implements EventSubscriberIn
         $this->createLog($subscription, SubscriptionLogType::PAUSED);
     }
 
+    #[AsEventListener(event: SubscriptionUnpausedEvent::class)]
     public function onSubscriptionUnpaused(SubscriptionUnpausedEvent $event): void
     {
         $subscription = $this->findSubscription($event->subscriptionId);
@@ -145,6 +132,7 @@ final readonly class SubscriptionLogEventSubscriber implements EventSubscriberIn
         $this->createLog($subscription, SubscriptionLogType::UNPAUSED);
     }
 
+    #[AsEventListener(event: SubscriptionResumedEvent::class)]
     public function onSubscriptionResumed(SubscriptionResumedEvent $event): void
     {
         $subscription = $this->findSubscription($event->subscriptionId);
@@ -160,6 +148,7 @@ final readonly class SubscriptionLogEventSubscriber implements EventSubscriberIn
         $this->createLog($subscription, SubscriptionLogType::RESUMED, $metadata);
     }
 
+    #[AsEventListener(event: SubscriptionPaymentPaidEvent::class)]
     public function onSubscriptionPaymentPaid(SubscriptionPaymentPaidEvent $event): void
     {
         $subscription = $this->findSubscription($event->subscriptionId);
@@ -179,6 +168,7 @@ final readonly class SubscriptionLogEventSubscriber implements EventSubscriberIn
         $this->createLog($subscription, SubscriptionLogType::PAYMENT_PAID, $metadata);
     }
 
+    #[AsEventListener(event: SubscriptionPaymentFailedEvent::class)]
     public function onSubscriptionPaymentFailed(SubscriptionPaymentFailedEvent $event): void
     {
         $subscription = $this->findSubscription($event->subscriptionId);
@@ -195,6 +185,7 @@ final readonly class SubscriptionLogEventSubscriber implements EventSubscriberIn
         $this->createLog($subscription, SubscriptionLogType::PAYMENT_FAILED, $metadata);
     }
 
+    #[AsEventListener(event: SubscriptionPaymentRecoveredEvent::class)]
     public function onSubscriptionPaymentRecovered(SubscriptionPaymentRecoveredEvent $event): void
     {
         $subscription = $this->findSubscription($event->subscriptionId);
@@ -211,6 +202,7 @@ final readonly class SubscriptionLogEventSubscriber implements EventSubscriberIn
         $this->createLog($subscription, SubscriptionLogType::PAYMENT_RECOVERED, $metadata);
     }
 
+    #[AsEventListener(event: SubscriptionPaymentRefundedEvent::class)]
     public function onSubscriptionPaymentRefunded(SubscriptionPaymentRefundedEvent $event): void
     {
         $subscription = $this->findSubscription($event->subscriptionId);

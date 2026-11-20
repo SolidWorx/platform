@@ -3,7 +3,7 @@ import globals from 'globals';
 
 export default [
     {
-        ignores: ['**/node_modules/**', '**/public/static/**', '**/vendor/**'],
+        ignores: ['**/node_modules/**', '**/public/static/**', '**/vendor/**', 'docs/dist/**', 'docs/.astro/**'],
     },
     {
         // Browser code: Stimulus controllers and the package entry point.
@@ -17,7 +17,7 @@ export default [
     },
     {
         // Build configuration runs under Node.
-        files: ['assets/webpack.config*.js', 'eslint.config.js'],
+        files: ['assets/webpack.config*.js', 'eslint.config.js', 'docs/astro.config.mjs', 'docs/src/plugins/**/*.mjs'],
         ...js.configs.recommended,
         languageOptions: {
             ecmaVersion: 2022,

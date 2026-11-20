@@ -13,22 +13,14 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\EventSubscriber;
 
-use Override;
 use SolidWorx\Platform\PlatformBundle\Console\Command;
 use SolidWorx\Platform\PlatformBundle\Console\IO;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
-final class ConsoleCommandEventSubscriber implements EventSubscriberInterface
+final class ConsoleCommandEventSubscriber
 {
-    #[Override]
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            ConsoleCommandEvent::class => 'onConsoleEvent',
-        ];
-    }
-
+    #[AsEventListener(event: ConsoleCommandEvent::class)]
     public function onConsoleEvent(ConsoleCommandEvent $event): void
     {
         $command = $event->getCommand();

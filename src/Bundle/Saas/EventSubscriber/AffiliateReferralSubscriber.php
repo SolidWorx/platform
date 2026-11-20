@@ -13,9 +13,8 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\SaasBundle\EventSubscriber;
 
-use Override;
 use SolidWorx\Platform\SaasBundle\Integration\LemonSqueezyAffiliate;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -24,19 +23,12 @@ use Symfony\Component\HttpKernel\KernelEvents;
  * Keeps the affiliate click id from `?aff_ref=` in a first-party cookie so it
  * survives sign-up until the subscription is created.
  */
-final readonly class AffiliateReferralSubscriber implements EventSubscriberInterface
+final readonly class AffiliateReferralSubscriber
 {
     // ponytail: fixed lifetime; Lemon Squeezy enforces the real attribution window when the click id is used.
     private const string COOKIE_LIFETIME = '+90 days';
 
-    #[Override]
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            KernelEvents::RESPONSE => 'onKernelResponse',
-        ];
-    }
-
+    #[AsEventListener(event: KernelEvents::RESPONSE)]
     public function onKernelResponse(ResponseEvent $event): void
     {
         if (! $event->isMainRequest()) {

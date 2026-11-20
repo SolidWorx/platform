@@ -1,6 +1,27 @@
 parameters:
 	ignoreErrors:
 		-
+			rawMessage: 'Only booleans are allowed in a negated boolean, mixed given.'
+			identifier: booleanNot.exprNotBoolean
+			count: 1
+			path: src/Bundle/Platform/Doctrine/EventListener/TenantMetadataListener.php
+
+		-
+			rawMessage: 'PHPDoc tag @var with type array<string, array<string, list<string>>> is not subtype of type array<Doctrine\ORM\Mapping\IndexMapping>.'
+			identifier: varTag.type
+			count: 2
+			path: src/Bundle/Platform/Doctrine/EventListener/TenantMetadataListener.php
+
+		-
+			rawMessage: '''
+				Fetching class constant class of deprecated interface Symfony\Component\HttpKernel\Bundle\BundleInterface:
+				since Symfony 8.1, use Symfony\Component\DependencyInjection\Kernel\BundleInterface instead
+			'''
+			identifier: classConstant.deprecatedInterface
+			count: 1
+			path: src/Bundle/Platform/Kernel.php
+
+		-
 			rawMessage: 'Return type (iterable<Symfony\Component\DependencyInjection\Kernel\BundleInterface>) of method SolidWorx\Platform\PlatformBundle\Kernel::registerBundles() should be covariant with return type (iterable<Symfony\Component\HttpKernel\Bundle\BundleInterface>) of method Symfony\Component\HttpKernel\Kernel::registerBundles()'
 			identifier: method.childReturnType
 			count: 1
@@ -11,3 +32,47 @@ parameters:
 			identifier: method.childReturnType
 			count: 1
 			path: src/Bundle/Platform/Kernel.php
+
+		-
+			rawMessage: '''
+				Fetching deprecated class constant DATETIME_MUTABLE of class Doctrine\DBAL\Types\Types:
+				Use {@see Types::DATETIME_IMMUTABLE} instead.
+			'''
+			identifier: classConstant.deprecated
+			count: 1
+			path: src/Bundle/Platform/Model/User.php
+
+		-
+			rawMessage: '''
+				Call to deprecated method overrideType() of class Doctrine\DBAL\Types\Type:
+				since doctrine/dbal 4.6. Build a type provider with the type already overridden
+				            instead.
+			'''
+			identifier: staticMethod.deprecated
+			count: 2
+			path: src/Bundle/Platform/SolidWorxPlatformBundle.php
+
+		-
+			rawMessage: Coalesce operator ?? is unnecessary because the left side is always set and the right side is null.
+			identifier: nullCoalesce.unnecessary
+			count: 2
+			path: tests/Bundle/PlatformBundle/Doctrine/EventListener/TenantMetadataListenerTest.php
+
+		-
+			rawMessage: '''
+				Call to deprecated method addType() of class Doctrine\DBAL\Types\Type:
+				since doctrine/dbal 4.6. Register the type in the type provider of the
+				            connection instead.
+			'''
+			identifier: staticMethod.deprecated
+			count: 1
+			path: tests/Bundle/PlatformBundle/Fixtures/TenantOrmTestCase.php
+
+		-
+			rawMessage: '''
+				Call to deprecated method hasType() of class Doctrine\DBAL\Types\Type:
+				since doctrine/dbal 4.6. Ask the type provider of the connection instead.
+			'''
+			identifier: staticMethod.deprecated
+			count: 1
+			path: tests/Bundle/PlatformBundle/Fixtures/TenantOrmTestCase.php

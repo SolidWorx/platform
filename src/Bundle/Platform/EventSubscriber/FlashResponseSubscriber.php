@@ -13,22 +13,14 @@ declare(strict_types=1);
 
 namespace SolidWorx\Platform\PlatformBundle\EventSubscriber;
 
-use Override;
 use SolidWorx\Platform\PlatformBundle\Response\RedirectResponse;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
-final class FlashResponseSubscriber implements EventSubscriberInterface
+final class FlashResponseSubscriber
 {
-    #[Override]
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            ResponseEvent::class => 'onKernelResponse',
-        ];
-    }
-
+    #[AsEventListener(event: ResponseEvent::class)]
     public function onKernelResponse(ResponseEvent $event): void
     {
         if (! $event->isMainRequest()) {

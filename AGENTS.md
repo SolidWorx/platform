@@ -42,6 +42,7 @@ The project is organized as a Monorepo of Symfony Bundles located in `src/Bundle
 - `src/Test/` - Shared test utilities and traits (`SolidWorx\Platform\Test\`).
 - `tests/` - Application-level tests (`SolidWorx\Platform\Tests\`).
 - `assets/` - Frontend source (JS/SCSS).
+- `docs/` - Documentation site (Astro Starlight, deployed to Cloudflare Workers). Pages live in `docs/src/content/docs/`; link between them with relative `.md` paths. A new page must also be added to the `sidebar` in `docs/astro.config.mjs`.
 - `vendor/` - Composer dependencies.
 
 ## 3. Coding Standards & Quality

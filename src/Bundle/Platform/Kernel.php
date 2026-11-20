@@ -33,6 +33,7 @@ use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Yaml\Yaml;
 use SymfonyCasts\Bundle\ResetPassword\SymfonyCastsResetPasswordBundle;
 use SymfonyCasts\Bundle\VerifyEmail\SymfonyCastsVerifyEmailBundle;
+use function array_key_exists;
 use function defined;
 use function file_exists;
 use function glob;
@@ -122,6 +123,18 @@ abstract class Kernel extends BaseKernel
         foreach ($this->bundles as $bundle) {
             if ($bundle instanceof PlatformConfigSectionInterface) {
                 $key = $bundle->getConfigSectionKey();
+
+                // The docs once showed `platform: saas:`; name the fix instead of letting the
+                // platform tree fail with a bare "Unrecognized option".
+                $platform = $this->rawConfig['platform'] ?? null;
+                if ($key !== '' && is_array($platform) && array_key_exists($key, $platform)) {
+                    throw new RuntimeException(sprintf(
+                        'The "%1$s" section in %2$s must be a root-level key next to "platform", not nested inside it. Move "platform.%1$s" to "%1$s".',
+                        $key,
+                        $this->resolveConfigFile() ?? 'the platform configuration',
+                    ));
+                }
+
                 $section = $key !== ''
                     ? ($this->rawConfig[$key] ?? [])
                     : ($this->rawConfig['platform'] ?? []);
