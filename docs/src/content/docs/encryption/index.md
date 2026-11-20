@@ -73,20 +73,33 @@ several tenants, loop over the tenants and use `runAs()` for each.
 platform:
     kms:
         enabled: null                    # null: on when symfony/doctrine-orm-key-management is installed
-        dsn: '%env(default:solidworx_platform.kms.default_dsn:KMS_DSN)%'
         key_id: platform                 # the key the platform stores its data keys under
         allow_local_key_in_prod: false   # allow the local key file outside dev and test
 ```
 
-The default DSN is `sodium+dir://%kernel.project_dir%/config/kms?ext=.key`, which uses the local key
-file `config/kms/platform.key` (32 raw bytes).
+Set the master key with the `KMS_DSN` environment variable. Without it, the DSN is
+`sodium+dir://%kernel.project_dir%/config/kms?ext=.key`, which uses the local key file
+`config/kms/platform.key` (32 raw bytes).
+
+Leave `dsn` out of `platform.yaml` unless it is a literal DSN with no secret in it. The `%env()%`
+values in `platform.yaml` are resolved when the file is read: an unset variable stops the kernel from
+booting, and a set one is written into the compiled container in `var/cache`, credentials included.
 
 The platform also configures `key_management` for you: a client named `platform`, and a data key store
 that authenticates stored keys with the `KMS_STORE_SECRET` environment variable (falling back to
 `kernel.secret` when it is not set).
 
-If the kms feature and multi-tenancy are both enabled but no data key store is configured, the
-container fails to compile. This is intentional, so tenant data is never encrypted under a shared key.
+The container refuses to build, so tenant data is never encrypted under a shared key, when:
+
+- the feature is enabled but `KeyManagementBundle` is not registered, for example because
+  FrameworkBundle is still on 8.1. Require `symfony/framework-bundle` ^8.2, register
+  `Symfony\Component\KeyManagement\KeyManagementBundle` in your kernel, or set
+  `platform.kms.enabled: false`;
+- the feature is enabled but `key_management` has no data key store, or is disabled. The platform
+  decorates `key_management.stored_envelope_encrypter`, which only exists with a store;
+- multi-tenancy is enabled and Doctrine columns are encrypted without the platform, for example with
+  `platform.kms.enabled: false` and a `key_management` configuration of your own. Let the platform
+  configure `key_management` instead.
 
 ## Local key file
 
@@ -106,13 +119,14 @@ Add the key directory to `.gitignore` in your application:
 /config/kms/
 ```
 
-In every environment except `dev` and `test`, the first encrypt or decrypt fails when the local key
-file is the master key, unless `allow_local_key_in_prod: true` is set. A warning is logged when
+In every environment except `dev` and `test`, the first encrypt or decrypt, and
+`platform:kms:rotate-tenant`, fail when the local key file is the master key, unless
+`allow_local_key_in_prod: true` is set. A warning is logged when
 `KMS_STORE_SECRET` is not set.
 
 ## Using a remote KMS
 
-Point `KMS_DSN` (or `platform.kms.dsn`) at a remote key service such as AWS KMS or HashiCorp Vault
+Point `KMS_DSN` at a remote key service such as AWS KMS or HashiCorp Vault
 Transit. Each backend is a separate bridge package with its own DSN scheme (Vault Transit uses
 `hashicorp-vault-transit://`), and its own options. Install the bridge, then take the DSN format from the
 Symfony [clients documentation](https://symfony.com/doc/8.2/key_management/clients.html):
@@ -123,8 +137,7 @@ KMS_DSN="<DSN from the bridge documentation>"
 ```
 
 Apps that override
-`key_management.clients.platform` directly bypass the local key guard below; use `KMS_DSN` or
-`platform.kms.dsn` instead.
+`key_management.clients.platform` directly bypass the local key guard below; use `KMS_DSN` instead.
 
 ## Production checklist
 
@@ -136,14 +149,27 @@ Apps that override
 
 ### Rotating KMS_STORE_SECRET
 
-List the new secret first and the old one after it, deploy, then rewrap the stored keys:
+Do not just change `KMS_STORE_SECRET`. The platform passes a single secret to the data key store, so
+the old one is gone and every stored data key, and every encrypted value, becomes unreadable.
+
+Instead, list the new secret first and the old one after it. The first one signs, all of them verify,
+and your list replaces the platform's single secret:
+
+```yaml
+# config/packages/key_management.yaml
+key_management:
+    store:
+        secret: ['%env(KMS_STORE_SECRET)%', '%env(KMS_STORE_SECRET_OLD)%']
+```
+
+Deploy with `KMS_STORE_SECRET` set to the new secret and `KMS_STORE_SECRET_OLD` to the old one, then
+rewrap the stored keys:
 
 ```bash
 bin/console key-management:rewrap-data-keys
 ```
 
-Remove the old secret only after the rewrap has finished. Never drop the old secret first: the stored
-keys can no longer be read.
+Once the rewrap has finished, remove `KMS_STORE_SECRET_OLD` from the list and from the environment.
 
 ### What the local key guard covers
 
@@ -178,3 +204,4 @@ stored keys. See the Symfony [documentation](https://symfony.com/doc/8.2/key_man
 - A value can be moved between rows of the same tenant without detection.
 - New columns only. Existing plaintext columns are not migrated.
 - Encrypted columns cannot be searched or sorted in SQL.
+- Symfony's `#[BlindIndexed]` blind indexes are not tenant-scoped: equal values match across tenants.
