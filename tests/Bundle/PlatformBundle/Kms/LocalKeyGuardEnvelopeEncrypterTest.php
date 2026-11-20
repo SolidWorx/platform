@@ -56,7 +56,17 @@ final class LocalKeyGuardEnvelopeEncrypterTest extends TestCase
         $guard = new LocalKeyGuardEnvelopeEncrypter($this->inner, $this->manager('sodium+dir:///etc/keys'));
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessageIsOrContains('local master key in production');
+        $this->expectExceptionMessageIsOrContains('local master key');
+
+        $guard->encrypt('app', 'secret');
+    }
+
+    public function testGuardThrowsInStagingWithLocalKey(): void
+    {
+        $guard = new LocalKeyGuardEnvelopeEncrypter($this->inner, new LocalKeyManager('sodium+dir:///etc/keys', 'platform', 'staging', false, null, 'secret'));
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessageIsOrContains('local master key');
 
         $guard->encrypt('app', 'secret');
     }

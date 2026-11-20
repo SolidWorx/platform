@@ -37,7 +37,7 @@ final class LocalKeyGuardEnvelopeEncrypter implements EnvelopeEncrypterInterface
     }
 
     /**
-     * @throws RuntimeException If a local master key is used in production without being allowed
+     * @throws RuntimeException If a local master key is used outside dev and test without being allowed
      */
     public function encrypt(string $key, #[SensitiveParameter] string $plaintext, string $aad = ''): Envelope
     {
@@ -47,7 +47,7 @@ final class LocalKeyGuardEnvelopeEncrypter implements EnvelopeEncrypterInterface
     }
 
     /**
-     * @throws RuntimeException If a local master key is used in production without being allowed
+     * @throws RuntimeException If a local master key is used outside dev and test without being allowed
      */
     public function decrypt(Envelope $envelope, string $aad = ''): string
     {

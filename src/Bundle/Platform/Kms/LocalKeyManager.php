@@ -40,9 +40,9 @@ use function unlink;
 /**
  * Looks after the master key when it is a local file rather than a remote KMS.
  *
- * Outside production a missing key is generated, so encrypted columns work out of the box. In
- * production a local master key is refused unless explicitly allowed: whoever reads the file can
- * decrypt every data key.
+ * In dev and test a missing key is generated, so encrypted columns work out of the box. Every other
+ * environment is treated as production (fail closed): a local master key is refused unless
+ * explicitly allowed, since whoever reads the file can decrypt every data key.
  */
 final readonly class LocalKeyManager
 {
@@ -51,6 +51,13 @@ final readonly class LocalKeyManager
         'openssl', 'openssl+dir', 'openssl+fly',
         'sodium-sealed-box', 'sodium-sealed-box+dir', 'sodium-sealed-box+fly',
     ];
+
+    private const array GENERATABLE_SCHEMES = ['sodium+dir', 'openssl+dir'];
+
+    /**
+     * The only environments trusted with a generated local key; any other is treated as production.
+     */
+    public const array LOCAL_KEY_ENVIRONMENTS = ['dev', 'test'];
 
     private bool $storeSecretConfigured;
 
@@ -104,7 +111,7 @@ final readonly class LocalKeyManager
         $key = match ($scheme) {
             'sodium+dir' => sodium_crypto_aead_xchacha20poly1305_ietf_keygen(),
             'openssl+dir' => random_bytes(32),
-            default => throw new RuntimeException(sprintf('Only sodium+dir:// and openssl+dir:// master keys can be generated; the KMS DSN uses "%s://".', $scheme)),
+            default => throw new RuntimeException(sprintf('Only sodium+dir:// and openssl+dir:// master keys can be generated; the KMS DSN uses "%s://". Configure the master key via KMS_DSN or platform.kms.dsn.', $scheme)),
         };
 
         $path = (string) $this->keyPath();
@@ -142,15 +149,15 @@ final readonly class LocalKeyManager
     }
 
     /**
-     * In production, refuses a local master key unless allowed; elsewhere, generates a missing one.
+     * Outside dev and test, refuses a local master key unless allowed; in dev and test, generates a missing one.
      *
-     * @throws RuntimeException If a local master key is used in production without being allowed
+     * @throws RuntimeException If a local master key is used outside dev and test without being allowed
      */
     public function check(): void
     {
-        if ($this->environment === 'prod') {
+        if (! in_array($this->environment, self::LOCAL_KEY_ENVIRONMENTS, strict: true)) {
             if (! $this->allowLocalKeyInProd && $this->isLocal()) {
-                throw new RuntimeException('local master key in production; set KMS_DSN to a remote KMS or platform.kms.allow_local_key_in_prod: true');
+                throw new RuntimeException(sprintf('Refusing a local master key in the "%s" environment (only dev and test may use one): configure the master key via KMS_DSN or platform.kms.dsn to point at a remote KMS, or set platform.kms.allow_local_key_in_prod: true.', $this->environment));
             }
 
             if (! $this->storeSecretConfigured) {
@@ -162,9 +169,19 @@ final readonly class LocalKeyManager
 
         $path = $this->keyPath();
 
-        if ($path !== null && ! file_exists($path)) {
-            $this->generate();
+        if ($path === null || file_exists($path)) {
+            return;
         }
+
+        $scheme = $this->dsn()->scheme;
+
+        if (! in_array($scheme, self::GENERATABLE_SCHEMES, strict: true)) {
+            $this->logger?->warning(sprintf('The master key %s is missing and %s:// keys cannot be generated; create it, or configure the master key via KMS_DSN or platform.kms.dsn.', $path, $scheme));
+
+            return;
+        }
+
+        $this->generate();
     }
 
     private function dsn(): Dsn

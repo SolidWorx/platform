@@ -15,11 +15,12 @@ namespace SolidWorx\Platform\PlatformBundle\Kms;
 
 use Closure;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
+use function in_array;
 
 /**
- * Generates a missing local master key outside production, so encrypted columns work out of the box.
+ * Generates a missing local master key in dev and test, so encrypted columns work out of the box.
  *
- * In production it does nothing: the cache may be warmed without the runtime env vars (a Docker
+ * In any other environment it does nothing: the cache may be warmed without the runtime env vars (a Docker
  * build), so the manager is not even built here. LocalKeyGuardEnvelopeEncrypter enforces the
  * production rules at runtime instead.
  */
@@ -44,7 +45,7 @@ final readonly class KmsCacheWarmer implements CacheWarmerInterface
      */
     public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
-        if ($this->environment !== 'prod') {
+        if (in_array($this->environment, LocalKeyManager::LOCAL_KEY_ENVIRONMENTS, strict: true)) {
             ($this->localKeys)()->check();
         }
 

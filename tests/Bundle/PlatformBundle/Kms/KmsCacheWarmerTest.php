@@ -21,8 +21,10 @@ use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\Kms\KmsCacheWarmer;
 use SolidWorx\Platform\PlatformBundle\Kms\LocalKeyManager;
 use Symfony\Component\DependencyInjection\Exception\EnvNotFoundException;
+use Symfony\Component\ErrorHandler\BufferingLogger;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\KeyManagement\Bridge\DoctrineOrm\Attribute\Encrypted;
+use function array_column;
 use function bin2hex;
 use function class_exists;
 use function random_bytes;
@@ -72,6 +74,23 @@ final class KmsCacheWarmerTest extends TestCase
         $this->assertSame([], new KmsCacheWarmer('prod', static fn (): never => throw new EnvNotFoundException('Environment variable not found: "KMS_DSN".'))->warmUp($this->dir));
 
         $this->assertFileDoesNotExist($this->dir . '/platform.key');
+    }
+
+    public function testWarmerNeverGeneratesInStaging(): void
+    {
+        $this->assertSame([], new KmsCacheWarmer('staging', fn (): LocalKeyManager => $this->manager('staging'))->warmUp($this->dir));
+
+        $this->assertFileDoesNotExist($this->dir . '/platform.key');
+    }
+
+    public function testWarmerWarnsInsteadOfThrowingForASealedBoxKey(): void
+    {
+        $logger = new BufferingLogger();
+        $manager = new LocalKeyManager('sodium-sealed-box+dir://' . $this->dir . '?ext=.key', 'platform', 'dev', false, $logger, null);
+
+        $this->assertSame([], new KmsCacheWarmer('dev', static fn (): LocalKeyManager => $manager)->warmUp($this->dir));
+
+        $this->assertSame(['warning'], array_column($logger->cleanLogs(), 0));
     }
 
     private function manager(string $environment): LocalKeyManager

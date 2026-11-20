@@ -128,7 +128,7 @@ final class LocalKeyManagerTest extends TestCase
     public function testProdWithLocalKeyThrows(): void
     {
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessageIsOrContains('local master key in production; set KMS_DSN to a remote KMS or platform.kms.allow_local_key_in_prod: true');
+        $this->expectExceptionMessageIsOrContains('configure the master key via KMS_DSN or platform.kms.dsn');
 
         $this->manager('prod')->check();
     }
@@ -179,6 +179,52 @@ final class LocalKeyManagerTest extends TestCase
         $this->manager('dev', logger: $logger, storeSecret: null)->check();
 
         $this->assertSame([], $logger->cleanLogs());
+    }
+
+    public function testStagingWithLocalKeyThrows(): void
+    {
+        // Fail closed: only dev and test are trusted with a local key.
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessageIsOrContains('local master key');
+
+        $this->manager('staging')->check();
+    }
+
+    public function testStagingWarnsWithoutStoreSecret(): void
+    {
+        $logger = new BufferingLogger();
+
+        $this->manager('staging', dsn: 'aws-kms://default?region=eu-west-1', logger: $logger, storeSecret: null)->check();
+
+        $this->assertSame(['warning'], array_column($logger->cleanLogs(), 0));
+    }
+
+    public function testStagingNeverGenerates(): void
+    {
+        $this->manager('staging', allowLocalKeyInProd: true)->check();
+
+        $this->assertFileDoesNotExist($this->dir . '/platform.key');
+    }
+
+    public function testGeneratesKeyInTest(): void
+    {
+        $this->manager('test')->check();
+
+        $this->assertFileExists($this->dir . '/platform.key');
+    }
+
+    public function testDevWarnsInsteadOfGeneratingASealedBoxKey(): void
+    {
+        $logger = new BufferingLogger();
+
+        $this->manager('dev', dsn: 'sodium-sealed-box+dir://' . $this->dir . '?ext=.key', logger: $logger)->check();
+
+        $logs = $logger->cleanLogs();
+        $this->assertSame(['warning'], array_column($logs, 0));
+        $message = array_column($logs, 1)[0];
+        $this->assertIsString($message);
+        $this->assertStringContainsString('KMS_DSN or platform.kms.dsn', $message);
+        $this->assertFileDoesNotExist($this->dir . '/platform.key');
     }
 
     public function testProdNeverGenerates(): void
