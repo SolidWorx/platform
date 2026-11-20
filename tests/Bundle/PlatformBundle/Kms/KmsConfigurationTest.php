@@ -18,9 +18,11 @@ use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\TestCase;
 use SolidWorx\Platform\PlatformBundle\DependencyInjection\SolidWorxPlatformExtension;
 use SolidWorx\Platform\PlatformBundle\Kms\KmsSupport;
+use SolidWorx\Platform\PlatformBundle\Kms\TenantScopeRegistry;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\KeyManagement\Bridge\DoctrineOrm\Attribute\Encrypted;
 
 #[CoversClass(SolidWorxPlatformExtension::class)]
@@ -96,6 +98,36 @@ final class KmsConfigurationTest extends TestCase
         $this->assertSame('sodium+dir://%kernel.project_dir%/config/kms?ext=.key', $container->getParameter('solidworx_platform.kms.default_dsn'));
     }
 
+    public function testTenantScopeRegistryIsRegisteredWithMultiTenancy(): void
+    {
+        $definition = $this->load([
+            'multi_tenancy' => [
+                'enabled' => true,
+            ],
+        ])->getDefinition(TenantScopeRegistry::class);
+
+        $this->assertEquals([new Reference('doctrine'), new Reference('cache.system')], $definition->getArguments());
+    }
+
+    public function testTenantScopeRegistryIsRemovedWithoutMultiTenancy(): void
+    {
+        $this->assertFalse($this->load([])->hasDefinition(TenantScopeRegistry::class));
+    }
+
+    public function testTenantScopeRegistryIsRemovedWhenKmsIsDisabled(): void
+    {
+        $container = $this->load([
+            'multi_tenancy' => [
+                'enabled' => true,
+            ],
+            'kms' => [
+                'enabled' => false,
+            ],
+        ]);
+
+        $this->assertFalse($container->hasDefinition(TenantScopeRegistry::class));
+    }
+
     public function testEnabledTrueWithoutBridgeThrows(): void
     {
         $this->expectException(InvalidConfigurationException::class);
@@ -113,6 +145,19 @@ final class KmsConfigurationTest extends TestCase
         $container = $this->prepend([], kmsAvailable: false);
 
         $this->assertSame([], $container->getExtensionConfig('key_management'));
+    }
+
+    /**
+     * @param array<string, mixed> $config
+     */
+    private function load(array $config): ContainerBuilder
+    {
+        $container = new ContainerBuilder();
+        $container->setParameter('kernel.debug', value: false);
+        $container->setParameter('kernel.environment', 'test');
+        new SolidWorxPlatformExtension($config)->load([[]], $container);
+
+        return $container;
     }
 
     /**

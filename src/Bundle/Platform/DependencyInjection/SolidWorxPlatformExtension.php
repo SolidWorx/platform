@@ -39,6 +39,7 @@ use SolidWorx\Platform\PlatformBundle\Doctrine\Type\URLType;
 use SolidWorx\Platform\PlatformBundle\Enum\PasswordStrengthLevel;
 use SolidWorx\Platform\PlatformBundle\Form\Type\Tenant\TenantOnboardingType;
 use SolidWorx\Platform\PlatformBundle\Kms\KmsSupport;
+use SolidWorx\Platform\PlatformBundle\Kms\TenantScopeRegistry;
 use SolidWorx\Platform\PlatformBundle\Logger\Processor\TenantLoggingProcessor;
 use SolidWorx\Platform\PlatformBundle\Menu\TwoFactorMenuBuilder;
 use SolidWorx\Platform\PlatformBundle\Messenger\TenantMiddleware;
@@ -262,10 +263,18 @@ final class SolidWorxPlatformExtension extends Extension implements PrependExten
         $this->loadMultiTenancy($container, $config['multi_tenancy']);
 
         $container->setParameter('solidworx_platform.kms.default_dsn', 'sodium+dir://%kernel.project_dir%/config/kms?ext=.key');
-        $container->setParameter('solidworx_platform.kms.enabled', $this->isKmsEnabled());
+        $kmsEnabled = $this->isKmsEnabled();
+        $container->setParameter('solidworx_platform.kms.enabled', $kmsEnabled);
         $container->setParameter('solidworx_platform.kms.dsn', $config['kms']['dsn']);
         $container->setParameter('solidworx_platform.kms.key_id', $config['kms']['key_id']);
         $container->setParameter('solidworx_platform.kms.allow_local_key_in_prod', $config['kms']['allow_local_key_in_prod']);
+
+        if ($kmsEnabled && $config['multi_tenancy']['enabled']) {
+            $container->getDefinition(TenantScopeRegistry::class)
+                ->setArguments([new Reference('doctrine'), new Reference('cache.system')]);
+        } else {
+            $container->removeDefinition(TenantScopeRegistry::class);
+        }
     }
 
     private function isKmsEnabled(): bool
