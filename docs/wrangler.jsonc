@@ -1,6 +1,6 @@
 {
     "$schema": "node_modules/wrangler/config-schema.json",
-    "name": "solidworx-platform-docs",
+    "name": "platform",
     "compatibility_date": "2026-11-01",
     // Static site only: no Worker script, Cloudflare serves the built files directly.
     "assets": {
